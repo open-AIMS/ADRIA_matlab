@@ -1,9 +1,9 @@
 # ADRIA_repo
 Repository for the development of the ADRIA dynamic multi-criteria decision making model.
 
-## Version: FILL THIS WHEN UPLOADED
+## Version: Ken's version from 26 Aug 2021 
 
-### Summary
+### Summary (now outdated once Rose and Vero replace with their versions) 
 
 Climate change is transforming coral reefs. Continued climate change has scope to erode reef biodiversity, key ecosystem functions, and the ecosystem services they provide for people. Conventional management strategies remain essential but will not be sufficient on their own to sustain coral reefs in a warming and acidifying ocean. New interventions are increasingly being considered, including assisted gene flow, cooling and shading, and reef structures that provide reef habitats and substrates for enhanced recruitment. 
 
@@ -15,37 +15,4 @@ The primary purpose of ADRIA is to help guide intervention deployment such that 
 
 The guiding principles for decision support in ADRIA are currently a set of dynamic multi-criteria decision analyses (dMCDA) applied at each time step. Criteria in the model are a composite of spatial environmental variables (risk from wave damage, thermal stress, and water quality) and ecological information (coral cover, substrate availability). 
 
-ADRIA is currently set up for the Moore Reef cluster: 26 sites in a cluster of four reefs off Cairns in North Queensland.  The intent is to broaden the set of case studies we can inform, including Whitsundays, and at different spatial scales.  
-
-At the end of this document are the evolving set of scripts that combine to form ADRIA.   
-
-Two main scripts will get you started:  runADRIAmain and analyseADRIAresults1.  
-
-### Key scripts and their run order
-
-* *ADRIAparms (script)*: Loads environmental and biological/ ecological model parameters into memory.
-* *setupADRIAsims (script)*: Prepares the main program by loading files and saving data structures.
-* *CriteriaWeights (function)*: Asks user for input regarding the weights used in the multi-criteria decision analysis (MCDA) for intervention deployment.
-* *InterventionTble (function)*: Generates options for intervention R\&D assumptions and deployment levels simulated by runADRIAmain. Output of this function is a control table that is used as input into runADRIAmains.
-* *ReefConditionMetrics (function)*: Converts coral cover to simple metrics for functional diversity (evenness) and structural complexity.
-* *MooreSites.xlsx (excel file)*: Lats, Ions and IDs for Moore Reef example sites.
-* *MooreTP15.xlsx (excel file)*: Transition probabilities (larval-connectivity proxies) for RECOM larval release simulations in the spawning season of 2015.
-* *MooreTP16.xlsx (excel file)*: Transition probabilities (larval-connectivity proxies) for RECOM larval release simulations in the spawning season of 2016.
-* *MooreTP17.xlsx (excel file)*: Transition probabilities (larval-connectivity proxies) for RECOM larval release simulations in the spawning season of 2017.
-* *runADRIAmain (script)*: Main execution file.
-* *ADRIA_TP_Moore (function)*:Generates transition probability matrices for larval connectivity and generates time series of environmental conditions with different connectivity patterns.
-* *ADRIA_TP (.mat file)*: Data file produced by ADRIA_TP_Moore.
-* *swhMoore.xlsx (excel file)*: Table with significant wave heights for the 26 example sites on and around the Moore Reef off Cairns.
-* *ADRIA_wavedist (.mat file)*: Data file produced by setupADRIAsims.
-* *ADRIA_dhwMoore (function)*: Calls NetCDF files from RECO runs.
-* *MooreDHWs (.mat file)*: Stored DHW data.
-* *ADRIA_DHWprojectfun (function)*: Produces DHW projections for example sites given RCP.
-* *ADRIA_dhwdisttime (.mat file)*: Projected DHW data produced by setupADRIAsims.
-* *ADRIA_larvalprod (function)*: Simulates effect of past heat stress on coral fecundity using Gompertz function.
-* *ADRIA_DMCDA (function)*: Multicriteria analysis for site selection at each timestep.
-* *ADRIA_bleachingmortalityfun (fuction)*: Bleaching mortality response function based on Hughes 2018. Uses Gompertz function where parameter 2 varies with thermal tolerance.
-* *ADRIA4groupsODE (function)*: ODE model for the simple coral community using a pulse impulsive approach.
-* *analyseADRIAresults1 (script)*: Analyses outputs of runADRIAsims.
-* *ADRIA_display_dhw_Moore (script)*: Displays DHWs for years 2016, 2017 and 2020.
-* *MooreSites_GE (script)*: Generates kml file that can display the location of Moor Reef sites in Google Earth.
-* *distributionPlot (function)*: Plots results of ADRIA simulations as violin plots (distributions).
+ADRIA is currently set up for the Moore Reef cluster: 26 sites in a cluster of four reefs off Cairns in North Queensland.  
