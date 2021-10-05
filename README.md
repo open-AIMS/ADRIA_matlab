@@ -16,3 +16,5 @@ The primary purpose of ADRIA is to help guide intervention deployment such that 
 The guiding principles for decision support in ADRIA are currently a set of dynamic multi-criteria decision analyses (dMCDA) applied at each time step. Criteria in the model are a composite of spatial environmental variables (risk from wave damage, thermal stress, and water quality) and ecological information (coral cover, substrate availability). 
 
 ADRIA is currently set up for the Moore Reef cluster: 26 sites in a cluster of four reefs off Cairns in North Queensland.  
+
+Note that the environmental input files (netcdfs) from Barbara's RECOM runs are not included here. Instead, transition-probability tables for connectivity are created and forward projections for DHW based on simple, linear heating rates for RCPs and based on observed spatial patterns of DHW for the study area between three bleaching years.  Vero and Barbara will be updating this.
