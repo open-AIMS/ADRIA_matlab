@@ -1,5 +1,5 @@
 # ADRIA_repo
-Repository for the development of the ADRIA dynamic multi-criteria decision making model.
+Repository for the development of ADRIA: Adaptive Dynamic Reef Intervention Algorithm.
 
 ## Version: Ken's version from 26 Aug 2021 
 
@@ -18,3 +18,8 @@ The guiding principles for decision support in ADRIA are currently a set of dyna
 ADRIA is currently set up for the Moore Reef cluster: 26 sites in a cluster of four reefs off Cairns in North Queensland.  
 
 Note that the environmental input files (netcdfs) from Barbara's RECOM runs are not included here. Instead, transition-probability tables for connectivity are created and forward projections for DHW based on simple, linear heating rates for RCPs and based on observed spatial patterns of DHW for the study area between three bleaching years.  Vero and Barbara will be updating this.
+
+#### Case-study: Moore Reef Cluster
+
+
+
