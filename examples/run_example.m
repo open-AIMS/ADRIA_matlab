@@ -12,11 +12,21 @@
 %   Shadeyrs = 1;     how many years to shade, starting in 2026
 %   sims = 50;        how many simulations to run
 
-% Create struct with default values.
 % Specify options above by name to change settings
-interventions = intervention_specification(Guided=1);
+interventions = intervention_specification(Guided=1, sims=2);
+
 
 % Set default criteria weighting
+% wave_stress = 1  % wave stress avoidance
+% heat_stress = 1  % heat stress avoidance
+% shade_connectivity = 0  % Connectivity when shading/cooling
+% seed_connectivity = 0   % Connectivity when seeding
+% coral_cover_high = 0    % High coral cover intervention
+% coral_cover_low = 0     % Low coral cover intervention
+% seed_priority = 1       % Seed at strongest sources for priority sites
+% shade_priority = 0      % Shade at strongest sources for priority sites
+% deployed_coral_risk_tol = 1  % Risk Tolerance wrt Deployed Corals
+
 % Settings can be changed as with intervention_specification()
 criteria_weights = CriteriaWeights();
 
