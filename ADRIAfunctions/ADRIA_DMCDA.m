@@ -1,101 +1,271 @@
-function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars)
+function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars,alg_ind)
 
-% utility function that uses a dynamic MCDA to work out what sites to pick, 
-%if any before going into the bleaching or cyclone season. It uses
-%disturbance probabilities for the season (distprobyr, a vector)) and
-%centrality of season (central, a vector) to produce a site ranking table
+    % utility function that uses a dynamic MCDA to work out what sites to pick, 
+    %if any before going into the bleaching or cyclone season. It uses
+    %disturbance probabilities for the season (distprobyr, a vector)) and
+    %centrality of season (central, a vector) to produce a site ranking table
 
-nsites = DCMAvars.nsites;
-nsiteint = DCMAvars.nsiteint;
-prioritysites = DCMAvars.prioritysites;
-strongpred  = DCMAvars.strongpred;
-centr  = DCMAvars.centr;
-damprob  = DCMAvars.damprob;
-heatstressprob  = DCMAvars.heatstressprob;
-sumcover  = DCMAvars.sumcover;
-risktol  = DCMAvars.risktol;
-wtconseed  = DCMAvars.wtconseed;
-wtconshade  = DCMAvars.wtconshade;
-wtwaves  = DCMAvars.wtwaves;
-wtheat  = DCMAvars.wtheat;
-wthicover  = DCMAvars.wthicover;
-wtlocover  = DCMAvars.wtlocover;
-wtpredecseed  = DCMAvars.wtpredecseed;
-wtpredecshade  = DCMAvars.wtpredecshade;
+    nsites = DCMAvars.nsites;
+    nsiteint = DCMAvars.nsiteint;
+    prioritysites = DCMAvars.prioritysites;
+    strongpred  = DCMAvars.strongpred;
+    centr  = DCMAvars.centr;
+    damprob  = DCMAvars.damprob;
+    heatstressprob  = DCMAvars.heatstressprob;
+    sumcover  = DCMAvars.sumcover;
+    risktol  = DCMAvars.risktol;
+    wtconseed  = DCMAvars.wtconseed;
+    wtconshade  = DCMAvars.wtconshade;
+    wtwaves  = DCMAvars.wtwaves;
+    wtheat  = DCMAvars.wtheat;
+    wthicover  = DCMAvars.wthicover;
+    wtlocover  = DCMAvars.wtlocover;
+    wtpredecseed  = DCMAvars.wtpredecseed;
+    wtpredecshade  = DCMAvars.wtpredecshade;
 
-%% Identify and assign key larval source sites for priority sites
-sites = 1:nsites;
-predec = zeros(nsites,3);
-predec(:,1:2) = strongpred;
-predprior = predec(prioritysites,2);
-predec(predprior,3) = 1;
+    %% Identify and assign key larval source sites for priority sites
+    sites = 1:nsites;
+    predec = zeros(nsites,3);
+    predec(:,1:2) = strongpred;
+    predprior = predec(prioritysites,2);
+    predec(predprior,3) = 1;
 
-%% prefseedsites
-%Combine data into matrix
-A(:,1) = sites; %site IDs
-A(:,2) = centr/max(centr); %node connectivity centrality, need to instead work out strongest predecessors to priority sites  
-A(:,3) = damprob.dam/max(damprob.dam); %damage probability from wave exposure
-A(:,4) = heatstressprob.heatstress/max(heatstressprob.heatstress); %risk from heat exposure
-A(:,5) = sumcover.covtott/max(sumcover.covtott); %coral cover
-A(:,6) = 1-sumcover.covtott/max(sumcover.covtott);
-A(:,7) = predec(:,3);
+    %% prefseedsites
+    %Combine data into matrix
+    A(:,1) = sites; %site IDs
+    A(:,2) = centr/max(centr); %node connectivity centrality, need to instead work out strongest predecessors to priority sites  
+    A(:,3) = damprob.dam/max(damprob.dam); %damage probability from wave exposure
+    A(:,4) = heatstressprob.heatstress/max(heatstressprob.heatstress); %risk from heat exposure
+    A(:,5) = sumcover.covtott/max(sumcover.covtott); %coral cover
+    A(:,6) = 1-sumcover.covtott/max(sumcover.covtott);
+    A(:,7) = predec(:,3);
 
-% %Filter out sites that have high risk of wave damage, specifically exceeding the risk tolerance 
-for i = 1:nsites
-     if A(i,3)> risktol %
-         A(i,3)=nan;
-     elseif A(i,4)>risktol
-         A(i,4)=nan;
-     end
-end
-% 
-A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
-if isempty(A)
-    prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-end
+    % %Filter out sites that have high risk of wave damage, specifically exceeding the risk tolerance 
+    for i = 1:nsites
+         if A(i,3)> risktol %
+             A(i,3)=nan;
+         elseif A(i,4)>risktol
+             A(i,4)=nan;
+         end
+    end
+    % 
+    A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
+    if isempty(A)
+        prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+        nprefseedsites = numel(prefseedsites);
+        prefshadesites = 0;
+        nprefshadesites = numel(prefseedsites);
+        return
+    end
+
+    %number of sites left after risk filtration
+    %nsitesrem = length(A(:,1));
+    if nsiteint > length(A(:,1))
+        nsiteint = length(A(:,1));
+    end
+
+switch alg_ind 
+    case 1
+        %% Order ranking
+        %% Seeding - Filtered set 
+        SE(:,1) = A(:,1); %sites column (remaining)
+        SE(:,2) = A(:,2)*wtconseed; %multiply centrality with connectivity weight
+        SE(:,3) = (1-A(:,3))*wtwaves; %multiply complementary of damage risk with disturbance weight
+        SE(:,4) = (1-A(:,4))*wtheat;
+        SE(:,5) = A(:,6)*wtlocover; %multiply by coral cover with its weight for high cover
+        SE(:,6) = A(:,7)*wtpredecseed; %multiply priority predecessor indicator by weight
+
+        SEwt(:,1) = A(:,1);
+        SEwt(:,2) = SE(:,2)+ SE(:,3) + SE(:,4) + SE(:,5); %for now, simply add indicators 
+        SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
+
+        %highest indicator picks the seed site
+        prefseedsites = SEwt2(1:nsiteint,1);
+        nprefseedsites = numel(prefseedsites);
+
+
+        %% Shading - filtered set
+        SH(:,1) = A(:,1); %sites column (remaining)
+        SH(:,2) = A(:,2)*wtconshade; %multiply centrality with connectivity weight
+        SH(:,3) = (1-A(:,3))*wtwaves; %multiply complementary of damage risk with disturbance weight
+        SH(:,4) = A(:,4)*wtheat; %multiply complementary of heat risk with heat weight
+        SH(:,5) = A(:,5)*wthicover; %multiply by coral cover with its weight for high cover
+        SH(:,6) = A(:,7)*wtpredecshade; %multiply priority predecessor indicator by weight
+
+        SHwt(:,1) = A(:,1);
+        SHwt(:,2) = SH(:,2)+ SH(:,3) + SH(:,4) + SH(:,5); %for now, simply add indicators 
+        % if SHwt(:,2) == 0
+        %     %SHwt(:,2) = rand(length(A(:,1)),1);
+        %     SHwt2 = sortrows(SHwt,2,'descend'); %sort from highest to lowest indicator
+        % else
+        SHwt2 = sortrows(SHwt,2,'descend'); %sort from highest to lowest indicator
+        % end
+        %highest indicators picks the cool sites
+        prefshadesites = SHwt2(1:nsiteint,1);
+        nprefshadesites = numel(prefshadesites);
+    case 2
+        %% TOPSIS
+        %% Seeding - Filtered set 
+        
+        wse = [1, wtconseed, wtwaves, wtheat, wtlocover, wtpredecseed];
+        wse = wse./sum(wse);
+        SE(:,1) = A(:,1); %sites column (remaining)
+        SE(:,2) = A(:,2); %multiply centrality with connectivity weight
+        SE(:,3) = (1-A(:,3)); %multiply complementary of damage risk with disturbance weight
+        SE(:,4) = (1-A(:,4));
+        SE(:,5) = A(:,6); %multiply by coral cover with its weight for high cover
+        SE(:,6) = A(:,7); %multiply priority predecessor indicator by weight
+
+       % normalisation
+        SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+        SE = SE.* repmat(wse,nsites,1);
+        % compute the set of positive ideal solutions for each criteria (max for
+        % good crieteria, min for bad criteria). Max used as all crieteria
+        % represent preferred attributes not costs or negative attributes
+
+        PIS = nanmax(SE(:,2:end));
+
+        % compute the set of negative ideal solutions for each criteria (min for
+        % good crieteria, max for bad criteria). Min used as all crieteria
+        % represent preferred attributes not costs or negative attributes
+
+        NIS = nanmin(SE(:,2:end));
+
+        % calculate separation distance from the ideal and non-ideal solns
+        S_p = sqrt(sum((SE(:,2:end)-PIS).^2,2));
+        S_n = sqrt(sum((SE(:,2:end)-NIS).^2,2));
+
+        % final ranking measure of relative closeness C
+        C = S_n./(S_p + S_n);
+        SEwt = [A(:,1), C];
+        order = sortrows(SEwt,2,'descend');
+
+        prefseedsites = order(1:nsiteint,1);
+        nprefseedsites = numel(prefseedsites); 
+
+        wsh = [1, wtconshade, wtwaves, wtheat, wthicover, wtpredecshade];
+        wsh = wsh./sum(wsh);
+        SH(:,1) = A(:,1); %sites column (remaining)
+        SH(:,2) = A(:,2); %multiply centrality with connectivity weight
+        SH(:,3) = (1-A(:,3)); %multiply complementary of damage risk with disturbance weight
+        SH(:,4) = A(:,4); %multiply complementary of heat risk with heat weight
+        SH(:,5) = A(:,5); %multiply by coral cover with its weight for high cover
+        SH(:,6) = A(:,7); %multiply priority predecessor indicator by weight
+
+        % normalisation
+        SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
+        SH = SH.* repmat(wsh,nsites,1);
+        % compute the set of positive ideal solutions for each criteria (max for
+        % good crieteria, min for bad criteria). Max used as all crieteria
+        % represent preferred attributes not costs or negative attributes
+
+        PIS = nanmax(SH(:,2:end));
+
+        % compute the set of negative ideal solutions for each criteria (min for
+        % good crieteria, max for bad criteria). Min used as all crieteria
+        % represent preferred attributes not costs or negative attributes
+
+        NIS = nanmin(SH(:,2:end));
+
+        % calculate separation distance from the ideal and non-ideal solns
+
+        S_p = sqrt(sum((SH(:,2:end)-PIS).^2,2));
+        S_n = sqrt(sum((SH(:,2:end)-NIS).^2,2));
+
+        % final ranking measue of relative closeness C
+
+        C = S_n./(S_p + S_n);
+        SHwt = [A(:,1), C];
+        order = sortrows(SHwt,2,'descend');
+        %highest indicators picks the cool sites
+        prefshadesites = order(1:nsiteint,1);
+        nprefshadesites = numel(prefshadesites); 
     
-%number of sites left after risk filtration
-%nsitesrem = length(A(:,1));
-if nsiteint > length(A(:,1))
-    nsiteint = length(A(:,1));
+    case 3
+        %% VIKOR
+        % level of compromise (utility vs. regret). v = 0.5 is consensus, v<0.5
+        % is minimal regret, v>0.5 is max group utility (majority rules)
+        v = 0.5;    
+        %% Seeding - Filtered set 
+        % make weighting vector and make it sum to 1
+        wse = [1, wtconseed, wtwaves, wtheat, wtlocover, wtpredecseed];
+        wse = wse./sum(wse);
+
+        SE(:,1) = A(:,1); %sites column (remaining)
+        SE(:,2) = A(:,2); %multiply centrality with connectivity weight
+        SE(:,3) = (1-A(:,3)); %multiply complementary of damage risk with disturbance weight
+        SE(:,4) = (1-A(:,4));
+        SE(:,5) = A(:,6); %multiply by coral cover with its weight for high cover
+        SE(:,6) = A(:,7); %multiply priority predecessor indicator by weight
+
+        % normalisation
+        SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+        SE = SE.* repmat(wse,nsites,1);
+
+        F_s = max(SE(:,2:end));
+        %F_h = min(SE(:,2:end));
+
+        % Compute utility of the majority S (Manhatten Distance)
+        % Compute individual regret R (Chebyshev distance)
+        sr_arg =((F_s-SE(:,2:end)));
+        S = sum(sr_arg,2);
+        S = [sites', S];
+        R = max(sr_arg,[],2);
+        R = [sites',R];
+
+        % Compute the VIKOR compromise Q
+        S_s = max(S(:,2));
+        S_h = min(S(:,2));
+        R_s = max(R(:,2));
+        R_h = min(R(:,2));
+        Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
+        Q = [sites',Q];
+
+        % sort Q in ascending order rows
+        orderQ = sortrows(Q,2,'ascend');
+        prefseedsites = orderQ(1:nsiteint,1);
+        nprefseedsites = numel(prefseedsites); 
+
+        %% Shading - Filtered set 
+        wsh = [1, wtconshade, wtwaves, wtheat, wthicover, wtpredecshade];
+        wsh = sum(wsh);
+
+        SH(:,1) = A(:,1); %sites column (remaining)
+        SH(:,2) = A(:,2); %multiply centrality with connectivity weight
+        SH(:,3) = (1-A(:,3)); %multiply complementary of damage risk with disturbance weight
+        SH(:,4) = A(:,4); %multiply complementary of heat risk with heat weight
+        SH(:,5) = A(:,5); %multiply by coral cover with its weight for high cover
+        SH(:,6) = A(:,7); %multiply priority predecessor indicator by weight
+
+        % normalisation
+        SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
+        SH = SH.* repmat(wsh,nsites,1);
+
+        F_s = max(SH(:,2:end));
+        %F_h = min(SH(:,2:end));
+
+        % Compute utility of the majority S (Manhatten Distance)
+        % Compute individual regret R (Chebyshev distance)
+        sr_arg =((F_s-SH(:,2:end)));
+        S = nansum(sr_arg,2);
+        S = [sites', S];
+        R = max(sr_arg,[],2);
+        R = [sites',R];
+
+        % Compute the VIKOR compromise Q
+        S_s = max(S(:,2));
+        S_h = min(S(:,2));
+        R_s = max(R(:,2));
+        R_h = min(R(:,2));
+        Q = v*(S-S_s)/(S_s-S_h) + (1-v)*(R-R_s)/(R_s-R_h);
+        Q = [sites',Q];
+
+        % sort R, S and Q in ascending order rows
+        orderQ = sortrows(Q,2,'ascend');
+        prefshadesites = orderQ(1:nsiteint,1);
+        nprefshadesites = numel(prefshadesites); 
+
+end 
 end
 
-%% Seeding - Filtered set 
-SE(:,1) = A(:,1); %sites column (remaining)
-SE(:,2) = A(:,2)*wtconseed; %multiply centrality with connectivity weight
-SE(:,3) = (1-A(:,3))*wtwaves; %multiply complementary of damage risk with disturbance weight
-SE(:,4) = (1-A(:,4))*wtheat;
-SE(:,5) = A(:,6)*wtlocover; %multiply by coral cover with its weight for high cover
-SE(:,6) = A(:,7)*wtpredecseed; %multiply priority predecessor indicator by weight
-
-
-SEwt(:,1) = A(:,1);
-SEwt(:,2) = SE(:,2)+ SE(:,3) + SE(:,4) + SE(:,5); %for now, simply add indicators 
-SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
-
-%highest indicator picks the seed site
-prefseedsites = SEwt2(1:nsiteint,1);
-nprefseedsites = numel(prefseedsites);
-
-
-%% Shading - filtered set
-SH(:,1) = A(:,1); %sites column (remaining)
-SH(:,2) = A(:,2)*wtconshade; %multiply centrality with connectivity weight
-SH(:,3) = (1-A(:,3))*wtwaves; %multiply complementary of damage risk with disturbance weight
-SH(:,4) = A(:,4)*wtheat; %multiply complementary of heat risk with heat weight
-SH(:,5) = A(:,5)*wthicover; %multiply by coral cover with its weight for high cover
-SH(:,6) = A(:,7)*wtpredecshade; %multiply priority predecessor indicator by weight
-
-SHwt(:,1) = A(:,1);
-SHwt(:,2) = SH(:,2)+ SH(:,3) + SH(:,4) + SH(:,5); %for now, simply add indicators 
-% if SHwt(:,2) == 0
-%     %SHwt(:,2) = rand(length(A(:,1)),1);
-%     SHwt2 = sortrows(SHwt,2,'descend'); %sort from highest to lowest indicator
-% else
-SHwt2 = sortrows(SHwt,2,'descend'); %sort from highest to lowest indicator
-% end
-%highest indicators picks the cool sites
-prefshadesites = SHwt2(1:nsiteint,1);
-nprefshadesites = numel(prefshadesites);
-end
 

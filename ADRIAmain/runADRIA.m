@@ -1,4 +1,4 @@
-function runADRIA(Interv,CrtWts)
+function runADRIA(Interv,CrtWts,alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -249,7 +249,7 @@ parfor sim = 1:Interv.sims % number of simulations for each intervention includi
             %% Select preferred intervention sites based on criteria (heuristics)
 
             if strategy == 1  % guided
-                [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars); %site selection function for intervention deployment
+                [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars,alg_ind); %site selection function for intervention deployment
                 nprefseed(tstep,I) = nprefseedsites; %number of preferred seeding sites
                 nprefshade(tstep,I) = nprefshadesites; %number of preferred shading sites
             elseif strategy == 0 % unguided deployment
