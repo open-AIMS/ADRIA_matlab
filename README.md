@@ -32,4 +32,13 @@ which will produce results in the Outputs directory.
 
 An ADRIA app can also be started by running `ADRIAv1.mlapp`
 
+## Tests
+
+Tests can be run with the following in the command window:
+
+```matlab
+>> cd tests
+>> runtests
+```
+
 
