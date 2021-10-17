@@ -308,7 +308,7 @@ parfor sim = 1:Interv.sims % number of simulations for each intervention includi
 end %sims
 
 
-filename =  ['Results' num2str(RCP) '.mat'];
+filename = ['Results' num2str(RCP) '.mat'];
 
 % convert to key coral metrics
 [TC,C,E,S] = ReefConditionMetrics(covsim);  %calls function that converts raw coral covers to ...
