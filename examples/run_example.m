@@ -13,7 +13,7 @@
 %   sims = 50;        how many simulations to run
 
 % Specify options above by name to change settings
-interventions = intervention_specification(Guided=1, sims=2);
+interventions = intervention_specification(Guided=1, sims=10);
 
 
 % Set default criteria weighting
@@ -37,3 +37,6 @@ criteria_weights = CriteriaWeights();
 alg_ind = 1;
 
 runADRIA(interventions, criteria_weights, alg_ind);
+
+
+analyseADRIAresults1;
