@@ -13,7 +13,7 @@
 %   sims = 50;        how many simulations to run
 
 % Specify options above by name to change settings
-interventions = intervention_specification(Guided=1, sims=10);
+interventions = intervention_specification(Guided=1, sims=8);
 
 
 % Set default criteria weighting
