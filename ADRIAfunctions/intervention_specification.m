@@ -1,9 +1,26 @@
 function [interventions] = intervention_specification(varargin)
-% Create intervention struct that hold default choices
+% Create intervention struct with specified values.
+% Uses default values if not specified.
+% 
+% Inputs:
+%    Argument list of parameters to override.
+%    Possible arguments (with default values):
+%      - Guided   : [0, 1]
+%      - PrSites  : 3
+%      - Seed1    : [0, 0.0005, 0.0010]
+%      - Seed2    : 0
+%      - SRM      : 0
+%      - Aadpt    : [6, 12]
+%      - Natad    : 0.05
+%      - Seedyrs  : 10
+%      - Shadeyrs : 1
+%      - sims     : 50
 %
 % Outputs:
 %   interventions : struct holding default/modified intervention values
 %
+% Usage example:
+% interv = intervention_specification(Guided=1, PrSites=3, sims=10)
 
 interventions = struct('Guided', [0,1], ...
                        'PrSites', 3, ...
