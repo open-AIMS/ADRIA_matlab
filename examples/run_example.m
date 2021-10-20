@@ -1,3 +1,8 @@
+
+% change to functions folder
+cd ..
+cd ADRIAfunctions
+
 % Create struct with default intervention values
 % Options and default values:
 %   Guided = [0, 1];  0 or 1 for guided or unguided intervention 
@@ -11,9 +16,11 @@
 %   Seedyrs = 10;     how many years to seed, starting in 2026
 %   Shadeyrs = 1;     how many years to shade, starting in 2026
 %   sims = 50;        how many simulations to run
+%   RCP = 60;
+
 
 % Specify options above by name to change settings
-interventions = intervention_specification(Guided=1, sims=8);
+interventions = intervention_specification();
 
 
 % Set default criteria weighting
@@ -36,7 +43,11 @@ criteria_weights = CriteriaWeights();
 %  3 = VIKOR 
 alg_ind = 1;
 
+% change to main folder to run main scripts
+cd ..
+cd ADRIAmain
 runADRIA(interventions, criteria_weights, alg_ind);
 
-
-analyseADRIAresults1;
+% cd ..
+% cd examples
+% analyseADRIAresults1;

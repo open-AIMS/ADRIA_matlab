@@ -2,7 +2,13 @@ function runADRIA(Interv,CrtWts,alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% Input: Interv : intervention structure created by
+%                 intervention_specification.m
+%        CrtWts : criteria array created by criteria_weights.m
+%        alg_ind : MCDA algorithm flag - 1, Order ranking
+%                                      - 2, TOPSIS
+%                                      - 3, VIKOR
+%
 % Model guides the selection of 
 % (1) reef sites for the deployment of restoration and adaptation interventions, and
 % (2) which interventions in the portfolio to deploy given a set of decision criteria
@@ -50,36 +56,45 @@ end
 
 %% Generate table of interventions and assumptions
 
+% change to location of functions
+cd .. 
+cd ADRIAfunctions
+
 % The following table sets out the intervention design.
 % It controls whether to seed with hardy corals of species 1 or 2 and by how much (here
 % with zero or 2percent added cover), whether to shade or not and by how
 % much (DHW equivalents), whether to use an informed (zero, 0) or and informed (1) strategy, 
 % and the risk tolerance of the decision maker.   
 
-[IT,ninter,~] = InterventionTable(Interv); %calls function that builds intervention table, ...
-
+[IT,~] = InterventionTable(Interv); %calls function that builds intervention table, ...
+ninter = size(IT,1);
 % which controls what interventions to run and and what levels, etc
-%sims = TBL(1,10); %number of simulations to run are given in the 10th column of the intervention table (probably clumsy)
-%save 'Itable' 'Itable';
 
-%% Load criteria weights
-
-%CrtWts0 = CriteriaWeights; %environmental and ecological criteria weights used in site selection
-
-%% Choose RCP scenario
+%% Retrieve RCP scenario
 % RCP 45, 60, 6085, and 85
 % 6085 refers to RCP 7 RCP
 
-RCP = 60;
+RCP = Interv.RCP;
 
 %% LOAD parameter file
-
+% change to location of main files 
+cd ..
+cd ADRIAmain
 [params,parms0] = ADRIAparms(Interv);  %environmental and ecological parameter values etc 
 
-%% RUN SETUP script
+%% RUN SETUP functions
+% change to location of functions
+cd ..
+cd ADRIAfunctions
+    
+% Simulate future connectivity patterns in response to environmental variation
+[TPdata,SiteRanks,strongpred,nsites] =  ADRIA_TP_Moore(params.con_cutoff); %con_cutoff filters out low connectivities
 
-%setup for the geographical setting including environmental input layers
-setupADRIAsims;
+
+cd ..
+cd ADRIAmain
+% setup for the geographical setting including environmental input layers
+[wavedisttime,dhwdisttime] = setupADRIAsims(Interv,params,nsites);
 
 %% Mortality projection from waves
 
@@ -94,9 +109,9 @@ mwaves(mwaves>1) = 1;
 
 %% Initialise and start simulations
 
-%Allocate memory to coral cover matrix
+% Allocate memory to coral cover matrix
 covsim = zeros(params.tf,params.nspecies,nsites,ninter,Interv.sims); %main metric: coral cover
-BL = zeros(params.tf,params.nspecies,nsites,ninter,Interv.sims); %coral bleaching
+% BL = zeros(params.tf,params.nspecies,nsites,ninter,Interv.sims); %coral bleaching
 % seedlog = zeros(params.tf,params.nsiteint,ninter,sims); %initialise coral seeding log
 % shadelog = zeros(params.tf,params.nsiteint,ninter,sims); %initialise coral shading log
 seedsim = zeros(params.tf,params.nspecies,nsites,ninter,Interv.sims); 
@@ -115,7 +130,9 @@ SiteRanks = SiteRanks;
 tf = params.tf;
 dhwdisttime = dhwdisttime;
 strongpred = strongpred;
-parfor sim = 1:Interv.sims % number of simulations for each intervention including the counterfactual
+
+% loop though number of simulations for each intervention including the counterfactual
+for sim = 1:Interv.sims 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PREPARE for and start INTERVENTIONS
@@ -138,21 +155,24 @@ parfor sim = 1:Interv.sims % number of simulations for each intervention includi
     wtpredecshade = CrtWts(:,8); %weight for the importance of shading sites that are predecessors of priority reefs 
     risktol = CrtWts(:,9); %risk tolerance
 
-    %Wtcounter = zeros(3,2,params.tf,ninter);
+    % container for coral cover and total coral cover
     Cov = zeros(params.tf,params.nspecies,nsites,ninter);
     dCovTot = zeros(nsites,ninter);
+    
+    % containers for seeding, shading and cooling
     nprefseed = zeros(params.tf,ninter); 
     nprefshade = zeros(params.tf,ninter);
-    nprefcool = zeros(params.tf,ninter); 
+    nprefcool = zeros(params.tf,ninter);     
     prefseedsites = []; %set the list of preferred seeding sites to empty
     prefshadesites = []; %set the list of preferred shading sites to empty
     prioritysites = []; %set the list of priority sites to empty
     % coralsdeployed = zeros(params.tf,ninter); % = params.nsiteint*seedcorals*nnz(nprefsite);
-    %% 
 
     %% Interventions and assumptions
-
+    
+    % loop through each permutation of interventions selected
     for I = 1:ninter
+        
         parms = parms0;
         strategy = IT(I,1);  %0 is random, 1 is guided
         pgs = IT(I,2); % group of priority sites
@@ -199,6 +219,7 @@ parfor sim = 1:Interv.sims % number of simulations for each intervention includi
             stresspast = struct('DHWpast',DHWpast); %generate structure for past year's stress to use in function
             [LP1,LP2,LP3,LP4] = ADRIA_larvalprod(tstep,parms,stresspast,...
                 params.LPdhwcoeff,params.DHWmaxtot,params.LPDprm2); %larval productivity ...
+            
             % for each species, site and year as a function of past heat exposure
             if tstep == 2
                 Yout(tstep,:,:) = Y0; %pos 2 is species, pos3 is sites
@@ -222,21 +243,21 @@ parfor sim = 1:Interv.sims % number of simulations for each intervention includi
             end
 
             %% Setup MCDA before bleaching season
-            %Factor 1: digraph centrality based on connectivity
+            % Factor 1: digraph centrality based on connectivity
 
             CovTot(tstep,:) = sum(Cov(tstep-1,:,:,I),2); %sums over species, second index becomes sites
             centr = SiteRanks.C1;
 
-            %Factor 2:   
+            % Factor 2:   
 
             dam = wavedisttime(tstep,:,sim)'; %probability of coral damage from waves used as criterion in site selection
             damprob = struct('dam', dam);
 
-            %Factor 3:
+            % Factor 3:
             heatstress = dhwdisttime(tstep,:,sim)'; %heat stress used as criterion in site selection
             heatstressprob = struct('heatstress',heatstress);
 
-            %Factor 4: Coral state
+            % Factor 4: Coral state
             covtott = CovTot(tstep,:)'; %total coral cover used as criterion in site selection
             sumcover = struct('covtott', covtott);
 
@@ -249,39 +270,39 @@ parfor sim = 1:Interv.sims % number of simulations for each intervention includi
             %% Select preferred intervention sites based on criteria (heuristics)
 
             if strategy == 1  % guided
-                [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars,alg_ind); %site selection function for intervention deployment
-                nprefseed(tstep,I) = nprefseedsites; %number of preferred seeding sites
-                nprefshade(tstep,I) = nprefshadesites; %number of preferred shading sites
+                [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars,alg_ind); % site selection function for intervention deployment
+                nprefseed(tstep,I) = nprefseedsites; % number of preferred seeding sites
+                nprefshade(tstep,I) = nprefshadesites; % number of preferred shading sites
             elseif strategy == 0 % unguided deployment
                 prefseedsites = randi(nsites,[params.nsiteint,1])'; % if unguided, then seed corals anywhere
-                prefshadesites = randi(nsites,[params.nsiteint,1])'; %  if unguided, then shade corals anywhere
+                prefshadesites = randi(nsites,[params.nsiteint,1])'; % if unguided, then shade corals anywhere
             end
 
             %% Run site loop and apply interventions before bleaching season
             for site = 1:nsites
-                %Warming and disturbance event going into the pulse function
-                if ismember(site,prefshadesites) == 1 && tstep <= shadeyears %if the site in the loop equals a preferred shading site
+                % Warming and disturbance event going into the pulse function
+                if ismember(site,prefshadesites) == 1 && tstep <= shadeyears % if the site in the loop equals a preferred shading site
                     dhw = dhwdisttime(tstep,site,sim)-srm; % then lower DHW according to SRM level
-                    dhw(dhw<0) = 0;  %but don't lower to negative
+                    dhw(dhw<0) = 0;  % but don't lower to negative
                     Sbl = 1-ADRIA_bleachingmortalityfun(tstep,parms,dhw)'; %survivors from bleaching event
-                    Sw =  1-mwaves(tstep,:,site,sim)';  %survivors from wave damage
-                    Yin1(:,site) = Yout(tstep-1,:,site)'.*Sbl.*Sw; %those survival rates are used to adjust overall coral survival 
-                    Yshade(site)= srm;  %log the site as shaded
-                    %BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
+                    Sw =  1-mwaves(tstep,:,site,sim)';  % survivors from wave damage
+                    Yin1(:,site) = Yout(tstep-1,:,site)'.*Sbl.*Sw; % those survival rates are used to adjust overall coral survival 
+                    Yshade(site)= srm;  % log the site as shaded
+                    % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
                 elseif ismember(site,prefshadesites) == 0 || tstep > shadeyears %if the site in the loop is not a preferred shading site
                     dhw = dhwdisttime(tstep,site,sim);
                     Sbl = 1-ADRIA_bleachingmortalityfun(tstep,parms,dhw)';
                     Sw =  1-mwaves(tstep,:,site,sim)';
                     Yin1(:,site) = Yout(tstep-1,:,site)'.*Sbl.*Sw;
-                    Yshade(site) = 0; %log the site as not shaded
-                    %BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
+                    Yshade(site) = 0; % log the site as not shaded
+                    % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
                 end
 
                 if ismember(site,prefseedsites) == 1 && tstep <= seedyears %if the site in the loop equals a preferred seeding site
-                    Yin1(2,site) = Yin1(2,site)+seed1; %seed enhanced corals of group 2
-                    Yin1(4,site) = Yin1(4,site)+seed2; %seed enhanced corals of group 4
-                    Yseed(2,site)= seed1; %log site as seeded with gr2
-                    Yseed(4,site)= seed2; %log site as seeded with gr4
+                    Yin1(2,site) = Yin1(2,site)+seed1; % seed enhanced corals of group 2
+                    Yin1(4,site) = Yin1(4,site)+seed2; % seed enhanced corals of group 4
+                    Yseed(2,site)= seed1; % log site as seeded with gr2
+                    Yseed(4,site)= seed2; % log site as seeded with gr4
                  else
                     Yseed(2,site)= 0;
                     Yseed(4,site)= 0;
@@ -293,27 +314,28 @@ parfor sim = 1:Interv.sims % number of simulations for each intervention includi
                 Yin = Yin2(:,site);
 
                 [~,Y] = ode45(@(t,X) ADRIA4groupsODE(t,X,parms), [0 1], Yin, odeset('NonNegative',1:4)); 
-                %ODE to solve assemblage composition after a year based on vital rates. Update of output with new population sizes from the end of the ODE run
+                % ODE to solve assemblage composition after a year based on vital rates. Update of output with new population sizes from the end of the ODE run
                 Yout(tstep,:,site) = Y(end,:); % update population sizes
                 Yout(Yout>parms.P) = parms.P; % limit covers to carrying capacity (obsolete)
 
                 Cov(:,:,:,I) = Yout(:,:,:);
-                covsim(:,:,:,I,sim) = Yout(:,:,:);  %output we save for analyses. Includes: tf,nspecies,nsites,ninter,sims
-                seedsim(tstep,:,site,I,sim) = Yseed(:,site); %combine seeding logs
-                shadesim(tstep,:,site,I,sim) = Yshade(site); %combined shading logs
+                covsim(:,:,:,I,sim) = Yout(:,:,:);  % output we save for analyses. Includes: tf,nspecies,nsites,ninter,sims
+                seedsim(tstep,:,site,I,sim) = Yseed(:,site); % combine seeding logs
+                shadesim(tstep,:,site,I,sim) = Yshade(site); % combined shading logs
 
-            end %sites   
-        end %tstep
-    end %Interventions
-end %sims
+            end % sites   
+        end % tstep
+    end % Interventions
+end % sims
 
-
-filename = ['Results' num2str(RCP) '.mat'];
+% save file with name indicating algorithm and RCP used
+filename = strcat('Results_RCP', num2str(RCP), '_Alg',num2str(alg_ind), '.mat');
 
 % convert to key coral metrics
-[TC,C,E,S] = ReefConditionMetrics(covsim);  %calls function that converts raw coral covers to ...
+[TC,C,E,S] = ReefConditionMetrics(covsim);  
+% calls function that converts raw coral covers to ...
 % total cover (TC), covers of the three goups (C), evenness (E), and structural complexity (S).
-%Note that S needs work: needs to be expressed as a function of coral group
+% Note that S needs work: needs to be expressed as a function of coral group
 % and size-frequency distribution. 
 
 save([fileloc,'/Outputs/',filename],'TC','C','E','S'); % seedlog and shadelog are omitted for now

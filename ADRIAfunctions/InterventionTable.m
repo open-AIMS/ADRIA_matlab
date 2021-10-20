@@ -1,4 +1,4 @@
-function [IT,N,Itable] = InterventionTable(Interv)
+function [IT,Itable] = InterventionTable(Interv)
 %
 % Input: 
 %   Interv: structure containing the set of intervention input selected by
