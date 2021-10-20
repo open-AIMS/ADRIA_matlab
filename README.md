@@ -21,5 +21,24 @@ Note that the environmental input files (netcdfs) from Barbara's RECOM runs are 
 
 #### Case-study: Moore Reef Cluster
 
+## Development quickstart
+
+1. Clone the repository
+2. Open the MATLAB IDE and navigate to the repository location
+3. Double click on the "ADRIA.prj" file to set up the MATLAB project
+
+An example run script (`run_example.m`) can be found in the `examples` directory
+which will produce results in the Outputs directory.
+
+An ADRIA app can also be started by running `ADRIAv1.mlapp`
+
+### Tests
+
+Tests can be run with the following in the command window:
+
+```matlab
+>> cd tests
+>> runtests
+```
 
 
