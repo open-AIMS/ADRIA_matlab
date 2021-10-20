@@ -14,8 +14,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
     % intervention strategy and choice of sites. This latter analysis is handled in analyseADRIA.
 
     
-    cd ..
-    cd Inputs
+    cd ../Inputs
     %% Simulate future wave exposure patterns from Puotinen and Callaghan SWH data
     swhtbl = readtable('swhMoore_interp.xlsx', 'PreserveVariableNames',true); % import Marji's significant wave heights 
     
@@ -39,8 +38,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
     sdhwdist0 =std(F.resdhwsites(:,5:7),0,2)';
     dhwdisttime = zeros(params.tf,nsites,Interv.sims);
     
-    cd ..
-    cd ADRIAfunctions
+    cd ../ADRIAfunctions
     
     for sim = 1:Interv.sims
         dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,nsites,mdhwdist0,...

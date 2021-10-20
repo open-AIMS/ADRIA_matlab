@@ -48,6 +48,6 @@ cd ..
 cd ADRIAmain
 runADRIA(interventions, criteria_weights, alg_ind);
 
-% cd ..
-% cd examples
-% analyseADRIAresults1;
+cd ..
+cd examples
+analyseADRIAresults1(RCP,alg_ind);

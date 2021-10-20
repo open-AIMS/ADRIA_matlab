@@ -11,8 +11,7 @@ function [TPdata,SiteRanks,strongpred,nsites] =  ADRIA_TP_Moore(con_cutoff)
 %   nsites: number of sites
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-cd ..
-cd Inputs
+cd ../Inputs
 
 %% Load Moore sites location data
 F0 = readtable('MooreSites.xlsx', 'PreserveVariableNames',true);

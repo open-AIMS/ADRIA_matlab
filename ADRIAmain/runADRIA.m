@@ -57,8 +57,7 @@ end
 %% Generate table of interventions and assumptions
 
 % change to location of functions
-cd .. 
-cd ADRIAfunctions
+cd ../ADRIAfunctions
 
 % The following table sets out the intervention design.
 % It controls whether to seed with hardy corals of species 1 or 2 and by how much (here
@@ -78,21 +77,18 @@ RCP = Interv.RCP;
 
 %% LOAD parameter file
 % change to location of main files 
-cd ..
-cd ADRIAmain
+cd ../ADRIAmain
 [params,parms0] = ADRIAparms(Interv);  %environmental and ecological parameter values etc 
 
 %% RUN SETUP functions
 % change to location of functions
-cd ..
-cd ADRIAfunctions
+cd ../ADRIAfunctions
     
 % Simulate future connectivity patterns in response to environmental variation
 [TPdata,SiteRanks,strongpred,nsites] =  ADRIA_TP_Moore(params.con_cutoff); %con_cutoff filters out low connectivities
 
 
-cd ..
-cd ADRIAmain
+cd ../ADRIAmain
 % setup for the geographical setting including environmental input layers
 [wavedisttime,dhwdisttime] = setupADRIAsims(Interv,params,nsites);
 
@@ -337,5 +333,5 @@ filename = strcat('Results_RCP', num2str(RCP), '_Alg',num2str(alg_ind), '.mat');
 % total cover (TC), covers of the three goups (C), evenness (E), and structural complexity (S).
 % Note that S needs work: needs to be expressed as a function of coral group
 % and size-frequency distribution. 
-
-save([fileloc,'/Outputs/',filename],'TC','C','E','S'); % seedlog and shadelog are omitted for now
+cd ../Outputs
+save(filename,'TC','C','E','S'); % seedlog and shadelog are omitted for now
