@@ -1,16 +1,20 @@
-function analyseADRIAresults1(RCP,alg_ind)
+function analyseADRIAresults1(metrics)
 %% Convert coral outputs to scope for ES provision and display selected  distributions (violin plots) and trajectories for each intervention
 
 % Presents summary results from runADRIAsims
 
-cd ../ADRIAfunctions 
-[CultES, ProvES,dCultES,dProvES,Nint] = Corals_to_Ecosys_Services(RCP,alg_ind); %calls function that converts coral outputs ...
+CultES = metrics.CultES;
+ProvES = metrics.ProvES; 
+dCultES = metrics.dCultES;
+dProvES = metrics.dProvES;
+Nint = metrics.Nint;
+
 % to ES proxies and deltaES proxies (relative to counterfactual)
 
 %% request user input
-prompt = {'Results years of interest:',... %choose whole range or any part of range 
-    'Sites of interest:',...  %these are reefs sites i the study 
-    'Interventions of Interest:'}; %choose any intervention, 1 or many
+prompt = {'Results years of interest:',... % choose whole range or any part of range 
+          'Sites of interest:',...         % these are reefs sites i the study 
+          'Interventions of Interest:'};   % choose any intervention, 1 or many
 dlgtitle = 'Input';
 dims = [1 50];
 definput = {'1:25','1:26',strcat('1:',num2str(Nint))}; %default input values
