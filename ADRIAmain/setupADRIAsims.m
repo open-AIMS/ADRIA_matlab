@@ -13,8 +13,6 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
     % portfolio. This helps us to understand the net cumulative benefits (or disbenefits) of each 
     % intervention strategy and choice of sites. This latter analysis is handled in analyseADRIA.
 
-    
-    cd ../Inputs
     %% Simulate future wave exposure patterns from Puotinen and Callaghan SWH data
     swhtbl = readtable('swhMoore_interp.xlsx', 'PreserveVariableNames',true); % import Marji's significant wave heights 
     
@@ -37,8 +35,6 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
     mdhwdist0 = mean(F.resdhwsites(:,5:7),2)';
     sdhwdist0 =std(F.resdhwsites(:,5:7),0,2)';
     dhwdisttime = zeros(params.tf,nsites,Interv.sims);
-    
-    cd ../ADRIAfunctions
     
     for sim = 1:Interv.sims
         dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,nsites,mdhwdist0,...
