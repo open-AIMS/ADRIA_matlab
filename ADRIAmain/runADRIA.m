@@ -2,12 +2,22 @@ function reef_condition_metrics = runADRIA(Interv, CrtWts, alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Input: Interv : intervention structure created by
-%                 intervention_specification.m
-%        CrtWts : criteria array created by criteria_weights.m
-%        alg_ind : MCDA algorithm flag - 1, Order ranking
-%                                      - 2, TOPSIS
-%                                      - 3, VIKOR
+% Input:
+%    Interv  : struct, of intervention options
+%              (see `intervention_specification`)
+%    CrtWts  : struct, criteria options
+%              (see `criteria_weights`)
+%    alg_ind : int, MCDA algorithm flag
+%                  - 1, Order ranking
+%                  - 2, TOPSIS
+%                  - 3, VIKOR
+%
+% Output:
+%    reef_condition_metrics : struct,
+%                                 - TC
+%                                 - C
+%                                 - E
+%                                 - S
 %
 % Model guides the selection of
 % (1) reef sites for the deployment of restoration and adaptation interventions, and
@@ -316,7 +326,6 @@ parfor sim = 1:Interv.sims
         end % tstep
     end % Interventions
 end % sims
-
 
 %% Convert to key coral metrics
 
