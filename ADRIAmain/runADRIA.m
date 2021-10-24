@@ -126,6 +126,19 @@ tf = params.tf;
 dhwdisttime = dhwdisttime;
 strongpred = strongpred;
 
+%% Weights for connectivity , waves (ww), high cover (whc) and low
+wtwaves = CrtWts(:, 1); %weight of wave damage in MCDA
+wtheat = CrtWts(:, 2); %weight of heat damage in MCDA
+wtconshade = CrtWts(:, 3); %weight of connectivity for shading in MCDA
+wtconseed = CrtWts(:, 4); %weight of connectivity for seeding in MCDA
+wthicover = CrtWts(:, 5); %weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
+wtlocover = CrtWts(:, 6); %weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
+wtpredecseed = CrtWts(:, 7); %weight for the importance of seeding sites that are predecessors of priority reefs
+wtpredecshade = CrtWts(:, 8); %weight for the importance of shading sites that are predecessors of priority reefs
+risktol = CrtWts(:, 9); %risk tolerance
+
+parfor sim = 1:Interv.sims % number of simulations for each intervention including the counterfactual
+
 % loop though number of simulations for each intervention including the counterfactual
 for sim = 1:Interv.sims 
 
@@ -138,17 +151,7 @@ for sim = 1:Interv.sims
     % connected sites are given preference.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    %% Weights for connectivity , waves (ww), high cover (whc) and low
-
-    wtwaves = CrtWts(:, 1); %weight of wave damage in MCDA
-    wtheat = CrtWts(:, 2); %weight of heat damage in MCDA
-    wtconshade = CrtWts(:, 3); %weight of connectivity for shading in MCDA
-    wtconseed = CrtWts(:, 4); %weight of connectivity for seeding in MCDA
-    wthicover = CrtWts(:, 5); %weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
-    wtlocover = CrtWts(:, 6); %weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
-    wtpredecseed = CrtWts(:, 7); %weight for the importance of seeding sites that are predecessors of priority reefs
-    wtpredecshade = CrtWts(:, 8); %weight for the importance of shading sites that are predecessors of priority reefs
-    risktol = CrtWts(:, 9); %risk tolerance
+    
 
     % container for coral cover and total coral cover
     Cov = zeros(params.tf,params.nspecies,nsites,ninter);
