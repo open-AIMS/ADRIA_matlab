@@ -1,7 +1,5 @@
-
-% change to functions folder
-cd ..
-cd ADRIAfunctions
+% set random number seed to ensure consistent results for test
+rng(101)
 
 % Create struct with default intervention values
 % Options and default values:
