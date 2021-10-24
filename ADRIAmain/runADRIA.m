@@ -1,4 +1,4 @@
-function runADRIA(Interv, CrtWts, alg_ind)
+function reef_condition_metrics = runADRIA(Interv, CrtWts, alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -328,14 +328,22 @@ for sim = 1:Interv.sims
     end % Interventions
 end % sims
 
-% save file with name indicating algorithm and RCP used
-filename = strcat('Results_RCP', num2str(RCP), '_Alg',num2str(alg_ind), '.mat');
+
+%% Convert to key coral metrics
 
 % convert to key coral metrics
 [TC,C,E,S] = ReefConditionMetrics(covsim);  
 % calls function that converts raw coral covers to ...
 % total cover (TC), covers of the three goups (C), evenness (E), and structural complexity (S).
 % Note that S needs work: needs to be expressed as a function of coral group
-% and size-frequency distribution. 
-cd ../Outputs
-save(filename,'TC','C','E','S'); % seedlog and shadelog are omitted for now
+% and size-frequency distribution.
+[TC, C, E, S] = ReefConditionMetrics(covsim);
+
+% seedlog and shadelog are omitted for now
+reef_condition_metrics = struct('TC', TC, ...
+                                'C', C, ...
+                                'E', E, ...
+                                'S', S);
+
+
+end
