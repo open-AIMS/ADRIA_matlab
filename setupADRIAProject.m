@@ -1,7 +1,18 @@
 % This script generates ADRIA project structure.
 % Assumes this is being run from the project root directory.
 
+%% Set up location for example input/outputs if necessary
+fileloc = pwd;
+if ~exist([fileloc, '/Inputs'], 'dir')
+    mkdir('Inputs')
+end
 
+if ~exist([fileloc, '/Outputs'], 'dir')
+    mkdir('Outputs')
+end
+
+
+%% Define project if necessary
 try
     proj = currentProject();
 

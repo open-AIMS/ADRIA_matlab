@@ -58,12 +58,6 @@ function reef_condition_metrics = runADRIA(Interv, CrtWts, alg_ind)
 % Absolute cover of all deployed corals = 10^6 corals *3*10^-3) m2/coral = 3000 m2
 % Relative cover of all deployed corals = 3000m2/100,000m2 = 3 percent
 
-%% Set up location for outputs, if directory doesn't exist, create one
-fileloc = pwd;
-if exist([fileloc, '/Outputs'], 'dir') == 0
-    mkdir('Outputs')
-end
-
 %% Generate table of interventions and assumptions
 
 % The following table sets out the intervention design.
