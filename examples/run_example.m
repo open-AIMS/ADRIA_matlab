@@ -18,8 +18,7 @@ rng(101)
 
 
 % Specify options above by name to change settings
-interventions = intervention_specification();
-
+interventions = intervention_specification(sims=8);
 
 % Set default criteria weighting
 % wave_stress = 1  % wave stress avoidance
@@ -41,11 +40,25 @@ criteria_weights = CriteriaWeights();
 %  3 = VIKOR 
 alg_ind = 1;
 
-% change to main folder to run main scripts
-cd ..
-cd ADRIAmain
-runADRIA(interventions, criteria_weights, alg_ind);
+reef_condition_metrics = runADRIA(interventions, criteria_weights, alg_ind);
 
-cd ..
-cd examples
-analyseADRIAresults1(RCP,alg_ind);
+
+%% Analysis Example
+
+% Convert reef results to ecosystem service metrics
+ecosys_results = Corals_to_Ecosys_Services(reef_condition_metrics);
+
+% Display analysis
+analyseADRIAresults1(ecosys_results);
+
+
+%% Save results to file
+
+% Generate common file prefix
+filename = ADRIA_resultFilePrefix(interventions.RCP, alg_ind);
+
+% Save reef results
+ADRIA_saveResults(reef_condition_metrics, strcat(filename, '_reef'));
+
+% Save ecosystem results into separate file
+ADRIA_saveResults(ecosys_results, strcat(filename, '_ES'))
