@@ -2,14 +2,6 @@
 % Assumes this is being run from the project root directory.
 
 
-global ADRIA_INPUT_DIR
-global ADRIA_OUTPUT_DIR
-
-% Set these to your preferred input/output locations
-ADRIA_INPUT_DIR = "Inputs/";
-ADRIA_OUTPUT_DIR = "Outputs/";
-
-
 try
     proj = currentProject();
 
