@@ -12,15 +12,14 @@ function [TPdata,SiteRanks,strongpred,nsites] =  ADRIA_TP_Moore(con_cutoff)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %% Load Moore sites location data
-F0 = readtable('Inputs/MooreSites.xlsx', 'PreserveVariableNames',true);
+F0 = readtable('MooreSites.xlsx', 'PreserveVariableNames',true);
 F0 = table2array(F0); %site IDs, site address, lons and lats for all sites
 xx = F0(:,3); %lon
 yy = F0(:,4); %lat
 
 %% Load transitional probability matrix (connectivity between sites)
-F1 = readtable('Inputs/MooreTPmean.xlsx', 'PreserveVariableNames',true);
+F1 = readtable('MooreTPmean.xlsx', 'PreserveVariableNames',true);
 F1(:,1:2) = [];  %remove the ID and address columns
 F1(1:2,:) = [];  %remove the ID and address rows
 TP1 = table2array(F1); %Transition probability matrix for all sites
