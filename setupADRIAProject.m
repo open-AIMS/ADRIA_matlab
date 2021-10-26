@@ -28,7 +28,7 @@ catch proj
     end
 end
 
-proj = openProject('.');
+proj = matlab.project.createProject("Name", "ADRIA", "Folder", pwd);
 
 % Add project directories and files
 proj.addFolderIncludingChildFiles('./ADRIAfunctions');
