@@ -37,6 +37,14 @@ catch
     proj.Name = "ADRIA";
 end
 
+
+if exist('ADRIA.prj')
+    proj = openProject(pwd)
+else
+     proj = matlab.project.createProject(pwd);
+     proj.Name = 'ADRIA';
+end
+
 % Add project directories and files
 proj.addFolderIncludingChildFiles('./ADRIAfunctions');
 proj.addFolderIncludingChildFiles('./ADRIAmain');
