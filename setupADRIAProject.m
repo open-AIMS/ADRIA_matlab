@@ -28,7 +28,14 @@ catch proj
     end
 end
 
-proj = matlab.project.createProject("Name", "ADRIA", "Folder", pwd);
+try
+    % For MATLAB 2021a
+    proj = matlab.project.createProject("Name", "ADRIA", "Folder", pwd);
+catch
+    % Try older approach if any errors are encountered
+    proj = matlab.project.createProject(pwd);
+    proj.Name = "ADRIA";
+end
 
 % Add project directories and files
 proj.addFolderIncludingChildFiles('./ADRIAfunctions');
