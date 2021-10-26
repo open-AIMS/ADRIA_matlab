@@ -14,11 +14,17 @@ end
 
 %% Define project if necessary
 try
-    proj = currentProject();
-
-    if proj.Name == 'ADRIA'
+    if exist('ADRIA.prj', 'file')
+        proj = openProject(pwd);
+    else
+        proj = currentProject();
+    end
+    
+    if proj.Name == "ADRIA"
         disp("ADRIA project is already loaded")
         return
+    else
+        close(proj)
     end
 catch proj
     msgText = getReport(proj);
@@ -37,13 +43,6 @@ catch
     proj.Name = "ADRIA";
 end
 
-
-if exist('ADRIA.prj')
-    proj = openProject(pwd)
-else
-     proj = matlab.project.createProject(pwd);
-     proj.Name = 'ADRIA';
-end
 
 % Add project directories and files
 proj.addFolderIncludingChildFiles('./ADRIAfunctions');
