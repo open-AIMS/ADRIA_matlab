@@ -14,11 +14,17 @@ end
 
 %% Define project if necessary
 try
-    proj = currentProject();
-
-    if proj.Name == 'ADRIA'
+    if exist('ADRIA.prj', 'file')
+        proj = openProject(pwd);
+    else
+        proj = currentProject();
+    end
+    
+    if proj.Name == "ADRIA"
         disp("ADRIA project is already loaded")
         return
+    else
+        close(proj)
     end
 catch proj
     msgText = getReport(proj);
@@ -28,13 +34,13 @@ catch proj
     end
 end
 
-%proj = matlab.project.createProject("Name", "ADRIA", "Folder", pwd);
-
-if exist('ADRIA.prj')
-    proj = openProject(pwd);
-else
-     proj = matlab.project.createProject(pwd);
-     proj.Name = 'ADRIA';
+try
+    % For MATLAB 2021a
+    proj = matlab.project.createProject("Name", "ADRIA", "Folder", pwd);
+catch
+    % Try older approach if any errors are encountered
+    proj = matlab.project.createProject(pwd);
+    proj.Name = "ADRIA";
 end
 
 
