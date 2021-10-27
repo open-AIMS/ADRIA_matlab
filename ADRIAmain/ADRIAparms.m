@@ -1,4 +1,4 @@
-function [params, parms] = ADRIAparms(Interv)
+function [params, ecol_params] = ADRIAparms(Interv)
 % Create structs with default parameter values for ADRIA
 %
 % Notes:
@@ -13,7 +13,7 @@ function [params, parms] = ADRIAparms(Interv)
 % This is the list of parameters and values used in most of ADRIA.
 % See ReadMe files for more descriptions and explanations
 
-%% Base parameters
+%% Base scenario parameters
 
 params.tf = 25; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
 
@@ -58,7 +58,7 @@ P = 0.70; % max total coral cover
 p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to both species.
 natad = [0.2, 0.2, 0.05, 0.10]; % DHWs per year for all species
 assistadapt = [0, 2, 2, 4]; % expressed as DHWs in absolute terms - i.e. not increasing over time
-parms = struct('r', r, 'mb', mb, 'P', P, 'p', p, 'natad', natad, 'assistadapt', assistadapt); % package into structure to use in functions
+ecol_params = struct('r', r, 'mb', mb, 'P', P, 'p', p, 'natad', natad, 'assistadapt', assistadapt); % package into structure to use in functions
 
 %% Ecosystem service parameters
 
