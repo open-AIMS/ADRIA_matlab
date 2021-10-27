@@ -159,7 +159,6 @@ parfor sim = 1:Interv.sims
     prioritysites = []; %set the list of priority sites to empty
     % coralsdeployed = zeros(params.tf,ninter); % = params.nsiteint*seedcorals*nnz(nprefsite);
 
-    %%
 
     %% Interventions and assumptions
 
