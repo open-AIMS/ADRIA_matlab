@@ -1,4 +1,4 @@
-default_interventions = intervention_specification();
+default_interventions = interventionSpecification();
 
 % Test returned type is of struct
 assert(isequal(class(default_interventions), 'struct'))

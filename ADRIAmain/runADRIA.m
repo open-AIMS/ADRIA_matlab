@@ -1,12 +1,12 @@
-function reef_condition_metrics = runADRIA(interv, CrtWts, alg_ind)
+function reef_condition_metrics = runADRIA(interv, crit_weights, alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Input:
-%    Interv  : struct, of intervention options
-%              (see `intervention_specification`)
-%    CrtWts  : struct, criteria options
-%              (see `criteria_weights`)
+%    interv        : struct, of intervention options
+%                    (see `intervention_specification`)
+%    crit_weights  : struct, criteria options
+%                    (see `criteria_weights`)
 %    alg_ind : int, MCDA algorithm flag
 %                  - 1, Order ranking
 %                  - 2, TOPSIS
@@ -66,7 +66,7 @@ function reef_condition_metrics = runADRIA(interv, CrtWts, alg_ind)
 % much (DHW equivalents), whether to use an informed (zero, 0) or and informed (1) strategy,
 % and the risk tolerance of the decision maker.
 
-[IT, ~] = InterventionTable(interv); %calls function that builds intervention table, ...
+[IT, ~] = interventionTable(interv); %calls function that builds intervention table, ...
 ninter = size(IT, 1);
 % which controls what interventions to run and and what levels, etc
 
@@ -124,18 +124,18 @@ dhwdisttime = dhwdisttime;
 strongpred = strongpred;
 
 %% Weights for connectivity , waves (ww), high cover (whc) and low
-wtwaves = CrtWts(:, 1); %weight of wave damage in MCDA
-wtheat = CrtWts(:, 2); %weight of heat damage in MCDA
-wtconshade = CrtWts(:, 3); %weight of connectivity for shading in MCDA
-wtconseed = CrtWts(:, 4); %weight of connectivity for seeding in MCDA
-wthicover = CrtWts(:, 5); %weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
-wtlocover = CrtWts(:, 6); %weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
-wtpredecseed = CrtWts(:, 7); %weight for the importance of seeding sites that are predecessors of priority reefs
-wtpredecshade = CrtWts(:, 8); %weight for the importance of shading sites that are predecessors of priority reefs
-risktol = CrtWts(:, 9); %risk tolerance
+wtwaves = crit_weights(:, 1); % weight of wave damage in MCDA
+wtheat = crit_weights(:, 2); % weight of heat damage in MCDA
+wtconshade = crit_weights(:, 3); % weight of connectivity for shading in MCDA
+wtconseed = crit_weights(:, 4); % weight of connectivity for seeding in MCDA
+wthicover = crit_weights(:, 5); % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
+wtlocover = crit_weights(:, 6); % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
+wtpredecseed = crit_weights(:, 7); % weight for the importance of seeding sites that are predecessors of priority reefs
+wtpredecshade = crit_weights(:, 8); % weight for the importance of shading sites that are predecessors of priority reefs
+risktol = crit_weights(:, 9); % risk tolerance
 
 % loop though number of simulations for each intervention including the counterfactual
-parfor sim = 1:interv.sims
+for sim = 1:interv.sims
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PREPARE for and start INTERVENTIONS

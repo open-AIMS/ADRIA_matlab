@@ -1,4 +1,4 @@
-function [interventions] = intervention_specification(varargin)
+function [interventions] = interventionSpecification(varargin)
 % Create intervention struct with specified values.
 % Uses default values if not specified.
 % 

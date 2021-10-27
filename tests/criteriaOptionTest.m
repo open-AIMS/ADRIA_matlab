@@ -1,4 +1,4 @@
-criterias = CriteriaWeights();
+criterias = criteriaWeights();
 
 % test return is of expected type
 assert(isequal(class(criterias), 'double'))
