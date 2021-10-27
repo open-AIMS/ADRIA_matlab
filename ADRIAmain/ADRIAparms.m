@@ -48,7 +48,6 @@ params.corals = [1, 2, 3, 4]; % species of live corals
 params.LPdhwcoeff = 0.4; % shape parameters relating dhw affecting cover to larval production
 params.LPDprm2 = 5; % parameter offsetting LPD curve
 params.wavemort90 = [0.3, 0.3, 0.1, 0.05]; % coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
-params.corals = [1, 2, 3, 4]; % species of live corals
 
 r = [0.40, 0.40, 0.10, 0.05]; % base growth of species 1 to 4 (1&2: sens, 3&4: hard)
 mb = [0.07, 0.07, 0.03, 0.01]; % background mortality of the four species, not waves and heat stress
