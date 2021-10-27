@@ -1,4 +1,4 @@
-function reef_condition_metrics = runADRIA(Interv, CrtWts, alg_ind)
+function reef_condition_metrics = runADRIA(interv, CrtWts, alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,11 +74,11 @@ ninter = size(IT, 1);
 % RCP 45, 60, 6085, and 85
 % 6085 refers to RCP 7 RCP
 
-RCP = Interv.RCP;
+RCP = interv.RCP;
 
 %% LOAD parameter file
 
-[params, parms0] = ADRIAparms(Interv); %environmental and ecological parameter values etc
+[params, parms0] = ADRIAparms(interv); %environmental and ecological parameter values etc
 
 %% RUN SETUP functions
 
@@ -86,11 +86,11 @@ RCP = Interv.RCP;
 [TPdata, SiteRanks, strongpred, nsites] = ADRIA_TP_Moore(params.con_cutoff); % con_cutoff filters out low connectivities
 
 % setup for the geographical setting including environmental input layers
-[wavedisttime, dhwdisttime] = setupADRIAsims(Interv, params, nsites);
+[wavedisttime, dhwdisttime] = setupADRIAsims(interv, params, nsites);
 
 %% Mortality projection from waves
 
-mwaves = zeros(params.tf, params.nspecies, nsites, Interv.sims);
+mwaves = zeros(params.tf, params.nspecies, nsites, interv.sims);
 for species = 1:4
     %including wave vulnerability of different corals here
     mwaves(:, species, :, :) = params.wavemort90(species) * wavedisttime;
@@ -102,12 +102,12 @@ mwaves(mwaves > 1) = 1;
 %% Initialise and start simulations
 
 % Allocate memory to coral cover matrix
-covsim = zeros(params.tf, params.nspecies, nsites, ninter, Interv.sims); %main metric: coral cover
-% BL = zeros(params.tf,params.nspecies,nsites,ninter,Interv.sims); %coral bleaching
+covsim = zeros(params.tf, params.nspecies, nsites, ninter, interv.sims); %main metric: coral cover
+% BL = zeros(params.tf,params.nspecies,nsites,ninter,interv.sims); %coral bleaching
 % seedlog = zeros(params.tf,params.nsiteint,ninter,sims); %initialise coral seeding log
 % shadelog = zeros(params.tf,params.nsiteint,ninter,sims); %initialise coral shading log
-seedsim = zeros(params.tf, params.nspecies, nsites, ninter, Interv.sims);
-shadesim = zeros(params.tf, params.nspecies, nsites, ninter, Interv.sims);
+seedsim = zeros(params.tf, params.nspecies, nsites, ninter, interv.sims);
+shadesim = zeros(params.tf, params.nspecies, nsites, ninter, interv.sims);
 
 %% Run simulations
 
@@ -135,7 +135,7 @@ wtpredecshade = CrtWts(:, 8); %weight for the importance of shading sites that a
 risktol = CrtWts(:, 9); %risk tolerance
 
 % loop though number of simulations for each intervention including the counterfactual
-parfor sim = 1:Interv.sims
+parfor sim = 1:interv.sims
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PREPARE for and start INTERVENTIONS
