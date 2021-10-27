@@ -1,17 +1,22 @@
 function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    % Set up ADRIA simulations.
+    % 
     % This setup script does one or two things.
-    % 1. Pulls in environmental data files (connectivity, DHWs and significant wave heights)
-    % for different environmental conditions. % The script extracts this info
-    % for the 26 example sites and generates forward projections based on RCP (for DHW only). 
-    % 2. Or loads pre-extracted and saved environmental data. %All environmental simulations 
-    % are run in a previsous setup script and saved as mat files to allow this 
-    % main script (runADRIAsims) to simply draw in the stored simulations. 
+    % 1. Pulls in environmental data files (connectivity, DHWs and 
+    %    significant wave heights) for different environmental conditions.
+    %    The script extracts this info for the 26 example sites and 
+    %    generates forward projections based on RCP (for DHW only).
     %
-    % In each simulation ADRIA generates a new environmental future for both the counterfactual and for the intervention
-    % portfolio. This helps us to understand the net cumulative benefits (or disbenefits) of each 
-    % intervention strategy and choice of sites. This latter analysis is handled in analyseADRIA.
+    % 2. Or loads pre-extracted and saved environmental data. 
+    %    All environmental simulations are run in a previsous setup script 
+    %    and saved as mat files to allow the main script (`runADRIAsims`)
+    %    to simply draw in the stored simulations. 
+    %
+    % In each simulation ADRIA generates a new environmental future for 
+    % both the counterfactual and for the intervention portfolio. This 
+    % helps us to understand the net cumulative benefits (or disbenefits) 
+    % of each intervention strategy and choice of sites.
+    % This latter analysis is handled in `analyseADRIA`.
 
     %% Simulate future wave exposure patterns from Puotinen and Callaghan SWH data
     swhtbl = readtable('swhMoore_interp.xlsx', 'PreserveVariableNames',true); % import Marji's significant wave heights 
