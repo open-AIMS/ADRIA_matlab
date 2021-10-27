@@ -18,7 +18,7 @@ rng(101)
 
 
 % Specify options above by name to change settings
-N = 100;
+N = 10;
 interventions = interventionSpecification(sims=N);
 
 % Set default criteria weighting
