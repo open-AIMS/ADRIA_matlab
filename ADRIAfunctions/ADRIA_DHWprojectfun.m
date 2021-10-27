@@ -1,9 +1,10 @@
 function DHWdisttime = ADRIA_DHWprojectfun(tf,nsites,mdhwdist0,sdhwdist0,dhwmax25,RCP,wb1,wb2)
-% Generates time sequence of Degree Heating Weeks for all sites
+% Generates time sequence of Degree Heating Weeks for all sites.
+% Uses the weibull distribution.
 %
 % Inputs: 
 %     tf        : int, number of time steps to generate
-%     nsites    : int, number of sites to generate time sequence for
+%     nsites    : int, number of sites to generate time sequence for [now unused - derived from shape of mdhwdist]
 %     mdhwdist0 : float, mean of DHW distribution
 %     sdhwdist0 : float, standard deviation of DHW distribution
 %     dhwmax25  : float, Maximum DHW at year 2025
@@ -13,7 +14,8 @@ function DHWdisttime = ADRIA_DHWprojectfun(tf,nsites,mdhwdist0,sdhwdist0,dhwmax2
 %
 % Outputs:
 %     DHWdisttime : 
-%         2D table of (timestep, nsites) indicating DHWs for each site
+%         2D table of shape (tf, nsites) indicating DHWs for each site
+%         across time
 
 % RCP heatrates
 if RCP == 26
