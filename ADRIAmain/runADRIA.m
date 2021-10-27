@@ -154,12 +154,13 @@ for sim = 1:interv.sims
 
     % container for coral cover and total coral cover
     Cov = zeros(params.tf, params.nspecies, nsites, ninter);
-    dCovTot = zeros(nsites, ninter);
+    % dCovTot = zeros(nsites, ninter);
 
     % containers for seeding, shading and cooling
     nprefseed = zeros(params.tf, ninter);
     nprefshade = zeros(params.tf, ninter);
-    nprefcool = zeros(params.tf, ninter);
+    % nprefcool = zeros(params.tf, ninter);
+    
     prefseedsites = []; %set the list of preferred seeding sites to empty
     prefshadesites = []; %set the list of preferred shading sites to empty
     prioritysites = []; %set the list of priority sites to empty
