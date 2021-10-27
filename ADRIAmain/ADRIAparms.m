@@ -1,8 +1,14 @@
 function [params, parms] = ADRIAparms(Interv)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%% ADRIA parameters %%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Create structs with default parameter values for ADRIA
+%
+% Notes:
+% Values for distribution of degree heating weeks come from [1].
+%
+% References
+% 1. Lough, J.M., Anderson, K.D. and Hughes, T.P. (2018) 
+%        'Increasing thermal stress for tropical coral reefs: 1871–2017',
+%        Scientific Reports, 8(1), p. 6079. 
+%        doi: 10.1038/s41598-018-24530-9.
 
 % This is the list of parameters and values used in most of ADRIA.
 % See ReadMe files for more descriptions and explanations
