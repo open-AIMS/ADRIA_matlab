@@ -41,8 +41,11 @@ criteria_weights = criteriaWeights();
 %  3 = VIKOR 
 alg_ind = 1;
 
+tic
 reef_condition_metrics = runADRIA(interventions, criteria_weights, alg_ind);
+tmp = toc;
 
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N), " sims (", num2str(tmp/N), " seconds per run)"))
 
 %% Analysis Example
 
