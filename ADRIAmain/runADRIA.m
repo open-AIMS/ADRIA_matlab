@@ -134,6 +134,12 @@ wtpredecseed = crit_weights(:, 7); % weight for the importance of seeding sites 
 wtpredecshade = crit_weights(:, 8); % weight for the importance of shading sites that are predecessors of priority reefs
 risktol = crit_weights(:, 9); % risk tolerance
 
+%% Set up structure for dMCDA
+dMCDA_vars = struct('nsites', nsites, 'nsiteint', params.nsiteint, 'prioritysites', [], ...
+    'strongpred', strongpred, 'centr', SiteRanks.C1, 'damprob', 0, 'heatstressprob', 0, ...
+    'sumcover', 0, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+    'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+
 % loop though number of simulations for each intervention including the counterfactual
 for sim = 1:interv.sims
 
@@ -208,8 +214,7 @@ for sim = 1:interv.sims
         for tstep = 2:tf %tf is time final
             %TP = squeeze(TPdata(:,:,Env(tstep,sim)));
             past_DHW_stress = dhwdisttime(tstep-1, :, sim); %call last year's DHWs (heat stress)
-            % stresspast = struct('DHWpast', past_DHW_stress); %generate structure for past year's stress to use in function
-            [LP1, LP2, LP3, LP4] = ADRIA_larvalprod(tstep, parms, past_DHW_stress, ...
+            [LP1, LP2, LP3, LP4] = ADRIA_larvalprod(tstep, parms.assistadapt, parms.natad, past_DHW_stress, ...
                 params.LPdhwcoeff, params.DHWmaxtot, params.LPDprm2); %larval productivity ...
 
             % for each species, site and year as a function of past heat exposure
@@ -236,33 +241,28 @@ for sim = 1:interv.sims
 
             %% Setup MCDA before bleaching season
             % Factor 1: digraph centrality based on connectivity
-
             CovTot(tstep, :) = sum(Cov(tstep-1, :, :, I), 2); %sums over species, second index becomes sites
-            centr = SiteRanks.C1;
 
             % Factor 2:
-
             dam = wavedisttime(tstep, :, sim)'; %probability of coral damage from waves used as criterion in site selection
-            damprob = struct('dam', dam);
 
             % Factor 3:
             heatstress = dhwdisttime(tstep, :, sim)'; %heat stress used as criterion in site selection
-            heatstressprob = struct('heatstress', heatstress);
 
             % Factor 4: Coral state
             covtott = CovTot(tstep, :)'; %total coral cover used as criterion in site selection
-            sumcover = struct('covtott', covtott);
-
-            %% Set up structure for dDCMA
-            DCMAvars = struct('nsites', nsites, 'nsiteint', params.nsiteint, 'prioritysites', prioritysites, ...
-                'strongpred', strongpred, 'centr', centr, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
-                'sumcover', sumcover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
-                'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+            
+            %% Update values for dMCDA
+            % DCMAvars.centr = centr
+            tmp_dMCDA_vars = dMCDA_vars;
+            tmp_dMCDA_vars.damprob = dam;
+            tmp_dMCDA_vars.heatstressprob = heatstress;
+            tmp_dMCDA_vars.sumcover = covtott;
+            tmp_dMCDA_vars.prioritysites = prioritysites;
 
             %% Select preferred intervention sites based on criteria (heuristics)
-
             if strategy == 1 % guided
-                [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(DCMAvars, alg_ind); % site selection function for intervention deployment
+                [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(tmp_dMCDA_vars, alg_ind); % site selection function for intervention deployment
                 nprefseed(tstep, I) = nprefseedsites; % number of preferred seeding sites
                 nprefshade(tstep, I) = nprefshadesites; % number of preferred shading sites
             elseif strategy == 0 % unguided deployment
