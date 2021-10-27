@@ -49,10 +49,10 @@ catch
     proj.Name = "ADRIA";
 
     % Add project directories and files
-    addpath(proj, './ADRIAfunctions');
-    addpath(proj, './ADRIAmain');
-    addpath(proj, './examples');
-    addpath(proj, './Inputs');
+    addPath(proj, './ADRIAfunctions');
+    addPath(proj, './ADRIAmain');
+    addPath(proj, './examples');
+    addPath(proj, './Inputs');
 end
 
 
