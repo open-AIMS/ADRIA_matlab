@@ -37,15 +37,26 @@ end
 try
     % For MATLAB 2021a
     proj = matlab.project.createProject("Name", "ADRIA", "Folder", pwd);
+    
+    % Add project directories and files
+    proj.addFolderIncludingChildFiles('./ADRIAfunctions');
+    proj.addFolderIncludingChildFiles('./ADRIAmain');
+    proj.addFolderIncludingChildFiles('./examples');
+    proj.addFolderIncludingChildFiles('./Inputs');
 catch
     % Try older approach if any errors are encountered
     proj = matlab.project.createProject(pwd);
     proj.Name = "ADRIA";
+
+    % Add project directories and files
+    addpath(proj, './ADRIAfunctions');
+    addpath(proj, './ADRIAmain');
+    addpath(proj, './examples');
+    addpath(proj, './Inputs');
 end
 
 
-% Add project directories and files
-proj.addFolderIncludingChildFiles('./ADRIAfunctions');
-proj.addFolderIncludingChildFiles('./ADRIAmain');
-proj.addFolderIncludingChildFiles('./examples');
-proj.addFolderIncludingChildFiles('./Inputs');
+
+
+
+
