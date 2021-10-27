@@ -66,7 +66,7 @@ function reef_condition_metrics = runADRIA(interv, CrtWts, alg_ind)
 % much (DHW equivalents), whether to use an informed (zero, 0) or and informed (1) strategy,
 % and the risk tolerance of the decision maker.
 
-[IT, ~] = InterventionTable(Interv); %calls function that builds intervention table, ...
+[IT, ~] = InterventionTable(interv); %calls function that builds intervention table, ...
 ninter = size(IT, 1);
 % which controls what interventions to run and and what levels, etc
 
@@ -207,9 +207,9 @@ parfor sim = 1:interv.sims
         %% Loop for time steps
         for tstep = 2:tf %tf is time final
             %TP = squeeze(TPdata(:,:,Env(tstep,sim)));
-            DHWpast = dhwdisttime(tstep-1, :, sim); %call last year's DHWs (heat stress)
-            stresspast = struct('DHWpast', DHWpast); %generate structure for past year's stress to use in function
-            [LP1, LP2, LP3, LP4] = ADRIA_larvalprod(tstep, parms, stresspast, ...
+            past_DHW_stress = dhwdisttime(tstep-1, :, sim); %call last year's DHWs (heat stress)
+            % stresspast = struct('DHWpast', past_DHW_stress); %generate structure for past year's stress to use in function
+            [LP1, LP2, LP3, LP4] = ADRIA_larvalprod(tstep, parms, past_DHW_stress, ...
                 params.LPdhwcoeff, params.DHWmaxtot, params.LPDprm2); %larval productivity ...
 
             % for each species, site and year as a function of past heat exposure
