@@ -34,7 +34,6 @@ N =size(CultES,3);% number of rows in the intervention table
 
 %%  Identifying Goldilocks sites (disabled here)
 
-% %nlowexpsites = 10;
 % figshow = 0;
 % lowexpsites = ADRIA_lowexp_sites(nlowexpsites,swh_array,resdhwsites,figshow)
 %% Display distributions across interventions
