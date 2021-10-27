@@ -30,14 +30,21 @@ elseif RCP == 85
     heatrate = 1.5;
 end
 
-DHW = ones(tf,nsites); %initialise
-for t = 1:tf
-    wblsample = wblrnd(wb1,wb2,1); % sample from under the maxDHW curve using the weibull distribution
-    wblsample(wblsample>1) = 1;
-    DHW(t,:) = wblsample*((dhwmax25 + normrnd(mdhwdist0,sdhwdist0))+heatrate*t);
-end
+DHWdisttime = min(wblrnd(wb1, wb2, tf, 1), 1.0) ...
+    .* (dhwmax25 + normrnd(repmat(mdhwdist0, tf, 1), repmat(sdhwdist0, tf, 1))...
+    + heatrate*(1:tf)');  % tf, nsites
+DHWdisttime(DHWdisttime < 0) = 0;
 
-DHW(DHW<0) = 0; 
-DHWdisttime = DHW;
+% Below should be the equivalent of the above in a straight loop
+% DHW = ones(tf,nsites); % initialise
+% 
+% for t = 1:tf
+%     wblsample = wblrnd(wb1,wb2,1); % sample from under the maxDHW curve using the weibull distribution
+%     wblsample(wblsample>1) = 1;
+%     DHW(t,:) = wblsample*((dhwmax25 + normrnd(mdhwdist0,sdhwdist0))+heatrate*t);
+% end
+% 
+% DHW(DHW<0) = 0; 
+% DHWdisttime = DHW;
 
 end %function
