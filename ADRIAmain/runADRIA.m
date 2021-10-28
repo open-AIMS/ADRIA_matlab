@@ -1,4 +1,4 @@
-function reef_condition_metrics = runADRIA(Interv, CrtWts, alg_ind)
+function reef_condition_metrics = runADRIA(Interv, CrtWts, alg_ind, out_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -11,7 +11,7 @@ function reef_condition_metrics = runADRIA(Interv, CrtWts, alg_ind)
 %                  - 1, Order ranking
 %                  - 2, TOPSIS
 %                  - 3, VIKOR
-%
+%   out_ind : indicates number of coral metric outputs (1-4)
 % Output:
 %    reef_condition_metrics : struct,
 %                                 - TC
@@ -135,7 +135,7 @@ wtpredecshade = CrtWts(:, 8); %weight for the importance of shading sites that a
 risktol = CrtWts(:, 9); %risk tolerance
 
 % loop though number of simulations for each intervention including the counterfactual
-parfor sim = 1:Interv.sims
+for sim = 1:Interv.sims
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PREPARE for and start INTERVENTIONS
@@ -327,13 +327,16 @@ end % sims
 % total cover (TC), covers of the three goups (C), evenness (E), and structural complexity (S).
 % Note that S needs work: needs to be expressed as a function of coral group
 % and size-frequency distribution.
-[TC, C, E, S] = ReefConditionMetrics(covsim);
+
+% only consider total coral cover for optimisation (for now)
+% TC
+reef_condition_metrics = ReefConditionMetrics(covsim,out_ind);
 
 % seedlog and shadelog are omitted for now
-reef_condition_metrics = struct('TC', TC, ...
-                                'C', C, ...
-                                'E', E, ...
-                                'S', S);
+%reef_condition_metrics = struct('TC', TC, ...
+%                                 'C', C, ...
+%                                 'E', E, ...
+%                                 'S', S);
 
 
 end

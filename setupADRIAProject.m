@@ -46,13 +46,13 @@ try
 catch
     % Try older approach if any errors are encountered
     proj = matlab.project.createProject(pwd);
-    proj.Name = "ADRIA";
+    proj.Name = 'ADRIA';
 
-    % Add project directories and files
-    addPath(proj, './ADRIAfunctions');
-    addPath(proj, './ADRIAmain');
-    addPath(proj, './examples');
-    addPath(proj, './Inputs');
+     % Add project directories and files
+    proj.addFolderIncludingChildFiles('./ADRIAfunctions');
+    proj.addFolderIncludingChildFiles('./ADRIAmain');
+    proj.addFolderIncludingChildFiles('./examples');
+    proj.addFolderIncludingChildFiles('./Inputs');
 end
 
 
