@@ -277,14 +277,14 @@ for sim = 1:interv.sims
                 if ismember(site, prefshadesites) == 1 && tstep <= shadeyears % if the site in the loop equals a preferred shading site
                     dhw = dhwdisttime(tstep, site, sim) - srm; % then lower DHW according to SRM level
                     dhw(dhw < 0) = 0; % but don't lower to negative
-                    Sbl = 1 - ADRIA_bleachingmortalityfun(tstep, parms, dhw)'; %survivors from bleaching event
+                    Sbl = 1 - ADRIA_bleachingMortality(tstep, parms, dhw)'; %survivors from bleaching event
                     Sw = 1 - mwaves(tstep, :, site, sim)'; % survivors from wave damage
                     Yin1(:, site) = Yout(tstep-1, :, site)' .* Sbl .* Sw; % those survival rates are used to adjust overall coral survival
                     Yshade(site) = srm; % log the site as shaded
                     % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
                 elseif ismember(site, prefshadesites) == 0 || tstep > shadeyears %if the site in the loop is not a preferred shading site
                     dhw = dhwdisttime(tstep, site, sim);
-                    Sbl = 1 - ADRIA_bleachingmortalityfun(tstep, parms, dhw)';
+                    Sbl = 1 - ADRIA_bleachingMortality(tstep, parms, dhw)';
                     Sw = 1 - mwaves(tstep, :, site, sim)';
                     Yin1(:, site) = Yout(tstep-1, :, site)' .* Sbl .* Sw;
                     Yshade(site) = 0; % log the site as not shaded
