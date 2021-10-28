@@ -141,7 +141,7 @@ dMCDA_vars = struct('nsites', nsites, 'nsiteint', params.nsiteint, 'prioritysite
     'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
 
 % loop though number of simulations for each intervention including the counterfactual
-for sim = 1:interv.sims
+parfor sim = 1:interv.sims
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PREPARE for and start INTERVENTIONS
@@ -277,19 +277,23 @@ for sim = 1:interv.sims
                 if ismember(site, prefshadesites) == 1 && tstep <= shadeyears % if the site in the loop equals a preferred shading site
                     dhw = dhwdisttime(tstep, site, sim) - srm; % then lower DHW according to SRM level
                     dhw(dhw < 0) = 0; % but don't lower to negative
-                    Sbl = 1 - ADRIA_bleachingMortality(tstep, parms, dhw)'; %survivors from bleaching event
-                    Sw = 1 - mwaves(tstep, :, site, sim)'; % survivors from wave damage
-                    Yin1(:, site) = Yout(tstep-1, :, site)' .* Sbl .* Sw; % those survival rates are used to adjust overall coral survival
                     Yshade(site) = srm; % log the site as shaded
                     % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
                 elseif ismember(site, prefshadesites) == 0 || tstep > shadeyears %if the site in the loop is not a preferred shading site
                     dhw = dhwdisttime(tstep, site, sim);
-                    Sbl = 1 - ADRIA_bleachingMortality(tstep, parms, dhw)';
-                    Sw = 1 - mwaves(tstep, :, site, sim)';
-                    Yin1(:, site) = Yout(tstep-1, :, site)' .* Sbl .* Sw;
                     Yshade(site) = 0; % log the site as not shaded
                     % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
                 end
+                
+                % survivors from bleaching event
+                Sbl = 1 - ADRIA_bleachingMortality(tstep, parms, dhw)';
+                
+                % survivors from wave damage
+                Sw = 1 - mwaves(tstep, :, site, sim)';
+                
+                % those survival rates are used to adjust overall coral 
+                % survival
+                Yin1(:, site) = Yout(tstep-1, :, site)' .* Sbl .* Sw;
 
                 if ismember(site, prefseedsites) == 1 && tstep <= seedyears %if the site in the loop equals a preferred seeding site
                     Yin1(2, site) = Yin1(2, site) + seed1; % seed enhanced corals of group 2
