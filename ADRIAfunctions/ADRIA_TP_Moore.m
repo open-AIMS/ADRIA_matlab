@@ -11,6 +11,7 @@ function [TPdata,SiteRanks,strongpred,nsites] =  ADRIA_TP_Moore(con_cutoff)
 %   nsites: number of sites
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+warning("Use of `ADRIA_TP_Moore()` is deprecated. Use `ADRIA_TP(filename, con_cutoff)` instead. Example: ADRIA_TP('MooreTPmean.xlsx', 0.1)")
 
 %% Load Moore sites location data
 F0 = readtable('MooreSites.xlsx', 'PreserveVariableNames',true);
