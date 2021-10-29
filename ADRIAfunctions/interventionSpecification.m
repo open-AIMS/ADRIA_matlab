@@ -1,4 +1,4 @@
-function [interventions] = intervention_specification(varargin)
+function [interventions] = interventionSpecification(varargin)
 % Create intervention struct with specified values.
 % Uses default values if not specified.
 % 
@@ -21,7 +21,7 @@ function [interventions] = intervention_specification(varargin)
 %   interventions : struct holding default/modified intervention values
 %
 % Usage example:
-% interv = intervention_specification(Guided=1, PrSites=3, sims=10)
+% interv = interventionSpecification(Guided=1, PrSites=3, sims=10)
 
 interventions = struct('Guided', [0,1], ...
                        'PrSites', 3, ...

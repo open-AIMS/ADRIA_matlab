@@ -18,7 +18,8 @@ rng(101)
 
 
 % Specify options above by name to change settings
-interventions = intervention_specification(sims=8);
+N = 10;
+interventions = interventionSpecification(sims=N);
 
 % Set default criteria weighting
 % wave_stress = 1  % wave stress avoidance
@@ -31,8 +32,8 @@ interventions = intervention_specification(sims=8);
 % shade_priority = 0      % Shade at strongest sources for priority sites
 % deployed_coral_risk_tol = 1  % Risk Tolerance wrt Deployed Corals
 
-% Settings can be changed as with intervention_specification()
-criteria_weights = CriteriaWeights();
+% Settings can be changed as with interventionSpecification()
+criteria_weights = criteriaWeights();
 
 % Algorithm choice
 %  1 = OrderRanking
@@ -40,8 +41,11 @@ criteria_weights = CriteriaWeights();
 %  3 = VIKOR 
 alg_ind = 1;
 
+tic
 reef_condition_metrics = runADRIA(interventions, criteria_weights, alg_ind);
+tmp = toc;
 
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N), " sims (", num2str(tmp/N), " seconds per run)"))
 
 %% Analysis Example
 
