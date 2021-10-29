@@ -15,9 +15,9 @@ alg_ind = 1;
 param_tbl = struct2table(params);
 ecol_tbl = struct2table(ecol_params);
 
-param_tbl = repmat(param_tbl, ninter);
-ecol_tbl = repmat(ecol_tbl, ninter);
-criteria_weights = repmat(criteria_weights, ninter);
+param_tbl = repmat(param_tbl, ninter, 1);
+ecol_tbl = repmat(ecol_tbl, ninter, 1);
+criteria_weights = repmat(criteria_weights, ninter, 1);
 
 %% Setup output
 % Create temporary struct
