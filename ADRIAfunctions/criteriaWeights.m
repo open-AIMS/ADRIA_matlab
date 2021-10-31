@@ -1,4 +1,4 @@
-function criteria_weights = CriteriaWeights(varargin)
+function criteria_weights = criteriaWeights(varargin)
 % Create struct holding criteria weights
 %
 % Outputs:
