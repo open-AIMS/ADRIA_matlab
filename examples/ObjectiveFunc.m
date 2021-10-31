@@ -1,5 +1,15 @@
 function av_TC = ObjectiveFunc(x,a,b,c,d,CrtWts)
-% x = [Guided,Seed1,Seed2,SRM,Aadpt,Natad,RCP]
+% objective function gives total coral cover TC as single output averaged
+% over sites and time.
+% Input : x - x = [Seed1,Seed2,SRM,Aadpt,Natad,RCP]
+%         a - alg_ind
+%         b - PrSites
+%         c - RCP
+%         d - d = 1 indicates single reef metric output for ADRIA
+% Output : av_TC - averaged total coral cover, scalar
+
+
+% set up intervention structure
 Interv = struct('Guided', 1, ...
                        'PrSites',b , ...
                        'Seed1', x(1), ...
@@ -10,7 +20,9 @@ Interv = struct('Guided', 1, ...
                        'Seedyrs', 10, ...
                        'Shadeyrs', 1, ...
                        'sims', 20,...
-                       'RCP', c);           
+                       'RCP', c);   
+% run ADRIA to get TC output
 reef_condition_metrics = runADRIA(Interv, CrtWts, a,d);
+% average over sites, time
 av_TC = mean(reef_condition_metrics,'all');
 end
