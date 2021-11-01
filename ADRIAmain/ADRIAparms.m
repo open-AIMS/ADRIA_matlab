@@ -25,17 +25,17 @@ params.years = 1:params.tf; % years of interest for analyses - change to yroi: y
 %% Environmental parameters
 
 params.beta = [1, 3]; % beta parameters for wave disturbance
-params.dhwmax25 = 7; % dhwmax at year 2025
+params.dhwmax25 = 7; % dhwmax at year 2025.  NOTE: all warming simulations will change with new common DHW input for MDS team  
 params.DHWmaxtot = 50; % max assumed DHW for all scenarios
 params.wb1 = 0.55; % weibull parameter 2 for DHW distributions based on Lough et al 2018
 params.wb2 = 2.24; % weibull parameter 1 for DHW distributions based on Lough et al 2018
 
 %% Ecological parameters
 
-params.basecov1 = 0.40; % initial cover of coral species 1
-params.basecov2 = 0.00; % initial cover of coral species 2
-params.basecov3 = 0.15; % initial cover of coral species 3
-params.basecov4 = 0.15; % initial cover of coral species 4
+params.basecov1 = 0.40; % initial cover of coral species 1. Acropora unenhanced 
+params.basecov2 = 0.00; % initial cover of coral species 2. Acropora enhanced
+params.basecov3 = 0.15; % initial cover of coral species 3  Other coral unenhanced
+params.basecov4 = 0.15; % initial cover of coral species 4  Other coral enhanced
 %params.basecov5 = 0.00; % initial cover of rubble
 
 params.corals = [1, 2, 3, 4]; % species of live corals
