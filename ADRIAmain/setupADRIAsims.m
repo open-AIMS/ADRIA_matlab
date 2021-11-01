@@ -1,4 +1,4 @@
-function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
+function [wavedisttime, dhwdisttime] = setupADRIAsims(interv,params,nsites)
     % Set up ADRIA simulations.
     % 
     % This setup script does one or two things.
@@ -26,7 +26,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
     swh100 = table2array(swhtbl(:,13));  % swhs within the 100 percentile (always) 
     waveexp90 = swh90/(max(swh100)); % routine wave exposure rel to max 
     mriskwaves = swh90/(7*max(swh90));  % placeholder conversion to mortality risks based on Madin paper
-    wavedisttime = 0.05*randn(params.tf,nsites,Interv.sims)+ waveexp90'; % projected spatial, 
+    wavedisttime = 0.05*randn(params.tf,nsites,interv.sims)+ waveexp90'; % projected spatial, 
     % temporal and sims distribution of wave exposures assuming 5% variation ? very much a placeholder until we get real data.
     
     wavedisttime(wavedisttime>1) = 1; % constrain below unity
@@ -39,9 +39,9 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
     z = F.z; % bathymetry
     mdhwdist0 = mean(F.resdhwsites(:,5:7),2)';
     sdhwdist0 =std(F.resdhwsites(:,5:7),0,2)';
-    dhwdisttime = zeros(params.tf,nsites,Interv.sims);
+    dhwdisttime = zeros(params.tf,nsites,interv.sims);
     
-    for sim = 1:Interv.sims
+    for sim = 1:interv.sims
         dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,nsites,mdhwdist0,...
             sdhwdist0,params.dhwmax25,params.RCP,params.wb1,params.wb2);
     end
