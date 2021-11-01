@@ -6,9 +6,10 @@ N = 20;
 p_sel = table;
 for p = 1:height(inter_opts)
     curr_row = inter_opts.option_bounds{p};
-    try
+    
+    if inter_opts.ptype{p} ~= "float"
         selection = randi(curr_row, N, 1);
-    catch
+    else
         a = curr_row(1);
         b = curr_row(2);
         selection = (b - a) .* rand(N, 1, 'double');
