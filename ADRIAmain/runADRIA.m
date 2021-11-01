@@ -1,4 +1,4 @@
-function reef_condition_metrics = runADRIA(interv, crit_weights, alg_ind, out_ind)
+function reef_condition_metrics = runADRIA(interv, crit_weights, params, ecol_parms, alg_ind, out_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,12 +74,7 @@ ninter = size(IT, 1);
 %% Retrieve RCP scenario
 % RCP 45, 60, 6085, and 85
 % 6085 refers to RCP 7 RCP
-
-RCP = interv.RCP;
-
-%% LOAD parameter file
-
-[params, parms0] = ADRIAparms(interv); %environmental and ecological parameter values etc
+% RCP = params.RCP;
 
 %% RUN SETUP functions
 
@@ -173,7 +168,7 @@ parfor sim = 1:interv.sims
     % loop through each permutation of interventions selected
     for I = 1:ninter
 
-        parms = parms0;
+        parms = ecol_parms;
         strategy = IT(I, 1); %0 is random, 1 is guided
         pgs = IT(I, 2); % group of priority sites
         seed1 = IT(I, 3); %species seeded - here the sensitive Acropora
@@ -333,9 +328,7 @@ end % sims
 % Note that S needs work: needs to be expressed as a function of coral group
 % and size-frequency distribution.
 
-% only consider total coral cover for optimisation (for now)
-% TC
-[TC, C, E, S] = ReefConditionMetrics(covsim);  % out_ind
+[TC, C, E, S] = reefConditionMetrics(covsim);
 
 % seedlog and shadelog are omitted for now
 reef_condition_metrics = struct('TC', TC, ...

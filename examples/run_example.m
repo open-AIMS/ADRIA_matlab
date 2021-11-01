@@ -41,8 +41,13 @@ criteria_weights = criteriaWeights();
 %  3 = VIKOR 
 alg_ind = 1;
 
+%% LOAD parameter file
+[params, ecol_parms] = ADRIAparms(); % environmental and ecological parameter values etc
+
+%% Run ADRIA
+
 tic
-reef_condition_metrics = runADRIA(interventions, criteria_weights, alg_ind);
+reef_condition_metrics = runADRIA(interventions, criteria_weights, params, ecol_parms, alg_ind);
 tmp = toc;
 
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N), " sims (", num2str(tmp/N), " seconds per run)"))
@@ -58,8 +63,10 @@ analyseADRIAresults1(ecosys_results);
 
 %% Save results to file
 
+% TODO: Extract RCP setting from `params` via ADRIAparms
+
 % Generate common file prefix
-filename = ADRIA_resultFilePrefix(interventions.RCP, alg_ind);
+filename = ADRIA_resultFilePrefix(params.RCP, alg_ind);
 
 % Save reef results
 ADRIA_saveResults(reef_condition_metrics, strcat(filename, '_reef'));
