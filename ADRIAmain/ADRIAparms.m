@@ -1,4 +1,4 @@
-function [params, ecol_params] = ADRIAparms(interv)
+function [params, ecol_params] = ADRIAparms()
 % Create structs with default parameter values for ADRIA
 %
 % Notes:
@@ -24,7 +24,7 @@ params.psgC = 1:26; % prioritysite group C
 params.nspecies = 4; % number of groups modelled in the current version. If the community model is replaced with a population model, then this becomes 1.
 params.ncoralsp = 4; % number of coral species modelled in the current version. If the community model is replaced with a population model, then this becomes 1.
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
-params.ncrit = length(fieldnames(interv)); % number of columns used in the intervention table
+% params.ncrit = length(fieldnames(interv)); % number of columns used in the intervention table
 params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
 params.RCP = 60;  % RCP scenario to use
 
