@@ -38,9 +38,9 @@ name = [
 ];
 
 defaults = {
-    [0,1];  % Guided
+    0;  % Guided
     3;  % PrSites
-    [0, 0.0005, 0.0010];  % Seed1
+    0.0005;  % Seed1
     0;  % Seed2
     0;  % SRM
     [6, 12];  % Aadpt
@@ -54,12 +54,12 @@ defaults = {
 
 % TODO: lower and upper bounds are dummy values and need to be replaced!
 lower_bound = {
-    [0, 0];  % Guided
+    0;  % Guided
     1;  % PrSites
-    [0, 0.01, 0.05];  % Seed1
-    0;  % Seed2
+    0.0;  % Seed1
+    0.0;  % Seed2
     0;  % SRM
-    [1, 6];  % Aadpt
+    6;  % Aadpt
     0.01;  % Natad
     10;  % Seedyrs
     1;  % Shadeyrs
@@ -67,13 +67,13 @@ lower_bound = {
 };
 
 upper_bound = {
-    [1, 1];  % Guided
+    1;  % Guided
     3;  % PrSites
-    [0, 0.05, 0.1];  % Seed1
-    1;  % Seed2
+    0.0010;  % Seed1
+    1.0;  % Seed2
     1;  % SRM
-    [8, 16];  % Aadpt
-    0.05;  % Natad
+    12;  % Aadpt
+    0.1;  % Natad
     15;  % Seedyrs
     5;  % Shadeyrs
     % 85  % RCP
@@ -82,8 +82,8 @@ upper_bound = {
 ptype = [
     "categorical";
     "categorical";
-    "categorical";
-    "categorical";
+    "float";
+    "float";
     "categorical";
     "categorical";
     "float";
