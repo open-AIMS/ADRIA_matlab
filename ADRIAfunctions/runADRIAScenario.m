@@ -244,7 +244,7 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     end % tstep
     
     %% assign results
-    [TC, C, E, S] = ReefConditionMetrics(coral_cover);
+    [TC, C, E, S] = reefConditionMetrics(coral_cover);
 
     % seedlog and shadelog are omitted for now
     Y = struct('TC', TC, ...
