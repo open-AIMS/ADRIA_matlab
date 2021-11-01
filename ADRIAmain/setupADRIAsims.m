@@ -43,7 +43,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(Interv,params,nsites)
     
     for sim = 1:Interv.sims
         dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,nsites,mdhwdist0,...
-            sdhwdist0,params.dhwmax25,Interv.RCP,params.wb1,params.wb2);
+            sdhwdist0,params.dhwmax25,params.RCP,params.wb1,params.wb2);
     end
     dhwdisttime(dhwdisttime <=0) = 0;
     dhwdisttime(dhwdisttime > params.DHWmaxtot) = params.DHWmaxtot;

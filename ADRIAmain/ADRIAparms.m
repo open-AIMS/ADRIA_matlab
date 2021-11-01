@@ -26,6 +26,7 @@ params.ncoralsp = 4; % number of coral species modelled in the current version. 
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 params.ncrit = length(fieldnames(interv)); % number of columns used in the intervention table
 params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
+params.RCP = 60;  % RCP scenario to use
 
 %% Environmental parameters
 
