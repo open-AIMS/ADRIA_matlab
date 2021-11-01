@@ -1,8 +1,12 @@
 %% Parameter prep
-interventions = interventionSpecification(sims=10);
+mc_scenario_generation
+IT = table2array(converted_tbl);
+
+% interventions = interventionSpecification(sims=10);
+% [IT, ~] = interventionTable(interventions); %calls function that builds intervention table, ...
+
 criteria_weights = criteriaWeights();
-[params, ecol_params] = ADRIAparms(interventions); %environmental and ecological parameter values etc
-[IT, ~] = interventionTable(interventions); %calls function that builds intervention table, ...
+[params, ecol_params] = ADRIAparms(); %environmental and ecological parameter values etc
 ninter = size(IT, 1);
 alg_ind = 1;
 
