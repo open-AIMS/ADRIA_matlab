@@ -3,22 +3,21 @@
 %% Settings
 criteria_thr = 0.75;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
 COTS_outbreak_threshold = 0.2; 
-metrics = 3; %[1,3,4,5,6,7,8];  % see below for metrics implemented
+metrics = [1,3,4,5,6,7,8];  % see below for metrics implemented
 
-%% Structure of the ReefConditionIndex when completed here 
+%% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totcov: [448×85 single]
 %        coralevenness: [448×85 single]
 %           sheltervol: [448×85×6 double]
 %    coraljuv_relative: [448×85 single]
 %                  CCA: [448×85 single]
-%              COTSrel: [448×85 single]
-%                   MA: [448×85 single]
-%               rubble: [448×85 single]
+%         COTSrel_comp: [448×85 single]
+%              MA_comp: [448×85 single]
+%          rubble_comp: [448×85 single]
 %                reefs: [448×7 table]
 
 %% load reefmod data output file
 reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data file produce by ReefMod
-
 % Example structure for ReefMod
 %                  COTS_mantatow: [10×448×85 single]
 %          coral_cover_lost_COTS: [10×448×84×6 single]
@@ -74,47 +73,46 @@ rci.coraljuv = sum(reefmod_data2.nb_coral_juv,[3:4]);  %calculate sum of coral j
 maxcoraljuv = max(rci.coraljuv,[],'All'); %find max juvenile density 
 rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute juvenile numbers to relative measures
 
-%% Estimate shelter volume
+%% Estimate shelter volume based on coral group, colony size and cover 
 allcorals(:,:,:,1:4) = reefmod_data2.nb_coral_juv;
 allcorals(:,:,:,5:17) = reefmod_data2.nb_coral_adol;
 allcorals(:,:,:,18:26) = reefmod_data2.nb_coral_adult;
-shvol = colony_sheltervolume_from_reefmod;
+shvol = colony_sheltervolume_from_reefmod;  %call function that converts coral groups and sizes to colony shelter volume
 for sp = 1:6
-    for sizebin = 1:26
+    for sizebin = 1:26  %26 coral size classes in ReefMod
         shvolrel(:,:,sp,sizebin) = allcorals(:,:,sp,sizebin).*shvol(sp,sizebin);
     end
 end
 sumshv = squeeze(sum(shvolrel,[4,5]));
 shvmax = max(sumshv,[],'All');
 rci.sheltervol = sumshv./shvmax;  %shelter volume relative to max
-%% Amalgamate the three types of macroalgae into one valiable and convert to proportion
-rci.MA(:,:,1) = reefmod_data2.macroEncrustFleshy; 
-rci.MA(:,:,2) = reefmod_data2.macroTurf; 
-rci.MA(:,:,3) = reefmod_data2.macroUprightFleshy; 
-rci.MA = squeeze(sum(rci.MA, 3))/100; %sum across algal types and reduce to three dimensions
+%% Amalgamate the three types of macroalgae into one variable and convert to proportion
+reefmod_data2.MA(:,:,1) = reefmod_data2.macroEncrustFleshy; 
+reefmod_data2.MA(:,:,2) = reefmod_data2.macroTurf; 
+reefmod_data2.MA(:,:,3) = reefmod_data2.macroUprightFleshy; 
+reefmod_data2.MA = squeeze(sum(reefmod_data2.MA, 3)); %sum across algal types and reduce to three dimensions
 
 %% Crustose coralline algae (CCAs)
 %YM notes
 %CCA is different than nongrazable. Nongrazable is a mix of sand/sponges, ie substrates that cannot be colonized by corals or algae.
 %CCA can be obtained as 100 - all corals - all algae - nongrazable. Don't include rubble here because it's not treated as a substrate.
-rci.CCA = 1 - rci.totcov - reefmod_data2.nongrazable'/100 - rci.MA;
+rci.CCA = 1 - rci.totcov - reefmod_data2.nongrazable'/100 - reefmod_data2.MA;
 rci.CCA(rci.CCA<0) = 0;
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
-rci.COTSrel = reefmod_data2.COTS_mantatow./COTS_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
-rci.COTSrel(rci.COTSrel<0) = 0;
-rci.COTSrel(rci.COTSrel>1) = 1;
+reefmod_data2.COTSrel = reefmod_data2.COTS_mantatow./COTS_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
+reefmod_data2.COTSrel(reefmod_data2.COTSrel<0) = 0;
+reefmod_data2.COTSrel(reefmod_data2.COTSrel>1) = 1;
 
 %% Convert COTS, macroalgae and rubble to their complementary values 
-rci.COTSrel = 1 - rci.COTSrel;
-rci.MA = 1 - rci.MA;
-rci.rubble = (100 - reefmod_data2.rubble)/100;
+rci.COTSrel_comp = 1 - reefmod_data2.COTSrel;  %complementary of COTS
+rci.MA_comp = (100 - reefmod_data2.MA)/100; %complementary of macroalgae
+rci.rubble_comp = (100 - reefmod_data2.rubble)/100; %complementary of rubble
 
 %% Add reefs to the structure, delete redundant fields, and reorganise
 rci.reefs = reefmod_data.reefs;
-rci = rmfield(rci,'coraljuv');
-rci = rmfield(rci,'covers');
-%rci = rmfield(rci,'coralevenness');
-fieldorder = {'totcov','coralevenness','sheltervol','coraljuv_relative','CCA','COTSrel', 'MA','rubble','reefs'};
+rci = rmfield(rci,'coraljuv'); %original field deleted as it's replaced with relative density of four size classes
+rci = rmfield(rci,'covers'); %original field deleted as it's replaced with derived metrics
+fieldorder = {'totcov','coralevenness','sheltervol','coraljuv_relative','CCA','COTSrel_comp', 'MA_comp','rubble_comp','reefs'};
 rci = orderfields(rci,fieldorder);
 
 %% Compare ReefMod data against reef condition criteria provided by expert elicitation process (questionnaire)
@@ -130,9 +128,9 @@ reefcondition = zeros(448,85);
                 rci.sheltervol(reef,t), ... 
                  rci.coraljuv_relative(reef,t), ...
                  rci.CCA(reef,t), ...
-                 rci.COTSrel(reef,t), ...
-                 rci.MA(reef,t), ...
-                 rci.rubble(reef,t)];
+                 rci.COTSrel_comp(reef,t), ...
+                 rci.MA_comp(reef,t), ...
+                 rci.rubble_comp(reef,t)];
             A = sum(M(metrics)> rci_crit(1,metrics),'omitnan')/numel(metrics);
             B = sum(M(metrics)> rci_crit(2,metrics),'omitnan')/numel(metrics);
             C = sum(M(metrics)> rci_crit(3,metrics),'omitnan')/numel(metrics);
@@ -152,15 +150,11 @@ reefcondition = zeros(448,85);
             end
         end
     end
-
-%mcond = squeeze(median(cond,1,'omitnan')); %average over simulations while ignoring nans
-
 %% Plot results 
 places = table2array(reefmod_data.reefs(:,3:5)); %extract lats and lons from ReefMod file
 lons = places(:,2);
 lats = places(:,1);
 reefarea = places(:,3);
-
 figure;
     tiledlayout(1,4,'TileSpacing','compact')
 for p = 1:4
