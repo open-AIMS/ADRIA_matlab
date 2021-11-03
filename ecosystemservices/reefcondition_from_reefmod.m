@@ -1,5 +1,21 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
+%% Settings
+criteria_thr = 0.75;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+COTS_outbreak_threshold = 0.2; 
+metrics = 3; %[1,3,4,5,6,7,8];  % see below for metrics implemented
+
+%% Structure of the ReefConditionIndex when completed here 
+%               totcov: [448×85 single]
+%        coralevenness: [448×85 single]
+%           sheltervol: [448×85×6 double]
+%    coraljuv_relative: [448×85 single]
+%                  CCA: [448×85 single]
+%              COTSrel: [448×85 single]
+%                   MA: [448×85 single]
+%               rubble: [448×85 single]
+%                reefs: [448×7 table]
+
 %% load reefmod data output file
 reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data file produce by ReefMod
 
@@ -24,7 +40,6 @@ reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data fi
 %% We need to extract and convert as many of these mertics as we can such that they can inform the Reef Condition Metric (RCI)
 % The metrics we are particulartly interested here as direct outputs are flagged by a YES.
 % Derived metrics, or metrics that require further elicitation and data, are flagged with NO or NOT YET.
-
 % 1.	Relative coral cover            YES - as sum of relative covers for each group)
 % 2.	Evenness of  coral groups       YES - based on the evenness of the six groups)  
 % 3.	Coral species richness          NOT YET -  requires further analysis of expert data)
@@ -47,7 +62,6 @@ for k = 1:numel(field_names) % step through fields
     F = field_names{k}; %assign field names to new structure
     reefmod_data2.(F) = squeeze(mean(reefmod_data.(F),1)); %average over simulations and reduce to two dimensions
 end
-
 
 %% Calculate coral evenness
 rci.totcov = sum(reefmod_data2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
@@ -72,8 +86,7 @@ for sp = 1:6
 end
 sumshv = squeeze(sum(shvolrel,[4,5]));
 shvmax = max(sumshv,[],'All');
-rci.sheltervol = sumshv./(1/2*shvmax);  %assuming here that half of max is enough to represent very good 
-
+rci.sheltervol = sumshv./shvmax;  %shelter volume relative to max
 %% Amalgamate the three types of macroalgae into one valiable and convert to proportion
 rci.MA(:,:,1) = reefmod_data2.macroEncrustFleshy; 
 rci.MA(:,:,2) = reefmod_data2.macroTurf; 
@@ -87,7 +100,7 @@ rci.MA = squeeze(sum(rci.MA, 3))/100; %sum across algal types and reduce to thre
 rci.CCA = 1 - rci.totcov - reefmod_data2.nongrazable'/100 - rci.MA;
 rci.CCA(rci.CCA<0) = 0;
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
-rci.COTSrel = reefmod_data2.COTS_mantatow./0.3;%max(RMdata.COTS_mantatow,[],'All');
+rci.COTSrel = reefmod_data2.COTS_mantatow./COTS_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
 rci.COTSrel(rci.COTSrel<0) = 0;
 rci.COTSrel(rci.COTSrel>1) = 1;
 
@@ -109,9 +122,7 @@ F = readtable('ReefConditionCriteria'); %in ADRIA input files, note that evennes
 rci_crit = table2array(F(:,2:end));
 rci_crit(:,1:3) = rci_crit(:,1:3);
 reefcondition = zeros(448,85);
-
-ncriteria = [1,3,4,5,6,7,8];
-
+%Start loop for crieria vs metric comparisons
     for reef = 1:448
         for t = 1:85
             M = [rci.totcov(reef,t), ... 
@@ -122,21 +133,19 @@ ncriteria = [1,3,4,5,6,7,8];
                  rci.COTSrel(reef,t), ...
                  rci.MA(reef,t), ...
                  rci.rubble(reef,t)];
-            A = sum(M(ncriteria)> rci_crit(1,ncriteria),'omitnan')/numel(ncriteria);
-            B = sum(M(ncriteria)> rci_crit(2,ncriteria),'omitnan')/numel(ncriteria);
-            C = sum(M(ncriteria)> rci_crit(3,ncriteria),'omitnan')/numel(ncriteria);
-            D = sum(M(ncriteria)> rci_crit(4,ncriteria),'omitnan')/numel(ncriteria);
-            E = sum(M(ncriteria)> rci_crit(5,ncriteria),'omitnan')/numel(ncriteria);
-
-            thr = 1; %if sum of criteria is 75% of max, then criteria met
-            
-                if A >thr
+            A = sum(M(metrics)> rci_crit(1,metrics),'omitnan')/numel(metrics);
+            B = sum(M(metrics)> rci_crit(2,metrics),'omitnan')/numel(metrics);
+            C = sum(M(metrics)> rci_crit(3,metrics),'omitnan')/numel(metrics);
+            D = sum(M(metrics)> rci_crit(4,metrics),'omitnan')/numel(metrics);
+            E = sum(M(metrics)> rci_crit(5,metrics),'omitnan')/numel(metrics);
+           
+                if A > criteria_thr
                 reefcondition(reef,t) = 0.9; %representative of very good
-                 elseif B > thr && A < thr  
+                 elseif B > criteria_thr && A < criteria_thr
                 reefcondition(reef,t) = 0.7; %representative of good
-                elseif C > thr && A < thr && B < thr
+                elseif C > criteria_thr && A < criteria_thr && B < criteria_thr
                  reefcondition(reef,t) = 0.5; %representative of fair
-                 elseif D > thr && C < thr  && A < thr && B < thr
+                 elseif D > criteria_thr && C < criteria_thr  && A < criteria_thr && B < criteria_thr
                 reefcondition(reef,t) = 0.3; %representative of poor
                 else 
                 reefcondition(reef,t) = 0.1; %
