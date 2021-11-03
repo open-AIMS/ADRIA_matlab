@@ -39,7 +39,9 @@ criteria_weights = criteriaWeights();
 %  1 = OrderRanking
 %  2 = TOPSIS
 %  3 = VIKOR 
-alg_ind = 1;
+%  4 = Multi-Obj GA 
+
+alg_ind = 1;;
 
 tic
 reef_condition_metrics = runADRIA(interventions, criteria_weights, alg_ind);
