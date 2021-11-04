@@ -32,6 +32,10 @@ interventions = interventionSpecification(sims=N);
 % shade_priority = 0      % Shade at strongest sources for priority sites
 % deployed_coral_risk_tol = 1  % Risk Tolerance wrt Deployed Corals
 
+% set up ADRIA project
+% input path to project or nothing if project is in pwd
+ADRIAsetup('/Users/rosecrocker/Documents/GitHub/ADRIA_repo/')
+
 % Settings can be changed as with interventionSpecification()
 criteria_weights = criteriaWeights();
 
