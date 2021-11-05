@@ -3,7 +3,7 @@ function [TP_data, site_ranks, strongpred] =  ADRIA_TP(file, con_cutoff)
 % sites, level of centrality, and the strongest predecessor for each site.
 %
 % Inputs:
-%   file       : str, data file to load
+%   file       : str, path to data file to load
 %   con_cutoff : float, percent thresholds of max for weak connections in 
 %                network (defined in ADRIAparms.m)
 %
