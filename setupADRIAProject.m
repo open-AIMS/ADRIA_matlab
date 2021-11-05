@@ -52,12 +52,12 @@ catch
     addPath(proj, './ADRIAfunctions/ParamHandler');
 end
 
-% Note: Usually these would be grouped into sensible subfolders
+% Note: Ran into an issue organizing files into related "modules"
 %       e.g., 'ADRIAfunctions/ParamHandler'.
 %       The docs for `addFolderIncludingChildFiles` state that it will
 %       add subfolders to a project. In actuality it appears to add files 
 %       to the project details, but does not add these to the search path 
-%       so that defined functions  are not accessible
+%       so that defined functions are not accessible
 %       (at least for R2021a).
 %       This behavior differs from adding top-level directories.
 %       https://au.mathworks.com/help/matlab/ref/matlab.project.project.addfolderincludingchildfiles.html
