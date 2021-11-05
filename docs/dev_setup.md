@@ -32,3 +32,10 @@ Tests can be run with the following in the command window:
 >> runtests
 ```
 
+**Note:**
+
+Some changes will require the project to be rebuilt.
+
+In such cases, delete the `ADRIA.prj` file and the `resources` directory,
+and rerun `setupADRIAProject.m`
+
