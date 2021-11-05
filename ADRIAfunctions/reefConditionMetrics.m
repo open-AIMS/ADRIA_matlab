@@ -1,4 +1,4 @@
-function [TC,C,E,S] = ReefConditionMetrics(covsim)
+function [TC,C,E,S] = reefConditionMetrics(covsim)
 %
 % ADRIA Reef Condition Metrics as indicators of scope for ecosystem 
 % service provision
