@@ -82,7 +82,7 @@ ninter = size(IT, 1);
 [TPdata, SiteRanks, strongpred, nsites] = ADRIA_TP_Moore(params.con_cutoff); % con_cutoff filters out low connectivities
 
 % setup for the geographical setting including environmental input layers
-[wavedisttime, dhwdisttime] = setupADRIAsims(interv, params, nsites);
+[wavedisttime, dhwdisttime] = setupADRIAsims(interv.sims, params, nsites);
 
 %% Mortality projection from waves
 
