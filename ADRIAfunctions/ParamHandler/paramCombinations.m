@@ -1,5 +1,5 @@
 function result = paramCombinations(elements)
-% Generate distinct combinations
+% Generate distinct combinations of categorical parameter options
 %
 % Source:
 % https://au.mathworks.com/matlabcentral/answers/98191-how-can-i-obtain-all-possible-combinations-of-given-vectors-in-matlab#answer_107541
