@@ -108,7 +108,7 @@ this function maps this back to `A` or `B` for use with ADRIA.
 - converted : table, of selected parameter values mapped back to their actual values.
 
 See also:
-    [`interventionDetails()`](##interventionDetails()), [`criteriaDetails()`](##criteriaDetails())
+    [`interventionDetails()`](#interventiondetails), [`criteriaDetails()`](#criteriadetails)
 
 
 ## ADRIA_TP()
