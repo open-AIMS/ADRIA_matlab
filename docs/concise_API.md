@@ -2,7 +2,7 @@
 
 A non-exhaustive overview of high-level ADRIA functions.
 
-The functions documented below form the ADRIA API through which developers interact with the core ADRIA platform.
+The functions documented below form the core API through which developers interact with ADRIA.
 
 WARNING: These functions and accompanying documentation are still under development and their names, expected inputs, outputs, and usage may change.
 
