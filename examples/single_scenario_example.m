@@ -1,11 +1,13 @@
 %% Parameter prep
 mc_scenario_generation
-IT = table2array(converted_tbl);
+scenarios = table2array(converted_tbl);
+IT = scenarios(:, 1:9);
+criteria_weights(:, 10:end);  % need better way of separating values...
 
 % interventions = interventionSpecification(sims=10);
 % [IT, ~] = interventionTable(interventions); %calls function that builds intervention table, ...
 
-criteria_weights = criteriaWeights();
+% criteria_weights = criteriaWeights();
 [params, ecol_params] = ADRIAparms(); %environmental and ecological parameter values etc
 ninter = size(IT, 1);
 alg_ind = 1;
@@ -33,7 +35,7 @@ tmp_s.S = 0;
 Y = repmat(tmp_s, ninter, 1);
 
 %% setup for the geographical setting including environmental input layers
-[wave_scen, dhw_scen] = setupADRIAsims(interventions, params, nsites);
+[wave_scen, dhw_scen] = setupADRIAsims(interventions.sims, params, nsites);
 
 % TODO: Replace these with wave/DHW projection scenarios instead
 
