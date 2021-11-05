@@ -176,7 +176,7 @@ ninter = height(X, 1);
 alg_ind = 1;
 
 %% Set up result array
-Y = repmat(tmp_s, ninter, 1);
+Y = ... % some NxD array where N is no. of sims and D is no. of outputs
 
 %% Run simulations
 parfor i = 1:ninter
