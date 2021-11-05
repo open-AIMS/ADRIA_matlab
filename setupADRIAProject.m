@@ -37,26 +37,37 @@ end
 try
     % For MATLAB 2021a
     proj = matlab.project.createProject("Name", "ADRIA", "Folder", pwd);
+    proj.addPath(pwd);
     
-    % Add project directories and files
-    proj.addFolderIncludingChildFiles('./ADRIAfunctions');
-    proj.addFolderIncludingChildFiles('./ADRIAmain');
-    proj.addFolderIncludingChildFiles('./examples');
-    proj.addFolderIncludingChildFiles('./Inputs');
+    % see note below
+    proj.addPath('./ADRIAfunctions/ParamHandler');
 catch
+    disp("Trying older approach")
     % Try older approach if any errors are encountered
     proj = matlab.project.createProject(pwd);
     proj.Name = 'ADRIA';
-
-     % Add project directories and files
-    proj.addFolderIncludingChildFiles('./ADRIAfunctions');
-    proj.addFolderIncludingChildFiles('./ADRIAmain');
-    proj.addFolderIncludingChildFiles('./examples');
-    proj.addFolderIncludingChildFiles('./Inputs');
+    addPath(proj, pwd);
+    
+    % see note below
+    addPath(proj, './ADRIAfunctions/ParamHandler');
 end
 
+% Note: Usually these would be grouped into sensible subfolders
+%       e.g., 'ADRIAfunctions/ParamHandler'.
+%       The docs for `addFolderIncludingChildFiles` state that it will
+%       add subfolders to a project. In actuality it appears to add files 
+%       to the project details, but does not add these to the search path 
+%       so that defined functions  are not accessible
+%       (at least for R2021a).
+%       This behavior differs from adding top-level directories.
+%       https://au.mathworks.com/help/matlab/ref/matlab.project.project.addfolderincludingchildfiles.html
+%
+%       For now I am manually adding this directory...
+proj.addFolderIncludingChildFiles('./ADRIAfunctions/ParamHandler');
 
 
-
-
-
+% Add main project directories and files
+proj.addFolderIncludingChildFiles('./ADRIAfunctions');
+proj.addFolderIncludingChildFiles('./ADRIAmain');
+proj.addFolderIncludingChildFiles('./examples');
+proj.addFolderIncludingChildFiles('./Inputs');
