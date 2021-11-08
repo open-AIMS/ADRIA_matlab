@@ -24,39 +24,42 @@ function criteria_weights = criteriaDetails(varargin)
 %       `option_bounds` indicates the min/max range of options ids.
 
 name = [
-    "wave_stress";
-    "heat_stress";
-    "shade_connectivity";
-    "seed_connectivity";
-    "coral_cover_high";
-    "coral_cover_low";
-    "seed_priority";
-    "shade_priority";
-    "deployed_coral_risk_tol"
+    "tf";
+    "nsiteint";
+    "psgA";
+    "psgB";
+    "psgC";
+    "nspecies";
+    "ncoralsp";
+    "con_cutoff";
+    "years";
+    "RCP"
 ];
 
 defaults = {
-    1; % "wave_stress";
-    0; % "heat_stress";
-    0; % "shade_connectivity";
-    0; % "seed_connectivity";
-    0; % "coral_cover_high";
-    0; % "coral_cover_low";
-    1; % "seed_priority";
-    0; % "shade_priority";
-    1 % "deployed_coral_risk_tol"
+    0; % "tf";
+    0; % "nsiteint";
+    0; % "psgA";
+    0; % "psgB";
+    0; % "psgC";
+    0; % "nspecies";
+    0; % "ncoralsp";
+    0; % "con_cutoff";
+    0; % "years";
+    0  % RCP
 };
 
 lower_bound = {
-    0; % "wave_stress";
-    0; % "heat_stress";
-    0; % "shade_connectivity";
-    0; % "seed_connectivity";
-    0; % "coral_cover_high";
-    0; % "coral_cover_low";
-    0; % "seed_priority";
-    0; % "shade_priority";
-    0 % "deployed_coral_risk_tol"
+    0; % "tf";
+    0; % "nsiteint";
+    0; % "psgA";
+    0; % "psgB";
+    0; % "psgC";
+    0; % "nspecies";
+    0; % "ncoralsp";
+    0; % "con_cutoff";
+    0; % "years";
+    0  % RCP
 };
 
 upper_bound = {
