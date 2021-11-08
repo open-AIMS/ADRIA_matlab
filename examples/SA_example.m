@@ -28,12 +28,9 @@ alg_ind = 1;
 
 %% ... generate parameter permutations ...
 M = height(combined_opts);
-% xmin = cell2mat(combined_opts.lower_bound)';
-% xmax = cell2mat(combined_opts.upper_bound)';
 
-opt_min_max = cell2mat(combined_opts.option_bounds);
-xmin = opt_min_max(:, 1)';
-xmax = opt_min_max(:, 2)';
+xmin = cell2mat(combined_opts.lower_bound);
+xmax = cell2mat(combined_opts.upper_bound);
 
 distr_fun = 'unif';
 distr_par = cell(M, 1);
@@ -43,16 +40,20 @@ x_labels = combined_opts.name;
 
 target_output = "TC";
 
-r = 10;  % number of elementary effects (total runs: r * (M+1))
+r = 2;  % number of elementary effects (total runs: r * (M+1))
 sampler = 'lhs';  % latin hypercube sampling
 design_type = 'radial';  % using radial design
 
+% Generate samples using SAFE
 X = OAT_sampling(r, M, distr_fun, distr_par, sampler, design_type);
+
+% Convert sampled values for use in ADRIA 
+% (maps real values back to categoricals)
 X_conv = convertScenarioSelection(X, combined_opts);
 
 ninter = size(X, 1);
 
-% Creating dummy permutations
+% Creating dummy permutations for core parameters and ecological parameters
 param_tbl = struct2table(params);
 ecol_tbl = struct2table(ecol_params);
 
@@ -120,17 +121,17 @@ end
 % Need Y = N dimensional array of QoIs...
 Y_TC = squeeze(mean(mean(processed.TC, 2), 1));
 
-[mu, sigma] = EET_indices(r, xmin, xmax, X, Y_TC, design_type);
-
-% plot results
-x_labels = cellstr(x_labels);
-EET_plot(mu, sigma, x_labels)
+% [mu, sigma] = EET_indices(r, xmin', xmax', X, Y_TC, design_type);
+% 
+% % plot results
+% x_labels = cellstr(x_labels);
+% EET_plot(mu, sigma, x_labels)
 
 
 % Bootstrapped confidence intervals
 nboot = 100;
 [mu, sigma, EE, mu_sd, sigma_sd, mu_lb, sigma_lb, mu_ub, sigma_ub] = ...
-    EET_indices(r, xmin, xmax, X, Y_TC, design_type, nboot);
+    EET_indices(r, xmin', xmax', X, Y_TC, design_type, nboot);
 
 % Plot boot strapped results
 EET_plot(mu, sigma, x_labels, mu_lb, mu_ub, sigma_lb, sigma_ub)
