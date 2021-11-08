@@ -35,12 +35,17 @@ Table of
 - name
 - ptype (`categorical` or `float`)
 - defaults
-- lower_bound
+- lower_bound (min/max of discrete values)
 - upper_bound
 - options (possible discrete values for categoricals)
-- option_bounds (min/max of discrete values)
+- raw_lower_bound (min/max of option values)
+- raw_upper_bound (min/max of option values)
   
-where lower/upper bounds indicates the raw bound values `options` maps option ids to their values, and `option_bounds` indicates the min/max range of options ids.
+The `raw_*_bound` columns hold the raw values prior to any transformation,
+and maps option IDs to their ADRIA expected values.
+
+The `lower/upper` columns indicates the min/max range of option IDs for
+categorical values, and are simply copies if the options are real-valued.
 
 
 ## criteriaDetails()
@@ -70,12 +75,17 @@ Table of
 - name
 - ptype (`categorical` or `float`)
 - defaults
-- lower_bound
+- lower_bound (min/max of discrete values)
 - upper_bound
 - options (possible discrete values for categoricals)
-- option_bounds (min/max of discrete values)
+- raw_lower_bound (min/max of option values)
+- raw_upper_bound (min/max of option values)
   
-where lower/upper bounds indicates the raw bound values `options` maps option ids to their values, and `option_bounds` indicates the min/max range of options ids.
+The `raw_*_bound` columns hold the raw values prior to any transformation,
+and maps option IDs to their ADRIA expected values.
+
+The `lower/upper` columns indicates the min/max range of option IDs for
+categorical values, and are simply copies if the options are real-valued.
 
 
 ## coreParamDetails()
