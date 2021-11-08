@@ -1,9 +1,9 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
 %% Settings
-criteria_thr = 0.7;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+criteria_thr = 0.99;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
 COTS_outbreak_threshold = 0.2; 
-metrics = [1,2,3,4,5,6,7,8];  % see below for metrics implemented
+metrics = 2 % [1,2,3,4,5,6,7,8];  % see below for metrics implemented
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totcov: [448×85 single]
