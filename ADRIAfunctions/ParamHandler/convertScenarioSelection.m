@@ -41,6 +41,12 @@ function converted = convertScenarioSelection(sel_values, p_opts)
             % convert from cell array to matrix if needed
             if ptype == "categorical"
                 tmp = floor(selection(sel));
+                if tmp == p_opts.upper_bound{p} % && tmp == selection(sel)
+                    % subtract a small constant to ensure flooring works
+                    % as intended when the value is at upper limit
+                    tmp = floor(tmp - 1e-6);
+                end
+
                 try
                     converted{sel, pname} = cell2mat(p_opts.options{p}{1}(tmp));
                 catch

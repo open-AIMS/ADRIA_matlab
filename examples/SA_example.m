@@ -9,17 +9,10 @@ criteria_opts = criteriaDetails();
 % table of all parameters and related details
 combined_opts = [inter_opts; criteria_opts];
 
-
-% scenarios = table2array(converted_tbl);
-% IT = scenarios(:, 1:9);
-% criteria_weights = scenarios(:, 10:end);  % need better way of separating values...
-
-% interventions = interventionSpecification(sims=10);
-% [IT, ~] = interventionTable(interventions); %calls function that builds intervention table, ...
-
-% criteria_weights = criteriaWeights();
+% core ADRIA parameters
 [params, ecol_params] = ADRIAparms(); %environmental and ecological parameter values etc
 
+% MCDA algorithm choice (1 to 3)
 alg_ind = 1;
 
 %% Load site data
@@ -40,26 +33,29 @@ x_labels = combined_opts.name;
 
 target_output = "TC";
 
-r = 2;  % number of elementary effects (total runs: r * (M+1))
+% number of elementary effects (total runs: r * (M+1))
+% where r is the # of trajectories, M is the number of factors
+r = 2;
+
 sampler = 'lhs';  % latin hypercube sampling
 design_type = 'radial';  % using radial design
 
 % Generate samples using SAFE
 X = OAT_sampling(r, M, distr_fun, distr_par, sampler, design_type);
 
-% Convert sampled values for use in ADRIA 
+% Convert sampled values for use in ADRIA
 % (maps real values back to categoricals)
 X_conv = convertScenarioSelection(X, combined_opts);
 
 ninter = size(X, 1);
 
-% Creating dummy permutations for core parameters and ecological parameters
+% Creating dummy permutations for core and ecological parameters
 param_tbl = struct2table(params);
 ecol_tbl = struct2table(ecol_params);
 
+% Repeating constant values
 param_tbl = repmat(param_tbl, ninter, 1);
 ecol_tbl = repmat(ecol_tbl, ninter, 1);
-% criteria_weights = repmat(criteria_weights, ninter, 1);
 
 %% Setup output
 % Create temporary struct
@@ -70,7 +66,7 @@ tmp_s.S = 0;
 
 Y = repmat(tmp_s, ninter, 1);
 
-%% setup for the geographical setting including environmental input layers
+%% Set up the geographical setting including environmental input layers
 [wave_scen, dhw_scen] = setupADRIAsims(1, params, nsites);
 
 % TODO: Replace these with wave/DHW projection scenarios instead
@@ -115,6 +111,9 @@ end
 
 %% SA analysis
 
+x_labels = humanReadableName(x_labels);
+x_labels = cellstr(x_labels);
+
 % ecosys_results = Corals_to_Ecosys_Services(processed);
 % analyseADRIAresults1(ecosys_results);
 
@@ -124,7 +123,6 @@ Y_TC = squeeze(mean(mean(processed.TC, 2), 1));
 % [mu, sigma] = EET_indices(r, xmin', xmax', X, Y_TC, design_type);
 % 
 % % plot results
-% x_labels = cellstr(x_labels);
 % EET_plot(mu, sigma, x_labels)
 
 
