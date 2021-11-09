@@ -130,21 +130,10 @@ sites, level of centrality, and the strongest predecessor for each site.
 - file       : str, path to data file to load
 - con_cutoff : float, percent thresholds of max for weak connections in  network (defined in ADRIAparms.m)
 
-**Output:**
+**Outputs:**
 - TP_data     : table, containing the transition probability for all sites (float)
 - site_ranks : table, centrality for each site
 - strongpred : matrix, strongest predecessor for each site
-
-
-## ADRIA_saveResults()
-
-Save results to file.
-
-If file is not specified, generates a filename based on date/time
-
-**Inputs:**
-- data     : any, data to save
-- filename : str, file name and location to save data to
 
 
 ## runADRIAScenario()
@@ -199,3 +188,32 @@ end
 %% Save results
 ADRIA_saveResults(Y, "example_results.mat")
 ```
+
+# Utility functions
+
+
+## ADRIA_saveResults()
+
+Save results to file.
+
+If file is not specified, generates a filename based on date/time
+
+**Inputs:**
+- data     : any, data to save
+- filename : str, file name and location to save data to
+
+
+## estimateRuntime()
+
+Estimate total runtime for a given number of simulations to be run.
+
+NOTE: 
+Assumes all detected cores are used.
+These are indicative estimates only with no guarantee of accuracy
+or reliability.
+
+**Inputs:**
+- n_sims : int, number of simulations to be run
+
+**Outputs:**
+- est : float, estimated runtime (in seconds)
