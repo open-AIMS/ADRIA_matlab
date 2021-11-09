@@ -35,7 +35,7 @@ tmp_s.S = 0;
 Y = repmat(tmp_s, ninter, 1);
 
 %% setup for the geographical setting including environmental input layers
-[wave_scen, dhw_scen] = setupADRIAsims(interventions.sims, params, nsites);
+[wave_scen, dhw_scen] = setupADRIAsims(1, params, nsites);
 
 % TODO: Replace these with wave/DHW projection scenarios instead
 
