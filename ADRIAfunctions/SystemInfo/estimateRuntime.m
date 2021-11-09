@@ -5,6 +5,12 @@ function est = estimateRuntime(n_sims)
 %     Assumes all detected cores are used.
 %     These are indicative estimates only with no guarantee of accuracy
 %     or reliability.
+%
+% Inputs:
+%     n_sims : int, number of simulations to be run
+%
+% Outputs:
+%     est : float, estimated runtime (in seconds)
 
     % Estimate from original run set
     trial_runtime = 6.9311;  % trial run time
