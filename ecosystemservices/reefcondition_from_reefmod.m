@@ -1,8 +1,8 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
 %% Settings
-criteria_thr = 0.7;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
-COTS_outbreak_threshold = 0.2; 
+criteriaThreshold = 0.7;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+cotsOutbreakThreshold = 0.2; 
 metrics = 1:8;  % see below for metrics implemented
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
@@ -100,13 +100,11 @@ reefmod_data2.Macroalgae(:,:,3) = reefmod_data2.macroUprightFleshy;
 reefmod_data2.Macroalgae = squeeze(sum(reefmod_data2.Macroalgae, 3)); %sum across algal types and reduce to three dimensions
 
 %% Crustose coralline algae (CCAs)
-%YM notes
-%CCA is different than nongrazable. Nongrazable is a mix of sand/sponges, ie substrates that cannot be colonized by corals or algae.
-%CCA can be obtained as 100 - all corals - all algae - nongrazable. Don't include rubble here because it's not treated as a substrate.
+%YM Bozec notes: CCA can be obtained as 100 - all corals - all algae - nongrazable. Don't include rubble here because it's not treated as a substrate.
 rci.CCA = 1 - rci.totalCover - reefmod_data2.nongrazable'/100 - reefmod_data2.Macroalgae;
 rci.CCA(rci.CCA<0) = 0;
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
-reefmod_data2.COTSrel = reefmod_data2.COTS_mantatow./COTS_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
+reefmod_data2.COTSrel = reefmod_data2.COTS_mantatow./cotsOutbreakThreshold; %max(RMdata.COTS_mantatow,[],'All');
 reefmod_data2.COTSrel(reefmod_data2.COTSrel<0) = 0;
 reefmod_data2.COTSrel(reefmod_data2.COTSrel>1) = 1;
 
@@ -144,13 +142,13 @@ reefcondition = zeros(448,85);
             D = sum(M(metrics)> rci_crit(4,metrics),'omitnan')/numel(metrics);
             E = sum(M(metrics)> rci_crit(5,metrics),'omitnan')/numel(metrics);
            
-                if A > criteria_thr
+                if A > criteriaThreshold
                 reefcondition(reef,t) = 0.9; %representative of very good
-                 elseif B > criteria_thr && A < criteria_thr
+                 elseif B > criteriaThreshold && A < criteriaThreshold
                 reefcondition(reef,t) = 0.7; %representative of good
-                elseif C > criteria_thr && A < criteria_thr && B < criteria_thr
+                elseif C > criteriaThreshold && A < criteriaThreshold && B < criteriaThreshold
                  reefcondition(reef,t) = 0.5; %representative of fair
-                 elseif D > criteria_thr && C < criteria_thr  && A < criteria_thr && B < criteria_thr
+                 elseif D > criteriaThreshold && C < criteriaThreshold  && A < criteriaThreshold && B < criteriaThreshold
                 reefcondition(reef,t) = 0.3; %representative of poor
                 else 
                 reefcondition(reef,t) = 0.1; %
