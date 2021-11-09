@@ -15,7 +15,6 @@ function [interventions] = interventionSpecification(varargin)
 %      - Seedyrs  : 10
 %      - Shadeyrs : 1
 %      - sims     : 50
-%      - RCP      : 60
 %
 % Outputs:
 %   interventions : struct holding default/modified intervention values
@@ -32,8 +31,7 @@ interventions = struct('Guided', [0,1], ...
                        'Natad', 0.05, ...
                        'Seedyrs', 10, ...
                        'Shadeyrs', 1, ...
-                       'sims', 50,...
-                       'RCP', 60);
+                       'sims', 50);
 
 % if number of arguments passed in is 0, then use default values
 % otherwise replace defaults with specified values
