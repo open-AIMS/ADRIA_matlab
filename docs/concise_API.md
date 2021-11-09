@@ -42,7 +42,8 @@ Table of
 - raw_upper_bound (min/max of option values)
   
 The `raw_*_bound` columns hold the raw values prior to any transformation,
-and maps option IDs to their ADRIA expected values.
+
+`Options` maps option IDs to their ADRIA expected values.
 
 The `lower/upper` columns indicates the min/max range of option IDs for
 categorical values, and are simply copies if the options are real-valued.
