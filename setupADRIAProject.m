@@ -59,6 +59,7 @@ addPath(proj, pwd);
 %
 %       For now I am manually adding directories directly
 addFolderIncludingChildFiles(proj, './ADRIAfunctions/ParamHandler');
+addFolderIncludingChildFiles(proj, './ADRIAfunctions/SystemInfo');
 
 % Add main directories and files to project spec
 addFolderIncludingChildFiles(proj, './ADRIAfunctions');
@@ -66,8 +67,8 @@ addFolderIncludingChildFiles(proj, './ADRIAmain');
 addFolderIncludingChildFiles(proj, './examples');
 addFolderIncludingChildFiles(proj, './Inputs');
 
-
 % Add to MATLAB path
+addPath(proj, './ADRIAfunctions/SystemInfo');
 addPath(proj, './ADRIAfunctions/ParamHandler');
 addPath(proj, './ADRIAfunctions');
 addPath(proj, './ADRIAmain');
