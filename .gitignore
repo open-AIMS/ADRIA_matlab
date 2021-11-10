@@ -33,8 +33,10 @@ octave-workspace
 resources/
 
 # only ignore data files in the outputs folder
-Outputs/
-!*.m
+Outputs/*
+!Outputs/Output_Conversion_Functions
+Outputs/Output_Conversion_Functions/*
+!Outputs/Output_Conversion_Functions/*.m
 
 # Mac related files
 *.DS_Store
