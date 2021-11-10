@@ -32,7 +32,9 @@ octave-workspace
 
 resources/
 
-Outputs/
+# ignore output files that are data files (so that data conversion functions can still be pushed/pulled
+Outputs/*.csv
+Outputs/*.mat
 
 # Mac related files
 *.DS_Store
