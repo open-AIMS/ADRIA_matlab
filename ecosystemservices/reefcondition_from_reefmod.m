@@ -1,9 +1,9 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
 %% Settings
-criteriaThreshold = 0.7;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+criteriaThreshold = 0.75;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
 cotsOutbreakThreshold = 0.2; 
-metrics = 1:8;  % see below for metrics implemented
+metrics = [1,2,4,5,6,7,8];  % see below for metrics implemented
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totalCover: [448×85 single]
@@ -57,61 +57,71 @@ reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data fi
 %% Average over simulations
 field_names = {'COTS_mantatow', 'coral_cover_per_taxa', 'macroEncrustFleshy', 'macroTurf', ... 
     'macroUprightFleshy', 'nb_coral_adol', 'nb_coral_adult','nb_coral_juv', 'nongrazable', 'rubble'};
-reefmod_data2 = struct(); % set up new scalar structure
+reefmodData2 = struct(); % set up new scalar structure
 for k = 1:numel(field_names) % step through fields
     F = field_names{k}; %assign field names to new structure
-    reefmod_data2.(F) = squeeze(mean(reefmod_data.(F),1)); %average over simulations and reduce to two dimensions
+    reefmodData2.(F) = squeeze(mean(reefmod_data.(F),1)); %average over simulations and reduce to two dimensions
 end
 
 %% Extract constants
 NREEFS = size(reefmod_data.reefs,1);
-NCORALGROUPS = size(reefmod_data2.coral_cover_per_taxa,3);
-allCorals(:,:,:,1:4) = reefmod_data2.nb_coral_juv;
-allCorals(:,:,:,5:17) = reefmod_data2.nb_coral_adol;
-allCorals(:,:,:,18:26) = reefmod_data2.nb_coral_adult;
-NCORALSIZEBINS = size(allCorals,4);
+NYEARS = size(reefmod_data.years,2);
+JUVENILE_CORAL_SIZECLASSES = 1:4;
+ADOLESCENT_CORAL_SIZECLASSES = 5:17;
+ADULT_CORAL_SIZECLASSES = 18:26;
+NCORALGROUPS = size(reefmodData2.coral_cover_per_taxa,3);
+coralNumbers(:,:,:,JUVENILE_CORAL_SIZECLASSES) = reefmodData2.nb_coral_juv;
+coralNumbers(:,:,:,ADOLESCENT_CORAL_SIZECLASSES) = reefmodData2.nb_coral_adol;
+coralNumbers(:,:,:,ADULT_CORAL_SIZECLASSES) = reefmodData2.nb_coral_adult;
+NCORALSIZEBINS = size(coralNumbers,4);
 
 %% Calculate coral evenness
-rci.totalCover = sum(reefmod_data2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
-rci.covers = reefmod_data2.coral_cover_per_taxa/100; %then package relative covers into the rci structure
+rci.totalCover = sum(reefmodData2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
+rci.covers = reefmodData2.coral_cover_per_taxa/100; %then package relative covers into the rci structure
 rci.coralEvenness = coral_evenness_fun(rci);  %call function that calculates the evenness of coral groups
 rci.coralEvenness = single(rci.coralEvenness); % change to single type
 
 %% Coral juveniles
-rci.coraljuv = sum(reefmod_data2.nb_coral_juv,[3:4]);  %calculate sum of coral juveniles across size classes and coral groups 
+rci.coraljuv = sum(reefmodData2.nb_coral_juv,[3:4]);  %calculate sum of coral juveniles across size classes and coral groups 
 maxcoraljuv = max(rci.coraljuv,[],'All'); %find max juvenile density 
 rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute juvenile numbers to relative measures
 
 %% Estimate shelter volume based on coral group, colony size and cover 
-shelterVolume = colony_sheltervolume_from_reefmod;  %call function that converts coral groups and sizes to colony shelter volume
-shelterVolume_relative = zeros(NREEFS,85,NCORALGROUPS,NCORALSIZEBINS);
-for sp = 1:NCORALGROUPS
-    for coralsizebin = 1:NCORALSIZEBINS  %26 coral size classes in ReefMod
-        shelterVolume_relative(:,:,sp,coralsizebin) = allCorals(:,:,sp,coralsizebin).*shelterVolume(sp,coralsizebin);
-    end
-end
-sumShelterVolumeRelative = squeeze(sum(shelterVolume_relative,[4,5]));
-shelterVolumeMax = max(sumShelterVolumeRelative,[],'All');
-rci.shelterVolume = sumShelterVolumeRelative./shelterVolumeMax;  %shelter volume relative to max
+svParms = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS,'NYEARS', NYEARS', 'NCORALGROUPS', NCORALGROUPS,'NCORALSIZEBINS', NCORALSIZEBINS);
+Y = SheltervolumeFromReefmod(svParms);  %call function that converts coral groups and sizes to colony shelter volume
+shelterVolumeRaw = Y;
+shelterVolumeSumAbsolute = squeeze(sum(shelterVolumeRaw,[3:4]));
+rci.shelterVolume = shelterVolumeSumAbsolute/max(shelterVolumeSumAbsolute,[],'All');
+
+%shelterVolumeRelative = zeros(NREEFS,NYEARS,NCORALGROUPS,NCORALSIZEBINS);
+% for sp = 1:NCORALGROUPS
+%     for coralSizeBin = 1:NCORALSIZEBINS  %26 coral size classes in ReefMod
+%         shelterVolumeRelative(:,:,sp,coralSizeBin) = allCoralNumbers(:,:,sp,coralSizeBin).*shelterVolume(sp,coralSizeBin);
+%     end
+% end
+% sumShelterVolumeRelative = squeeze(sum(shelterVolumeRelative,[4,5]));
+% shelterVolumeMax = max(sumShelterVolumeRelative,[],'All');
+% rci.shelterVolume = sumShelterVolumeRelative./shelterVolumeMax;  %shelter volume relative to max
+%rci.shelterVolume = squeeze(sum(rci.shelterVolume,3));
 %% Amalgamate the three types of macroalgae into one variable and convert to proportion
-reefmod_data2.Macroalgae(:,:,1) = reefmod_data2.macroEncrustFleshy; 
-reefmod_data2.Macroalgae(:,:,2) = reefmod_data2.macroTurf; 
-reefmod_data2.Macroalgae(:,:,3) = reefmod_data2.macroUprightFleshy; 
-reefmod_data2.Macroalgae = squeeze(sum(reefmod_data2.Macroalgae, 3)); %sum across algal types and reduce to three dimensions
+reefmodData2.Macroalgae(:,:,1) = reefmodData2.macroEncrustFleshy; 
+reefmodData2.Macroalgae(:,:,2) = reefmodData2.macroTurf; 
+reefmodData2.Macroalgae(:,:,3) = reefmodData2.macroUprightFleshy; 
+reefmodData2.Macroalgae = squeeze(sum(reefmodData2.Macroalgae, 3)); %sum across algal types and reduce to three dimensions
 
 %% Crustose coralline algae (CCAs)
 %YM Bozec notes: CCA can be obtained as 100 - all corals - all algae - nongrazable. Don't include rubble here because it's not treated as a substrate.
-rci.CCA = 1 - rci.totalCover - reefmod_data2.nongrazable'/100 - reefmod_data2.Macroalgae;
+rci.CCA = 1 - rci.totalCover - reefmodData2.nongrazable'/100 - reefmodData2.Macroalgae;
 rci.CCA(rci.CCA<0) = 0;
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
-reefmod_data2.COTSrel = reefmod_data2.COTS_mantatow./cotsOutbreakThreshold; %max(RMdata.COTS_mantatow,[],'All');
-reefmod_data2.COTSrel(reefmod_data2.COTSrel<0) = 0;
-reefmod_data2.COTSrel(reefmod_data2.COTSrel>1) = 1;
+reefmodData2.COTSrel = reefmodData2.COTS_mantatow./cotsOutbreakThreshold; %max(RMdata.COTS_mantatow,[],'All');
+reefmodData2.COTSrel(reefmodData2.COTSrel<0) = 0;
+reefmodData2.COTSrel(reefmodData2.COTSrel>1) = 1;
 
 %% Convert COTS, macroalgae and rubble to their complementary values 
-rci.COTSrel_complementary = 1 - reefmod_data2.COTSrel;  %complementary of COTS
-rci.Macroalgae_complementary = (100 - reefmod_data2.Macroalgae)/100; %complementary of macroalgae
-rci.rubble_complementary = (100 - reefmod_data2.rubble)/100; %complementary of rubble
+rci.COTSrel_complementary = 1 - reefmodData2.COTSrel;  %complementary of COTS
+rci.Macroalgae_complementary = (100 - reefmodData2.Macroalgae)/100; %complementary of macroalgae
+rci.rubble_complementary = (100 - reefmodData2.rubble)/100; %complementary of rubble
 
 %% Add reefs to the structure, delete redundant fields, and reorganise
 rci.reefs = reefmod_data.reefs;
@@ -121,13 +131,13 @@ fieldorder = {'totalCover','coralEvenness','shelterVolume','coraljuv_relative','
 rci = orderfields(rci,fieldorder);
 
 %% Compare ReefMod data against reef condition criteria provided by expert elicitation process (questionnaire)
-F = readtable('ReefConditionCriteria'); %in ADRIA input files, note that evenness is omitted
+F = readtable('ExpertReefConditionCriteriaMedian'); %in ADRIA input files, note that evenness is omitted
 rci_crit = table2array(F(:,2:end));
 rci_crit(:,1:3) = rci_crit(:,1:3);
-reefcondition = zeros(448,85);
+reefcondition = zeros(NREEFS,NYEARS);
 %Start loop for crieria vs metric comparisons
-    for reef = 1:448
-        for t = 1:85
+    for reef = 1:NREEFS
+        for t = 1:NYEARS
             M = [rci.totalCover(reef,t), ... 
                 rci.coralEvenness(reef,t), ...
                 rci.shelterVolume(reef,t), ... 
