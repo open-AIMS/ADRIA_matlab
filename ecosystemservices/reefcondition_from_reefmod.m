@@ -1,9 +1,9 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
 %% Settings
-criteriaThreshold = 0.75;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+criteriaThreshold = 0.7;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
 cotsOutbreakThreshold = 0.2; 
-metrics = [1,2,4,5,6,7,8];  % see below for metrics implemented
+metrics = [1,2,3]; %4,5,6,7,8];  % see below for metrics implemented
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totalCover: [448×85 single]
@@ -63,7 +63,7 @@ for k = 1:numel(field_names) % step through fields
     reefmodData2.(F) = squeeze(mean(reefmod_data.(F),1)); %average over simulations and reduce to two dimensions
 end
 
-%% Extract constants
+%% Extract constants and variables
 NREEFS = size(reefmod_data.reefs,1);
 NYEARS = size(reefmod_data.years,2);
 JUVENILE_CORAL_SIZECLASSES = 1:4;
@@ -74,6 +74,10 @@ coralNumbers(:,:,:,JUVENILE_CORAL_SIZECLASSES) = reefmodData2.nb_coral_juv;
 coralNumbers(:,:,:,ADOLESCENT_CORAL_SIZECLASSES) = reefmodData2.nb_coral_adol;
 coralNumbers(:,:,:,ADULT_CORAL_SIZECLASSES) = reefmodData2.nb_coral_adult;
 NCORALSIZEBINS = size(coralNumbers,4);
+places = table2array(reefmod_data.reefs(:,3:5)); %extract lats and lons from ReefMod file
+lons = places(:,2);
+lats = places(:,1);
+reefArea = places(:,3); %in ReefMod, total reef area from GBRMPA maps is used as coral real estate
 
 %% Calculate coral evenness
 rci.totalCover = sum(reefmodData2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
@@ -87,22 +91,15 @@ maxcoraljuv = max(rci.coraljuv,[],'All'); %find max juvenile density
 rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute juvenile numbers to relative measures
 
 %% Estimate shelter volume based on coral group, colony size and cover 
-svParms = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS,'NYEARS', NYEARS', 'NCORALGROUPS', NCORALGROUPS,'NCORALSIZEBINS', NCORALSIZEBINS);
-Y = SheltervolumeFromReefmod(svParms);  %call function that converts coral groups and sizes to colony shelter volume
-shelterVolumeRaw = Y;
-shelterVolumeSumAbsolute = squeeze(sum(shelterVolumeRaw,[3:4]));
-rci.shelterVolume = shelterVolumeSumAbsolute/max(shelterVolumeSumAbsolute,[],'All');
+shelterVolumeInput = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS,'NYEARS', NYEARS', 'NCORALGROUPS', NCORALGROUPS,'NCORALSIZEBINS', NCORALSIZEBINS);
+shelterVolume0 = SheltervolumeFromReefmod(shelterVolumeInput); %call function that converts coral groups and sizes to colony shelter volume
+for t = 1:NYEARS
+    shelterVolumePerArea(:,t) = shelterVolume0(:,t)./reefArea; %max(shelterVolumeTotalAbsolute,[],'All');
+end
+shelterVolume = shelterVolumePerArea./mean(shelterVolumePerArea(:,1:10),2);
+shelterVolume(shelterVolume>1)=0;
+rci.shelterVolume = shelterVolume;
 
-%shelterVolumeRelative = zeros(NREEFS,NYEARS,NCORALGROUPS,NCORALSIZEBINS);
-% for sp = 1:NCORALGROUPS
-%     for coralSizeBin = 1:NCORALSIZEBINS  %26 coral size classes in ReefMod
-%         shelterVolumeRelative(:,:,sp,coralSizeBin) = allCoralNumbers(:,:,sp,coralSizeBin).*shelterVolume(sp,coralSizeBin);
-%     end
-% end
-% sumShelterVolumeRelative = squeeze(sum(shelterVolumeRelative,[4,5]));
-% shelterVolumeMax = max(sumShelterVolumeRelative,[],'All');
-% rci.shelterVolume = sumShelterVolumeRelative./shelterVolumeMax;  %shelter volume relative to max
-%rci.shelterVolume = squeeze(sum(rci.shelterVolume,3));
 %% Amalgamate the three types of macroalgae into one variable and convert to proportion
 reefmodData2.Macroalgae(:,:,1) = reefmodData2.macroEncrustFleshy; 
 reefmodData2.Macroalgae(:,:,2) = reefmodData2.macroTurf; 
@@ -151,8 +148,8 @@ reefcondition = zeros(NREEFS,NYEARS);
             C = sum(M(metrics)> rci_crit(3,metrics),'omitnan')/numel(metrics);
             D = sum(M(metrics)> rci_crit(4,metrics),'omitnan')/numel(metrics);
             E = sum(M(metrics)> rci_crit(5,metrics),'omitnan')/numel(metrics);
-           
-                if A > criteriaThreshold
+            
+              if A > criteriaThreshold
                 reefcondition(reef,t) = 0.9; %representative of very good
                  elseif B > criteriaThreshold && A < criteriaThreshold
                 reefcondition(reef,t) = 0.7; %representative of good
@@ -165,17 +162,14 @@ reefcondition = zeros(NREEFS,NYEARS);
             end
         end
     end
+    
 %% Plot results 
-places = table2array(reefmod_data.reefs(:,3:5)); %extract lats and lons from ReefMod file
-lons = places(:,2);
-lats = places(:,1);
-reefarea = places(:,3);
 figure;
     tiledlayout(1,4,'TileSpacing','compact')
 for p = 1:4
      ax(p) = nexttile;
 colormap(flipud(turbo))
-bubblechart(lons,lats,reefarea/1000, median(reefcondition(:,p*20-19:p*20),2));
+bubblechart(lons,lats,reefArea/1000, median(reefcondition(:,p*20-19:p*20),2));
 bubblesize([3 30])
 caxis([0.1,0.9]);
 end
