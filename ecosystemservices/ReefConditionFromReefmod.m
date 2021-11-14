@@ -3,7 +3,7 @@
 %% Settings
 criteriaThreshold = 0.8;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
 cotsOutbreakThreshold = 0.2; 
-metrics = [1,2,4,5,6,7,8];  % see below for metrics implemented
+metrics = [1,2,4,5,6,7,8];  % see below for metrics implemented - note that shelter volume is omitted here
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totalCover: [448×85 single]
@@ -93,13 +93,10 @@ rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute j
 %% Estimate shelter volume based on coral group, colony size and cover 
 shelterVolumeInput = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS,'NYEARS', NYEARS', 'NCORALGROUPS', NCORALGROUPS,'NCORALSIZEBINS', NCORALSIZEBINS);
 shelterVolume0 = SheltervolumeFromReefmod(shelterVolumeInput); %call function that converts coral groups and sizes to colony shelter volume
-shelterVolumePerKm2 = zeros(NREEFS,NYEARS);
-for t = 1:NYEARS
-    shelterVolumePerKm2(:,t) = shelterVolume0(:,t)./reefArea; %max(shelterVolumeTotalAbsolute,[],'All');
-end
-shelterVolume = shelterVolumePerKm2./mean(shelterVolumePerKm2(:,1:10),2);
-shelterVolume(shelterVolume>1)=0;
-rci.shelterVolume = shelterVolume;
+shelterVolumePerKm2 = shelterVolume0./reefArea;  %normalise by division by reef area (matrix by vector)
+shelterVolume = shelterVolumePerKm2./mean(shelterVolumePerKm2(:,1:10),2); %nondimensionalise by comparing against mean sheltervolume in early years
+shelterVolume(shelterVolume>1)=0; %constrain shelter volume between 0 and 1
+rci.shelterVolume = shelterVolume; %add to rci structure 
 
 %% Amalgamate the three types of macroalgae into one variable and convert to proportion
 reefmodData2.Macroalgae(:,:,1) = reefmodData2.macroEncrustFleshy; 
@@ -131,7 +128,6 @@ rci = orderfields(rci,fieldorder);
 %% Compare ReefMod data against reef condition criteria provided by expert elicitation process (questionnaire)
 F = readtable('ExpertReefConditionCriteriaMedian'); %in ADRIA input files, note that evenness is omitted
 rci_crit = table2array(F(:,2:end));
-rci_crit(:,1:3) = rci_crit(:,1:3);
 reefcondition = zeros(NREEFS,NYEARS);
 %Start loop for crieria vs metric comparisons
     for reef = 1:NREEFS
