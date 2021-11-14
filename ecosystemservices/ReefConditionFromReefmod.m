@@ -1,9 +1,9 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
 %% Settings
-criteriaThreshold = 0.7;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+criteriaThreshold = 0.8;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
 cotsOutbreakThreshold = 0.2; 
-metrics = [1,2,3]; %4,5,6,7,8];  % see below for metrics implemented
+metrics = [1,2,4,5,6,7,8];  % see below for metrics implemented
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totalCover: [448×85 single]
@@ -86,17 +86,18 @@ rci.coralEvenness = coral_evenness_fun(rci);  %call function that calculates the
 rci.coralEvenness = single(rci.coralEvenness); % change to single type
 
 %% Coral juveniles
-rci.coraljuv = sum(reefmodData2.nb_coral_juv,[3:4]);  %calculate sum of coral juveniles across size classes and coral groups 
+rci.coraljuv = sum(reefmodData2.nb_coral_juv,3:4);  %calculate sum of coral juveniles across size classes and coral groups 
 maxcoraljuv = max(rci.coraljuv,[],'All'); %find max juvenile density 
 rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute juvenile numbers to relative measures
 
 %% Estimate shelter volume based on coral group, colony size and cover 
 shelterVolumeInput = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS,'NYEARS', NYEARS', 'NCORALGROUPS', NCORALGROUPS,'NCORALSIZEBINS', NCORALSIZEBINS);
 shelterVolume0 = SheltervolumeFromReefmod(shelterVolumeInput); %call function that converts coral groups and sizes to colony shelter volume
+shelterVolumePerKm2 = zeros(NREEFS,NYEARS);
 for t = 1:NYEARS
-    shelterVolumePerArea(:,t) = shelterVolume0(:,t)./reefArea; %max(shelterVolumeTotalAbsolute,[],'All');
+    shelterVolumePerKm2(:,t) = shelterVolume0(:,t)./reefArea; %max(shelterVolumeTotalAbsolute,[],'All');
 end
-shelterVolume = shelterVolumePerArea./mean(shelterVolumePerArea(:,1:10),2);
+shelterVolume = shelterVolumePerKm2./mean(shelterVolumePerKm2(:,1:10),2);
 shelterVolume(shelterVolume>1)=0;
 rci.shelterVolume = shelterVolume;
 
