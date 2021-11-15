@@ -1,8 +1,8 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
 %% Settings
-criteriaThreshold = 0.8;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
-cotsOutbreakThreshold = 0.2; 
+criteria_threshold = 0.8;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+cots_outbreak_threshold = 0.2; 
 metrics = [1,2,4,5,6,7,8];  % see below for metrics implemented - note that shelter volume is omitted here
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
@@ -82,8 +82,8 @@ reefArea = places(:,3); %in ReefMod, total reef area from GBRMPA maps is used as
 %% Calculate coral evenness
 rci.totalCover = sum(reefmodData2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
 rci.covers = reefmodData2.coral_cover_per_taxa/100; %then package relative covers into the rci structure
-rci.coralEvenness = coral_evenness_fun(rci);  %call function that calculates the evenness of coral groups
-rci.coralEvenness = single(rci.coralEvenness); % change to single type
+rci.coral_evenness = coralEvenness(rci);  %call function that calculates the evenness of coral groups
+rci.coral_evenness = single(rci.coral_evenness); % change to single type
 
 %% Coral juveniles
 rci.coraljuv = sum(reefmodData2.nb_coral_juv,3:4);  %calculate sum of coral juveniles across size classes and coral groups 
@@ -109,7 +109,7 @@ reefmodData2.Macroalgae = squeeze(sum(reefmodData2.Macroalgae, 3)); %sum across 
 rci.CCA = 1 - rci.totalCover - reefmodData2.nongrazable'/100 - reefmodData2.Macroalgae;
 rci.CCA(rci.CCA<0) = 0;
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
-reefmodData2.COTSrel = reefmodData2.COTS_mantatow./cotsOutbreakThreshold; %max(RMdata.COTS_mantatow,[],'All');
+reefmodData2.COTSrel = reefmodData2.COTS_mantatow./cots_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
 reefmodData2.COTSrel(reefmodData2.COTSrel<0) = 0;
 reefmodData2.COTSrel(reefmodData2.COTSrel>1) = 1;
 
@@ -122,7 +122,7 @@ rci.rubble_complementary = (100 - reefmodData2.rubble)/100; %complementary of ru
 rci.reefs = reefmod_data.reefs;
 rci = rmfield(rci,'coraljuv'); %original field deleted as it's replaced with relative density of four size classes
 rci = rmfield(rci,'covers'); %original field deleted as it's replaced with derived metrics
-fieldorder = {'totalCover','coralEvenness','shelterVolume','coraljuv_relative','CCA','COTSrel_complementary', 'Macroalgae_complementary','rubble_complementary','reefs'};
+fieldorder = {'totalCover','coral_evenness','shelterVolume','coraljuv_relative','CCA','COTSrel_complementary', 'Macroalgae_complementary','rubble_complementary','reefs'};
 rci = orderfields(rci,fieldorder);
 
 %% Compare ReefMod data against reef condition criteria provided by expert elicitation process (questionnaire)
@@ -133,7 +133,7 @@ reefcondition = zeros(NREEFS,NYEARS);
     for reef = 1:NREEFS
         for t = 1:NYEARS
             M = [rci.totalCover(reef,t), ... 
-                rci.coralEvenness(reef,t), ...
+                rci.coral_evenness(reef,t), ...
                 rci.shelterVolume(reef,t), ... 
                  rci.coraljuv_relative(reef,t), ...
                  rci.CCA(reef,t), ...
@@ -146,13 +146,13 @@ reefcondition = zeros(NREEFS,NYEARS);
             D = sum(M(metrics)> rci_crit(4,metrics),'omitnan')/numel(metrics);
             E = sum(M(metrics)> rci_crit(5,metrics),'omitnan')/numel(metrics);
             
-              if A > criteriaThreshold
+              if A > criteria_threshold
                 reefcondition(reef,t) = 0.9; %representative of very good
-                 elseif B > criteriaThreshold && A < criteriaThreshold
+                 elseif B > criteria_threshold && A < criteria_threshold
                 reefcondition(reef,t) = 0.7; %representative of good
-                elseif C > criteriaThreshold && A < criteriaThreshold && B < criteriaThreshold
+                elseif C > criteria_threshold && A < criteria_threshold && B < criteria_threshold
                  reefcondition(reef,t) = 0.5; %representative of fair
-                 elseif D > criteriaThreshold && C < criteriaThreshold  && A < criteriaThreshold && B < criteriaThreshold
+                 elseif D > criteria_threshold && C < criteria_threshold  && A < criteria_threshold && B < criteria_threshold
                 reefcondition(reef,t) = 0.3; %representative of poor
                 else 
                 reefcondition(reef,t) = 0.1; %
