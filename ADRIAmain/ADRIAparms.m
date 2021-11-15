@@ -21,6 +21,7 @@ params.nsiteint = 5; % max number of sites we intervene on in a given year. May 
 params.psgA = 1:10; % prioritysite group A
 params.psgB = 11:20; % prioritysite group B
 params.psgC = 1:26; % prioritysite group C
+
 params.nspecies = 4; % number of groups modelled in the current version. If the community model is replaced with a population model, then this becomes 1.
 params.ncoralsp = 4; % number of coral species modelled in the current version. If the community model is replaced with a population model, then this becomes 1.
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
@@ -31,17 +32,17 @@ params.RCP = 60;  % RCP scenario to use
 %% Environmental parameters
 
 params.beta = [1, 3]; % beta parameters for wave disturbance
-params.dhwmax25 = 7; % dhwmax at year 2025
+params.dhwmax25 = 7; % dhwmax at year 2025.  NOTE: all warming simulations will change with new common DHW input for MDS team  
 params.DHWmaxtot = 50; % max assumed DHW for all scenarios
 params.wb1 = 0.55; % weibull parameter 2 for DHW distributions based on Lough et al 2018
 params.wb2 = 2.24; % weibull parameter 1 for DHW distributions based on Lough et al 2018
 
 %% Ecological parameters
 
-params.basecov1 = 0.40; % initial cover of coral species 1
-params.basecov2 = 0.00; % initial cover of coral species 2
-params.basecov3 = 0.15; % initial cover of coral species 3
-params.basecov4 = 0.15; % initial cover of coral species 4
+params.basecov1 = 0.40; % initial cover of coral species 1. Acropora unenhanced 
+params.basecov2 = 0.00; % initial cover of coral species 2. Acropora enhanced
+params.basecov3 = 0.15; % initial cover of coral species 3  Other coral unenhanced
+params.basecov4 = 0.15; % initial cover of coral species 4  Other coral enhanced
 %params.basecov5 = 0.00; % initial cover of rubble
 
 params.corals = [1, 2, 3, 4]; % species of live corals
