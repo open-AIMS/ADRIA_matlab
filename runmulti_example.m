@@ -26,7 +26,7 @@ s1 = str2num(getenv('Seed1')); % Seed 1
 s2 = str2num(getenv('Seed2'));; % Seed 2
 srm = str2num(getenv('SRM')); % SRM
 aadpt = str2num(getenv('Aadpt'));; % Asissted Adapt.
-natad = str2num(getenv('Natad'));; % Asissted Adapt.
+natad = str2num(getenv('Natad'));; % rate of natural adaptation .
 
 interventions = interventionSpecification(Guided = 1,PrSites = prsites,...
     Seed1 = s1,Seed2 = s2,SRM = srm,Aadpt = aadpt,Natad = natad, ...
