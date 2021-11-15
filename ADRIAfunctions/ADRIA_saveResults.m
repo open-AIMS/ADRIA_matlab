@@ -7,8 +7,6 @@ function ADRIA_saveResults(data, filename)
     %     data     : any, data to save
     %     filename : str, file name and location to save data to
     if ~exist('filename', 'var')
-        
-        % TODO : Remove explicit "Outputs" path
         right_now = datetime(now, 'ConvertFrom', 'datenum');
         right_now = replace(string(right_now), ' ', '_');
         right_now = replace(right_now, ':', '');

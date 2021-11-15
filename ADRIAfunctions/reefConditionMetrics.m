@@ -1,11 +1,12 @@
-function [TC,C,E,S] = ReefConditionMetrics(covsim)
+function [TC,C,E,S] = reefConditionMetrics(covsim)
 %
 % ADRIA Reef Condition Metrics as indicators of scope for ecosystem 
 % service provision
 % Function converts the cover of four species to scope for providing 
 % ecosystem services: cultural, provisioning and regulating (including 
 % some supporting)
-%
+% out_ind = 1 : just calculate TC
+% out_ind >1 : calculate other metrics
 
 %% Preliminary estimates using only three species 
 % 1: Total coral cover (relative)
@@ -14,8 +15,6 @@ function [TC,C,E,S] = ReefConditionMetrics(covsim)
 % 3: Structural complexity, for now as S = relative cover of large Acropora.
 % 4: Net reef accretion as total coral cover times net rate of reef
 % calcification from eReefs
-
-n = 3; %number of species
 C = covsim; % dimensions: time, species, sites, interventions, sims 
 TC = sum(C,2); %sum over species
 C1 = C(:,1,:,:,:) + C(:,2,:,:,:); %Adding enhanced to unenhanced Acropora
@@ -24,7 +23,7 @@ C3 = C(:,4,:,:,:); %Coral species 3
 
 %% Calculate Evenness
 % Note that evenness may be replaced by other diversity metric 
-
+n = 3; %number of species
 p1 = C1./TC;
 p2 = C2./TC;
 p3 = C3./TC;

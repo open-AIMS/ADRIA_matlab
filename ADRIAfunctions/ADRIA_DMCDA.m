@@ -34,10 +34,13 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     %Combine data into matrix
     A(:,1) = sites; %site IDs
     A(:,2) = centr/max(centr); %node connectivity centrality, need to instead work out strongest predecessors to priority sites  
-    A(:,3) = damprob.dam/max(damprob.dam); %damage probability from wave exposure
-    A(:,4) = heatstressprob.heatstress/max(heatstressprob.heatstress); %risk from heat exposure
-    A(:,5) = sumcover.covtott/max(sumcover.covtott); %coral cover
-    A(:,6) = 1-sumcover.covtott/max(sumcover.covtott);
+    A(:,3) = damprob/max(damprob); %damage probability from wave exposure
+    A(:,4) = heatstressprob/max(heatstressprob); %risk from heat exposure
+    
+    prop_cover = sumcover/max(sumcover);  %proportional coral cover
+    A(:,5) = prop_cover; 
+    A(:,6) = 1 - prop_cover;
+
     A(:,7) = predec(:,3);
 
     % %Filter out sites that have high risk of wave damage, specifically exceeding the risk tolerance 
@@ -98,8 +101,9 @@ switch alg_ind
         %     %SHwt(:,2) = rand(length(A(:,1)),1);
         %     SHwt2 = sortrows(SHwt,2,'descend'); %sort from highest to lowest indicator
         % else
-        SHwt2 = sortrows(SHwt,2,'descend'); %sort from highest to lowest indicator
+        SHwt2 = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
         % end
+
         %highest indicators picks the cool sites
         prefshadesites = SHwt2(1:nsiteint,1);
         nprefshadesites = numel(prefshadesites);
@@ -125,9 +129,10 @@ switch alg_ind
 
         PIS = nanmax(SE(:,2:end));
 
-        % compute the set of negative ideal solutions for each criteria (min for
-        % good crieteria, max for bad criteria). Min used as all crieteria
-        % represent preferred attributes not costs or negative attributes
+        % compute the set of negative ideal solutions for each criteria 
+        % (min for good criteria, max for bad criteria). 
+        % Min used as all criteria represent preferred attributes not 
+        % costs or negative attributes
 
         NIS = nanmin(SE(:,2:end));
 
@@ -264,7 +269,54 @@ switch alg_ind
         orderQ = sortrows(Q,2,'ascend');
         prefshadesites = orderQ(1:nsiteint,1);
         nprefshadesites = numel(prefshadesites); 
-
+    case 4
+        %% Multi-objective GA algorithm weighting
+        % Seeding - Filtered set 
+        SE(:,1) = A(:,1); %sites column (remaining)
+        SE(:,2) = A(:,2)*wtconseed; %multiply centrality with connectivity weight
+        SE(:,3) = (1-A(:,3))*wtwaves; %multiply complementary of damage risk with disturbance weight
+        SE(:,4) = (1-A(:,4))*wtheat;
+        SE(:,5) = A(:,6)*wtlocover; %multiply by coral cover with its weight for high cover
+        SE(:,6) = A(:,7)*wtpredecseed; %multiply priority predecessor indicator by weight
+        
+         % Shading - filtered set
+        SH(:,1) = A(:,1); %sites column (remaining)
+        SH(:,2) = A(:,2)*wtconshade; %multiply centrality with connectivity weight
+        SH(:,3) = (1-A(:,3))*wtwaves; %multiply complementary of damage risk with disturbance weight
+        SH(:,4) = A(:,4)*wtheat; %multiply complementary of heat risk with heat weight
+        SH(:,5) = A(:,5)*wthicover; %multiply by coral cover with its weight for high cover
+        SH(:,6) = A(:,7)*wtpredecshade; %multiply priority predecessor indicator by weight
+        
+        % set up optimisation problem
+        % no inequality or equality constraints
+        Aeq = [];
+        beq = [];
+        A = [];
+        b = [];
+        lb = zeros(1,nsites); % x (weightings) can be 0
+        ub = ones(1,nsites); % to 1
+     
+        % multi-objective function for seeding
+        fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
+        % solve multi-objective problem using genetic alg
+        x1 = gamultiobj(fun1,nsites,A,b,Aeq,beq,lb,ub);
+        x1 = x1(end,:);
+        
+        % multi-objective function for shading
+        fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
+        % solve multi-objective problem using genetic alg
+        x2 = gamultiobj(fun2,nsites,A,b,Aeq,beq,lb,ub);
+        x2 = x2(end,:);
+        
+        % order ga alg generated weightings from highest to lowest
+        orderseed = sortrows([SE(:,1) x1'],2,'descend');
+        ordershade = sortrows([SH(:,1) x2'],2,'descend');
+        
+        % use to select sites
+        prefseedsites = orderseed(1:nsiteint,1);
+        prefshadesites = ordershade(1:nsiteint,1);
+        nprefshadesites = numel(prefshadesites);
+        nprefseedsites = numel(prefseedsites);
 end 
 end
 
