@@ -6,16 +6,14 @@ psqr = zeros(size(X.covers,1),size(X.covers,2),size(X.covers,3)); %indices are: 
 for reef = 1:size(X.covers,1)
         for t = 1:size(X.covers,2)
             for group = 1:size(X.covers,3)
-                psqr(reef,t,group) = (X.covers(reef,t,group)./X.totalCover(reef,t)).^2;
+                psqr(reef,t,group) = (X.covers(reef,t,group)./X.total_cover(reef,t)).^2;
             end
             sumpsqr(reef,t) = sum(psqr(reef,t,:));
         end
 end
-
-%sumpsqr = sum(psqr,3);
-N = 6;
+N = X.NCORALGROUPS;
 simpsonD = 1./sumpsqr; % Hill 1973, Ecology 54:427-432
-Y = simpsonD./N;  %Evenness
+Y = simpsonD./N;  %Group evenness 
 end
    
 

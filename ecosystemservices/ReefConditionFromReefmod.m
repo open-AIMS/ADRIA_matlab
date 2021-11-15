@@ -1,9 +1,9 @@
 %% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
 %% Settings
-criteria_threshold = 0.8;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
+criteria_threshold = 0.75;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
 cots_outbreak_threshold = 0.2; 
-metrics = [1,2,4,5,6,7,8];  % see below for metrics implemented - note that shelter volume is omitted here
+metrics = 1:8;  % see below for metrics implemented
 
 %% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totalCover: [448×85 single]
@@ -58,7 +58,8 @@ reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data fi
 field_names = {'COTS_mantatow', 'coral_cover_per_taxa', 'macroEncrustFleshy', 'macroTurf', ... 
     'macroUprightFleshy', 'nb_coral_adol', 'nb_coral_adult','nb_coral_juv', 'nongrazable', 'rubble'};
 reefmodData2 = struct(); % set up new scalar structure
-for k = 1:numel(field_names) % step through fields
+nfield_names = numel(field_names);
+for k = 1:nfield_names % step through fields
     F = field_names{k}; %assign field names to new structure
     reefmodData2.(F) = squeeze(mean(reefmod_data.(F),1)); %average over simulations and reduce to two dimensions
 end
@@ -80,9 +81,10 @@ lats = places(:,1);
 reefArea = places(:,3); %in ReefMod, total reef area from GBRMPA maps is used as coral real estate
 
 %% Calculate coral evenness
-rci.totalCover = sum(reefmodData2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
-rci.covers = reefmodData2.coral_cover_per_taxa/100; %then package relative covers into the rci structure
-rci.coral_evenness = coralEvenness(rci);  %call function that calculates the evenness of coral groups
+rci.total_cover = sum(reefmodData2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
+covers = reefmodData2.coral_cover_per_taxa/100; %then package relative covers into the rci structure
+evenness_parms = struct('NCORALGROUPS', NCORALGROUPS, 'covers', covers,'total_cover', rci.total_cover);
+rci.coral_evenness = coralEvenness(evenness_parms);  %call function that calculates the evenness of coral groups
 rci.coral_evenness = single(rci.coral_evenness); % change to single type
 
 %% Coral juveniles
@@ -94,7 +96,7 @@ rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute j
 shelterVolumeInput = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS,'NYEARS', NYEARS', 'NCORALGROUPS', NCORALGROUPS,'NCORALSIZEBINS', NCORALSIZEBINS);
 shelterVolume0 = SheltervolumeFromReefmod(shelterVolumeInput); %call function that converts coral groups and sizes to colony shelter volume
 shelterVolumePerKm2 = shelterVolume0./reefArea;  %normalise by division by reef area (matrix by vector)
-shelterVolume = shelterVolumePerKm2./mean(shelterVolumePerKm2(:,1:10),2); %nondimensionalise by comparing against mean sheltervolume in early years
+shelterVolume = shelterVolumePerKm2./median(shelterVolumePerKm2(:,1:10),2); %nondimensionalise by comparing against mean sheltervolume in early years
 shelterVolume(shelterVolume>1)=0; %constrain shelter volume between 0 and 1
 rci.shelterVolume = shelterVolume; %add to rci structure 
 
@@ -106,7 +108,7 @@ reefmodData2.Macroalgae = squeeze(sum(reefmodData2.Macroalgae, 3)); %sum across 
 
 %% Crustose coralline algae (CCAs)
 %YM Bozec notes: CCA can be obtained as 100 - all corals - all algae - nongrazable. Don't include rubble here because it's not treated as a substrate.
-rci.CCA = 1 - rci.totalCover - reefmodData2.nongrazable'/100 - reefmodData2.Macroalgae;
+rci.CCA = 1 - rci.total_cover - reefmodData2.nongrazable'/100 - reefmodData2.Macroalgae;
 rci.CCA(rci.CCA<0) = 0;
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
 reefmodData2.COTSrel = reefmodData2.COTS_mantatow./cots_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
@@ -121,8 +123,8 @@ rci.rubble_complementary = (100 - reefmodData2.rubble)/100; %complementary of ru
 %% Add reefs to the structure, delete redundant fields, and reorganise
 rci.reefs = reefmod_data.reefs;
 rci = rmfield(rci,'coraljuv'); %original field deleted as it's replaced with relative density of four size classes
-rci = rmfield(rci,'covers'); %original field deleted as it's replaced with derived metrics
-fieldorder = {'totalCover','coral_evenness','shelterVolume','coraljuv_relative','CCA','COTSrel_complementary', 'Macroalgae_complementary','rubble_complementary','reefs'};
+%rci = rmfield(rci,'covers'); %original field deleted as it's replaced with derived metrics
+fieldorder = {'total_cover','coral_evenness','shelterVolume','coraljuv_relative','CCA','COTSrel_complementary', 'Macroalgae_complementary','rubble_complementary','reefs'};
 rci = orderfields(rci,fieldorder);
 
 %% Compare ReefMod data against reef condition criteria provided by expert elicitation process (questionnaire)
@@ -132,7 +134,7 @@ reefcondition = zeros(NREEFS,NYEARS);
 %Start loop for crieria vs metric comparisons
     for reef = 1:NREEFS
         for t = 1:NYEARS
-            M = [rci.totalCover(reef,t), ... 
+            M = [rci.total_cover(reef,t), ... %M is the  matrix of attribute values from ReefMod
                 rci.coral_evenness(reef,t), ...
                 rci.shelterVolume(reef,t), ... 
                  rci.coraljuv_relative(reef,t), ...
@@ -140,19 +142,22 @@ reefcondition = zeros(NREEFS,NYEARS);
                  rci.COTSrel_complementary(reef,t), ...
                  rci.Macroalgae_complementary(reef,t), ...
                  rci.rubble_complementary(reef,t)];
-            A = sum(M(metrics)> rci_crit(1,metrics),'omitnan')/numel(metrics);
-            B = sum(M(metrics)> rci_crit(2,metrics),'omitnan')/numel(metrics);
-            C = sum(M(metrics)> rci_crit(3,metrics),'omitnan')/numel(metrics);
-            D = sum(M(metrics)> rci_crit(4,metrics),'omitnan')/numel(metrics);
-            E = sum(M(metrics)> rci_crit(5,metrics),'omitnan')/numel(metrics);
+             % the following tests how many ReefMod metrics exceed expert
+             % criteria across condition categories
+            nmetrics = numel(metrics);
+            A = sum(M(metrics)> rci_crit(1,metrics),'omitnan')/nmetrics;
+            B = sum(M(metrics)> rci_crit(2,metrics),'omitnan')/nmetrics;
+            C = sum(M(metrics)> rci_crit(3,metrics),'omitnan')/nmetrics;
+            D = sum(M(metrics)> rci_crit(4,metrics),'omitnan')/nmetrics;
+            E = sum(M(metrics)> rci_crit(5,metrics),'omitnan')/nmetrics;
             
-              if A > criteria_threshold
+              if A >= criteria_threshold
                 reefcondition(reef,t) = 0.9; %representative of very good
-                 elseif B > criteria_threshold && A < criteria_threshold
+                 elseif B >= criteria_threshold && A < criteria_threshold
                 reefcondition(reef,t) = 0.7; %representative of good
-                elseif C > criteria_threshold && A < criteria_threshold && B < criteria_threshold
+                elseif C >= criteria_threshold && A < criteria_threshold && B < criteria_threshold
                  reefcondition(reef,t) = 0.5; %representative of fair
-                 elseif D > criteria_threshold && C < criteria_threshold  && A < criteria_threshold && B < criteria_threshold
+                 elseif D >= criteria_threshold && C < criteria_threshold  && A < criteria_threshold && B < criteria_threshold
                 reefcondition(reef,t) = 0.3; %representative of poor
                 else 
                 reefcondition(reef,t) = 0.1; %
