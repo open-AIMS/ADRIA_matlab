@@ -2,7 +2,7 @@ function [params, ecol_params] = ADRIAparms()
 % Create structs with default parameter values for ADRIA
 %
 % Notes:
-% Values for distribution of degree heating weeks come from [1].
+% Values for the historical, temporal pattern of degree heating weeks between bleaching years come from [1].
 %
 % References
 % 1. Lough, J.M., Anderson, K.D. and Hughes, T.P. (2018) 
@@ -22,8 +22,8 @@ params.psgA = 1:10; % prioritysite group A
 params.psgB = 11:20; % prioritysite group B
 params.psgC = 1:26; % prioritysite group C
 
-params.nspecies = 4; % number of groups modelled in the current version. If the community model is replaced with a population model, then this becomes 1.
-params.ncoralsp = 4; % number of coral species modelled in the current version. If the community model is replaced with a population model, then this becomes 1.
+params.nspecies = 4; % total number of species modelled in the current version. Currently this is only corals, so nspecies = ncoralsp.
+params.ncoralsp = 4; % number of coral species modelled in the current version. Currently nspecies = ncoralsp.
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 % params.ncrit = length(fieldnames(interv)); % number of columns used in the intervention table
 params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
@@ -31,9 +31,9 @@ params.RCP = 60;  % RCP scenario to use
 
 %% Environmental parameters
 
-params.beta = [1, 3]; % beta parameters for wave disturbance
-params.dhwmax25 = 7; % dhwmax at year 2025.  NOTE: all warming simulations will change with new common DHW input for MDS team  
-params.DHWmaxtot = 50; % max assumed DHW for all scenarios
+params.beta = [1, 3]; % beta parameters for wave disturbance (distribution parameter)
+params.dhwmax25 = 7; % dhwmax at year 2025. NOTE: all warming simulations will change with new common DHW input for MDS team  
+params.DHWmaxtot = 50; % max assumed DHW for all scenarios.  Will be obsolete when we move to new, shared inputs for DHW projections
 params.wb1 = 0.55; % weibull parameter 2 for DHW distributions based on Lough et al 2018
 params.wb2 = 2.24; % weibull parameter 1 for DHW distributions based on Lough et al 2018
 
@@ -51,14 +51,14 @@ params.LPdhwcoeff = 0.4; % shape parameters relating dhw affecting cover to larv
 params.LPDprm2 = 5; % parameter offsetting LPD curve
 params.wavemort90 = [0.3, 0.3, 0.1, 0.05]; % coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
 
-r = [0.40, 0.40, 0.10, 0.05]; % base growth of species 1 to 4 (1&2: sens, 3&4: hard)
-mb = [0.07, 0.07, 0.03, 0.01]; % background mortality of the four species, not waves and heat stress
-P = 0.70; % max total coral cover
+r = [0.40, 0.40, 0.10, 0.05]; % base growth of species 1 to 4 (1&2: Acropora, 3&4: others)
+mb = [0.07, 0.07, 0.03, 0.01]; % background mortality of the four coral species, not waves and heat stress
+P = 0.70; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
 
 % DHW and bleaching mortality-related parameters.
-p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to both species.
-natad = [0.2, 0.2, 0.05, 0.10]; % DHWs per year for all species
-assistadapt = [0, 2, 2, 4]; % expressed as DHWs in absolute terms - i.e. not increasing over time
+p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
+natad = [0.2, 0.2, 0.05, 0.10]; % rate of natural adaptation, DHWs per year for all species
+assistadapt = [0, 2, 2, 4]; % assisted adaptation, expressed as DHWs in absolute terms - i.e. not increasing over time
 ecol_params = struct('r', r, 'mb', mb, 'P', P, 'p', p, 'natad', natad, 'assistadapt', assistadapt); % package into structure to use in functions
 
 %% Ecosystem service parameters
