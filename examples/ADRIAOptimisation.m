@@ -23,11 +23,11 @@ function [x,fval] = ADRIAOptimisation(alg,opti_ind,varargin)
     %             multiple values are chosen to optimise over.
     %         fval : the max value/optimal value of the chosen metrics 
     
-    if nargin == 2
+    if size(varargin,1) == 0
         % get shell variables
         prsites = str2double(getenv('PrSites'));
-        rcp = str2double(getenv('RCP'));; 
-    elseif nargin>2
+        rcp = str2double(getenv('RCP'));
+    else
         prsites = varargin{1};
         rcp = varargin{2};
     end

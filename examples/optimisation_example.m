@@ -15,7 +15,7 @@ file_ap = 'Example1obj';
 
 % perform optimisation (takes a while, be warned, improvements to
 % efficiency to be made)
-[x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,alg,file_ap);
+[x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,rcp,file_ap);
 
 % print results (also automatically saved to a struct in a .mat file) 
 sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f',...
@@ -37,7 +37,7 @@ file_ap = 'Example2obj';
 
 % perform optimisation (takes a while, be warned, improvements to
 % efficiency to be made)
-[x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,alg,file_ap);
+[x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,rcp,file_ap);
 
 % print results (also automatically saved to a struct in a .mat file) 
 sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f, av_CES = %1.4f',...
