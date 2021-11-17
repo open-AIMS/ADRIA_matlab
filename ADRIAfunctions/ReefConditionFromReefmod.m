@@ -84,7 +84,7 @@ reefArea = places(:,3); %in ReefMod, total reef area from GBRMPA maps is used as
 rci.total_cover = sum(reefmodData2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
 covers = reefmodData2.coral_cover_per_taxa/100; %then package relative covers into the rci structure
 evenness_parms = struct('NCORALGROUPS', NCORALGROUPS, 'covers', covers,'total_cover', rci.total_cover);
-rci.coral_evenness = coralEvenness(evenness_parms);  %call function that calculates the evenness of coral groups
+rci.coral_evenness = coralEvennessReefMod(evenness_parms);  %call function that calculates the evenness of coral groups
 rci.coral_evenness = single(rci.coral_evenness); % change to single type
 
 %% Coral juveniles
@@ -94,7 +94,7 @@ rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute j
 
 %% Estimate shelter volume based on coral group, colony size and cover 
 shelterVolumeInput = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS,'NYEARS', NYEARS', 'NCORALGROUPS', NCORALGROUPS,'NCORALSIZEBINS', NCORALSIZEBINS);
-shelterVolume0 = SheltervolumeFromReefmod(shelterVolumeInput); %call function that converts coral groups and sizes to colony shelter volume
+shelterVolume0 = shelterVolumeFromReefmod(shelterVolumeInput); %call function that converts coral groups and sizes to colony shelter volume
 shelterVolumePerKm2 = shelterVolume0./reefArea;  %normalise by division by reef area (matrix by vector)
 shelterVolume = shelterVolumePerKm2./median(shelterVolumePerKm2(:,1:10),2); %nondimensionalise by comparing against mean sheltervolume in early years
 shelterVolume(shelterVolume>1)=0; %constrain shelter volume between 0 and 1

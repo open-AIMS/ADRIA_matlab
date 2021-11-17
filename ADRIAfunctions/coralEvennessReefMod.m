@@ -1,6 +1,6 @@
 %%Calculate evenness across functional coral groups in ReefMod
 
-function Y = coralEvenness(X)  
+function Y = coralEvennessReefMod(X)  
 psqr = zeros(size(X.covers,1),size(X.covers,2),size(X.covers,3)); %indices are: (1) reef, (2) time steps, 3) coral groups
 %sumpsqr(reef,t) = zeros(size(X.covers,1),size(X.covers,2));
 for reef = 1:size(X.covers,1)
