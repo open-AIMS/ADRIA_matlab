@@ -1,6 +1,10 @@
-function DHWdisttime = ADRIA_DHWprojectfun(tf,nsites,mdhwdist0,sdhwdist0,dhwmax25,RCP,wb1,wb2)
+function DHWdisttime = ADRIA_DHWprojectfun(tf,mdhwdist0,sdhwdist0,dhwmax25,RCP,wb1,wb2)
 % Generates time sequence of Degree Heating Weeks for all sites.
-% Uses the weibull distribution.
+% Builds on forward projections of max DHWs from trends in climate models. 
+% Temporal patterns in DHW were simulated by fitting a weibul distribution to historical DHW data by 
+% Lough et al. 2018, essentiallly sampling under the DHW max curve.
+% Variation in the spatial distribution of observed DHWs in the three bleaching years was used
+% to represent the spatio-temporal stochasticity among grid cells within and among bleaching years in the future. 
 %
 % Inputs: 
 %     tf        : int, number of time steps to generate
@@ -17,7 +21,7 @@ function DHWdisttime = ADRIA_DHWprojectfun(tf,nsites,mdhwdist0,sdhwdist0,dhwmax2
 %         2D table of shape (tf, nsites) indicating DHWs for each site
 %         across time
 
-% RCP heatrates
+% Proxy RCP heatrates for maximum DHW. Represent trends based on regressions fitted to NOAA's ESM for the GBR (ref to come).   
 if RCP == 26
     heatrate = 0.2;
 elseif RCP == 45

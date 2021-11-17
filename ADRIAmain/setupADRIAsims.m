@@ -37,9 +37,9 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(sims,params,nsites)
     % Data is structure with resdhwsites, dhw_surf and z
     F = load('MooreDHWs'); % load data that are previously generated
     z = F.z; % bathymetry
-    mdhwdist0 = mean(F.resdhwsites(:,5:7),2)';
-    sdhwdist0 =std(F.resdhwsites(:,5:7),0,2)';
-    dhwdisttime = zeros(params.tf,nsites,sims);
+    mdhwdist0 = mean(F.resdhwsites(:,5:7),2)'; %mean residual dhw at sites
+    sdhwdist0 =std(F.resdhwsites(:,5:7),0,2)'; %standard deviation of residual dhws at sites
+    dhwdisttime = zeros(params.tf,nsites,sims); %initialise matrix that represents projections of DHW in space and time
     
     for sim = 1:sims
         dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,nsites,mdhwdist0,...
