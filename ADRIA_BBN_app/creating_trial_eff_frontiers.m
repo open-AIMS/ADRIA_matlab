@@ -112,7 +112,9 @@ ub = [1 1];
 ES = [];
 CES = [];
 PES = [];
-for x = 0.01:0.05:1
+
+for x = 0.00001:0.05:1
+
     % create objective with this level of TC and E and S as variables
     CESobj = @(zz) -1*funcCES(x,zz);
     z0 = rand(1,2);
@@ -134,5 +136,7 @@ ylabel('CES','Interpreter','latex','Fontsize',12)
 
 hold on
 plot(ES(:,1),ES(:,2),'*')
-xlabel('ES','Interpreter','latex','Fontsize',12)
-ylabel('ES','Interpreter','latex','Fontsize',12)
+
+xlabel('E','Interpreter','latex','Fontsize',12)
+ylabel('S','Interpreter','latex','Fontsize',12)
+
