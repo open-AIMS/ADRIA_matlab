@@ -1,4 +1,4 @@
-function reef_condition_metrics = runADRIA(interv, crit_weights, params, ecol_parms, alg_ind, out_ind)
+function reef_condition_metrics = runADRIA(interv, crit_weights, params, ecol_parms, alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -11,7 +11,6 @@ function reef_condition_metrics = runADRIA(interv, crit_weights, params, ecol_pa
 %                  - 1, Order ranking
 %                  - 2, TOPSIS
 %                  - 3, VIKOR
-%   out_ind : indicates number of coral metric outputs (1-4)
 %
 % Output:
 %    reef_condition_metrics : struct,
@@ -71,10 +70,7 @@ function reef_condition_metrics = runADRIA(interv, crit_weights, params, ecol_pa
 ninter = size(IT, 1);
 % which controls what interventions to run and and what levels, etc
 
-%% Retrieve RCP scenario
-% RCP 45, 60, 6085, and 85
-% 6085 refers to RCP 7 RCP
-% RCP = params.RCP;
+
 
 %% RUN SETUP functions
 
@@ -134,7 +130,8 @@ risktol = crit_weights(:, 9); % risk tolerance
 dMCDA_vars = struct('nsites', nsites, 'nsiteint', params.nsiteint, 'prioritysites', [], ...
     'strongpred', strongpred, 'centr', SiteRanks.C1, 'damprob', 0, 'heatstressprob', 0, ...
     'sumcover', 0, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
-    'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+    'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, ...
+    'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
 
 % loop though number of simulations for each intervention including the counterfactual
 parfor sim = 1:interv.sims
@@ -170,6 +167,7 @@ parfor sim = 1:interv.sims
 
         parms = ecol_parms;
         strategy = IT(I, 1); %0 is random, 1 is guided
+
         pgs = IT(I, 2); % group of priority sites
         seed1 = IT(I, 3); %species seeded - here the sensitive Acropora
         seed2 = IT(I, 4); %species seeded - here the hardier other coral
@@ -328,7 +326,7 @@ end % sims
 % Note that S needs work: needs to be expressed as a function of coral group
 % and size-frequency distribution.
 
-[TC, C, E, S] = reefConditionMetrics(covsim);
+[TC, C, E, S] = ReefConditionMetrics(covsim);
 
 % seedlog and shadelog are omitted for now
 reef_condition_metrics = struct('TC', TC, ...

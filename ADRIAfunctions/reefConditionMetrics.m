@@ -1,12 +1,10 @@
-function [TC,C,E,S] = reefConditionMetrics(covsim)
+function [TC,C,E,S] = ReefConditionMetrics(covsim)
 %
 % ADRIA Reef Condition Metrics as indicators of scope for ecosystem 
 % service provision
 % Function converts the cover of four species to scope for providing 
 % ecosystem services: cultural, provisioning and regulating (including 
 % some supporting)
-% out_ind = 1 : just calculate TC
-% out_ind >1 : calculate other metrics
 
 %% Preliminary estimates using only three species 
 % 1: Total coral cover (relative)
