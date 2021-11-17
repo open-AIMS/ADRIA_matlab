@@ -1,7 +1,7 @@
 
 function [resdhwsites,dhw_surf,z] = ADRIA_dhwMoore(~)
 
-%% Extract DHD data for Moore Reef Cluster from Robson files
+%% Extract Degree Heating Weeks data for Moore Reef Cluster from Robson files
 
 %% Load Moore sites
 F0 = readtable('MooreSites.xlsx', 'PreserveVariableNames',true);
