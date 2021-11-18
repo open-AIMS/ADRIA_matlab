@@ -199,3 +199,25 @@ end
 %% Save results
 ADRIA_saveResults(Y, "example_results.mat")
 ```
+
+## ADRIA_DMCDA()
+Allows selection from 4 MCDA algorithms to make dynamic site selection decisions within ADRIA. Selection decisions are based on a decision matrix A,
+which currently incoporates connectivity, wave stress, heat stress, coral cover and priority predecessors as criteria.
+
+**Inputs:**
+- DCMAvars    : a structure of the form struct('nsites', [], 'nsiteint', [], ...
+      'strongpred', [], 'centr', [], 'damprob', [], 'heatstressprob', [], ...
+      'prioritysites', [], 'sumcover', [], 'risktol', [], 'wtconseed', [], ...
+      'wtconshade', [],'wtwaves', [], 'wtheat', [], 'wthicover', [], ...
+      'wtlocover', [], 'wtpredecseed', [], 'wtpredecshade', []);
+      where []'s are dynamically updated in runADRIA.m
+- alg_ind   : an integer indicating the algorithm to be used for the multi-criteria anlysis 
+      (1: order-ranking, 2: TOPSIS, 3: VIKOR, 4: multi-obj ranking
+
+**Output:**
+- prefseedsites : array of reccommended best sites for seeding
+- prefshadesites : array of reccommended best sites for shading
+- nprefseedsites : number of seeding sites chosen by MCDA
+- nprefshadesites : number of shading sites chosen by MCDA
+
+
