@@ -244,6 +244,9 @@ PrSites and RCP. If > 2 inputs, will use these as PrSites and RCP. Saves the out
          multiple values are chosen to optimise over).
 - fval : the max value/optimal value of the chosen metrics 
 
+See also:
+    [`ObjectiveFunc()`](#objectivefunc)
+    
 **Example:**
 ```matlab
 %% Optimise for average total coral cover av_TC and scope for cultural ecosystem services av_CES
