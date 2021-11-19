@@ -13,6 +13,11 @@ function [params, ecol_params] = ADRIAparms()
 % This is the list of parameters and values used in most of ADRIA.
 % See ReadMe files for more descriptions and explanations
 
+msg = ['Note: ADRIAparms() is marked for deprecation.\n', ...
+       'It will be replaced by coreParamDetails().'
+];
+warning(msg);
+
 %% Base scenario parameters
 
 params.tf = 25; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
