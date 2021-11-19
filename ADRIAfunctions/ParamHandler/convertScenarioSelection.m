@@ -39,7 +39,7 @@ function converted = convertScenarioSelection(sel_values, p_opts)
         % converted(:, p) = {1:length(selection)};
         for sel = 1:length(selection)
             % convert from cell array to matrix if needed
-            if ptype == "categorical"
+            if ptype == "categorical" || ptype == "integer"
                 tmp = floor(selection(sel));
                 if tmp == p_opts.upper_bound{p} % && tmp == selection(sel)
                     % subtract a small constant to ensure flooring works

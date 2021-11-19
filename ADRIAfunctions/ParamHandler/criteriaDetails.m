@@ -47,28 +47,16 @@ defaults = {
     1 % "deployed_coral_risk_tol"
 };
 
-lower_bound = {
-    0; % "wave_stress";
-    0; % "heat_stress";
-    0; % "shade_connectivity";
-    0; % "seed_connectivity";
-    0; % "coral_cover_high";
-    0; % "coral_cover_low";
-    0; % "seed_priority";
-    0; % "shade_priority";
-    0 % "deployed_coral_risk_tol"
-};
-
-upper_bound = {
-    1; % "wave_stress";
-    1; % "heat_stress";
-    1; % "shade_connectivity";
-    1; % "seed_connectivity";
-    1; % "coral_cover_high";
-    1; % "coral_cover_low";
-    1; % "seed_priority";
-    1; % "shade_priority";
-    1 % "deployed_coral_risk_tol"
+p_bounds = {
+    [0, 1]; % "wave_stress";
+    [0, 1]; % "heat_stress";
+    [0, 1]; % "shade_connectivity";
+    [0, 1]; % "seed_connectivity";
+    [0, 1]; % "coral_cover_high";
+    [0, 1]; % "coral_cover_low";
+    [0, 1]; % "seed_priority";
+    [0, 1]; % "shade_priority";
+    [0, 1] % "deployed_coral_risk_tol"
 };
 
 ptype = [
@@ -84,8 +72,7 @@ ptype = [
 ];
 
 
-criteria_weights = paramTableBuilder(name, ptype, defaults, lower_bound, ...
-                                     upper_bound);
+criteria_weights = paramTableBuilder(name, ptype, defaults, p_bounds);
 
 % if number of arguments passed in is 0, then use default values
 % otherwise replace defaults with specified values
