@@ -1,6 +1,12 @@
 % set random number seed to ensure consistent results for test
 rng(101)
 
+%% Set up ADRIA project
+% Specify path to ADRIA project. Opens current directory if nothing is
+% provided
+ADRIAsetup()
+
+%% Generate parameter combinations
 % Create struct with default intervention values
 % Options and default values:
 %   Guided = [0, 1];  0 or 1 for guided or unguided intervention 
@@ -16,10 +22,26 @@ rng(101)
 %   sims = 50;        how many simulations to run
 %   RCP = 60;
 
-
 % Specify options above by name to change settings
 N = 10;
+
 interventions = interventionSpecification(sims=N);
+
+% Specific settings can be changed as with interventionSpecification()
+criteria_weights = criteriaWeights();
+
+alg_ind = 1;
+
+%% Future approach (implementation above will be deprecated)
+% inter_opts = interventionDetails();
+% criteria_opts = criteriaDetails();
+
+% combine parameters
+% combined_opts = [inter_opts; criteria_opts];
+
+% p_sel = table;
+% converted_tbl = convertScenarioSelection(p_sel, combined_opts);
+% converted_tbl
 
 % Set default criteria weighting
 % wave_stress = 1  % wave stress avoidance
@@ -32,20 +54,12 @@ interventions = interventionSpecification(sims=N);
 % shade_priority = 0      % Shade at strongest sources for priority sites
 % deployed_coral_risk_tol = 1  % Risk Tolerance wrt Deployed Corals
 
-% set up ADRIA project
-% input path to project or nothing if project is in pwd
-ADRIAsetup()
-
-% Settings can be changed as with interventionSpecification()
-criteria_weights = criteriaWeights();
 
 % Algorithm choice
 %  1 = OrderRanking
 %  2 = TOPSIS
 %  3 = VIKOR 
 %  4 = Multi-Obj GA 
-
-alg_ind = 1;;
 
 %% LOAD parameter file
 [params, ecol_parms] = ADRIAparms(); % environmental and ecological parameter values etc
