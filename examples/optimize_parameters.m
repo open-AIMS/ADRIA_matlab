@@ -1,7 +1,7 @@
 % Example script showcasing how to optimize known ADRIA parameters for a
 % specified objective function.
 
-alg = 1;  % Use Order Ranking
+alg = 1; % Use Order Ranking
 
 % get shell variables
 prsites = 2; % PrSites
@@ -29,7 +29,7 @@ lb = cell2mat(all_params.lower_bound);
 ub = cell2mat(all_params.upper_bound);
 
 [params, ecol_parms] = ADRIAparms();
-params.RCP = rcp;  % set target RCP scenario
+params.RCP = rcp; % set target RCP scenario
 
 [TP_data, site_ranks, strongpred] = ADRIA_TP('Inputs/MooreTPmean.xlsx', 0.1);
 nsites = 26;
@@ -39,22 +39,22 @@ fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(rcp), ".nc");
 wave_scen = ncread(fn, "wave");
 dhw_scen = ncread(fn, "DHW");
 
-% objective function for simulated annealing function is negative (as
+% Objective function for simulated annealing function is negative (as
 % solves the minimisation) and must have a single vector input and scalar
 % output
-ObjectiveFunction = @(x) -1*allParamObjectiveFunc(x, alg, out_name, ...
-                                                  all_params, ...
-                                                  nsites, wave_scen, ...
-                                                  dhw_scen, params, ...
-                                                  ecol_parms, ...
-                                                  TP_data, site_ranks, strongpred);
+ObjectiveFunction = @(x) -1 * allParamObjectiveFunc(x, alg, out_name, ...
+    all_params, ...
+    nsites, wave_scen, ...
+    dhw_scen, params, ...
+    ecol_parms, ...
+    TP_data, site_ranks, strongpred);
 
 % Begin optimisation (only run for 30 seconds)
 obj_opts = optimoptions('simulannealbnd', 'MaxTime', 30);
 x = simulannealbnd(ObjectiveFunction, x0, lb, ub, obj_opts);
 
 % label file with key parameters
-filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv',rcp,prsites,alg);
+filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv', rcp, prsites, alg);
 
 % Save as CSV
 saveData(x, filename, 'csv')
