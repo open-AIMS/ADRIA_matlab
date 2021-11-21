@@ -18,7 +18,7 @@ i_params = interventionDetails();
 criteria_weights = criteriaDetails();
 all_params = [i_params; criteria_weights];
 
-% Filter to target interventions
+% Get names of parameters (used for later display)
 p_names = all_params.name;
 
 % Initialise parameters (use the lower bounds to start with)
