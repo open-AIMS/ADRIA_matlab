@@ -18,10 +18,10 @@ function criteria_weights = criteriaDetails(varargin)
 %
 % Outputs:
 %   table of name, ptype, defaults, lower_bound, upper_bound, options,
-%   option_bounds
+%   raw_bounds
 %       where lower/upper bounds indicates the raw bound values
 %       `options` maps option ids to their values, and
-%       `option_bounds` indicates the min/max range of options ids.
+%       `raw_bounds` indicates the min/max range of options ids.
 
 name = [
     "wave_stress";

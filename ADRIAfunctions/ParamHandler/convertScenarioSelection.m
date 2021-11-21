@@ -10,7 +10,8 @@ function converted = convertScenarioSelection(sel_values, p_opts)
 %
 % Inputs:
 %     sel_values : table or array, of parameter value selections
-%                    if array, converts to table.
+%                    if array, converts to table using information in
+%                    p_opts
 %     p_opts     : table, of parameter options (value ranges, etc)
 %
 % Outputs:
