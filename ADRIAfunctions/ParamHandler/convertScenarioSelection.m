@@ -44,7 +44,7 @@ function converted = convertScenarioSelection(sel_values, p_opts)
                 if tmp == p_opts.upper_bound{p} % && tmp == selection(sel)
                     % subtract a small constant to ensure flooring works
                     % as intended when the value is at upper limit
-                    tmp = floor(tmp - 1e-6);
+                    tmp = max(floor(tmp - 1e-6), 1);
                 end
 
                 try

@@ -46,7 +46,7 @@ for i = 1:length(options)
 
     try
         lower_opt_bound{i} = 1;
-        upper_opt_bound{i} = length(options{i}{1})+1;
+        upper_opt_bound{i} = length(options{i}{1});
     catch
         lower_opt_bound{i} = lower;
         upper_opt_bound{i} = upper;
