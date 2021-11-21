@@ -5,6 +5,11 @@ function criteria_weights = criteriaWeights(varargin)
 %   criteria_weights : struct holding default and user specified weightings
 %
 
+msg = ['criteriaWeights() will be deprecated in the future.\n', ...
+       'Use criteriaDetails() instead.'
+];
+warning(msg);
+
 %% ADRIA Criteria weights
 
 %% Criteria Weights used in the selection of sites and interventions (min 0, max 1)

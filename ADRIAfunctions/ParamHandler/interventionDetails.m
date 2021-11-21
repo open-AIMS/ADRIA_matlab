@@ -18,11 +18,13 @@ function interventions = interventionDetails(varargin)
 %
 % Outputs:
 %   table of name, ptype, defaults, lower_bound, upper_bound, options,
-%   option_bounds
-%       where lower/upper bounds indicates the raw bound values
-%       `options` maps option ids to their values, and
-%       `option_bounds` indicates the min/max range of options ids.
-
+%   raw_lower_bound, raw_upper_bound, where
+%       - `name` holds the parameter names
+%       - `ptype` denotes the parameter type (categorical, integer, float)
+%       - `defaults` indicates the raw unmodified assigned value
+%       - lower/upper bounds indicate the range of mapped ids 
+%       - `options` maps option ids to their values
+%       - raw_lower/raw_upper bounds indicates the original value ranges
 name = [
     "Guided";
     "PrSites";
@@ -51,50 +53,35 @@ defaults = {
     % 60  % RCP
 };
 
-
 % TODO: lower and upper bounds are dummy values and need to be replaced!
-lower_bound = {
-    0;  % Guided
-    1;  % PrSites
-    0.0;  % Seed1
-    0.0;  % Seed2
-    0;  % SRM
-    6;  % Aadpt
-    0.01;  % Natad
-    10;  % Seedyrs
-    1;  % Shadeyrs
-    % 60  % RCP
-};
-
-upper_bound = {
-    1;  % Guided
-    3;  % PrSites
-    0.0010;  % Seed1
-    1.0;  % Seed2
-    1;  % SRM
-    12;  % Aadpt
-    0.1;  % Natad
-    15;  % Seedyrs
-    5;  % Shadeyrs
+p_bounds = {
+    [0, 1];  % Guided
+    [1, 3];  % PrSites
+    [0.0, 0.0010];  % Seed1
+    [0.0, 1.0];  % Seed2
+    [0, 1];  % SRM
+    [6, 12];  % Aadpt
+    [0.01, 0.1];  % Natad
+    [10, 15];  % Seedyrs
+    [1, 5];  % Shadeyrs
     % 85  % RCP
 };
 
 ptype = [
-    "categorical";
-    "categorical";
+    "integer";
+    "integer";
     "float";
     "float";
-    "categorical";
-    "categorical";
+    "integer";
+    "integer";
     "float";
-    "categorical";
-    "categorical";
+    "integer";
+    "integer";
     % "categorical";
 ];
 
 
-interventions = paramTableBuilder(name, ptype, defaults, lower_bound, ...
-                                  upper_bound);
+interventions = paramTableBuilder(name, ptype, defaults, p_bounds);
 
 % if number of arguments passed in is 0, then use default values
 % otherwise replace defaults with specified values

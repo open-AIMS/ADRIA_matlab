@@ -1,7 +1,10 @@
+% Example script showcasing how monte carlo parameter combinations
+% can be generated.
+
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
 
-
+% all available parameter options
 combined_opts = [inter_opts; criteria_opts];
 
 % Generate using simple monte carlo
