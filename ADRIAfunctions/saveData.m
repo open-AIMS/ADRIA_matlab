@@ -1,7 +1,13 @@
 function saveData(data, filename, dim_spec, nc_varname)
     % Save data to file in CSV, `.mat` or NetCDF format.
     %
-    % If file is not specified, generates a filename based on date/time
+    % If file is not specified, generates a filename based on date/time.
+    %
+    % If NetCDF format is specified, attempts to create a new NetCDF file
+    % and field/variable (specified by `nc_varname`). If the file already
+    % exists, then the new variable is created. This function does not
+    % support overwriting existing variables and so variable names must be
+    % unique.
     %
     % Inputs:
     %     data       : any, data to save
