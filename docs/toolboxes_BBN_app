@@ -1,0 +1,8 @@
+## Setup for BBN inference app ##
+- the app is located in the ADRIA_BBN_app folder and called ADRIA_BBN_app3 (ADRIA_app_example2 is an earlier version).
+- The app runs solely on the data in ADRIA_BBN_data, which was created using the .mat to .csv coversion function BBN_Compatible_Table_Func in the Functions/OutputConversionFunctions folder.
+- This data is limited and so some of the variable choices available do not work yet (this will be amended when a larger data set is generated)
+- the main non-matlab Toolbox the app uses is the BANSHEE toolbox for non-parametric Bayesian Belief Networks (free), which can be downloaded as a Matlab add-on or from their GitHub.
+- One function in this toolbox has been changed for to allow plotting on the GUI interface and nicer network plotting, called bn_visualise
+- the new copy of bn_visualise that the app uses is provided in the folder ADRIA_BBN_app, so when you first download the toolbox, change the name of the toolbox function bn_visualise to something else, and then change the name of the function called bn_visualise_copy in the ADRIA_BBN_app folder to bn_visualise.
+- the only other non-matlab-native function the app uses is al_goodplot a function which does violin plots. This is included in the ADRIA_BBN_app folder, but is part of the al_goodplot toolbox (free).
