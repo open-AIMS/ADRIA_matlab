@@ -1,5 +1,5 @@
 function out = ObjectiveFunc(x,CrtWts,params,ecol_parms,algInd,prSites,RCP,optInd)
-    % objective function gives total coral cover TC as single output averaged
+    % Objective function gives total coral cover TC as single output averaged
     % over sites and time.
     % Input : x - x = [Seed1,Seed2,SRM,Aadpt,Natad,RCP]
     %         algInd - indicate MCDA alg
