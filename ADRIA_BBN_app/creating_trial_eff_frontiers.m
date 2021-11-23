@@ -13,12 +13,13 @@ S_i = squeeze(mean(S,1));
 E_i = squeeze(mean(E,1));
 
 
+
 %%
 % plotting CES against PES
 % CES and PES for example intervention scenarios on sites 1-26 (alternatively could
 % average over sites)
-CES_i = tanh(TC_i/TCsatCult).*(evcult*E_i+strcult*S_i);
-PES_i = tanh(TC_i/TCsatProv).*(evprov*E_i+strprov*S_i);
+%CES_i = tanh(TC_i/TCsatCult).*(evcult*E_i+strcult*S_i);
+%PES_i = tanh(TC_i/TCsatProv).*(evprov*E_i+strprov*S_i);
 
 
 % comparison of fronts for range of sites on 2 intervention schemes
@@ -102,7 +103,50 @@ ylabel('S','Interpreter','latex','Fontsize',12)
 quiver(x,y,0.9*tanh(x),0.1*y)
 legend('$Site 1$', '$Site 26$', 'Interpreter','latex','FontSize',10);
 
-%% optimisation?
+%%
+% plotting PES againts S
+
+% comparison of fronts for range of sites on 2 intervention schemes
+count =1;
+for k = 1:8:26
+    figure(count)
+    hold on
+    title(sprintf('Site %2.0f',k), 'Interpreter','latex','Fontsize',12);
+    plot(squeeze(PES_i(k,1,:)),squeeze(S_i(k,1,:)),'*');
+    plot(squeeze(PES_i(k,192,:)),squeeze(S_i(k,192,:)),'*');
+    xlabel('PES','Interpreter','latex','Fontsize',12)
+    ylabel('S','Interpreter','latex','Fontsize',12)
+    legend('$Int 1$', '$Int 192$', 'Interpreter','latex','FontSize',10);
+    count = count+1;
+end
+
+
+for k = 1:30:192
+    figure(count)
+    hold on
+    title(sprintf('Seed1 %1.2f Seed2 %1.2f SRM %1.2f AsAdt %1.2f NatAdt %1.2f',Data(k+1,6:10)), 'Interpreter','latex','Fontsize',12);
+    plot(squeeze(PES_i(1,k,:)),squeeze(S_i(1,k,:)),'*')
+    plot(squeeze(PES_i(26,k,:)),squeeze(S_i(26,k,:)),'*')
+    xlabel('E','Interpreter','latex','Fontsize',12)
+    ylabel('S','Interpreter','latex','Fontsize',12)
+    legend('$Site 1$', '$Site 26$', 'Interpreter','latex','FontSize',10);
+    count = count+1;
+end
+
+
+hold on 
+[x,y] = meshgrid(linspace(0,max(squeeze(E_i(26,57,:))),10),linspace(0,max(squeeze(S_i(26,57,:))),10));
+plot(squeeze(PES_i(1,57,:)),squeeze(S_i(1,57,:)),'*')
+plot(squeeze(PES_i(26,57,:)),squeeze(S_i(26,57,:)),'*')
+xlabel('PES','Interpreter','latex','Fontsize',12)
+ylabel('S','Interpreter','latex','Fontsize',12)
+% example utility isoclines representing 0.3 loss in CES due to 0.7
+% increase in PES
+quiver(x,y,0.9*tanh(x),0.1*y)
+legend('$Site 1$', '$Site 26$', 'Interpreter','latex','FontSize',10);
+
+%% optimisation
+% for a given level of TC, optimise for E and S
 A = [];
 b = [];
 Aeq = [];
@@ -140,3 +184,45 @@ plot(ES(:,1),ES(:,2),'*')
 xlabel('E','Interpreter','latex','Fontsize',12)
 ylabel('S','Interpreter','latex','Fontsize',12)
 
+%% optimisation 2
+% want to plot efficiency frontier for structural complexity and
+% provisional ecosystem services
+
+% have PES as a function of C1,C2,C3
+% S = C1
+% so set levels of C1 and optimise for C2 and C3
+
+A = [1 1];
+Aeq = [];
+beq = [];
+%lb = [0 0];
+%ub = [1 1];
+S = linspace(0,1);
+PES = zeros(size(S));
+C2 = zeros(size(S));
+C3 = zeros(size(S));
+for ss = 1:length(S)-1
+
+    % create objective with this level of C1 and C2 and C3 as variables
+    PESobj = @(cc) -1*FuncPES2(S(ss),cc);
+    c0 = rand(2,1);
+    b = 1-S(ss);
+    % solve for max CES
+    [c23,fval] = fmincon(PESobj,c0,A,b,Aeq,beq,lb,ub);
+    C2(ss) = c23(1);
+    C3(ss) = c23(2);
+    C2(ss) + C3(ss) + S(ss)
+    PES(ss) = -fval;       
+end
+
+hold on 
+plot(S,PES,'*')
+plot(C2,PES,'*')
+plot(C3,PES,'*')
+plot(S+C2+C3,PES,'*')
+xlabel('S/C2/C3/TC','Interpreter','latex','Fontsize',12);
+ylabel('PES','Interpreter','latex','Fontsize',12);
+h = legend('S','C2','C3','TC');
+set(h,'Interpreter','Latex','Fontsize',12);
+
+%plot(S,C3,'*')

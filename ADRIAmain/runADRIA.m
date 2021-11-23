@@ -334,7 +334,7 @@ end % sims
 
 % only consider total coral cover for optimisation (for now)
 % TC
-reef_condition_metrics = ReefConditionMetrics(covsim,out_ind);
+reef_condition_metrics = reefConditionMetrics(covsim,out_ind);
 
 % seedlog and shadelog are omitted for now
 %reef_condition_metrics = struct('TC', TC, ...
