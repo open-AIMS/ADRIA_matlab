@@ -14,7 +14,7 @@ function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
 %     dhw     : float, degree heating weeks for given time step
 %
 % Output:
-%     Y : Array[4, float], bleaching mortality for each coral species
+%     Y : Array[sp*2, float], bleaching mortality for each coral species
 %
 % References:
 %     1. Hughes, T.P., Kerry, J.T., Baird, A.H., Connolly, S.R., 
