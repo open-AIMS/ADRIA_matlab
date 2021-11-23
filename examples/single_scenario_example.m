@@ -72,16 +72,16 @@ for i = 1:ninter
 end
 tmp = toc;
 
-disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(ninter*num_sims), " scenarios (", num2str(tmp/(ninter*num_sims)), " seconds per run)"))
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(ninter*num_reps), " scenarios (", num2str(tmp/(ninter*num_reps)), " seconds per run)"))
 
 %% post-processing
 % collate data across all scenario runs
 
 tf = params.tf;
-processed = struct('TC', zeros(tf, nsites, ninter, num_sims), ...
-                   'C', zeros(tf, 4, nsites, ninter, num_sims), ...
-                   'E', zeros(tf, nsites, ninter, num_sims), ...
-                   'S', zeros(tf, nsites, ninter, num_sims));
+processed = struct('TC', zeros(tf, nsites, ninter, num_reps), ...
+                   'C', zeros(tf, 4, nsites, ninter, num_reps), ...
+                   'E', zeros(tf, nsites, ninter, num_reps), ...
+                   'S', zeros(tf, nsites, ninter, num_reps));
 for i = 1:ninter
     for j = 1:num_reps
         processed.TC(:, :, i, j) = Y(i, j).TC;
