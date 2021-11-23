@@ -1,8 +1,8 @@
 function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
-                              TP_data, site_ranks, strongpred, nsites, ...  
+                              TP_data, site_ranks, strongpred, ...
                               wave_scen, dhw_scen, alg_ind)
 % Run a single intervention scenario with given criteria and parameters
-% If each input was originally a table, this is equivalent to a running 
+% If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
 %
 % Inputs:
@@ -10,24 +10,17 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 %    criteria    : table, row of criteria weights table
 %    params      : table, row of environment parameter permutations
 %    ecol_params : table, row of ecological parameter permutations
+%    TP_data     : matrix, transitional probability matrix
+%    site_ranks  : matrix, of site centrality
+%    strongpred  : matrix, of strongest predecessor for each site
+%    nsites      : int, number of sites considered [To be removed]
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
-%    alg_ind     : int, algorithm choice (1, 2, 3)
+%    alg_ind     : int, ranking algorithm choice 
+%                    (Order: 1, TOPSIS: 2, Vikor: 3)
 %
-% Example: [UNFINISHED]
-% >> interventions = interventionSpecification(sims=10);
-% >> criteria_weights = criteriaWeights();
-% >> [params, ecol_params] = ADRIAparms(interv); %environmental and ecological parameter values etc
-%
-% >> % ... generate parameter perturbations ...
-%
-% >> [IT, ~] = interventionTable(interv); %calls function that builds intervention table, ...
-% >> ninter = size(IT, 1);
-% >> Y = zeros(ninter, 4);  % result set
-% >> for i = 1:niter
-% >>     Y(i, :) = runADRIAScenario(IT(i, :), criteria_weights(i, :), params(i, :), ecol_params(i, :))
-% >> end
-
+% Example:
+%    See `single_scenario_example.m` in the `examples` directory.
 
     %% Weights for connectivity , waves (ww), high cover (whc) and low
     wtwaves = criteria(:, 1); % weight of wave damage in MCDA
@@ -41,28 +34,28 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     risktol = criteria(:, 9); % risk tolerance
 
     %% Set up connectivity
-    % [TP_data, site_ranks, strongpred, nsites] = ADRIA_TP_Moore(params.con_cutoff); % con_cutoff filters out low connectivities
+    nsites = width(TP_data);
 
     %% Set up structure for dMCDA
     dMCDA_vars = struct('nsites', nsites, 'nsiteint', params.nsiteint, 'prioritysites', [], ...
         'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
         'sumcover', 0, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
         'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
-    
+
     %% Set up result structure
-    tf = params.tf;  % timeframe: total number of time steps
-    
+    tf = params.tf; % timeframe: total number of time steps
+
     % container for coral cover and total coral cover
     coral_cover = zeros(tf, params.nspecies, nsites);
-    
+
     % containers for seeding, shading and cooling
     nprefseed = zeros(params.tf, 1);
     nprefshade = zeros(params.tf, 1);
     % nprefcool = zeros(params.tf, ninter);
-    
-    prefseedsites = [];  % set the list of preferred seeding sites to empty
+
+    prefseedsites = []; % set the list of preferred seeding sites to empty
     prefshadesites = []; % set the list of preferred shading sites to empty
-    prioritysites = [];  % set the list of priority sites to empty
+    prioritysites = []; % set the list of priority sites to empty
     % coralsdeployed = zeros(params.tf,ninter); % = params.nsiteint*seedcorals*nnz(nprefsite);
 
     Yin1 = zeros(params.nspecies, nsites);
@@ -75,14 +68,14 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     Y0(2, :) = params.basecov2; %sensitive enhanced corals set to their basecover
     Y0(3, :) = params.basecov3; %naturally hardy corals set to their basecover
     Y0(4, :) = params.basecov4; %enhanced naturally hardy corals set to their basecover
-    
-    % matrix in which to store the output: first branching corals, then 
+
+    % matrix in which to store the output: first branching corals, then
     % foliose corals, then macroalgae
     Yout = zeros(params.tf, params.nspecies, nsites);
     Yout(1, :, :) = Y0; % Set initial population sizes at tstep = 1
     % Yout(tstep,:,:) = Y0; %pos 2 is species, pos3 is sites
     rec = zeros(params.nspecies, nsites); %recruitment
-    
+
     %% Extract intervention options
     strategy = interv(:, 1); % Intervention strategy: 0 is random, 1 is guided
     pgs = interv(:, 2); % group of priority sites
@@ -91,12 +84,12 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     srm = interv(:, 5); %DHW equivalents reduced by fogging or some other shading mechanism
     seedyears = interv(:, 8); %years to shade are in column 8
     shadeyears = interv(:, 9); %years to shade are in column 9
-    
+
     %% Update ecological parameters based on intervention option
     assistadapt = ecol_params.assistadapt;
     assistadapt(2) = interv(:, 6); % level of assisted coral adaptation is column 6 in the intervention table
     natad = ecol_params.natad + interv(:, 7); % level of added natural coral adaptation is column 7 in the intervention table
-    
+
     if pgs == 1
         prioritysites = params.psgA; %see ADRIAparms for list of sites in group
     elseif pgs == 2
@@ -104,13 +97,13 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     elseif pgs == 3
         prioritysites = params.psgC; %see ADRIAparms for list of sites in group
     end
-    
+
     %% Extract other parameters
     LPdhwcoeff = params.LPdhwcoeff;
     DHWmaxtot = params.DHWmaxtot;
     LPDprm2 = params.LPDprm2;
     wavemort90 = params.wavemort90; % 90th percentile wave mortality
-    
+
     %% project wave mortality
     mwaves = zeros(tf, params.nspecies, nsites);
     for species = 1:4
@@ -120,15 +113,14 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 
     mwaves(mwaves < 0) = 0;
     mwaves(mwaves > 1) = 1;
-    
+
     %% pre-running initial step
-    %TP = squeeze(TP_data(:,:,Env(tstep,sim)));
     tstep = 2;
     past_DHW_stress = dhw_scen(tstep-1, :); %call last year's DHWs (heat stress)
     [LP1, LP2, LP3, LP4] = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
         LPdhwcoeff, DHWmaxtot, LPDprm2); %larval productivity ...
 
-    Yout(tstep, :, :) = Y0; %pos 2 is species, pos3 is sites
+    Yout(tstep, :, :) = Y0; % pos 2 is species, pos3 is sites
 
     % for each species, site and year as a function of past heat exposure
     recSensUE = (Y0(1, :) * TP_data) .* LP1; %larvprod of species 1;
@@ -140,47 +132,68 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     rec(3, :) = recHardUE; %potential recruitment of species 31
     rec(4, :) = recHardE; %potential recruitment of species 4
 
+    %% temporary allocation to avoid incurring access overhead
+    % specify constant odeset option
+    non_neg_opt = odeset('NonNegative', 1:4);
+    tspan = [0, 1];
+
+    e_r = ecol_params.r;
+    e_P = ecol_params.P;  % max total coral cover
+    e_mb = ecol_params.mb;
+    e_p = ecol_params.p;  % Gompertz shape parameters
+
+    neg_e_p1 = -e_p(1);  % setting constant values for use in loop
+    neg_e_p2 = -e_p(2);
+
     %% Running the model as pulse-impulsive
     % Loop for time steps
     for tstep = 3:tf
-        %TP = squeeze(TP_data(:,:,Env(tstep,sim)));
-        past_DHW_stress = dhw_scen(tstep-1, :); %call last year's DHWs (heat stress)
+        p_step = tstep - 1; % previous timestep
+
+        past_DHW_stress = dhw_scen(p_step, :); %call last year's DHWs (heat stress)
         [LP1, LP2, LP3, LP4] = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); %larval productivity ...
 
         % for each species, site and year as a function of past heat exposure
-        recSensUE = (squeeze(Yout(tstep-1, 1, :))' * TP_data) .* LP1; %larvprod of species 1;
-        recSensE = (squeeze(Yout(tstep-1, 2, :))' * TP_data) .* LP2; %larvprod of species 2;
-        recHardUE = (squeeze(Yout(tstep-1, 3, :))' * TP_data) .* LP3; %larvprod of species 3;
-        recHardE = (squeeze(Yout(tstep-1, 4, :))' * TP_data) .* LP4; %larvprod of species 4;
+        recSensUE = (squeeze(Yout(p_step, 1, :))' * TP_data) .* LP1; %larvprod of species 1;
+        recSensE = (squeeze(Yout(p_step, 2, :))' * TP_data) .* LP2; %larvprod of species 2;
+        recHardUE = (squeeze(Yout(p_step, 3, :))' * TP_data) .* LP3; %larvprod of species 3;
+        recHardE = (squeeze(Yout(p_step, 4, :))' * TP_data) .* LP4; %larvprod of species 4;
         rec(1, :) = recSensUE; %potential recruitment of species 1
         rec(2, :) = recSensE; %potential recruitment of species 2
         rec(3, :) = recHardUE; %potential recruitment of species 3
         rec(4, :) = recHardE; %potential recruitment of species 4
 
         %% Setup MCDA before bleaching season
+
         % Factor 1: digraph centrality based on connectivity
-        total_cover(tstep, :) = sum(coral_cover(tstep-1, :, :), 2); %sums over species, second index becomes sites
+        % sums over species, second index becomes sites
+        total_cover(tstep, :) = sum(coral_cover(p_step, :, :), 2);
 
         % Factor 2:
-        dam = wave_scen(tstep, :)'; %probability of coral damage from waves used as criterion in site selection
+        % probability of coral damage from waves used as criterion in
+        % site selection
+        dam = wave_scen(tstep, :)';
 
         % Factor 3:
-        heatstress = dhw_scen(tstep, :)'; %heat stress used as criterion in site selection
+        % heat stress used as criterion in site selection
+        dhw_ss = dhw_scen(tstep, :); % subset of DHW for given timestep
+        heatstress = dhw_ss';
 
         % Factor 4: Coral state
         total_cover_t = total_cover(tstep, :)'; %total coral cover used as criterion in site selection
 
-        %% Update values for dMCDA
-        % DCMAvars.centr = centr
-        tmp_dMCDA_vars = dMCDA_vars;
-        tmp_dMCDA_vars.damprob = dam;
-        tmp_dMCDA_vars.heatstressprob = heatstress;
-        tmp_dMCDA_vars.sumcover = total_cover_t;
-        tmp_dMCDA_vars.prioritysites = prioritysites;
-
         %% Select preferred intervention sites based on criteria (heuristics)
         if strategy == 1 % guided
+
+            % Update values for dMCDA
+            tmp_dMCDA_vars = dMCDA_vars;
+            tmp_dMCDA_vars.damprob = dam;
+            tmp_dMCDA_vars.heatstressprob = heatstress;
+            tmp_dMCDA_vars.sumcover = total_cover_t;
+            tmp_dMCDA_vars.prioritysites = prioritysites;
+            % DCMAvars.centr = centr
+
             [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(tmp_dMCDA_vars, alg_ind); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
@@ -191,27 +204,30 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 
         %% Run site loop and apply interventions before bleaching season
         for site = 1:nsites
+            dhw = dhw_ss(site);
+
             % Warming and disturbance event going into the pulse function
             if ismember(site, prefshadesites) == 1 && tstep <= shadeyears % if the site in the loop equals a preferred shading site
-                dhw = dhw_scen(tstep, site) - srm; % then lower DHW according to SRM level
+                dhw = dhw - srm;
                 dhw(dhw < 0) = 0; % but don't lower to negative
                 Yshade(site) = srm; % log the site as shaded
                 % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
             elseif ismember(site, prefshadesites) == 0 || tstep > shadeyears %if the site in the loop is not a preferred shading site
-                dhw = dhw_scen(tstep, site);
                 Yshade(site) = 0; % log the site as not shaded
                 % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
             end
 
             % survivors from bleaching event
-            Sbl = 1 - ADRIA_bleachingMortality(tstep, ecol_params, dhw)';
+            Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
+                                               neg_e_p2, assistadapt, ...
+                                               natad, dhw)';
 
             % survivors from wave damage
             Sw = 1 - mwaves(tstep, :, site)';
 
-            % those survival rates are used to adjust overall coral 
+            % those survival rates are used to adjust overall coral
             % survival
-            Yin1(:, site) = Yout(tstep-1, :, site)' .* Sbl .* Sw;
+            Yin1(:, site) = Yout(p_step, :, site)' .* Sbl .* Sw;
 
             if ismember(site, prefseedsites) == 1 && tstep <= seedyears %if the site in the loop equals a preferred seeding site
                 Yin1(2, site) = Yin1(2, site) + seed1; % seed enhanced corals of group 2
@@ -225,13 +241,18 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 
             %% Recruitment and seeding
 
-            Yin2(:, site) = Yin1(:, site) + rec(:, site); % add new recruits: need to use min/max function to ensure cover doesn't exceed ecol_params.P
+            % add new recruits: need to use min/max function to ensure
+            % cover doesn't exceed maximum total coral cover (ecol_params.P)
+            Yin2(:, site) = Yin1(:, site) + rec(:, site);
             Yin = Yin2(:, site);
 
-            [~, Y] = ode45(@(t, X) ADRIA4groupsODE(t, X, ecol_params), [0, 1], Yin, odeset('NonNegative', 1:4));
-            % ODE to solve assemblage composition after a year based on vital rates. Update of output with new population sizes from the end of the ODE run
+            [~, Y] = ode45(@(t, X) ADRIA4groupsODE(X, e_r, e_P, e_mb), tspan, Yin, non_neg_opt);
+
+            % ODE to solve assemblage composition after a year based on
+            % vital rates. Update of output with new population sizes from
+            % the end of the ODE run
             Yout(tstep, :, site) = Y(end, :); % update population sizes
-            Yout(Yout > ecol_params.P) = ecol_params.P; % limit covers to carrying capacity (obsolete)
+            Yout(Yout > e_P) = e_P; % limit covers to carrying capacity (obsolete)
 
             % output we save for analyses. Includes: tf,nspecies,nsites,ninter,sims
             % raw results for current simulation
@@ -242,13 +263,13 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 
         end % sites
     end % tstep
-    
+
     %% assign results
     [TC, C, E, S] = reefConditionMetrics(coral_cover);
 
     % seedlog and shadelog are omitted for now
     Y = struct('TC', TC, ...
-               'C', C, ...
-               'E', E, ...
-               'S', S);
-end
+        'C', C, ...
+        'E', E, ...
+        'S', S);
+    end

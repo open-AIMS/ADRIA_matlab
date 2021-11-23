@@ -1,24 +1,26 @@
-% Example script illustrating running ADRIA one scenario at a time.
+% Example script illustrating running ADRIA scenarios
 
 %% Generate monte carlo samples
 
-% number of scenarios (not factoring in RCP replicates)
+% Number of scenarios
 N = 8;
+num_reps = 3;  % Number of replicate RCP scenarios
 
+% Collect details of available parameters
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
 
-% all available parameter options
+% Create main table listing all available parameter options
 combined_opts = [inter_opts; criteria_opts];
 
-% Generate using simple monte carlo
+% Generate samples using simple monte carlo
 % Create selection table based on lower/upper parameter bounds
 p_sel = table;
 for p = 1:height(combined_opts)
     a = combined_opts.lower_bound{p};
     b = combined_opts.upper_bound{p};
     
-    selection = (b - a) .* rand(N, 1) + a;
+    selection = (b - a).*rand(N, 1) + a;
     
     p_sel.(combined_opts.name{p}) = selection;
 end
@@ -39,10 +41,9 @@ criteria_weights = scenarios(:, 10:end);
 
 % Environmental and ecological parameter values etc
 [params, ecol_params] = ADRIAparms();
-% ninter = size(IT, 1);
-alg_ind = 1;
+alg_ind = 1;  % use order-ranking for example
 
-%% Load site data
+%% Load site specific data
 [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', params.con_cutoff);
 
@@ -53,22 +54,8 @@ ecol_tbl = struct2table(ecol_params);
 
 param_tbl = repmat(param_tbl, N, 1);
 ecol_tbl = repmat(ecol_tbl, N, 1);
-% criteria_weights = repmat(criteria_weights, ninter, 1);
-
-%% Setup output
-% Create temporary struct
-tmp_s.TC = 0;
-tmp_s.C = 0;
-tmp_s.E = 0;
-tmp_s.S = 0;
-
-%% Determine total number of simulations
-num_reps = 3;  % Number of replicate RCP scenarios
-Y = repmat(tmp_s, N, num_reps);
 
 %% setup for the geographical setting including environmental input layers
-% [wave_scen, dhw_scen] = setupADRIAsims(num_sims, params, nsites);
-
 % Load wave/DHW scenario data
 % Generated with generateWaveDHWs.m
 % TODO: Replace these with wave/DHW projection scenarios instead
@@ -77,7 +64,7 @@ wave_scen = ncread(fn, "wave");
 dhw_scen = ncread(fn, "DHW");
 
 %% Scenario runs
-% Currently running interventions only
+% Currently running over interventions/criteria weights only
 %
 % In actuality, this would be done for some combination of:
 % intervention * criteria * environment parameters * ecological parameter
@@ -86,23 +73,12 @@ dhw_scen = ncread(fn, "DHW");
 % sequence
 
 tic
-for i = 1:N
-    scen_it = IT(i, :);
-    scen_crit = criteria_weights(i, :);
-    scen_params = param_tbl(i, :);
-    ecol_params = ecol_tbl(i, :);
-    parfor j = 1:num_reps
-        w_scen = wave_scen(:, :, j);
-        d_scen = dhw_scen(:, :, j);
-        Y(i, j) = runADRIAScenario(scen_it, scen_crit, ...
-                                   scen_params, ecol_params, ...
-                                   TP_data, site_ranks, strongpred, ...
-                                   w_scen, d_scen, alg_ind);
-    end
-end
+Y = runScenarios(IT, criteria_weights, param_tbl, ecol_tbl, ...
+                 TP_data, site_ranks, strongpred, num_reps, ...
+                 wave_scen, dhw_scen, alg_ind);
 tmp = toc;
 
-disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " scenarios (", num2str(tmp/(N*num_reps)), " seconds per run)"))
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
 
 %% post-processing
 % collate data across all scenario runs
@@ -122,5 +98,5 @@ for i = 1:N
 end
 
 %% analysis
-ecosys_results = Corals_to_Ecosys_Services(processed);
-analyseADRIAresults1(ecosys_results);
+% ecosys_results = Corals_to_Ecosys_Services(processed);
+% analyseADRIAresults1(ecosys_results);
