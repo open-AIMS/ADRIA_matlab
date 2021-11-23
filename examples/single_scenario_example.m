@@ -2,7 +2,7 @@
 
 %% Generate monte carlo samples
 
-% number of scenarios
+% number of scenarios (not factoring in RCP replicates)
 N = 8;
 
 inter_opts = interventionDetails();
@@ -18,7 +18,7 @@ for p = 1:height(combined_opts)
     a = combined_opts.lower_bound{p};
     b = combined_opts.upper_bound{p};
     
-    selection = (b - a).*rand(N, 1) + a;
+    selection = (b - a) .* rand(N, 1) + a;
     
     p_sel.(combined_opts.name{p}) = selection;
 end

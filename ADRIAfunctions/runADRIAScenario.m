@@ -10,24 +10,17 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 %    criteria    : table, row of criteria weights table
 %    params      : table, row of environment parameter permutations
 %    ecol_params : table, row of ecological parameter permutations
+%    TP_data     : matrix, transitional probability matrix
+%    site_ranks  : matrix, of site centrality
+%    strongpred  : matrix, of strongest predecessor for each site
+%    nsites      : int, number of sites considered [To be removed]
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
-%    alg_ind     : int, algorithm choice (1, 2, 3)
+%    alg_ind     : int, ranking algorithm choice 
+%                    (Order: 1, TOPSIS: 2, Vikor: 3)
 %
-% Example: [UNFINISHED]
-% >> interventions = interventionSpecification(sims=10);
-% >> criteria_weights = criteriaWeights();
-% >> [params, ecol_params] = ADRIAparms(interv); %environmental and ecological parameter values etc
-%
-% >> % ... generate parameter perturbations ...
-%
-% >> [IT, ~] = interventionTable(interv); %calls function that builds intervention table, ...
-% >> ninter = size(IT, 1);
-% >> Y = zeros(ninter, 4);  % result set
-% >> for i = 1:niter
-% >>     Y(i, :) = runADRIAScenario(IT(i, :), criteria_weights(i, :), params(i, :), ecol_params(i, :))
-% >> end
-
+% Example:
+%    See `single_scenario_example.m` in the `examples` directory.
 
     %% Weights for connectivity , waves (ww), high cover (whc) and low
     wtwaves = criteria(:, 1); % weight of wave damage in MCDA
@@ -204,7 +197,9 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
             end
 
             % survivors from bleaching event
-            Sbl = 1 - ADRIA_bleachingMortality(tstep, ecol_params, dhw)';
+            Sbl = 1 - ADRIA_bleachingMortality(tstep, ecol_params.p, ...
+                                               assistadapt, ...
+                                               natad, dhw)';
 
             % survivors from wave damage
             Sw = 1 - mwaves(tstep, :, site)';
