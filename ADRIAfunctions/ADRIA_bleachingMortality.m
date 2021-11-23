@@ -1,4 +1,4 @@
-function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw) %NOTATION HERE IS INCONSISTENT WITH THAT IN LINES 221-223 OF MAIN SCRIPT WHERE THE FUNCTION IS CALLED 
+function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
 % Gompertz cumulative mortality function 
 %
 % Partial calibration using data by Hughes et al [1] (see Fig. 2C)
