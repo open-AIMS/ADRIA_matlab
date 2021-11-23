@@ -9,7 +9,7 @@ function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
 %     n_p2    : float, Gompertz distribution shape parameter 2
 %     a_adapt : array[sp*2, float], assisted adaptation
 %                 where `sp` is the number of species considered
-%     n_adapt : array[sp*2, float], assisted adaptation
+%     n_adapt : array[sp*2, float], natural adaptation
 %                 where `sp` is the number of species considered
 %     dhw     : float, degree heating weeks for given time step
 %
