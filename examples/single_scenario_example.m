@@ -1,5 +1,35 @@
+% Example script illustrating running ADRIA one scenario at a time.
+
+%% Generate monte carlo samples
+
+% number of scenarios
+N = 8;
+
+inter_opts = interventionDetails();
+criteria_opts = criteriaDetails();
+
+% all available parameter options
+combined_opts = [inter_opts; criteria_opts];
+
+% Generate using simple monte carlo
+% Create selection table based on lower/upper parameter bounds
+p_sel = table;
+for p = 1:height(combined_opts)
+    a = combined_opts.lower_bound{p};
+    b = combined_opts.upper_bound{p};
+    
+    selection = (b - a).*rand(N, 1) + a;
+    
+    p_sel.(combined_opts.name{p}) = selection;
+end
+
+% Convert sampled values to ADRIA usable values
+% Necessary as samplers expect real-valued parameters (e.g., floats)
+% where as in practice ADRIA makes use of integer and categorical
+% parameters
+converted_tbl = convertScenarioSelection(p_sel, combined_opts);
+
 %% Parameter prep
-mc_scenario_generation
 scenarios = table2array(converted_tbl);
 IT = scenarios(:, 1:9);
 criteria_weights = scenarios(:, 10:end);  % need better way of separating values...
