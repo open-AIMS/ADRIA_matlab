@@ -1,15 +1,45 @@
+% Example script illustrating running ADRIA one scenario at a time.
+
+%% Generate monte carlo samples
+
+% number of scenarios
+N = 8;
+
+inter_opts = interventionDetails();
+criteria_opts = criteriaDetails();
+
+% all available parameter options
+combined_opts = [inter_opts; criteria_opts];
+
+% Generate using simple monte carlo
+% Create selection table based on lower/upper parameter bounds
+p_sel = table;
+for p = 1:height(combined_opts)
+    a = combined_opts.lower_bound{p};
+    b = combined_opts.upper_bound{p};
+    
+    selection = (b - a).*rand(N, 1) + a;
+    
+    p_sel.(combined_opts.name{p}) = selection;
+end
+
+% Convert sampled values to ADRIA usable values
+% Necessary as samplers expect real-valued parameters (e.g., floats)
+% where as in practice ADRIA makes use of integer and categorical
+% parameters
+converted_tbl = convertScenarioSelection(p_sel, combined_opts);
+
 %% Parameter prep
-mc_scenario_generation
 scenarios = table2array(converted_tbl);
+
+% Separate parameters into components
+% (to be replaced with a better way of separating these...)
 IT = scenarios(:, 1:9);
-criteria_weights = scenarios(:, 10:end);  % need better way of separating values...
+criteria_weights = scenarios(:, 10:end);
 
-% interventions = interventionSpecification(sims=10);
-% [IT, ~] = interventionTable(interventions); %calls function that builds intervention table, ...
-
-% criteria_weights = criteriaWeights();
-[params, ecol_params] = ADRIAparms(); %environmental and ecological parameter values etc
-ninter = size(IT, 1);
+% Environmental and ecological parameter values etc
+[params, ecol_params] = ADRIAparms();
+% ninter = size(IT, 1);
 alg_ind = 1;
 
 %% Load site data
@@ -21,9 +51,9 @@ alg_ind = 1;
 param_tbl = struct2table(params);
 ecol_tbl = struct2table(ecol_params);
 
-param_tbl = repmat(param_tbl, ninter, 1);
-ecol_tbl = repmat(ecol_tbl, ninter, 1);
-criteria_weights = repmat(criteria_weights, ninter, 1);
+param_tbl = repmat(param_tbl, N, 1);
+ecol_tbl = repmat(ecol_tbl, N, 1);
+% criteria_weights = repmat(criteria_weights, ninter, 1);
 
 %% Setup output
 % Create temporary struct
@@ -32,9 +62,9 @@ tmp_s.C = 0;
 tmp_s.E = 0;
 tmp_s.S = 0;
 
-%% Determine total number of scenarios
+%% Determine total number of simulations
 num_reps = 3;  % Number of replicate RCP scenarios
-Y = repmat(tmp_s, ninter, num_reps);
+Y = repmat(tmp_s, N, num_reps);
 
 %% setup for the geographical setting including environmental input layers
 % [wave_scen, dhw_scen] = setupADRIAsims(num_sims, params, nsites);
@@ -56,7 +86,7 @@ dhw_scen = ncread(fn, "DHW");
 % sequence
 
 tic
-for i = 1:ninter
+for i = 1:N
     scen_it = IT(i, :);
     scen_crit = criteria_weights(i, :);
     scen_params = param_tbl(i, :);
@@ -72,17 +102,17 @@ for i = 1:ninter
 end
 tmp = toc;
 
-disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(ninter*num_sims), " scenarios (", num2str(tmp/(ninter*num_sims)), " seconds per run)"))
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " scenarios (", num2str(tmp/(N*num_reps)), " seconds per run)"))
 
 %% post-processing
 % collate data across all scenario runs
 
 tf = params.tf;
-processed = struct('TC', zeros(tf, nsites, ninter, num_sims), ...
-                   'C', zeros(tf, 4, nsites, ninter, num_sims), ...
-                   'E', zeros(tf, nsites, ninter, num_sims), ...
-                   'S', zeros(tf, nsites, ninter, num_sims));
-for i = 1:ninter
+processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
+                   'C', zeros(tf, 4, nsites, N, num_reps), ...
+                   'E', zeros(tf, nsites, N, num_reps), ...
+                   'S', zeros(tf, nsites, N, num_reps));
+for i = 1:N
     for j = 1:num_reps
         processed.TC(:, :, i, j) = Y(i, j).TC;
         processed.C(:, :, :, i, j) = Y(i, j).C;
