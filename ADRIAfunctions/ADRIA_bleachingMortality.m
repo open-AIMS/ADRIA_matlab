@@ -1,12 +1,12 @@
-function Y = ADRIA_bleachingMortality(tstep, g_shape, a_adapt, n_adapt, dhw)
+function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
 % Gompertz cumulative mortality function 
 %
 % Partial calibration using data by Hughes et al [1] (see Fig. 2C)
 %
 % Inputs:
 %     tstep   : int, current time step
-%     g_shape : array[2, float], Gompertz distribution shape parameters 
-%                 (1 and 2)
+%     n_p1    : float, Gompertz distribution shape parameter 1
+%     n_p2    : float, Gompertz distribution shape parameter 2
 %     a_adapt : array[sp*2, float], assisted adaptation
 %                 where `sp` is the number of species considered
 %     n_adapt : array[sp*2, float], assisted adaptation
@@ -26,14 +26,7 @@ function Y = ADRIA_bleachingMortality(tstep, g_shape, a_adapt, n_adapt, dhw)
 %        Nature, 556(7702), pp. 492–496. 
 %        doi:10.1038/s41586-018-0041-2.
 ad = a_adapt + tstep .* n_adapt;
-n_species = length(ad);
-neg_p1 = -g_shape(1);
-neg_p2 = -g_shape(2);
-
-Y = zeros(1, n_species);
-for sp = 1:n_species
-    Y(sp) = exp(neg_p1*(exp(neg_p2 * (dhw - ad(sp)))));
-end
+Y = exp(n_p1 * (exp(n_p2 * (dhw - ad) )));
 
 end
 

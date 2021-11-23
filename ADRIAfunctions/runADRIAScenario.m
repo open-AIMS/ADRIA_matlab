@@ -132,9 +132,18 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     rec(3, :) = recHardUE; %potential recruitment of species 31
     rec(4, :) = recHardE; %potential recruitment of species 4
 
+    %% temporary allocation to avoid incurring access overhead
     % specify constant odeset option
     non_neg_opt = odeset('NonNegative', 1:4);
     tspan = [0, 1];
+
+    e_r = ecol_params.r;
+    e_P = ecol_params.P;  % max total coral cover
+    e_mb = ecol_params.mb;
+    e_p = ecol_params.p;  % Gompertz shape parameters
+
+    neg_e_p1 = -e_p(1);  % setting constant values for use in loop
+    neg_e_p2 = -e_p(2);
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
@@ -193,11 +202,6 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
             prefshadesites = randi(nsites, [params.nsiteint, 1])'; % if unguided, then shade corals anywhere
         end
 
-        % temporary allocation to avoid incurring access overhead
-        e_r = ecol_params.r;
-        e_P = ecol_params.P;
-        e_mb = ecol_params.mb;
-
         %% Run site loop and apply interventions before bleaching season
         for site = 1:nsites
             dhw = dhw_ss(site);
@@ -214,8 +218,8 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
             end
 
             % survivors from bleaching event
-            Sbl = 1 - ADRIA_bleachingMortality(tstep, ecol_params.p, ...
-                                               assistadapt, ...
+            Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
+                                               neg_e_p2, assistadapt, ...
                                                natad, dhw)';
 
             % survivors from wave damage
