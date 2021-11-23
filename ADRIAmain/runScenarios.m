@@ -75,7 +75,7 @@ Y = repmat(tmp_s, N, n_reps);
 
 n_rep_scens = length(wave_scen);
 
-for i = 1:N
+parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     scen_params = params(i, :);
