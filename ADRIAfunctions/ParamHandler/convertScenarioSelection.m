@@ -10,7 +10,8 @@ function converted = convertScenarioSelection(sel_values, p_opts)
 %
 % Inputs:
 %     sel_values : table or array, of parameter value selections
-%                    if array, converts to table.
+%                    if array, converts to table using information in
+%                    p_opts
 %     p_opts     : table, of parameter options (value ranges, etc)
 %
 % Outputs:
@@ -39,12 +40,12 @@ function converted = convertScenarioSelection(sel_values, p_opts)
         % converted(:, p) = {1:length(selection)};
         for sel = 1:length(selection)
             % convert from cell array to matrix if needed
-            if ptype == "categorical"
+            if ptype == "categorical" || ptype == "integer"
                 tmp = floor(selection(sel));
                 if tmp == p_opts.upper_bound{p} % && tmp == selection(sel)
                     % subtract a small constant to ensure flooring works
                     % as intended when the value is at upper limit
-                    tmp = floor(tmp - 1e-6);
+                    tmp = max(floor(tmp - 1e-6), 1);
                 end
 
                 try

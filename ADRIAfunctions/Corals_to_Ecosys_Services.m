@@ -35,19 +35,20 @@ elseif user_ind == 0
     TCsatProv = 0.5;
     cf = 1; %counterfactual
 end
+
 %% Conversion to scope for ecosystem services
 
-CultES = tanh(TC/TCsatCult) .* (evcult .* E + strcult .* S); %placeholder function
+CultES = tanh(TC/TCsatCult) .* (evcult .* E + strcult .* S); %placeholder function for saturating function (needs stakeholder input)
 CultES(CultES > 1) = 1; %set unity to max
 
-ProvES = tanh(TC/TCsatProv) .* (evprov .* E + strprov .* S);
+ProvES = tanh(TC/TCsatProv) .* (evprov .* E + strprov .* S); %placeholder function for saturating function (needs stakeholder input)
 ProvES(ProvES > 1) = 1;
 
-dCultES = CultES - CultES(:, :, cf, :);
+dCultES = CultES - CultES(:, :, cf, :);  %ditto for delta between intervention and counterfactual
 dCultES(dCultES > 1) = 1; %set unity to max
 dCultES(dCultES < 0) = 0; %set unity to max
 
-dProvES = ProvES - ProvES(:, :, cf, :);
+dProvES = ProvES - ProvES(:, :, cf, :); %ditto for delta between intervention and counterfactual
 dProvES(dProvES > 1) = 1;
 dProvES(dProvES < 0) = 0;
 

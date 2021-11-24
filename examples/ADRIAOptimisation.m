@@ -1,4 +1,4 @@
-function [x,fval] = ADRIAOptimisation(alg,opti_ind,varargin)
+%function [x,fval] = ADRIAOptimisation(alg,opti_ind,varargin)
     % ADRIAOptimisation takes variables for RCP and
     % PrSites and runs an optimisation algorithm to maximise outputs with
     % respect to the intervention variables Seed1, Seed2, SRM, AsAdt,
@@ -23,67 +23,66 @@ function [x,fval] = ADRIAOptimisation(alg,opti_ind,varargin)
     %             multiple values are chosen to optimise over.
     %         fval : the max value/optimal value of the chosen metrics 
     
-    if size(varargin,1) == 0
-        % get shell variables
-        prsites = str2double(getenv('PrSites'));
-        rcp = str2double(getenv('RCP'));
-    else
-        prsites = varargin{1};
-        rcp = varargin{2};
-    end
-    % use default criteria weights
-    CrtWts = CriteriaWeights();  
-    % load parameter file
-    [params, ecol_parms] = ADRIAparms(); % environmental and ecological parameter values etc
+alg = 1;  % Use Order Ranking
 
-    % initialise parameters (could later randomise this)
-    % x0 = [Seed1,Seed2,SRM,Aadpt,Natad]
-    x0 = [0 0 0 0 0];
+% get shell variables
+prsites = str2num(getenv('PrSites')); % PrSites
+rcp = str2num(getenv('RCP')); % RCP
+out_name = 'TC'; % out_ind
 
-    if sum(opti_ind) == 1
-        % if opti_ind = 1, perform a single objective optimisation for
-        % chosen output (obj is negative as default is the minimisation)
-        ObjectiveFunction = @(x) -1*ObjectiveFunc(x,CrtWts,params,ecol_parms,alg,prsites,rcp,opti_ind);
+% Use default criteria weights
+criteria_opts = criteriaDetails();
+CrtWts = cell2mat(criteria_opts.defaults)';
 
-        % upper bounds on x
-        ub = [0.001,0.001,6,6,0.1];
-        % lower bounds on x
-        lb = [0,0,0,0,0];
+% Perturb subset of intervention options
+i_params = interventionDetails();
 
-        % begin optimisation algorithm
-        [x, fval] = simulannealbnd(ObjectiveFunction,x0,lb,ub);
-        fval = -1*fval;
+% Filter to target interventions
+p_names = i_params.name;
+rules = false;
+for target = {'Seed1', 'Seed2', 'SRM', 'Aadpt', 'Natad'}
+    rules = rules | (p_names == target);
+end
 
-    else
-        % if sum(opti_ind)>1  perform a multi-objective optimisation over the
-        % specified outputs
-        ObjectiveFunction = @(x) -1*ObjectiveFunc(x,CrtWts,params,ecol_parms,alg,prsites,rcp,opti_ind);
+subset = i_params(rules, :);
 
-        % upper bounds on x
-        ub = [0.001,0.001,6,6,0.1];
-        % lower bounds on x
-        lb = [0,0,0,0,0];
+% Initialise parameters
+x0 = cell2mat(subset.defaults);
 
-        % no constraint equations for now
-        A = [];
-        b = [];
-        Aeq = [];
-        beq = [];
+% Upper/Lower bounds of x
+lb = cell2mat(subset.lower_bound);
+ub = cell2mat(subset.upper_bound);
+
+[params, ecol_parms] = ADRIAparms();
+
+% objective function for simulated annealing function is negative (as
+% solves the minimisation) and must have a single vector input and scalar
+% output
+ObjectiveFunction = @(x) -1*ObjectiveFunc(x,alg,prsites,rcp,out_name,CrtWts, params, ecol_parms);
+
 
         % no. of variables to optimise for = no. of interventions
-        nvar = 5;
+        %nvar = 5;
+
 
         % begin optimisation algorithm
-        [x, fval] = gamultiobj(ObjectiveFunction,nvar,A,b,Aeq,beq,lb,ub);
-        fval = -1*fval;
-    end
+    %    [x, fval] = gamultiobj(ObjectiveFunction,nvar,A,b,Aeq,beq,lb,ub);
+     %   fval = -1*fval;
+    %end
     % label file with key parameters
-    filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv',rcp,prsites,alg);
+   % filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv',rcp,prsites,alg);
     % add filename appendage if specified
-    if nargin == 5
-        filename = strcat(varargin{4},filename);
-    end
+    %if nargin == 5
+       % filename = strcat(varargin{4},filename);
+   % end
     % save as structure
-    s = struct('interv',x,'output',fval);
-    save(filename,'s')
-end
+   % s = struct('interv',x,'output',fval);
+   % save(filename,'s')
+%end
+
+% label file with key parameters
+filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv',rcp,prsites,alg);
+
+% Save as CSV
+saveData(x, filename, 'csv')
+

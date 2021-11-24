@@ -16,6 +16,7 @@ removing the need to `cd` into specific directories to run ADRIA functions.
 The following toolboxes are required:
 - Statistics and Machine Learning Toolbox
 - Parallel Computing Toolbox
+- Global Optimization Toolbox
 
 
 An example run script (`examples/run_example.m`) can be run by calling 

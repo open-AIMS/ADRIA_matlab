@@ -199,3 +199,91 @@ end
 %% Save results
 ADRIA_saveResults(Y, "example_results.mat")
 ```
+
+## ADRIA_DMCDA()
+Allows selection from 4 MCDA algorithms to make dynamic site selection decisions within ADRIA. Selection decisions are based on a decision matrix A,
+which currently incoporates connectivity, wave stress, heat stress, coral cover and priority predecessors as criteria.
+
+**Inputs:**
+- DMCDAvars    : a structure of the form struct('nsites', [], 'nsiteint', [], ...
+      'strongpred', [], 'centr', [], 'damprob', [], 'heatstressprob', [], ...
+      'prioritysites', [], 'sumcover', [], 'risktol', [], 'wtconseed', [], ...
+      'wtconshade', [],'wtwaves', [], 'wtheat', [], 'wthicover', [], ...
+      'wtlocover', [], 'wtpredecseed', [], 'wtpredecshade', []);
+      where []'s are dynamically updated in runADRIA.m
+- alg_ind   : an integer indicating the algorithm to be used for the multi-criteria anlysis 
+      (1: order-ranking, 2: TOPSIS, 3: VIKOR, 4: multi-obj ranking
+
+**Output:**
+- prefseedsites : array of reccommended best sites for seeding
+- prefshadesites : array of reccommended best sites for shading
+- nprefseedsites : number of seeding sites chosen by MCDA
+- nprefshadesites : number of shading sites chosen by MCDA
+
+## ADRIAOptimisation()
+ADRIAOptimisation takes variables for RCP and PrSites and runs an optimisation algorithm to maximise outputs with
+respect to the intervention variables Seed1, Seed2, SRM, AsAdt, NatAdt. If 2 inputs, will use shell variables for 
+PrSites and RCP. If > 2 inputs, will use these as PrSites and RCP. Saves the outputs to a structure in a .mat file.
+
+**Inputs:**
+- alg : indicates MCDA algorithm to be used 
+         1 - Order Ranking
+         2 - TOPSIS
+         3 - VIKOR
+- opti_ind : indicates which outputs to optimise over out of [TC,E,S,CES,PES], sum(opti_ind) >=1 ex., opti_ind = [1 0 0 0 0] 
+         optimises for average TC only
+         1 - include, 
+         0 - don't include, 
+
+- varargin{1} : prsites (1,2,3)
+- varargin{2} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
+- varargin{3} : optional appendage to filename (e.g. run no. etc)
+
+**Outputs:**
+- x : [Seed1,Seed2,SRM,Aadpt,Natad] which maximise the chosen ADRIA output metrics (will represent a pareto front if
+         multiple values are chosen to optimise over).
+- fval : the max value/optimal value of the chosen metrics 
+
+See also:
+    [`ObjectiveFunc()`](#objectivefunc)
+    
+**Example:**
+```matlab
+%% Optimise for average total coral cover av_TC and scope for cultural ecosystem services av_CES
+
+% use simplest MDCA algorithm for now
+alg = 1;
+
+% use all sites (C)
+prsites = 3; 
+
+% optimisation specification - want to optimise over TC and CES so indicate 1 in their placeholders
+opti_ind = [1,0,0,1,0];
+
+% declare filename appendage to tag as example
+file_ap = 'Example2obj';
+
+% perform optimisation (takes a while, be warned, improvements to
+% efficiency to be made)
+[x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,rcp,file_ap);
+
+% print results (also automatically saved to a struct in a .mat file) 
+sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f, av_CES = %1.4f',...
+    x(1),x(2),x(3),x(4),x(5),fval(1),fval(2));
+```  
+
+## ObjectiveFunc() 
+Formulation of runADRIA which allows for optimisation as an objective function with conventional Matlab optimisation functions.
+Currently averages over space and time to acheive suitable format (more descriptive formats such as distribution summary statistics, 
+kdes etc may come in later versions).
+
+**Input:** 
+- x : intervention values vector [Seed1,Seed2,SRM,Aadpt,Natad,RCP]
+- algInd : indicate MCDA alg
+- prSites : indicate site group
+- RCP : RCP scenario
+- opti_ind : indicate number of outputs to optimise over
+
+**Output:**
+- out : scalar or vector with either any combination of [Av_TC, Av_E, Av_S, Av_CES, AV_PES]
+      

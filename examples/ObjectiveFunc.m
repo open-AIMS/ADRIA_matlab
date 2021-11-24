@@ -49,4 +49,5 @@ function out = ObjectiveFunc(x,CrtWts,params,ecol_parms,algInd,prSites,RCP,optIn
         av_PES = mean(ecosys_results.ProvES,'all');
         out = [av_TC av_E av_S av_CES av_PES].*optInd;
     end
+
 end
