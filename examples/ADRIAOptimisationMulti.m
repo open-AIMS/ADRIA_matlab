@@ -21,6 +21,7 @@ function [x,fval] = ADRIAOptimisationMulti(alg,out_names,varargin)
     %             multiple values are chosen to optimise over.
     %         fval : the max value/optimal value of the chosen metrics 
     
+    
     % Perturb all available parameters
     i_params = interventionDetails();
     criteria_weights = criteriaDetails();
@@ -63,9 +64,6 @@ function [x,fval] = ADRIAOptimisationMulti(alg,out_names,varargin)
     lb = cell2mat(subset.lower_bound);
     ub = cell2mat(subset.upper_bound);
 
-    % objective function for simulated annealing function is negative (as
-    % solves the minimisation) and must have a single vector input and scalar
-    % output
     % no. of variables to optimise for = no. of interventions
     nvar = 5;
     ObjectiveFunction = @(x) -1*AllParamObjectiveFuncMulti(x, alg, out_names, ...
@@ -93,13 +91,10 @@ function [x,fval] = ADRIAOptimisationMulti(alg,out_names,varargin)
         % label file with key parameters
         filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv',rcp,prsites,alg);
         % add filename appendage if specified
-        if nargin == 5
-            filename = strcat(varargin{4},filename);
+        if size(varargin,1) == 3
+            filename = strcat(varargin{3},filename);
         end
-        % save as structure
-        %s = struct('interv',x,'output',fval);
-        %save(filename,'s')
-        
+
         % Save as CSV
         saveData(x, filename, 'csv')
 end

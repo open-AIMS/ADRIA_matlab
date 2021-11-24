@@ -70,8 +70,6 @@ function reef_condition_metrics = runADRIA(interv, crit_weights, params, ecol_pa
 ninter = size(IT, 1);
 % which controls what interventions to run and and what levels, etc
 
-
-
 %% RUN SETUP functions
 
 % Simulate future connectivity patterns in response to environmental variation

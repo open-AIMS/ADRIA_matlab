@@ -8,14 +8,15 @@ alg = 1;
 prsites = 3; 
 
 % optimisation specification - want to optimise over TC only
-opti_ind = [1,0,0,0,0];
+names_vec = cell(1,1);
+names_vec{1} = 'TC';
 
 % declare filename appendage to tag as example
 file_ap = 'Example1obj';
 
 % perform optimisation (takes a while, be warned, improvements to
 % efficiency to be made)
-[x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,rcp,file_ap);
+[x,fval] = ADRIAOptimisationMulti(alg,names_vec,prsites,rcp,file_ap);
 
 % print results (also automatically saved to a struct in a .mat file) 
 sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f',...
@@ -29,15 +30,17 @@ alg = 1;
 % use all sites (C)
 prsites = 3; 
 
-% optimisation specification - want to optimise over TC and CES now
-opti_ind = [1,0,0,1,0];
+% optimisation specification - want to optimise TC and CES
+names_vec = cell(2,1);
+names_vec{1} = 'TC';
+names_vec{2} = 'CES';
 
 % declare filename appendage to tag as example
 file_ap = 'Example2obj';
 
 % perform optimisation (takes a while, be warned, improvements to
 % efficiency to be made)
-[x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,rcp,file_ap);
+[x,fval] = ADRIAOptimisationMulti(alg,names_vec,prsites,rcp,file_ap);
 
 % print results (also automatically saved to a struct in a .mat file) 
 sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f, av_CES = %1.4f',...
