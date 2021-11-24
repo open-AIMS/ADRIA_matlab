@@ -40,9 +40,12 @@ function [x,fval] = ADRIAOptimisationMulti(alg,out_names,varargin)
         rules = rules | (p_names == target);
     end
     
-    if size(varargin,1) == 1
+    if size(varargin,1) == 0
+        rcp = params.RCP;
+    elseif size(varargin,1) == 1
         prsites = varargin{1};
         i_params.prsites = prsites;
+        rcp = params.RCP;
     elseif size(varargin,1) == 2
          prsites = varargin{1};
          rcp = varargin{2};

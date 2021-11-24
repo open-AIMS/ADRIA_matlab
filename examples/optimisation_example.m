@@ -7,6 +7,8 @@ alg = 1;
 % use all sites (C)
 prsites = 3; 
 
+rcp = 60;
+
 % optimisation specification - want to optimise over TC only
 names_vec = cell(1,1);
 names_vec{1} = 'TC';
@@ -34,6 +36,8 @@ prsites = 3;
 names_vec = cell(2,1);
 names_vec{1} = 'TC';
 names_vec{2} = 'CES';
+
+rcp = 60;
 
 % declare filename appendage to tag as example
 file_ap = 'Example2obj';
