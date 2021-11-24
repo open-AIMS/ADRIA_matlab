@@ -1,11 +1,7 @@
 function ecosys_results = Corals_to_Ecosys_Services(F0,user_ind)
 
-%% load data file
-%loads results from ADRIA -
-% F0 = load(strcat('Outputs/Results_RCP',num2str(RCP),'_Alg',num2str(alg_ind)));
 % user_ind indicates whether to use default 
 TC = F0.TC;
-C = F0.C;
 E = F0.E;
 S = F0.S;
 
