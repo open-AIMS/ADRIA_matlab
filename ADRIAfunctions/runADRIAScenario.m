@@ -13,7 +13,6 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 %    TP_data     : matrix, transitional probability matrix
 %    site_ranks  : matrix, of site centrality
 %    strongpred  : matrix, of strongest predecessor for each site
-%    nsites      : int, number of sites considered [To be removed]
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
 %    alg_ind     : int, ranking algorithm choice 
