@@ -21,6 +21,9 @@ function interventions = interventionDetails(varargin)
 %   raw_lower_bound, raw_upper_bound, where
 %       - `name` holds the parameter names
 %       - `ptype` denotes the parameter type (categorical, integer, float)
+%           - categoricals: values have to be exact match
+%           - integers: whole number values ranging between lower/upper
+%           - float: values can range between lower/upper
 %       - `defaults` indicates the raw unmodified assigned value
 %       - lower/upper bounds indicate the range of mapped ids 
 %       - `options` maps option ids to their values
@@ -35,8 +38,6 @@ name = [
     "Natad";
     "Seedyrs";
     "Shadeyrs";
-    %  "sims";
-    % "RCP"
 ];
 
 defaults = {
@@ -49,8 +50,6 @@ defaults = {
     0.05;  % Natad
     10;  % Seedyrs
     1;  % Shadeyrs
-    %  50;  % sims
-    % 60  % RCP
 };
 
 % TODO: lower and upper bounds are dummy values and need to be replaced!
@@ -64,20 +63,18 @@ p_bounds = {
     [0.01, 0.1];  % Natad
     [10, 15];  % Seedyrs
     [1, 5];  % Shadeyrs
-    % 85  % RCP
 };
 
 ptype = [
-    "integer";
+    "categorical";  % categoricals: values have to be exact match
+    "integer";      % integer: option is whole number between upper/lower
+    "float";        % float: value ranges between upper/lower
+    "float";
+    "categorical";
     "integer";
     "float";
-    "float";
     "integer";
     "integer";
-    "float";
-    "integer";
-    "integer";
-    % "categorical";
 ];
 
 
