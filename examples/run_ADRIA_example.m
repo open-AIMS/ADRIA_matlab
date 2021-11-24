@@ -25,13 +25,23 @@ for p = 1:height(combined_opts)
     p_sel.(combined_opts.name{p}) = selection;
 end
 
+%% Parameter prep
+
+% Creating dummy permutations for core ADRIA parameters
+% (environmental and ecological parameter values etc)
+% This process will be replaced
+[params, ecol_params] = ADRIAparms();
+param_tbl = struct2table(params);
+ecol_tbl = struct2table(ecol_params);
+
+param_tbl = repmat(param_tbl, N, 1);
+ecol_tbl = repmat(ecol_tbl, N, 1);
+
 % Convert sampled values to ADRIA usable values
 % Necessary as samplers expect real-valued parameters (e.g., floats)
 % where as in practice ADRIA makes use of integer and categorical
 % parameters
 converted_tbl = convertScenarioSelection(p_sel, combined_opts);
-
-%% Parameter prep
 scenarios = table2array(converted_tbl);
 
 % Separate parameters into components
@@ -39,21 +49,12 @@ scenarios = table2array(converted_tbl);
 IT = scenarios(:, 1:9);
 criteria_weights = scenarios(:, 10:end);
 
-% Environmental and ecological parameter values etc
-[params, ecol_params] = ADRIAparms();
-alg_ind = 1;  % use order-ranking for example
+% use order-ranking for example
+alg_ind = 1;
 
 %% Load site specific data
 [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', params.con_cutoff);
-
-%% ... generate parameter permutations ...
-% Creating dummy permutations
-param_tbl = struct2table(params);
-ecol_tbl = struct2table(ecol_params);
-
-param_tbl = repmat(param_tbl, N, 1);
-ecol_tbl = repmat(ecol_tbl, N, 1);
 
 %% setup for the geographical setting including environmental input layers
 % Load wave/DHW scenario data
@@ -64,13 +65,14 @@ wave_scen = ncread(fn, "wave");
 dhw_scen = ncread(fn, "DHW");
 
 %% Scenario runs
-% Currently running over interventions/criteria weights only
+% Currently running over unique interventions and criteria weights only for
+% a limited number of RCP scenarios.
 %
 % In actuality, this would be done for some combination of:
 % intervention * criteria * environment parameters * ecological parameter
 %     * wave_scen * dhw_scen * alg_ind * N_sims
-% where the combinations would be generated via some quasi-monte carlo
-% sequence
+% where the unique combinations would be generated via some quasi-monte 
+% carlo sequence, or through some user-informed process.
 
 tic
 Y = runScenarios(IT, criteria_weights, param_tbl, ecol_tbl, ...
@@ -98,5 +100,5 @@ for i = 1:N
 end
 
 %% analysis
-% ecosys_results = Corals_to_Ecosys_Services(processed);
-% analyseADRIAresults1(ecosys_results);
+ecosys_results = Corals_to_Ecosys_Services(processed);
+analyseADRIAresults1(ecosys_results);
