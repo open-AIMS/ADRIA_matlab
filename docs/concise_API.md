@@ -201,8 +201,26 @@ ADRIA_saveResults(Y, "example_results.mat")
 ```
 
 ## ADRIA_DMCDA()
-Allows selection from 4 MCDA algorithms to make dynamic site selection decisions within ADRIA. Selection decisions are based on a decision matrix A,
-which currently incoporates connectivity, wave stress, heat stress, coral cover and priority predecessors as criteria.
+Allows selection from 3 MCDA algorithms to make dynamic site selection decisions within ADRIA. Selection decisions are based on a decision matrix A,
+which currently incoporates connectivity, wave stress, heat stress, coral cover and priority predecessors as criteria. Each algorithm carries out a different decision strategy:
+
+1 : order ranking
+   - ranks sites according to additive ranking
+   - rank calculated from the sum of the columns of A
+   - Strategy: When overall performance matters and trade-offs between criteria need not be considered (also least computationally expensive).
+2 : TOPSIS
+   - ranks sites according a ratio 
+   - ratio is calculated from the geometric distance from the Positive Ideal Solution PIS and Negative Ideal Solution NIS
+   - See Hsu-Shih Shih, Huan-Jyh Shyur, E. Stanley Lee, 2007 An extension of TOPSIS for group decision making, Mathematical and Computer Modelling, vol. 45:7–8.
+   - Strategy: When trade-offs between criteria should be considered, but it is not necessary to avoid hidden value extremes.
+
+3 : VIKOR 
+   - ranks sites according to a linear combination of  two measures, S and R.
+   - S measures 'group utility', or the performance of site x against all criteria
+   - R measures 'individual regret', or the maximum deviance of site x from the best ranked sites under all criteria
+   - weightings of R and S in the linear combination are chosen to balance group utility and individual regret (currently both set at 0.5)
+   - See Alidrisi, Hisham, 2021 An Innovative Job Evaluation Approach Using the VIKOR Algorithm, Journal of Risk and Financial Management, vol. 14:6.
+   - Strategy: When trade-offs between criteria should be considered and the decision-maker wants to weight against potential poorly performing criteria which can       be hidden in trade-offs.
 
 **Inputs:**
 - DMCDAvars    : a structure of the form struct('nsites', [], 'nsiteint', [], ...
@@ -211,6 +229,23 @@ which currently incoporates connectivity, wave stress, heat stress, coral cover 
       'wtconshade', [],'wtwaves', [], 'wtheat', [], 'wthicover', [], ...
       'wtlocover', [], 'wtpredecseed', [], 'wtpredecshade', []);
       where []'s are dynamically updated in runADRIA.m
+      - nsites : total number of sites
+      - nsiteint : number of sites to select for priority interventions
+      - strongpred : strongest predecessor sites (calculated in ADRIA_TP_Moore())
+      - centr : site centrality (calculated in ADRIA_TP_Moore())
+      - damprob : probability of coral wave damage for each site
+      - heatstressprob : probability of heat stress for each site
+      - prioritysites : list of sites in group (i.e. prsites: 1,2,3)
+      - sumcover : total coral cover
+      - risktol : risk tolerance (input by user from criteriaWeights/Details)
+      - wtconseed : weight of connectivity for seeding
+      - wtconshade : weight of connectivity for shading
+      - wtwaves : weight of wave damage
+      - wtheat : weight of heat risk
+      - wthicover : weight of high coral cover
+      - wtlocover : weight of low coral cover
+      - wtpredecseed : weight for seeding predecessors of priority reefs
+      - wtpredecshade : weight for shading predecessors of priority reefs
 - alg_ind   : an integer indicating the algorithm to be used for the multi-criteria anlysis 
       (1: order-ranking, 2: TOPSIS, 3: VIKOR, 4: multi-obj ranking
 
