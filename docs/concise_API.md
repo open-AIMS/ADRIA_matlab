@@ -208,6 +208,7 @@ which currently incoporates connectivity, wave stress, heat stress, coral cover 
    - ranks sites according to additive ranking
    - rank calculated from the sum of the columns of A
    - Strategy: When overall performance matters and trade-offs between criteria need not be considered (also least computationally expensive).
+   
 2 : TOPSIS
    - ranks sites according a ratio 
    - ratio is calculated from the geometric distance from the Positive Ideal Solution PIS and Negative Ideal Solution NIS
