@@ -230,6 +230,7 @@ which currently incoporates connectivity, wave stress, heat stress, coral cover 
       'wtconshade', [],'wtwaves', [], 'wtheat', [], 'wthicover', [], ...
       'wtlocover', [], 'wtpredecseed', [], 'wtpredecshade', []);
       where []'s are dynamically updated in runADRIA.m
+      
       - nsites : total number of sites
       - nsiteint : number of sites to select for priority interventions
       - strongpred : strongest predecessor sites (calculated in ADRIA_TP_Moore())
@@ -247,6 +248,7 @@ which currently incoporates connectivity, wave stress, heat stress, coral cover 
       - wtlocover : weight of low coral cover
       - wtpredecseed : weight for seeding predecessors of priority reefs
       - wtpredecshade : weight for shading predecessors of priority reefs
+      
 - alg_ind   : an integer indicating the algorithm to be used for the multi-criteria anlysis 
       (1: order-ranking, 2: TOPSIS, 3: VIKOR, 4: multi-obj ranking
 
