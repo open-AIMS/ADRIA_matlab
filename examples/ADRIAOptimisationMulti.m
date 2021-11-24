@@ -97,6 +97,6 @@ function [x, fval] = ADRIAOptimisationMulti(alg, out_names, varargin)
         filename = strcat(varargin{3}, filename);
     end
 
-        % Save as CSV
-        saveData(x, filename, 'csv')
+    % Save as CSV
+    saveData(x, filename)
 end
