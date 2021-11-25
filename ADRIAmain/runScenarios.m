@@ -82,7 +82,7 @@ parfor i = 1:N
     scen_ecol = ecol_params(i, :);
     
     % Select random subset of RCP conditions WITHOUT replacement
-    rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false)
+    rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
     w_scen = wave_scen(:, :, rcp_scens);
     d_scen = dhw_scen(:, :, rcp_scens);
     for j = 1:n_reps
