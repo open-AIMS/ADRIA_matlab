@@ -54,11 +54,26 @@ ub_vals = tmp(:, 2);
 arrayfun(assert_lb, combined_opts.name, lb_vals);
 arrayfun(assert_ub, combined_opts.name, ub_vals);
 
+%% Check integer options
+% Collect all integer parameters
+int_idxs = combined_opts.ptype == 'integer';
+int_opts = combined_opts(int_idxs, :);
+
+int_samples = converted_tbl(:, int_idxs);
+int_names = int_samples.Properties.VariableNames;
+
+% Check that all sampled integer values are valid
+for i = 1:length(int_names)
+    n = int_names(i);
+    vals = converted_tbl.(n{1});
+    tmp = int_opts.options{i, 1};
+    assert(all(ismember(vals, cell2mat(tmp{1}))));
+end
+
 %% Check categoricals
 % Collect all categorical parameters
 cat_idxs = combined_opts.ptype == 'categorical';
 cats = combined_opts(cat_idxs, :);
-valid_opts = cell2mat(values(cats.options{1}{1}));
 
 cat_samples = converted_tbl(:, cat_idxs);
 cat_names = cat_samples.Properties.VariableNames;
