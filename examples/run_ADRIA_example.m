@@ -42,12 +42,11 @@ ecol_tbl = repmat(ecol_tbl, N, 1);
 % where as in practice ADRIA makes use of integer and categorical
 % parameters
 converted_tbl = convertScenarioSelection(p_sel, combined_opts);
-scenarios = table2array(converted_tbl);
 
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-IT = scenarios(:, 1:9);
-criteria_weights = scenarios(:, 10:end);
+IT = converted_tbl{:, 1:9};
+criteria_weights = converted_tbl{:, 10:end};
 
 % use order-ranking for example
 alg_ind = 1;
@@ -100,5 +99,5 @@ for i = 1:N
 end
 
 %% analysis
-ecosys_results = Corals_to_Ecosys_Services(processed);
-analyseADRIAresults1(ecosys_results);
+% ecosys_results = coralsToEcosysServices(processed);
+% analyseADRIAresults1(ecosys_results);
