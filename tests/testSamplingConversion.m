@@ -1,10 +1,15 @@
 % Tests to make sure values converted after sampling resolve to the
 % expected parameter bounds.
-
+%
 % Conversion from real-valued samples to ADRIA usable values
 % is necessary as almost all samplers/optimizers expect real-valued 
 % parameters (e.g., floats) where as in practice ADRIA makes use of integer
 % and categorical parameters
+%
+% Parameter types
+%  - categoricals: values have to be exact match
+%  - integers: whole number values ranging between lower/upper
+%  - float: values can range between lower/upper
 
 % Number of scenarios
 N = 50;
