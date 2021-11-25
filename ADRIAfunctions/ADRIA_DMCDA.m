@@ -40,18 +40,14 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     prop_cover = sumcover/max(sumcover);  %proportional coral cover
     A(:,5) = prop_cover; 
     A(:,6) = 1 - prop_cover;
-
     A(:,7) = predec(:,3);
 
-    % %Filter out sites that have high risk of wave damage, specifically exceeding the risk tolerance 
-    for i = 1:nsites
-         if A(i,3)> risktol %
-             A(i,3)=nan;
-         elseif A(i,4)>risktol
-             A(i,4)=nan;
-         end
-    end
-    % 
+    % Filter out sites that have high risk of wave damage, specifically 
+    % exceeding the risk tolerance 
+    A(A(:, 3) > risktol, 3) = nan;
+    rule = (A(:, 3) <= risktol) & (A(:, 4) > risktol);
+    A(rule, 4) = nan;
+    
     A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
     if isempty(A)
         prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
