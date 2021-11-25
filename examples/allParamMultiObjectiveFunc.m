@@ -1,8 +1,9 @@
-function av_res = allParamObjectiveFuncMulti(x, alg, tgt_names, ...
+function av_res = allParamMultiObjectiveFunc(x, alg, tgt_names, ...
                                        combined_opts, nsites, ...
                                        wave_scens, dhw_scens, ...
                                        params, ecol_parms, ...
-                                       TP_data, site_ranks, strongpred)
+                                       TP_data, site_ranks, ...
+                                       strongpred, ES_vars)
     % Objective function that runs a single ADRIA simulation for all
     % parameters.
     %
@@ -67,9 +68,8 @@ function av_res = allParamObjectiveFuncMulti(x, alg, tgt_names, ...
             processed.E(:, :, :, i) = Y(i).E;
             processed.S(:, :, :, i) = Y(i).S;
         end
-        % use default values for ES calcs
-        out_ind = 0;
-        outs_ES = Corals_to_Ecosys_Services(processed,out_ind);
+
+        outs_ES = coralsToEcosysServices(processed,ES_vars);
         
         if any(strcmp(tgt_names,'CES'))
             processed.CES = outs_ES.CES;

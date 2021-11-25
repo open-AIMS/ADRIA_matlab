@@ -1,8 +1,8 @@
-function [x, fval] = ADRIAOptimisationMulti(alg, out_names, varargin)
-% ADRIAOptimisation takes variables for RCP and
-% PrSites and runs an optimisation algorithm to maximise outputs with
-% respect to the intervention variables Seed1, Seed2, SRM, AsAdt,
-% NatAdt
+function [x, fval] = multiObjOptimization(alg, out_names, fn, TP_data, site_ranks, strongpred, varargin)
+% multiObjOptimization runs a multi-objective genetic optimisation algorithm 
+% to maximise outputs specified in out_names with respect to the intervention 
+% variables Seed1, Seed2, SRM, AsAdt, NatAdt
+%
 % Inputs :
 %        if no inputs for prsites and/or rcp, uses standard parameters
 %        Input order:
@@ -12,9 +12,11 @@ function [x, fval] = ADRIAOptimisationMulti(alg, out_names, varargin)
 %              3 - VIKOR
 %        out_names: indicates which outputs to optimise over as a cell structture of strings
 %                   e.g. out_names = {'TC','CES','PES'};
+%        varargin : default values used if not specified
 %        varargin{1} : prsites (1,2,3)
 %        varargin{2} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
-%        varargin{3} : optional appendage to filename (e.g. run no. etc)
+%        varargin{3} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
+%                               strprov,TCsatCult,TCsatProv,cf 
 % Outputs :
 %         x : [Seed1,Seed2,SRM,Aadpt,Natad] which maximise the chosen
 %             ADRIA output metrics (will represent a pareto front if
@@ -26,9 +28,7 @@ function [x, fval] = ADRIAOptimisationMulti(alg, out_names, varargin)
     criteria_weights = criteriaDetails();
     all_params = [i_params; criteria_weights];
 
-    [TP_data, site_ranks, strongpred] = ADRIA_TP('Inputs/MooreTPmean.xlsx', 0.1);
     nsites = 26;
-
     [params, ecol_parms] = ADRIAparms();
 
     % Filter to target interventions
@@ -38,29 +38,34 @@ function [x, fval] = ADRIAOptimisationMulti(alg, out_names, varargin)
     for target = {'Seed1', 'Seed2', 'SRM', 'Aadpt', 'Natad'}
         rules = rules | (p_names == target);
     end
-
+    
     if size(varargin, 1) == 0
-        rcp = params.RCP;
+        % if nothing provided, use defaults
+        % already in params and i_params except for ES_vars
+        ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
     elseif size(varargin, 1) == 1
+        % set prsites to input
         prsites = varargin{1};
         i_params.prsites = prsites;
-        rcp = params.RCP;
+        % other params defaults
+        ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
     elseif size(varargin, 1) == 2
-        prsites = varargin{1};
-        rcp = varargin{2};
-        % set rcp to desired value
-        params.RCP = rcp;
-        i_params.prsites = prsites;
+        % set rcp and prsites to input
+        params.RCP = varargin{1};
+        i_params.prsites = varargin{2};
+        % other param defaults
+        ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
+    elseif size(varargin, 1) == 3
+        % set all params to input
+        params.RCP = varargin{1};
+        i_params.prsites = varargin{2};
+        ES_vars =  varargin{3};
     end
 
     % Wave/DHW scenarios
-    fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(rcp), ".nc");
     wave_scen = ncread(fn, "wave");
     dhw_scen = ncread(fn, "DHW");
     subset = i_params(rules, :);
-
-    % Initialise parameters
-    x0 = cell2mat(subset.defaults);
 
     % Upper/Lower bounds of x
     lb = cell2mat(subset.lower_bound);
@@ -73,30 +78,17 @@ function [x, fval] = ADRIAOptimisationMulti(alg, out_names, varargin)
         nsites, wave_scen, ...
         dhw_scen, params, ...
         ecol_parms, ...
-        TP_data, site_ranks, strongpred);
-    if size(out_name) == 1
-        % begin optimisation algorithm
-        [x, fval] = simulannealbnd(ObjectiveFunction, x0, lb, ub);
-        fval = -1 * fval;
+        TP_data, site_ranks, ...
+        strongpred, ES_vars);
+    
+    % no constraint equations for now
+    A = [];
+    b = [];
+    Aeq = [];
+    beq = [];
 
-    else
-        % no constraint equations for now
-        A = [];
-        b = [];
-        Aeq = [];
-        beq = [];
+    % begin optimisation algorithm
+    [x, fval] = gamultiobj(ObjectiveFunction, nvar, A, b, Aeq, beq, lb, ub);
+    fval = -1 * fval;
 
-        % begin optimisation algorithm
-        [x, fval] = gamultiobj(ObjectiveFunction, nvar, A, b, Aeq, beq, lb, ub);
-        fval = -1 * fval;
-    end
-    % label file with key parameters
-    filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv', rcp, prsites, alg);
-    % add filename appendage if specified
-    if size(varargin, 1) == 3
-        filename = strcat(varargin{3}, filename);
-    end
-
-    % Save as CSV
-    saveData(x, filename)
 end
