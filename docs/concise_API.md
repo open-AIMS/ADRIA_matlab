@@ -33,13 +33,13 @@ to override defaults.
 Table of 
 
 - name
-- ptype (`categorical` or `float`)
+- ptype (`categorical`, `integer`, or `float`)
 - defaults
-- lower_bound (min/max of discrete values)
-- upper_bound
+- lower_bound (min of discrete values)
+- upper_bound (max of discrete values)
 - options (possible discrete values for categoricals)
-- raw_lower_bound (min/max of option values)
-- raw_upper_bound (min/max of option values)
+- raw_lower_bound (min of option values)
+- raw_upper_bound (max of option values)
   
 The `raw_*_bound` columns hold the raw values prior to any transformation,
 and maps option IDs to their ADRIA expected values.
@@ -73,7 +73,7 @@ Possible arguments (with default values):
 Table of 
 
 - name
-- ptype (`categorical` or `float`)
+- ptype (`categorical`, `integer`, or `float`)
 - defaults
 - lower_bound (min/max of discrete values)
 - upper_bound
@@ -128,7 +128,7 @@ sites, level of centrality, and the strongest predecessor for each site.
 
 **Inputs:**
 - file       : str, path to data file to load
-- con_cutoff : float, percent thresholds of max for weak connections in  network (defined in ADRIAparms.m)
+- con_cutoff : float, percent thresholds of max for weak connections in network (defined in ADRIAparms.m)
 
 **Output:**
 - TP_data     : table, containing the transition probability for all sites (float)
@@ -136,7 +136,7 @@ sites, level of centrality, and the strongest predecessor for each site.
 - strongpred : matrix, strongest predecessor for each site
 
 
-## ADRIA_saveResults()
+## saveData()
 
 Save results to file.
 
@@ -144,8 +144,27 @@ If file is not specified, generates a filename based on date/time
 
 **Inputs:**
 - data     : any, data to save
-- filename : str, file name and location to save data to
+- filename : str (optional), file name and location to save data to
+               Defaults to `ADRIA_results_[current time].csv` if nothing specified.
+- dim_spec : cell array (optional), name/dimensions of `data`.
+               Required for 'nc'.
+               e.g., `{'x_name', x_data, 'y_name', y_data}`
+- nc_varname : str (optional), variable name to save data to in the
+               NetCDF file. Required for 'nc'.
 
+Usage Example:
+
+```matlab
+% Example random data
+data = rand(5,5)
+
+% These are equivalent
+saveData(data, 'example')
+saveData(data, 'example.csv')
+
+% Saving the 5x5 dimension array to NetCDF
+saveData(data, 'example.nc', {'x', 5, 'y', 5}, 'varname')
+```
 
 ## runADRIAScenario()
 
@@ -253,8 +272,8 @@ which currently incoporates connectivity, wave stress, heat stress, coral cover 
       (1: order-ranking, 2: TOPSIS, 3: VIKOR, 4: multi-obj ranking
 
 **Output:**
-- prefseedsites : array of reccommended best sites for seeding
-- prefshadesites : array of reccommended best sites for shading
+- prefseedsites : array of recommended best sites for seeding
+- prefshadesites : array of recommended best sites for shading
 - nprefseedsites : number of seeding sites chosen by MCDA
 - nprefshadesites : number of shading sites chosen by MCDA
 
