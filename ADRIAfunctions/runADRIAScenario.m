@@ -216,7 +216,7 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
             Yin1(:, site) = Yout(p_step, :, site) .* Sbl .* Sw_t(p_step, :, site);
 
             % if the site in the loop equals a preferred seeding site
-            if ismember(site, prefseedsites) == 1 && tstep <= seedyears
+            if ismember(site, prefseedsites) && tstep <= seedyears
                 Yin1(2, site) = Yin1(2, site) + seed1; % seed enhanced corals of group 2
                 Yin1(4, site) = Yin1(4, site) + seed2; % seed enhanced corals of group 4
                 Yseed(2, site) = seed1; % log site as seeded with gr2
