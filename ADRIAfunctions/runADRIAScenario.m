@@ -109,7 +109,8 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     %% temporary allocation to avoid incurring access overhead
     % specify constant odeset option
     non_neg_opt = odeset('NonNegative', 1:4);
-    tspan = [0, 1];
+    % return 3 steps as we're only interested in the last one anyway
+    tspan = [0, 0.5, 1];
 
     e_r = ecol_params.r;
     e_P = ecol_params.P;  % max total coral cover
