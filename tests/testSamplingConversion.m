@@ -80,8 +80,8 @@ cat_names = cat_samples.Properties.VariableNames;
 
 % Check that all sampled categoricals are valid
 for i = 1:length(cat_names)
-    n = cat_names(1);
+    n = cat_names(i);
     vals = converted_tbl.(n{1});
-    tmp = cats.options{:, 1};
+    tmp = cats.options{i, 1};
     assert(all(ismember(vals, cell2mat(values(tmp{1})))));
 end
