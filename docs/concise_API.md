@@ -33,13 +33,13 @@ to override defaults.
 Table of 
 
 - name
-- ptype (`categorical` or `float`)
+- ptype (`categorical`, `integer`, or `float`)
 - defaults
-- lower_bound (min/max of discrete values)
-- upper_bound
+- lower_bound (min of discrete values)
+- upper_bound (max of discrete values)
 - options (possible discrete values for categoricals)
-- raw_lower_bound (min/max of option values)
-- raw_upper_bound (min/max of option values)
+- raw_lower_bound (min of option values)
+- raw_upper_bound (max of option values)
   
 The `raw_*_bound` columns hold the raw values prior to any transformation,
 and maps option IDs to their ADRIA expected values.
@@ -73,7 +73,7 @@ Possible arguments (with default values):
 Table of 
 
 - name
-- ptype (`categorical` or `float`)
+- ptype (`categorical`, `integer`, or `float`)
 - defaults
 - lower_bound (min/max of discrete values)
 - upper_bound
@@ -128,7 +128,7 @@ sites, level of centrality, and the strongest predecessor for each site.
 
 **Inputs:**
 - file       : str, path to data file to load
-- con_cutoff : float, percent thresholds of max for weak connections in  network (defined in ADRIAparms.m)
+- con_cutoff : float, percent thresholds of max for weak connections in network (defined in ADRIAparms.m)
 
 **Output:**
 - TP_data     : table, containing the transition probability for all sites (float)
@@ -136,7 +136,7 @@ sites, level of centrality, and the strongest predecessor for each site.
 - strongpred : matrix, strongest predecessor for each site
 
 
-## ADRIA_saveResults()
+## saveData()
 
 Save results to file.
 
@@ -144,8 +144,27 @@ If file is not specified, generates a filename based on date/time
 
 **Inputs:**
 - data     : any, data to save
-- filename : str, file name and location to save data to
+- filename : str (optional), file name and location to save data to
+               Defaults to `ADRIA_results_[current time].csv` if nothing specified.
+- dim_spec : cell array (optional), name/dimensions of `data`.
+               Required for 'nc'.
+               e.g., `{'x_name', x_data, 'y_name', y_data}`
+- nc_varname : str (optional), variable name to save data to in the
+               NetCDF file. Required for 'nc'.
 
+Usage Example:
+
+```matlab
+% Example random data
+data = rand(5,5)
+
+% These are equivalent
+saveData(data, 'example')
+saveData(data, 'example.csv')
+
+% Saving the 5x5 dimension array to NetCDF
+saveData(data, 'example.nc', {'x', 5, 'y', 5}, 'varname')
+```
 
 ## runADRIAScenario()
 
@@ -201,8 +220,27 @@ ADRIA_saveResults(Y, "example_results.mat")
 ```
 
 ## ADRIA_DMCDA()
-Allows selection from 4 MCDA algorithms to make dynamic site selection decisions within ADRIA. Selection decisions are based on a decision matrix A,
-which currently incoporates connectivity, wave stress, heat stress, coral cover and priority predecessors as criteria.
+Allows selection from 3 MCDA algorithms to make dynamic site selection decisions within ADRIA. Selection decisions are based on a decision matrix A,
+which currently incoporates connectivity, wave stress, heat stress, coral cover and priority predecessors as criteria. Each algorithm carries out a different decision strategy:
+
+1 : order ranking
+   - ranks sites according to additive ranking
+   - rank calculated from the sum of the columns of A
+   - Strategy: When overall performance matters and trade-offs between criteria need not be considered (also least computationally expensive).
+   
+2 : TOPSIS
+   - ranks sites according a ratio 
+   - ratio is calculated from the geometric distance from the Positive Ideal Solution PIS and Negative Ideal Solution NIS
+   - See Hsu-Shih Shih, Huan-Jyh Shyur, E. Stanley Lee, 2007 An extension of TOPSIS for group decision making, Mathematical and Computer Modelling, vol. 45:7–8.
+   - Strategy: When trade-offs between criteria should be considered, but it is not necessary to avoid hidden value extremes.
+
+3 : VIKOR 
+   - ranks sites according to a linear combination of  two measures, S and R.
+   - S measures 'group utility', or the performance of site x against all criteria
+   - R measures 'individual regret', or the maximum deviance of site x from the best ranked sites under all criteria
+   - weightings of R and S in the linear combination are chosen to balance group utility and individual regret (currently both set at 0.5)
+   - See Alidrisi, Hisham, 2021 An Innovative Job Evaluation Approach Using the VIKOR Algorithm, Journal of Risk and Financial Management, vol. 14:6.
+   - Strategy: When trade-offs between criteria should be considered and the decision-maker wants to weight against potential poorly performing criteria which can       be hidden in trade-offs.
 
 **Inputs:**
 - DMCDAvars    : a structure of the form struct('nsites', [], 'nsiteint', [], ...
@@ -211,12 +249,31 @@ which currently incoporates connectivity, wave stress, heat stress, coral cover 
       'wtconshade', [],'wtwaves', [], 'wtheat', [], 'wthicover', [], ...
       'wtlocover', [], 'wtpredecseed', [], 'wtpredecshade', []);
       where []'s are dynamically updated in runADRIA.m
+      
+      - nsites : total number of sites
+      - nsiteint : number of sites to select for priority interventions
+      - strongpred : strongest predecessor sites (calculated in ADRIA_TP_Moore())
+      - centr : site centrality (calculated in ADRIA_TP_Moore())
+      - damprob : probability of coral wave damage for each site
+      - heatstressprob : probability of heat stress for each site
+      - prioritysites : list of sites in group (i.e. prsites: 1,2,3)
+      - sumcover : total coral cover
+      - risktol : risk tolerance (input by user from criteriaWeights/Details)
+      - wtconseed : weight of connectivity for seeding
+      - wtconshade : weight of connectivity for shading
+      - wtwaves : weight of wave damage
+      - wtheat : weight of heat risk
+      - wthicover : weight of high coral cover
+      - wtlocover : weight of low coral cover
+      - wtpredecseed : weight for seeding predecessors of priority reefs
+      - wtpredecshade : weight for shading predecessors of priority reefs
+      
 - alg_ind   : an integer indicating the algorithm to be used for the multi-criteria anlysis 
       (1: order-ranking, 2: TOPSIS, 3: VIKOR, 4: multi-obj ranking
 
 **Output:**
-- prefseedsites : array of reccommended best sites for seeding
-- prefshadesites : array of reccommended best sites for shading
+- prefseedsites : array of recommended best sites for seeding
+- prefshadesites : array of recommended best sites for shading
 - nprefseedsites : number of seeding sites chosen by MCDA
 - nprefshadesites : number of shading sites chosen by MCDA
 

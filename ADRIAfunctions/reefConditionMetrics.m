@@ -5,8 +5,6 @@ function [TC,C,E,S] = reefConditionMetrics(covsim)
 % Function converts the cover of four species to scope for providing 
 % ecosystem services: cultural, provisioning and regulating (including 
 % some supporting)
-% out_ind = 1 : just calculate TC
-% out_ind >1 : calculate other metrics
 
 %% Preliminary estimates using only three species 
 % 1: Total coral cover (relative)

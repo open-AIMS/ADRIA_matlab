@@ -58,8 +58,6 @@ for s = 1:nsites
     end
 end
 
-%rwnames = {'Site1';'Site2';'Site3';'Site4';'Site5'};
-%SiteRanks = table(C1,C2,C3);%,'RowNames',rwnames
 SiteRanks = table(C1);%,'RowNames',rwnames
 SiteRanks(nsites+1:end,:) = [];
 
