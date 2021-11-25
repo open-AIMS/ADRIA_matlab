@@ -56,10 +56,11 @@ arrayfun(assert_ub, combined_opts.name, ub_vals);
 
 %% Check categoricals
 % Collect all categorical parameters
-cats = combined_opts(combined_opts.ptype == 'categorical', :);
+cat_idxs = combined_opts.ptype == 'categorical';
+cats = combined_opts(cat_idxs, :);
 valid_opts = cell2mat(values(cats.options{1}{1}));
 
-cat_samples = converted_tbl(:, combined_opts.ptype == 'categorical');
+cat_samples = converted_tbl(:, cat_idxs);
 cat_names = cat_samples.Properties.VariableNames;
 
 % Check that all sampled categoricals are valid
