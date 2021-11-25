@@ -188,16 +188,23 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
         % Sbl_t = arrayfun(@(x) 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, neg_e_p2, assistadapt, natad, x), dhw_ss, 'UniformOutput', false);
         % Sbl_t = vertcat(Sbl_t{:});
 
+        % Warming and disturbance event going into the pulse function
+        if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
+            Yshade(:, prefshadesites) = srm;
+        else
+            Yshade(:, :) = 0;
+        end
+        
         %% Run site loop and apply interventions before bleaching season
         for site = 1:nsites
             % Warming and disturbance event going into the pulse function
-            if ismember(site, prefshadesites) == 1 && tstep <= shadeyears % if the site in the loop equals a preferred shading site
-                Yshade(site) = srm; % log the site as shaded
-                % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
-            elseif ismember(site, prefshadesites) == 0 || tstep > shadeyears %if the site in the loop is not a preferred shading site
-                Yshade(site) = 0; % log the site as not shaded
-                % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
-            end
+%             if ismember(site, prefshadesites) == 1 && tstep <= shadeyears % if the site in the loop equals a preferred shading site
+%                 Yshade(site) = srm; % log the site as shaded
+%                 % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
+%             elseif ismember(site, prefshadesites) == 0 || tstep > shadeyears %if the site in the loop is not a preferred shading site
+%                 Yshade(site) = 0; % log the site as not shaded
+%                 % BL(tstep,:,site,I,sims) = Yout(tstep-1,:,site)'.*(1-Sbl);
+%             end
 
             % survivors from bleaching event
             Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
@@ -234,6 +241,7 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
             Yout(tstep, :, site) = Y(end, :); % update population sizes
             Yout(Yout > e_P) = e_P; % limit covers to carrying capacity (obsolete)
 
+            % MOVE OUTSIDE ALL LOOPS?
             % output we save for analyses. Includes: tf,nspecies,nsites,ninter,sims
             % raw results for current simulation
             coral_cover(:, :, :) = Yout(:, :, :);
