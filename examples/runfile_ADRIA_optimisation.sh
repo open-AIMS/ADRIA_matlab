@@ -14,4 +14,4 @@ module load MATLAB/R2019a
 cd $PBS_O_WORKDIR
 
 matlab -nodisplay -r "ADRIASetup" 
-matlab -nodisplay -r "ADRIAOptimisation" > ADRIA_opt_output_RCP"$RCP"_PrSites"$PrSites".log
+matlab -nodisplay -r "run_ADRIA_opt_hpc" > ADRIA_opt_output_RCP"$RCP"_PrSites"$PrSites".log

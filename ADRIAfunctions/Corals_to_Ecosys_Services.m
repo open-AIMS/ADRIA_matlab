@@ -1,33 +1,40 @@
-function ecosys_results = Corals_to_Ecosys_Services(F0)
+function ecosys_results = Corals_to_Ecosys_Services(F0,user_ind)
 
-%% load data file
-%loads results from ADRIA -
-% F0 = load(strcat('Outputs/Results_RCP',num2str(RCP),'_Alg',num2str(alg_ind)));
-
+% user_ind indicates whether to use default 
 TC = F0.TC;
-C = F0.C;
 E = F0.E;
 S = F0.S;
 
-%% request user input
-MetricPrompt = {'Relative importance of coral evenness for cultural ES (proportion):', ...
-    'Relative importance of structural complexity for cultural ES (proportion):', ...
-    'Relative importance of coral evenness for provisioning ES (proportion):', ...
-    'Relative importance of structural complexity for provisioning ES (proportion):', ...
-    'Total coral cover at which scope to support Cultural ES is maximised:', ...
-    'Total coral cover at which scope to support Provisioning ES is maximised:', ...
-    'Row used as counterfactual:'};
-dlgtitle = 'Coral metrics and scope for ecosystem-services provision';
-dims = [1, 50];
-definput = {'0.5', '0.5', '0.2', '0.8', '0.5', '0.5', '1'};
-answer = inputdlg(MetricPrompt, dlgtitle, dims, definput, "off");
-evcult = str2num(answer{1}); %importance of evenness in supporting cultural ecosystem services
-strcult = str2num(answer{2}); %importance of structural complexity in supporting cultural ecosystem services
-evprov = str2num(answer{3}); %importance of evenness in supporting provisioning ecosystem services
-strprov = str2num(answer{4});  %importance of structural complexity in supporting provisioning ecosystem services
-TCsatCult = str2num(answer{5}); %saturating relationship between total cover and cultural services
-TCsatProv = str2num(answer{6}); %saturating relationship between total cover and cultural services
-cf = str2num(answer{7}); %counterfactual
+% if user_ind =1 request user input for importance balancing
+if user_ind == 1
+    MetricPrompt = {'Relative importance of coral evenness for cultural ES (proportion):', ...
+        'Relative importance of structural complexity for cultural ES (proportion):', ...
+        'Relative importance of coral evenness for provisioning ES (proportion):', ...
+        'Relative importance of structural complexity for provisioning ES (proportion):', ...
+        'Total coral cover at which scope to support Cultural ES is maximised:', ...
+        'Total coral cover at which scope to support Provisioning ES is maximised:', ...
+        'Row used as counterfactual:'};
+    dlgtitle = 'Coral metrics and scope for ecosystem-services provision';
+    dims = [1, 50];
+    definput = {'0.5', '0.5', '0.2', '0.8', '0.5', '0.5', '1'};
+    answer = inputdlg(MetricPrompt, dlgtitle, dims, definput, "off");
+    evcult = str2double(answer{1});
+    strcult = str2double(answer{2});
+    evprov = str2double(answer{3});
+    strprov = str2double(answer{4});
+    TCsatCult = str2double(answer{5});
+    TCsatProv = str2double(answer{6});
+    cf = str2double(answer{7}); %counterfactual
+    % if user_ind == 0 use default (e.g. for optimisation)
+elseif user_ind == 0
+    evcult = 0.5;
+    strcult = 0.5;
+    evprov = 0.2;
+    strprov = 0.8;
+    TCsatCult = 0.5;
+    TCsatProv = 0.5;
+    cf = 1; %counterfactual
+end
 
 %% Conversion to scope for ecosystem services
 
@@ -53,3 +60,4 @@ ecosys_results = struct('CultES', CultES, ...
                         'dProvES', dProvES, ...
                         'Nint', Nint);
 end
+
