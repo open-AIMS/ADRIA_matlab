@@ -1,4 +1,4 @@
-function [LP1,LP2,LP3,LP4] = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff, DHWmaxtot, LPDprm2)
+function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff, DHWmaxtot, LPDprm2)
 % Project larval production for each coral type for the given time step.
 %
 % Inputs:
@@ -11,9 +11,12 @@ function [LP1,LP2,LP3,LP4] = ADRIA_larvalprod(tstep, assistadapt, natad, stressp
 %    LPDprm2 : int, larval production parameter 2?
 ad = assistadapt + tstep .* natad;
 
-LP1 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*(1-ad(1)/DHWmaxtot)-LPDprm2))));
-LP2 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*(1-ad(2)/DHWmaxtot)-LPDprm2))));
-LP3 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*(1-ad(3)/DHWmaxtot)-LPDprm2))));
-LP4 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*(1-ad(4)/DHWmaxtot)-LPDprm2))));
+tmp_ad = (1 - ad / DHWmaxtot);
+LP1 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(1)-LPDprm2))));
+LP2 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(2)-LPDprm2))));
+LP3 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(3)-LPDprm2))));
+LP4 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(4)-LPDprm2))));
+
+Y = [LP1; LP2; LP3; LP4];
 
 end

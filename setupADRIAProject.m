@@ -73,3 +73,7 @@ addPath(proj, './ADRIAfunctions');
 addPath(proj, './ADRIAmain');
 addPath(proj, './examples');
 addPath(proj, './Inputs');
+
+
+% Programmatically install toolbox:
+% https://au.mathworks.com/help/matlab/ref/matlab.addons.toolbox.installtoolbox.html
