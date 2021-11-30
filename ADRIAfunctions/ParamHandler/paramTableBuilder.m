@@ -13,17 +13,17 @@ for i = 1:length(ptype)
     
     this_bound = raw_bounds{i};
     if tmp_ptype == "integer"
-        lower = this_bound(1);
-        upper = this_bound(2);
+        l_val = this_bound(1);
+        u_val = this_bound(2);
         
         if length(this_bound(1)) > 1
             % parameter holds an arrays as options
             % e.g. lower := [0, 0], upper := [1, 1]
-            t = [lower; upper]';
+            t = [l_val; u_val]';
             tmp = paramCombinations({t(1, :); t(2, :)});
             opts{i} = {containers.Map(1:length(tmp), tmp)};
         else
-            opts{i} = {paramCombinations({lower:upper})};
+            opts{i} = {paramCombinations({l_val:u_val})};
         end
     else
         % simply map integer id to categorical value
@@ -46,7 +46,7 @@ for i = 1:length(options)
 
     try
         lower_opt_bound{i} = 1;
-        upper_opt_bound{i} = length(options{i}{1});
+        upper_opt_bound{i} = length(options{i}{1})+1;
     catch
         lower_opt_bound{i} = lower;
         upper_opt_bound{i} = upper;

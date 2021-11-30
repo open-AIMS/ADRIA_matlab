@@ -1,15 +1,20 @@
-function Y = ADRIA_bleachingMortality(tstep,parms,dhw)
+function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
 % Gompertz cumulative mortality function 
 %
 % Partial calibration using data by Hughes et al [1] (see Fig. 2C)
 %
 % Inputs:
-%     tstep : int, current time step
-%     parms : ?
-%     dhw   : float, degree heating weeks for given time step
+%     tstep   : int, current time step
+%     n_p1    : float, Gompertz distribution shape parameter 1
+%     n_p2    : float, Gompertz distribution shape parameter 2
+%     a_adapt : array[sp*2, float], assisted adaptation
+%                 where `sp` is the number of species considered
+%     n_adapt : array[sp*2, float], natural adaptation
+%                 where `sp` is the number of species considered
+%     dhw     : float, degree heating weeks for given time step
 %
 % Output:
-%     Y : Array[4, float], bleaching mortality for each coral species
+%     Y : Array[sp*2, float], bleaching mortality for each coral species
 %
 % References:
 %     1. Hughes, T.P., Kerry, J.T., Baird, A.H., Connolly, S.R., 
@@ -20,11 +25,8 @@ function Y = ADRIA_bleachingMortality(tstep,parms,dhw)
 %        'Global warming transforms coral reef assemblages', 
 %        Nature, 556(7702), pp. 492–496. 
 %        doi:10.1038/s41586-018-0041-2.
-ad = parms.assistadapt +tstep.*parms.natad;
+ad = a_adapt + tstep .* n_adapt;
+Y = exp(n_p1 * (exp(n_p2 * (dhw - ad) )));
 
-Y(1) = exp(-parms.p(1)*(exp(-parms.p(2)*(dhw-ad(1))))); %sp1
-Y(2) = exp(-parms.p(1)*(exp(-parms.p(2)*(dhw-ad(2))))); %sp2
-Y(3) = exp(-parms.p(1)*(exp(-parms.p(2)*(dhw-ad(3))))); %sp3
-Y(4) = exp(-parms.p(1)*(exp(-parms.p(2)*(dhw-ad(4))))); %sp4
 end
 

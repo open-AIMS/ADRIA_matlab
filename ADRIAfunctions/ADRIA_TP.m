@@ -5,12 +5,16 @@ function [TP_data, site_ranks, strongpred] =  ADRIA_TP(file, con_cutoff)
 % Inputs:
 %   file       : str, path to data file to load
 %   con_cutoff : float, percent thresholds of max for weak connections in 
-%                network (defined in ADRIAparms.m)
+%                  network (defined in ADRIAparms.m)
 %
 % Output:
-%   TP_data     : table, containing the transition probability for all sites (float)
-%   site_ranks : table, centrality for each site
-%   strongpred : matrix, strongest predecessor for each site
+%   TP_data    : table[float], containing the transition probability for 
+%                  all sites
+%   site_ranks : table[float], centrality for each site
+%   strongpred : matrix[float], strongest predecessor for each site
+%
+% Example: 
+%     ADRIA_TP('MooreTPmean.xlsx', 0.1)
 %% Load transitional probability matrix (connectivity between sites)
 F1 = readtable(file, 'PreserveVariableNames', true);
 F1(:,1:2) = [];  % remove the ID and address columns

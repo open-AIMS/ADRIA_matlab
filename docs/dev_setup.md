@@ -18,7 +18,6 @@ The following toolboxes are required:
 - Parallel Computing Toolbox
 - Global Optimization Toolbox
 
-
 An example run script (`examples/run_example.m`) can be run by calling 
 
 ```matlab
