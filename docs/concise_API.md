@@ -284,21 +284,20 @@ shade_connectivity, seed_connectivity, coral_cover_high, coral_cover_low, seed_p
 If 2 inputs, will use shell variables for ES_vars and RCP. If > 2 inputs, will use these as ES_sites and RCP.
 
 ** Inputs : **
-        if no inputs for prsites and/or rcp, uses standard parameters
-        Input order:
-        - alg : indicates MCDA algorithm to be used
+if no inputs for prsites and/or rcp, uses standard parameters
+- alg : indicates MCDA algorithm to be used
              1 - Order Ranking
              2 - TOPSIS
              3 - VIKOR
-        - out_names: indicates which outputs to optimise over as a cell structture of strings
+- out_names: indicates which outputs to optimise over as a cell structture of strings
                   e.g. out_names = {'TC','CES','PES'};
-        - fn: string giving file location within GitRepo of DHW data for reef of interest
-        - TP_data: structure generated from ADRIA_TP function
-        - site_ranks : structure generated from ADRIA_TP function
-        - strongpred : structure generated from ADRIA_TP function
-        - varargin : default values used if not specified
-        - varargin{1} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
-        - varargin{2} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
+- fn: string giving file location within GitRepo of DHW data for reef of interest
+- TP_data: structure generated from ADRIA_TP function
+- site_ranks : structure generated from ADRIA_TP function
+- strongpred : structure generated from ADRIA_TP function
+- varargin : default values used if not specified
+- varargin{1} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
+- varargin{2} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
                                strprov,TCsatCult,TCsatProv,cf])
 **Outputs:**
 - x : [Guided, PrSites, Seed1,Seed2,SRM,Aadpt,Natad, AaAdpt, NatAdpt, Seedyrs, Shadeyrs, wave_stress, heat_stress, 
@@ -346,19 +345,19 @@ Currently averages over space and time to acheive suitable format (more descript
 kdes etc may come in later versions).
 
 **Input:**
-       - x             : array, perturbed parameters
-       - alg           : int, ranking algorithm 
-       - tgt_names      : cell of strs, name of output to optimize (TC, E, S, CES, PES)
-       - combined_opts : table, ADRIA parameter details
-       - nsites        : int, number of sites
-       - wave_scens    : matrix, available wave damage scenarios
-       - dhw_scens     : matrix, available DHW scenarios
-       - params        : array, core ADRIA parameter values (TO BE REPLACED)
-       - ecol_parms    : array, ADRIA ecological parameter values (TO BE REPLACED)
-       - TP_data       : array, Transition probability data
-       - site_ranks    : array, site centrality data
-       - strongpred    : array, data indicating strongest predecessor per site
+- x             : array, perturbed parameters
+- alg           : int, ranking algorithm 
+- tgt_names      : cell of strs, name of output to optimize (TC, E, S, CES, PES)
+- combined_opts : table, ADRIA parameter details
+- nsites        : int, number of sites
+- wave_scens    : matrix, available wave damage scenarios
+- dhw_scens     : matrix, available DHW scenarios
+- params        : array, core ADRIA parameter values (TO BE REPLACED)
+- ecol_parms    : array, ADRIA ecological parameter values (TO BE REPLACED)
+- TP_data       : array, Transition probability data
+- site_ranks    : array, site centrality data
+- strongpred    : array, data indicating strongest predecessor per site
     
 **Output:** 
-     - av_res : average result (specified by tgt_name) over time/sites, as an array of dimension 1*(length of tgt_names)
+- av_res : average result (specified by tgt_name) over time/sites, as an array of dimension 1*(length of tgt_names)
       
