@@ -283,8 +283,7 @@ respect to the intervention variables Guided, PrSites, Seed1, Seed2, SRM, AaAdpt
 shade_connectivity, seed_connectivity, coral_cover_high, coral_cover_low, seed_priority, shade_priority, deployed_coral_risk_tol.
 If 2 inputs, will use shell variables for ES_vars and RCP. If > 2 inputs, will use these as ES_sites and RCP.
 
-** Inputs : **
-if no inputs for prsites and/or rcp, uses standard parameters
+** Inputs :**
 - alg : indicates MCDA algorithm to be used
              1 - Order Ranking
              2 - TOPSIS
@@ -299,6 +298,7 @@ if no inputs for prsites and/or rcp, uses standard parameters
 - varargin{1} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
 - varargin{2} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
                                strprov,TCsatCult,TCsatProv,cf])
+                               
 **Outputs:**
 - x : [Guided, PrSites, Seed1,Seed2,SRM,Aadpt,Natad, AaAdpt, NatAdpt, Seedyrs, Shadeyrs, wave_stress, heat_stress, 
        shade_connectivity, seed_connectivity, coral_cover_high, coral_cover_low, seed_priority, 
