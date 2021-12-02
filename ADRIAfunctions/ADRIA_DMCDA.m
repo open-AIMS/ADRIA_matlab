@@ -1,9 +1,39 @@
 function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars,alg_ind)
 
-    % utility function that uses a dynamic MCDA to work out what sites to pick, 
-    %if any before going into the bleaching or cyclone season. It uses
-    %disturbance probabilities for the season (distprobyr, a vector)) and
-    %centrality of season (central, a vector) to produce a site ranking table
+%    Utility function that uses a dynamic MCDA to work out what sites to pick, 
+%    if any before going into the bleaching or cyclone season. It uses
+%    disturbance probabilities for the season (distprobyr, a vector)) and
+%     centrality of season (central, a vector) to produce a site ranking table
+%
+%     Inputs: 
+%         DMCDAvars : a structure of the form struct('nsites', [], 'nsiteint', [], ... 'strongpred', [], 'centr', [], 'damprob', [], 'heatstressprob', [], ... 'prioritysites', [], 'sumcover', [], 'risktol', [], 'wtconseed', [], ... 'wtconshade', [],'wtwaves', [], 'wtheat', [], 'wthicover', [], ... 'wtlocover', [], 'wtpredecseed', [], 'wtpredecshade', []); where []'s are dynamically updated in runADRIA.m
+% 
+%         - nsites : total number of sites
+%         - nsiteint : number of sites to select for priority interventions
+%         - strongpred : strongest predecessor sites (calculated in ADRIA_TP_Moore())
+%         - centr : site centrality (calculated in ADRIA_TP_Moore())
+%         - damprob : probability of coral wave damage for each site
+%         - heatstressprob : probability of heat stress for each site
+%         - prioritysites : list of sites in group (i.e. prsites: 1,2,3)
+%         - sumcover : total coral cover
+%         - risktol : risk tolerance (input by user from criteriaWeights/Details)
+%         - wtconseed : weight of connectivity for seeding
+%         - wtconshade : weight of connectivity for shading
+%         - wtwaves : weight of wave damage
+%         - wtheat : weight of heat risk
+%         - wthicover : weight of high coral cover
+%         - wtlocover : weight of low coral cover
+%         - wtpredecseed : weight for seeding predecessors of priority reefs
+%         - wtpredecshade : weight for shading predecessors of priority reefs
+%
+%         alg_ind : an integer indicating the algorithm to be used for the multi-criteria anlysis 
+%                   (1: order-ranking, 2: TOPSIS, 3: VIKOR, 4: multi-obj ranking
+%
+%       Outputs :
+%               prefseedsites : site IDs to seed at
+%               prefshadesites : sites IDs to shade at
+%               nprefseedsites : number of preferred seeding sites
+%               nprefshadesites : number of preferredf shading sites
 
     nsites = DCMAvars.nsites;
     nsiteint = DCMAvars.nsiteint;

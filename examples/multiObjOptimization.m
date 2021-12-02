@@ -13,9 +13,8 @@ function [x, fval] = multiObjOptimization(alg, out_names, fn, TP_data, site_rank
 %        out_names: indicates which outputs to optimise over as a cell structture of strings
 %                   e.g. out_names = {'TC','CES','PES'};
 %        varargin : default values used if not specified
-%        varargin{1} : prsites (1,2,3)
-%        varargin{2} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
-%        varargin{3} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
+%        varargin{1} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
+%        varargin{2} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
 %                               strprov,TCsatCult,TCsatProv,cf 
 % Outputs :
 %         x : [Seed1,Seed2,SRM,Aadpt,Natad] which maximise the chosen
