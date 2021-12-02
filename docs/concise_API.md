@@ -345,7 +345,7 @@ CES and PES as possible outputs, as specified in tgt_names.
 Currently averages over space and time to acheive suitable format (more descriptive formats such as distribution summary statistics, 
 kdes etc may come in later versions).
 
-**Input :**
+**Input:**
        - x             : array, perturbed parameters
        - alg           : int, ranking algorithm 
        - tgt_names      : cell of strs, name of output to optimize (TC, E, S, CES, PES)
@@ -359,6 +359,6 @@ kdes etc may come in later versions).
        - site_ranks    : array, site centrality data
        - strongpred    : array, data indicating strongest predecessor per site
     
-**Output :** 
+**Output:** 
      - av_res : average result (specified by tgt_name) over time/sites, as an array of dimension 1*(length of tgt_names)
       
