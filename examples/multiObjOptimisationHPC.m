@@ -8,7 +8,6 @@
 alg = 1;  
 
 % get shell variables
-prsites = str2num(getenv('PrSites')); % PrSites
 rcp = str2num(getenv('RCP')); % RCP
 
 % optimisation specification - want to optimise for TC,E and S
