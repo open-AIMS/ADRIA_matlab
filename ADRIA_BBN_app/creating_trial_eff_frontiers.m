@@ -195,8 +195,8 @@ ylabel('S','Interpreter','latex','Fontsize',12)
 A = [1 1];
 Aeq = [];
 beq = [];
-%lb = [0 0];
-%ub = [1 1];
+lb = [0 0];
+ub = [1 1];
 S = linspace(0,1);
 PES = zeros(size(S));
 C2 = zeros(size(S));
@@ -211,7 +211,6 @@ for ss = 1:length(S)-1
     [c23,fval] = fmincon(PESobj,c0,A,b,Aeq,beq,lb,ub);
     C2(ss) = c23(1);
     C3(ss) = c23(2);
-    C2(ss) + C3(ss) + S(ss)
     PES(ss) = -fval;       
 end
 
