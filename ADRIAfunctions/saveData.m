@@ -22,7 +22,7 @@ function saveData(data, filename, nc_settings)
     %     nc_settings: Named Arguments (optional, required for `.nc`).
     %                    - var_name : string, name of variable
     %                    - dim_spec : cell, of variable dimensions
-    %                        e.g., `{'x_name', x_data, 'y_name', y_data}`
+    %                        e.g., `{'x_name', 10, 'y_name', 5}`
     %                    - compression : int, compression level to use
     %                        0 to 9, where 0 is no compression, and 9 is
     %                        maximum compression.
