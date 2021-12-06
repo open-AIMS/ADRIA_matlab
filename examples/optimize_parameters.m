@@ -57,4 +57,4 @@ x = simulannealbnd(ObjectiveFunction, x0, lb, ub, obj_opts);
 filename = sprintf('ADRIA_opt_out_RCP%2.0f_PrSites%1.0d_Alg%1.0d.csv', rcp, prsites, alg);
 
 % Save as CSV
-saveData(x, filename, 'csv')
+saveData(x, filename)
