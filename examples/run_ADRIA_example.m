@@ -99,5 +99,27 @@ for i = 1:N
 end
 
 %% analysis
-% ecosys_results = coralsToEcosysServices(processed);
+% Prompt for importance balancing
+% MetricPrompt = {'Relative importance of coral evenness for cultural ES (proportion):', ...
+%         'Relative importance of structural complexity for cultural ES (proportion):', ...
+%         'Relative importance of coral evenness for provisioning ES (proportion):', ...
+%         'Relative importance of structural complexity for provisioning ES (proportion):', ...
+%         'Total coral cover at which scope to support Cultural ES is maximised:', ...
+%         'Total coral cover at which scope to support Provisioning ES is maximised:', ...
+%         'Row used as counterfactual:'};
+% dlgtitle = 'Coral metrics and scope for ecosystem-services provision';
+% dims = [1, 50];
+% definput = {'0.5', '0.5', '0.2', '0.8', '0.5', '0.5', '1'};
+% answer = inputdlg(MetricPrompt, dlgtitle, dims, definput, "off");
+% evcult = str2double(answer{1});
+% strcult = str2double(answer{2});
+% evprov = str2double(answer{3});
+% strprov = str2double(answer{4});
+% TCsatCult = str2double(answer{5});
+% TCsatProv = str2double(answer{6});
+% cf = str2double(answer{7}); %counterfactual
+% 
+% ES_vars = [evcult, strcult, evprov, strprov, TCsatCult, TCsatProv, cf];
+% 
+% ecosys_results = coralsToEcosysServices(processed, ES_vars);
 % analyseADRIAresults1(ecosys_results);
