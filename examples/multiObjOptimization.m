@@ -43,22 +43,14 @@ function [x, fval] = multiObjOptimization(alg, out_names, fn, TP_data, site_rank
         % already in params and i_params except for ES_vars
         ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
     elseif size(varargin, 1) == 1
-        % set prsites to input
-        prsites = varargin{1};
-        i_params.prsites = prsites;
+        % set rcp to input
+        params.RCP = varargin{1};
         % other params defaults
         ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
     elseif size(varargin, 1) == 2
-        % set rcp and prsites to input
+         % set all params to input
         params.RCP = varargin{1};
-        i_params.prsites = varargin{2};
-        % other param defaults
-        ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
-    elseif size(varargin, 1) == 3
-        % set all params to input
-        params.RCP = varargin{1};
-        i_params.prsites = varargin{2};
-        ES_vars =  varargin{3};
+        ES_vars =  varargin{2};
     end
 
     % Wave/DHW scenarios
@@ -71,8 +63,8 @@ function [x, fval] = multiObjOptimization(alg, out_names, fn, TP_data, site_rank
     ub = cell2mat(subset.upper_bound);
 
     % no. of variables to optimise for = no. of interventions
-    nvar = 5;
-    ObjectiveFunction = @(x) -1 * AllParamObjectiveFuncMulti(x, alg, out_names, ...
+    nvar = 18;
+    ObjectiveFunction = @(x) -1 * allParamMultiObjectiveFunc(x, alg, out_names, ...
         all_params, ...
         nsites, wave_scen, ...
         dhw_scen, params, ...

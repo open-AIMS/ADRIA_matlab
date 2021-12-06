@@ -26,7 +26,7 @@ function av_res = allParamMultiObjectiveFunc(x, alg, tgt_names, ...
     %     av_res : average result (specified by tgt_name) over time/sites
 
     %% Convert sampled values back to ADRIA expected values
-    converted_tbl = convertScenarioSelection(x', combined_opts);
+    converted_tbl = convertScenarioSelection(x, combined_opts);
     scenarios = table2array(converted_tbl);
 
     %% Subset scenario spec for use
