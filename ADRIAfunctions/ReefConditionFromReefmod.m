@@ -1,11 +1,14 @@
-%% Prepares ReefMod output data for analyses in ADRIA, including translation to ReefConditionMetrics
 
-%% Settings
-criteria_threshold = 0.75;  %threshold for how many criteria need to be met in order for a condition category to be satisfied. 
-cots_outbreak_threshold = 0.2; 
-metrics = 1:8;  % see below for metrics implemented
+%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Model translates ReefMod output data to a Reef Condition Index via ADRIA
+%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
+% Settings
+criteria_threshold = 0.75;  %threshold for how many criteria need to be met for category to be satisfied. 
+cots_outbreak_threshold = 0.2; % number of CoTS per manta tow to classify as outbreak
+metrics = 1:8;  % see below for metrics implemented - a value of 8 implements all metrics
+
+% Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totalCover: [448×85 single]
 %            coralEvenness: [448×85 single]
 %            shelterVolume: [448×85×6 double]
@@ -36,7 +39,7 @@ reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data fi
 %                         rubble: [10×448×85 single]
 %                          years: [1×85 double]
 
-%% We need to extract and convert as many of these mertics as we can such that they can inform the Reef Condition Metric (RCI)
+%% We need to extract and convert as many of these metrics as we can such that they can inform the Reef Condition Metric (RCI)
 % The metrics we are particulartly interested here as direct outputs are flagged by a YES.
 % Derived metrics, or metrics that require further elicitation and data, are flagged with NO or NOT YET.
 % 1.	Relative coral cover            YES - as sum of relative covers for each group)
