@@ -138,33 +138,54 @@ sites, level of centrality, and the strongest predecessor for each site.
 
 ## saveData()
 
-Save results to file.
+Convenience function to save data to file in CSV, `.mat` or NetCDF format.
 
-If file is not specified, generates a filename based on date/time
+If file is not specified, generates a filename based on date/time.
+
+If NetCDF format is specified, attempts to create a new NetCDF file
+and field/variable (specified by `nc_varname`). If the file already
+exists, then the new variable is created. This function does not
+support overwriting existing variables and so variable names must be
+unique.
+
+Note: If NetCDF is specified and `data` is a struct,
+   this function will attempt to create an entry for each item
+   and infer its dimensions (up to 5) and name (using the struct
+   fieldnames).
 
 **Inputs:**
-- data     : any, data to save
-- filename : str (optional), file name and location to save data to
-               Defaults to `ADRIA_results_[current time].csv` if nothing specified.
-- dim_spec : cell array (optional), name/dimensions of `data`.
-               Required for 'nc'.
-               e.g., `{'x_name', x_data, 'y_name', y_data}`
-- nc_varname : str (optional), variable name to save data to in the
-               NetCDF file. Required for 'nc'.
+- data       : any, data to save
+- filename   : str (optional), file name and location of file.
+               Defaults to `ADRIA_results_[current time].csv`
+               if nothing specified.
+- nc_settings: Named Arguments (optional, required for `.nc`).
+               - var_name : string, name of variable
+               - dim_spec : cell, of variable dimensions
+                   e.g., `{'x_name', 10, 'y_name', 5}`
+               - compression : int, compression level to use
+                   0 to 9, where 0 is no compression, and 9 is
+                   maximum compression.
+                   Defaults to 4.
 
 Usage Example:
 
 ```matlab
-% Example random data
 data = rand(5,5)
 
-% These are equivalent
+These are equivalent
 saveData(data, 'example')
 saveData(data, 'example.csv')
 
-% Saving the 5x5 dimension array to NetCDF
-saveData(data, 'example.nc', {'x', 5, 'y', 5}, 'varname')
+Saving a 5x5 dimension array to NetCDF
+saveData(data, 'example.nc', var_name='out', ...
+         dim_spec={'x', 5, 'y', 5}, compression=4)
+
+Saving a struct to NetCDF
+Supports up to 5 dimensions per variable
+tmp = struct('x', rand(2,2), 'y', rand(2,2,2,2))
+saveData(tmp, 'example.nc', compression=8)
 ```
+
 
 ## runADRIAScenario()
 
@@ -183,31 +204,31 @@ a single row from each (i.e., a unique combination of intervention and parameter
 
 **Example: [UNFINISHED]**
 ```matlab
-%% Set up parameters
+%Set up parameters
 interv = interventionDetails();
 criteria = criteriaDetails();
-p_opts = [interv; criteria];  % join tables together
+p_opts = [interv; criteria];  join tables together
 
-X ...;  % some sampling process
+X ...;  some sampling process
 
-% map back to categorical options as necessary
+map back to categorical options as necessary
 X = convertScenarioSelection(X, p_opts)
 
-% other parameters are static 
-% environmental and ecological parameter values etc
+other parameters are static 
+environmental and ecological parameter values etc
 [params, ecol_params] = ADRIAparms();
 
-%% Load site data
+%Load site data
 [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', params.con_cutoff);
 
 ninter = height(X, 1);
 alg_ind = 1;
 
-%% Set up result array
-Y = ... % some NxD array where N is no. of sims and D is no. of outputs
+%Set up result array
+Y = ... some NxD array where N is no. of sims and D is no. of outputs
 
-%% Run simulations
+%Run simulations
 parfor i = 1:ninter
     Y(i) = runADRIAScenario(IT(i, :), criteria_weights(i, :), ...
                             param_tbl(i, :), ecol_tbl(i, :), ...
@@ -215,7 +236,7 @@ parfor i = 1:ninter
                             w_scen, d_scen, alg_ind);
 end
 
-%% Save results
+%Save results
 ADRIA_saveResults(Y, "example_results.mat")
 ```
 
@@ -306,25 +327,25 @@ See also:
     
 **Example:**
 ```matlab
-%% Optimise for average total coral cover av_TC and scope for cultural ecosystem services av_CES
+%Optimise for average total coral cover av_TC and scope for cultural ecosystem services av_CES
 
-% use simplest MDCA algorithm for now
+use simplest MDCA algorithm for now
 alg = 1;
 
-% use all sites (C)
+use all sites (C)
 prsites = 3; 
 
-% optimisation specification - want to optimise over TC and CES so indicate 1 in their placeholders
+optimisation specification - want to optimise over TC and CES so indicate 1 in their placeholders
 opti_ind = [1,0,0,1,0];
 
-% declare filename appendage to tag as example
+declare filename appendage to tag as example
 file_ap = 'Example2obj';
 
-% perform optimisation (takes a while, be warned, improvements to
-% efficiency to be made)
+perform optimisation (takes a while, be warned, improvements to
+efficiency to be made)
 [x,fval] = ADRIAOptimisation(alg,opti_ind,prsites,rcp,file_ap);
 
-% print results (also automatically saved to a struct in a .mat file) 
+print results (also automatically saved to a struct in a .mat file) 
 sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f, av_CES = %1.4f',...
     x(1),x(2),x(3),x(4),x(5),fval(1),fval(2));
 ```  

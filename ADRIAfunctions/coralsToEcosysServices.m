@@ -1,4 +1,5 @@
-function ecosys_results = coralsToEcosysServices(F0,ES_vars)
+function ecosys_results = coralsToEcosysServices(F0, ES_vars)
+
 %% Converts coral metrics in F0 (TC, E and S) into scope to support cultural
 % and provisional ES (CultES and ProvES)
 %
@@ -31,7 +32,7 @@ function ecosys_results = coralsToEcosysServices(F0,ES_vars)
     ProvES = tanh(TC/TCsatProv) .* (evprov .* E + strprov .* S); %placeholder function for saturating function (needs stakeholder input)
     ProvES(ProvES > 1) = 1;
 
-    dCultES = CultES - CultES(:, :, cf, :);  %ditto for delta between intervention and counterfactual
+    dCultES = CultES - CultES(:, :, cf, :); %ditto for delta between intervention and counterfactual
     dCultES(dCultES > 1) = 1; %set unity to max
     dCultES(dCultES < 0) = 0; %set unity to max
 
@@ -40,8 +41,7 @@ function ecosys_results = coralsToEcosysServices(F0,ES_vars)
     dProvES(dProvES < 0) = 0;
 
     ecosys_results = struct('CultES', CultES, ...
-                            'ProvES', ProvES, ...
-                            'dCultES', dCultES, ...
-                            'dProvES', dProvES);
+        'ProvES', ProvES, ...
+        'dCultES', dCultES, ...
+        'dProvES', dProvES);
 end
-
