@@ -86,12 +86,12 @@ dhw_scen = ncread(fn, "DHW");
 % sequence
 
 tic
-for i = 1:N
+parfor i = 1:N
     scen_it = IT(i, :);
     scen_crit = criteria_weights(i, :);
     scen_params = param_tbl(i, :);
     ecol_params = ecol_tbl(i, :);
-    parfor j = 1:num_reps
+    for j = 1:num_reps
         w_scen = wave_scen(:, :, j);
         d_scen = dhw_scen(:, :, j);
         Y(i, j) = runADRIAScenario(scen_it, scen_crit, ...
