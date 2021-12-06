@@ -177,7 +177,7 @@ saveData(data, 'example')
 saveData(data, 'example.csv')
 
 Saving a 5x5 dimension array to NetCDF
-saveData(data, 'example.nc', var_name='out', 
+saveData(data, 'example.nc', var_name='out', ...
          dim_spec={'x', 5, 'y', 5}, compression=4)
 
 Saving a struct to NetCDF
