@@ -8,7 +8,8 @@ CultES = metrics.CultES;
 ProvES = metrics.ProvES;
 dCultES = metrics.dCultES;
 dProvES = metrics.dProvES;
-Nint = metrics.Nint;
+tmp_int_size = size(CultES);
+Nint = tmp_int_size(3);
 
 % to ES proxies and deltaES proxies (relative to counterfactual)
 

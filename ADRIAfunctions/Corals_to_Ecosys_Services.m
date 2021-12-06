@@ -1,5 +1,5 @@
-function ecosys_results = Corals_to_Ecosys_Services(F0,user_ind)
-
+function ecosys_results = Corals_to_Ecosys_Services(F0, user_ind)
+warning("`Corals_to_Ecosys_Services()` is deprecated. Use `coralsToEcosysServices()` instead.")
 % user_ind indicates whether to use default 
 TC = F0.TC;
 E = F0.E;
