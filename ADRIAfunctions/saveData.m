@@ -1,4 +1,4 @@
-function saveData(data, filename, dim_spec, nc_varname)
+function saveData(data, filename, nc_settings)
     % Save data to file in CSV, `.mat` or NetCDF format.
     %
     % If file is not specified, generates a filename based on date/time.
@@ -19,11 +19,14 @@ function saveData(data, filename, dim_spec, nc_varname)
     %     filename   : str (optional), file name and location of file.
     %                    Defaults to `ADRIA_results_[current time].csv`
     %                    if nothing specified.
-    %     dim_spec   : cell array (optional), name/dimensions of `data`.
-    %                    Required for 'nc'.
-    %                    e.g., `{'x_name', x_data, 'y_name', y_data}`
-    %     nc_varname : str (optional), variable name to save data to in the
-    %                    NetCDF file. Required for 'nc'.
+    %     nc_settings: Named Arguments (optional, required for `.nc`).
+    %                    - var_name : string, name of variable
+    %                    - dim_spec : cell, of variable dimensions
+    %                        e.g., `{'x_name', x_data, 'y_name', y_data}`
+    %                    - compression : int, compression level to use
+    %                        0 to 9, where 0 is no compression, and 9 is
+    %                        maximum compression.
+    %                        Defaults to 4.
     %
     % Example:
     %     data = rand(5,5)
@@ -33,12 +36,21 @@ function saveData(data, filename, dim_spec, nc_varname)
     %     saveData(data, 'example.csv')
     %
     %     % Saving a 5x5 dimension array to NetCDF
-    %     saveData(data, 'example.nc', {'x', 5, 'y', 5}, 'varname')
+    %     saveData(data, 'example.nc', var_name='out', 
+    %              dim_spec={'x', 5, 'y', 5}, compression=4)
     %
-    %     % Saving a struct
+    %     % Saving a struct to NetCDF
     %     % Supports up to 5 dimensions per variable
     %     tmp = struct('x', rand(2,2), 'y', rand(2,2,2,2))
-    %     saveData(tmp, 'example.nc')
+    %     saveData(tmp, 'example.nc', compression=8)
+    arguments
+        data
+        filename string
+        nc_settings.var_name string
+        nc_settings.dim_spec cell
+        nc_settings.compression {mustBeNumeric} = 4
+    end
+        
     valid_formats = {'mat', 'csv', 'nc'};
 
     if exist('filename', 'var')
@@ -78,6 +90,8 @@ function saveData(data, filename, dim_spec, nc_varname)
     elseif strcmpi(fmt, 'csv')
         writematrix(data, filename);
     elseif strcmpi(fmt, 'nc')
+        c_level = nc_settings.compression;
+
         if ~isstruct(data)
             if ~exist('dim_spec', 'var')
                 error('No data dimension details provided.');
@@ -87,7 +101,8 @@ function saveData(data, filename, dim_spec, nc_varname)
                 nc_varname = 'data';
             end
             
-            nccreate(filename, nc_varname, 'Dimensions', dim_spec);
+            nccreate(filename, nc_varname, 'Dimensions', dim_spec, ...
+                     'DeflateLevel', c_level);
             ncwrite(filename, nc_varname, data);
         else
             f_names = fieldnames(data);
@@ -99,7 +114,8 @@ function saveData(data, filename, dim_spec, nc_varname)
 
                 nccreate(filename, tmp_fn, 'Dimensions', ...
                     {[tmp_fn '_x'], x, [tmp_fn '_y'], y, ...
-                     [tmp_fn '_z'], z, [tmp_fn '_v'], v, [tmp_fn '_w'], w})
+                     [tmp_fn '_z'], z, [tmp_fn '_v'], v, ...
+                     [tmp_fn '_w'], w}, 'DeflateLevel', c_level)
                 ncwrite(filename, tmp_fn, t_data)
             end
         end
