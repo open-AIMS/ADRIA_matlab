@@ -102,24 +102,24 @@ shelterVolume(shelterVolume > 1) = 0; %constrain shelter volume between 0 and 1
 rci.shelter_volume = shelterVolume; %add to rci structure
 
 %% Amalgamate the three types of macroalgae into one variable and convert to proportion
-avg_RM_data.Macroalgae(:, :, 1) = avg_RM_data.macroEncrustFleshy;
-avg_RM_data.Macroalgae(:, :, 2) = avg_RM_data.macroTurf;
-avg_RM_data.Macroalgae(:, :, 3) = avg_RM_data.macroUprightFleshy;
-avg_RM_data.Macroalgae = squeeze(sum(avg_RM_data.Macroalgae, 3)); %sum across algal types and reduce to three dimensions
+avg_RM_data.macroAlgae(:, :, 1) = avg_RM_data.macroEncrustFleshy;
+avg_RM_data.macroAlgae(:, :, 2) = avg_RM_data.macroTurf;
+avg_RM_data.macroAlgae(:, :, 3) = avg_RM_data.macroUprightFleshy;
+avg_RM_data.macroAlgae = squeeze(sum(avg_RM_data.macroAlgae, 3)); %sum across algal types and reduce to three dimensions
 
 %% Crustose coralline algae (CCAs)
 %YM Bozec notes: CCA can be obtained as 100 - all corals - all algae - nongrazable. Don't include rubble here because it's not treated as a substrate.
-rci.CCA = 1 - rci.total_cover - avg_RM_data.nongrazable' / 100 - avg_RM_data.Macroalgae;
+rci.CCA = 1 - rci.total_cover - avg_RM_data.nongrazable' / 100 - avg_RM_data.macroAlgae;
 rci.CCA(rci.CCA < 0) = 0;
 
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
-avg_RM_data.COTSrel = avg_RM_data.COTS_mantatow ./ cots_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
+avg_RM_data.COTSrel = avg_RM_data.COTS_mantatow ./ cots_outbreak_threshold;
 avg_RM_data.COTSrel(avg_RM_data.COTSrel < 0) = 0;
 avg_RM_data.COTSrel(avg_RM_data.COTSrel > 1) = 1;
 
 %% Convert COTS, macroalgae and rubble to their complementary values
 rci.COTSrel_complementary = 1 - avg_RM_data.COTSrel; %complementary of COTS
-rci.Macroalgae_complementary = (100 - avg_RM_data.Macroalgae) / 100; %complementary of macroalgae
+rci.macroalgae_complementary = (100 - avg_RM_data.macroAlgae) / 100; %complementary of macroalgae
 rci.rubble_complementary = (100 - avg_RM_data.rubble) / 100; %complementary of rubble
 
 %% Add reefs to the structure, delete redundant fields, and reorganise
@@ -142,8 +142,9 @@ for reef = 1:NREEFS
              rci.coraljuv_relative(reef, t), ...
              rci.CCA(reef, t), ...
              rci.COTSrel_complementary(reef, t), ...
-             rci.Macroalgae_complementary(reef, t), ...
+             rci.macroalgae_complementary(reef, t), ...
              rci.rubble_complementary(reef, t)];
+
         % the following tests how many ReefMod metrics exceed expert
         % criteria across condition categories
         nmetrics = numel(metrics);
