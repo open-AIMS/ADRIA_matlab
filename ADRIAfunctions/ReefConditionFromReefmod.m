@@ -10,10 +10,10 @@ metrics = 1:8; % see below for metrics implemented - a value of 8 implements all
 % Structure of the ReefConditionIndex when completed here ('comp' means complementary, i.e. 1-metric)
 %               totalCover: [448×85 single]
 %            coralEvenness: [448×85 single]
-%            shelterVolume: [448×85×6 double]
+%           shelter_volume: [448×85×6 double]
 %        coraljuv_relative: [448×85 single]
 %                      CCA: [448×85 single]
-%    COTSrel_complementary: [448×85 single
+%    COTSrel_complementary: [448×85 single]
 % macroalgae_complementary: [448×85 single]
 %     rubble_complementary: [448×85 single]
 %                    reefs: [448×7 table]
@@ -99,7 +99,7 @@ shelterVolume0 = shelterVolumeFromReefmod(shelterVolumeInput); %call function th
 shelterVolumePerKm2 = shelterVolume0 ./ reefArea; %normalise by division by reef area (matrix by vector)
 shelterVolume = shelterVolumePerKm2 ./ median(shelterVolumePerKm2(:, 1:10), 2); %nondimensionalise by comparing against mean sheltervolume in early years
 shelterVolume(shelterVolume > 1) = 0; %constrain shelter volume between 0 and 1
-rci.shelterVolume = shelterVolume; %add to rci structure
+rci.shelter_volume = shelterVolume; %add to rci structure
 
 %% Amalgamate the three types of macroalgae into one variable and convert to proportion
 avg_RM_data.Macroalgae(:, :, 1) = avg_RM_data.macroEncrustFleshy;
@@ -125,8 +125,8 @@ rci.rubble_complementary = (100 - avg_RM_data.rubble) / 100; %complementary of r
 %% Add reefs to the structure, delete redundant fields, and reorganise
 rci.reefs = reefmod_data.reefs;
 rci = rmfield(rci, 'coraljuv'); %original field deleted as it's replaced with relative density of four size classes
-%rci = rmfield(rci,'covers'); %original field deleted as it's replaced with derived metrics
-fieldorder = {'total_cover', 'coral_evenness', 'shelterVolume', 'coraljuv_relative', 'CCA', 'COTSrel_complementary', 'Macroalgae_complementary', 'rubble_complementary', 'reefs'};
+
+fieldorder = {'total_cover', 'coral_evenness', 'shelter_volume', 'coraljuv_relative', 'CCA', 'COTSrel_complementary', 'macroalgae_complementary', 'rubble_complementary', 'reefs'};
 rci = orderfields(rci, fieldorder);
 
 %% Compare ReefMod data against reef condition criteria provided by expert elicitation process (questionnaire)
@@ -138,7 +138,7 @@ for reef = 1:NREEFS
     for t = 1:NYEARS
         M = [rci.total_cover(reef, t), ... %M is the  matrix of attribute values from ReefMod
              rci.coral_evenness(reef, t), ...
-             rci.shelterVolume(reef, t), ...
+             rci.shelter_volume(reef, t), ...
              rci.coraljuv_relative(reef, t), ...
              rci.CCA(reef, t), ...
              rci.COTSrel_complementary(reef, t), ...
