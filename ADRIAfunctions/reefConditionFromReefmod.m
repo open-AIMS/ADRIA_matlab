@@ -98,7 +98,7 @@ shelterVolumeInput = struct('coralNumbers', coralNumbers, 'NREEFS', NREEFS, 'NYE
 shelterVolume0 = shelterVolumeFromReefmod(shelterVolumeInput); %call function that converts coral groups and sizes to colony shelter volume
 shelterVolumePerKm2 = shelterVolume0 ./ reefArea; %normalise by division by reef area (matrix by vector)
 shelterVolume = shelterVolumePerKm2 ./ median(shelterVolumePerKm2(:, 1:10), 2); %nondimensionalise by comparing against mean sheltervolume in early years
-shelterVolume(shelterVolume > 1) = 0; %constrain shelter volume between 0 and 1
+shelterVolume(shelterVolume > 1) = 1; %constrain shelter volume between 0 and 1
 rci.shelter_volume = shelterVolume; %add to rci structure
 
 %% Amalgamate the three types of macroalgae into one variable and convert to proportion
