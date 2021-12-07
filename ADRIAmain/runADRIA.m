@@ -76,11 +76,11 @@ ninter = size(IT, 1);
 [TPdata, SiteRanks, strongpred, nsites] = ADRIA_TP_Moore(params.con_cutoff); % con_cutoff filters out low connectivities
 
 % setup for the geographical setting including environmental input layers
-[wavedisttime, dhwdisttime] = setupADRIAsims(interv.sims, params, nsites);
+[wavedisttime, dhwdisttime] = setupADRIAsims(interv.sims, params, nsites); % NOTE: this will later point to a dataset of simulated environmental projections
 
 %% Mortality projection from waves
 
-mwaves = zeros(params.tf, params.nspecies, nsites, interv.sims);
+mwaves = zeros(params.tf, params.nspecies, nsites, interv.sims); %coral mortality attributable to routine (not cyclone) wave damage
 for species = 1:4
     %including wave vulnerability of different corals here
     mwaves(:, species, :, :) = params.wavemort90(species) * wavedisttime;
@@ -96,7 +96,7 @@ covsim = zeros(params.tf, params.nspecies, nsites, ninter, interv.sims); %main m
 % BL = zeros(params.tf,params.nspecies,nsites,ninter,interv.sims); %coral bleaching
 % seedlog = zeros(params.tf,params.nsiteint,ninter,sims); %initialise coral seeding log
 % shadelog = zeros(params.tf,params.nsiteint,ninter,sims); %initialise coral shading log
-seedsim = zeros(params.tf, params.nspecies, nsites, ninter, interv.sims);
+seedsim = zeros(params.tf, params.nspecies, nsites, ninter, interv.sims); 
 shadesim = zeros(params.tf, params.nspecies, nsites, ninter, interv.sims);
 
 %% Run simulations
@@ -113,7 +113,7 @@ tf = params.tf;
 dhwdisttime = dhwdisttime;
 strongpred = strongpred;
 
-%% Weights for connectivity , waves (ww), high cover (whc) and low
+%% Weights for connectivity , waves (ww), high cover (whc) and low provided as user input
 wtwaves = crit_weights(:, 1); % weight of wave damage in MCDA
 wtheat = crit_weights(:, 2); % weight of heat damage in MCDA
 wtconshade = crit_weights(:, 3); % weight of connectivity for shading in MCDA
@@ -206,30 +206,32 @@ parfor sim = 1:interv.sims
         %% Loop for time steps
         for tstep = 2:tf %tf is time final
             %TP = squeeze(TPdata(:,:,Env(tstep,sim)));
-            past_DHW_stress = dhwdisttime(tstep-1, :, sim); %call last year's DHWs (heat stress)
+            past_DHW_stress = dhwdisttime(tstep-1, :, sim); %call last year's DHWs (heat stress) 
             [LP1, LP2, LP3, LP4] = ADRIA_larvalprod(tstep, parms.assistadapt, parms.natad, past_DHW_stress, ...
-                params.LPdhwcoeff, params.DHWmaxtot, params.LPDprm2); %larval productivity ...
+                params.LPdhwcoeff, params.DHWmaxtot, params.LPDprm2); %larval productivity as a function of past heat stress. 
+            % Reference: Hughes et al. 2019. Global warming impairs
+            % stock-recruitment dynamics of corals. Nature, 568:387-390 
 
-            % for each species, site and year as a function of past heat exposure
+            % coral recruitment for each species, site and year as a function of past heat exposure
             if tstep == 2
                 Yout(tstep, :, :) = Y0; %pos 2 is species, pos3 is sites
-                recSensUE = (Y0(1, :) * TPdata) .* LP1; %larvprod of species 1;
-                recSensE = (Y0(2, :) * TPdata) .* LP2; %larvprod of species 2;
-                recHardUE = (Y0(3, :) * TPdata) .* LP3; %larvprod of species 3;
-                recHardE = (Y0(4, :) * TPdata) .* LP4; %larvprod of species 4;
-                rec(1, :) = recSensUE; %potential recruitment of species 1
-                rec(2, :) = recSensE; %potential recruitment of species 2
-                rec(3, :) = recHardUE; %potential recruitment of species 31
-                rec(4, :) = recHardE; %potential recruitment of species 4
+                recSensUE = (Y0(1, :) * TPdata) .* LP1; %initial recruiment of species 1;
+                recSensE = (Y0(2, :) * TPdata) .* LP2; %initial recruiment of species 2;
+                recHardUE = (Y0(3, :) * TPdata) .* LP3; %initial recruiment of species 3;
+                recHardE = (Y0(4, :) * TPdata) .* LP4; %initial recruiment of species 4;
+                rec(1, :) = recSensUE; %initial recruitment of species 1
+                rec(2, :) = recSensE; %initial recruitment of species 2
+                rec(3, :) = recHardUE; %initial recruitment of species 31
+                rec(4, :) = recHardE; %initial recruitment of species 4
             else
-                recSensUE = (squeeze(Yout(tstep-1, 1, :))' * TPdata) .* LP1; %larvprod of species 1;
-                recSensE = (squeeze(Yout(tstep-1, 2, :))' * TPdata) .* LP2; %larvprod of species 2;
-                recHardUE = (squeeze(Yout(tstep-1, 3, :))' * TPdata) .* LP3; %larvprod of species 3;
-                recHardE = (squeeze(Yout(tstep-1, 4, :))' * TPdata) .* LP4; %larvprod of species 4;
-                rec(1, :) = recSensUE; %potential recruitment of species 1
-                rec(2, :) = recSensE; %potential recruitment of species 2
-                rec(3, :) = recHardUE; %potential recruitment of species 3
-                rec(4, :) = recHardE; %potential recruitment of species 4
+                recSensUE = (squeeze(Yout(tstep-1, 1, :))' * TPdata) .* LP1; %recruitment of species 1;
+                recSensE = (squeeze(Yout(tstep-1, 2, :))' * TPdata) .* LP2; %recruitment of species 2;
+                recHardUE = (squeeze(Yout(tstep-1, 3, :))' * TPdata) .* LP3; %recruitment of species 3;
+                recHardE = (squeeze(Yout(tstep-1, 4, :))' * TPdata) .* LP4; %recruitment of species 4;
+                rec(1, :) = recSensUE; %recruitment of species 1
+                rec(2, :) = recSensE; %recruitment of species 2
+                rec(3, :) = recHardUE; %recruitment of species 3
+                rec(4, :) = recHardE; %recruitment of species 4
             end
 
             %% Setup MCDA before bleaching season
