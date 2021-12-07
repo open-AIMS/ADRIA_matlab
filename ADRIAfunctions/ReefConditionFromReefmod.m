@@ -60,11 +60,11 @@ reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data fi
 %% Average over simulations
 field_names = {'COTS_mantatow', 'coral_cover_per_taxa', 'macroEncrustFleshy', 'macroTurf', ... 
     'macroUprightFleshy', 'nb_coral_adol', 'nb_coral_adult','nb_coral_juv', 'nongrazable', 'rubble'};
-reefmodData2 = struct(); % set up new scalar structure
+avg_RM_data = struct(); % set up new scalar structure
 nfield_names = numel(field_names);
 for k = 1:nfield_names % step through fields
     F = field_names{k}; %assign field names to new structure
-    reefmodData2.(F) = squeeze(mean(reefmod_data.(F),1)); %average over simulations and reduce to two dimensions
+    avg_RM_data.(F) = squeeze(mean(reefmod_data.(F),1)); %average over simulations and reduce to two dimensions
 end
 
 %% Extract constants and variables
@@ -73,10 +73,10 @@ NYEARS = size(reefmod_data.years,2);
 JUVENILE_CORAL_SIZECLASSES = 1:4;
 ADOLESCENT_CORAL_SIZECLASSES = 5:17;
 ADULT_CORAL_SIZECLASSES = 18:26;
-NCORALGROUPS = size(reefmodData2.coral_cover_per_taxa,3);
-coralNumbers(:,:,:,JUVENILE_CORAL_SIZECLASSES) = reefmodData2.nb_coral_juv;
-coralNumbers(:,:,:,ADOLESCENT_CORAL_SIZECLASSES) = reefmodData2.nb_coral_adol;
-coralNumbers(:,:,:,ADULT_CORAL_SIZECLASSES) = reefmodData2.nb_coral_adult;
+NCORALGROUPS = size(avg_RM_data.coral_cover_per_taxa,3);
+coralNumbers(:,:,:,JUVENILE_CORAL_SIZECLASSES) = avg_RM_data.nb_coral_juv;
+coralNumbers(:,:,:,ADOLESCENT_CORAL_SIZECLASSES) = avg_RM_data.nb_coral_adol;
+coralNumbers(:,:,:,ADULT_CORAL_SIZECLASSES) = avg_RM_data.nb_coral_adult;
 NCORALSIZEBINS = size(coralNumbers,4);
 places = table2array(reefmod_data.reefs(:,3:5)); %extract lats and lons from ReefMod file
 lons = places(:,2);
@@ -84,14 +84,14 @@ lats = places(:,1);
 reefArea = places(:,3); %in ReefMod, total reef area from GBRMPA maps is used as coral real estate
 
 %% Calculate coral evenness
-rci.total_cover = sum(reefmodData2.coral_cover_per_taxa,3)/100; %first calculate total coral cover
-covers = reefmodData2.coral_cover_per_taxa/100; %then package relative covers into the rci structure
+rci.total_cover = sum(avg_RM_data.coral_cover_per_taxa,3)/100; %first calculate total coral cover
+covers = avg_RM_data.coral_cover_per_taxa/100; %then package relative covers into the rci structure
 evenness_parms = struct('NCORALGROUPS', NCORALGROUPS, 'covers', covers,'total_cover', rci.total_cover);
 rci.coral_evenness = coralEvennessReefMod(evenness_parms);  %call function that calculates the evenness of coral groups
 rci.coral_evenness = single(rci.coral_evenness); % change to single type
 
 %% Coral juveniles
-rci.coraljuv = sum(reefmodData2.nb_coral_juv,3:4);  %calculate sum of coral juveniles across size classes and coral groups 
+rci.coraljuv = sum(avg_RM_data.nb_coral_juv,3:4);  %calculate sum of coral juveniles across size classes and coral groups 
 maxcoraljuv = max(rci.coraljuv,[],'All'); %find max juvenile density 
 rci.coraljuv_relative = single(rci.coraljuv/(maxcoraljuv));  %convert absolute juvenile numbers to relative measures
 
@@ -104,24 +104,25 @@ shelterVolume(shelterVolume>1)=0; %constrain shelter volume between 0 and 1
 rci.shelterVolume = shelterVolume; %add to rci structure 
 
 %% Amalgamate the three types of macroalgae into one variable and convert to proportion
-reefmodData2.Macroalgae(:,:,1) = reefmodData2.macroEncrustFleshy; 
-reefmodData2.Macroalgae(:,:,2) = reefmodData2.macroTurf; 
-reefmodData2.Macroalgae(:,:,3) = reefmodData2.macroUprightFleshy; 
-reefmodData2.Macroalgae = squeeze(sum(reefmodData2.Macroalgae, 3)); %sum across algal types and reduce to three dimensions
+avg_RM_data.Macroalgae(:,:,1) = avg_RM_data.macroEncrustFleshy; 
+avg_RM_data.Macroalgae(:,:,2) = avg_RM_data.macroTurf; 
+avg_RM_data.Macroalgae(:,:,3) = avg_RM_data.macroUprightFleshy; 
+avg_RM_data.Macroalgae = squeeze(sum(avg_RM_data.Macroalgae, 3)); %sum across algal types and reduce to three dimensions
 
 %% Crustose coralline algae (CCAs)
 %YM Bozec notes: CCA can be obtained as 100 - all corals - all algae - nongrazable. Don't include rubble here because it's not treated as a substrate.
-rci.CCA = 1 - rci.total_cover - reefmodData2.nongrazable'/100 - reefmodData2.Macroalgae;
+rci.CCA = 1 - rci.total_cover - avg_RM_data.nongrazable'/100 - avg_RM_data.Macroalgae;
 rci.CCA(rci.CCA<0) = 0;
+
 %% COTS abundance above critical threshold for outbreak density and relative to max observed
-reefmodData2.COTSrel = reefmodData2.COTS_mantatow./cots_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
-reefmodData2.COTSrel(reefmodData2.COTSrel<0) = 0;
-reefmodData2.COTSrel(reefmodData2.COTSrel>1) = 1;
+avg_RM_data.COTSrel = avg_RM_data.COTS_mantatow./cots_outbreak_threshold; %max(RMdata.COTS_mantatow,[],'All');
+avg_RM_data.COTSrel(avg_RM_data.COTSrel<0) = 0;
+avg_RM_data.COTSrel(avg_RM_data.COTSrel>1) = 1;
 
 %% Convert COTS, macroalgae and rubble to their complementary values 
-rci.COTSrel_complementary = 1 - reefmodData2.COTSrel;  %complementary of COTS
-rci.Macroalgae_complementary = (100 - reefmodData2.Macroalgae)/100; %complementary of macroalgae
-rci.rubble_complementary = (100 - reefmodData2.rubble)/100; %complementary of rubble
+rci.COTSrel_complementary = 1 - avg_RM_data.COTSrel;  %complementary of COTS
+rci.Macroalgae_complementary = (100 - avg_RM_data.Macroalgae)/100; %complementary of macroalgae
+rci.rubble_complementary = (100 - avg_RM_data.rubble)/100; %complementary of rubble
 
 %% Add reefs to the structure, delete redundant fields, and reorganise
 rci.reefs = reefmod_data.reefs;
