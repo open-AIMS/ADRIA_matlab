@@ -19,7 +19,7 @@ metrics = 1:8; % see below for metrics implemented - a value of 8 implements all
 %                    reefs: [448×7 table]
 
 %% load reefmod data output file
-reefmod_data = load('sR0_FORECAST_CAIRNS_MIROC5_45.mat'); %loads example data file produce by ReefMod
+reefmod_data = load('Inputs/sR0_FORECAST_CAIRNS_MIROC5_45.mat');
 % Example structure for ReefMod
 %                  COTS_mantatow: [10×448×85 single]
 %          coral_cover_lost_COTS: [10×448×84×6 single]
