@@ -46,7 +46,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     % exceeding the risk tolerance 
     A(A(:, 3) > risktol, 3) = nan;
     rule = (A(:, 3) <= risktol) & (A(:, 4) > risktol);
-    %rule = (A(:, 4) > risktol);
+
     A(rule, 4) = nan;
     
     A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
@@ -211,9 +211,9 @@ switch alg_ind
         % Compute individual regret R (Chebyshev distance)
         sr_arg =((F_s-SE(:,2:end)));
         S = sum(sr_arg,2);
-        S = [sites', S];
+        S = [A(:,1), S];
         R = max(sr_arg,[],2);
-        R = [sites',R];
+        R = [A(:,1),R];
 
         % Compute the VIKOR compromise Q
         S_s = max(S(:,2));
@@ -221,7 +221,7 @@ switch alg_ind
         R_s = max(R(:,2));
         R_h = min(R(:,2));
         Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-        Q = [sites',Q];
+        Q = [A(:,1),Q];
 
         % sort Q in ascending order rows
         orderQ = sortrows(Q,2,'ascend');
@@ -250,9 +250,9 @@ switch alg_ind
         % Compute individual regret R (Chebyshev distance)
         sr_arg =((F_s-SH(:,2:end)));
         S = nansum(sr_arg,2);
-        S = [sites', S];
+        S = [A(:,1), S];
         R = max(sr_arg,[],2);
-        R = [sites',R];
+        R = [A(:,1),R];
 
         % Compute the VIKOR compromise Q
         S_s = max(S(:,2));
@@ -260,7 +260,7 @@ switch alg_ind
         R_s = max(R(:,2));
         R_h = min(R(:,2));
         Q = v*(S-S_s)/(S_s-S_h) + (1-v)*(R-R_s)/(R_s-R_h);
-        Q = [sites',Q];
+        Q = [A(:,1),Q];
 
         % sort R, S and Q in ascending order rows
         orderQ = sortrows(Q,2,'ascend');
@@ -288,21 +288,21 @@ switch alg_ind
         % no inequality or equality constraints
         Aeq = [];
         beq = [];
-        A = [];
-        b = [];
-        lb = zeros(1,nsites); % x (weightings) can be 0
-        ub = ones(1,nsites); % to 1
+        Aineq = [];
+        bineq = [];
+        lb = zeros(1,length(A(:,1))); % x (weightings) can be 0
+        ub = ones(1,length(A(:,1))); % to 1
      
         % multi-objective function for seeding
         fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
         % solve multi-objective problem using genetic alg
-        x1 = gamultiobj(fun1,nsites,A,b,Aeq,beq,lb,ub);
+        x1 = gamultiobj(fun1,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
         x1 = x1(end,:);
         
         % multi-objective function for shading
         fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
         % solve multi-objective problem using genetic alg
-        x2 = gamultiobj(fun2,nsites,A,b,Aeq,beq,lb,ub);
+        x2 = gamultiobj(fun2,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
         x2 = x2(end,:);
         
         % order ga alg generated weightings from highest to lowest
