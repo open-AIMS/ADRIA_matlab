@@ -1,3 +1,5 @@
+% MARKED FOR DEPRECATION
+
 function av_C = parameterized_objective(x,a,b)
 % x = [Guided,Seed1,Seed2,SRM,Aadpt,Natad,RCP]
 Interv = struct('Guided', 1, ...
