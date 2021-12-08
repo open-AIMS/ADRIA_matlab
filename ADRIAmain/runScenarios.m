@@ -1,6 +1,7 @@
 function Y = runScenarios(intervs, crit_weights, params, ecol_params, ...
                           TP_data, site_ranks, strongpred, ...
-                          n_reps, wave_scen, dhw_scen, alg_ind)
+                          n_reps, wave_scen, dhw_scen, alg_ind, ...
+                          file_prefix)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,13 +18,16 @@ function Y = runScenarios(intervs, crit_weights, params, ecol_params, ...
 %                  - 1, Order ranking
 %                  - 2, TOPSIS
 %                  - 3, VIKOR
+%    file_prefix : str, (optional) write results to netcdf instead of 
+%                    storing in memory.
+%                    If provided, output `Y` will be an empty struct.
 %
 % Output:
 %    Y : struct,
-%          - TC
-%          - C
-%          - E
-%          - S
+%          - TC [n_timesteps, n_sites, N, n_reps]
+%          - C  [n_timesteps, n_sites, N, n_species, n_reps]
+%          - E  [n_timesteps, n_sites, N, n_reps]
+%          - S  [n_timesteps, n_sites, N, n_reps]
 %
 % Model guides the selection of
 % (1) reef sites for the deployment of restoration and adaptation interventions, and
@@ -63,19 +67,26 @@ function Y = runScenarios(intervs, crit_weights, params, ecol_params, ...
 % Max number of corals deployed per group of sites per year = 1000,000
 % Absolute cover of all deployed corals = 10^6 corals *3*10^-3) m2/coral = 3000 m2
 % Relative cover of all deployed corals = 3000m2/100,000m2 = 3 percent
+if ~exist('file_prefix', 'var')
+    file_prefix = false;
+end
+
 N = height(intervs);
-% Y = zeros(N, nreps);
+
+[timesteps, nsites, ~] = size(wave_scen);
+zeros(timesteps, nsites, N, n_reps);
 
 % Create temporary struct
 tmp_s.TC = 0;
 tmp_s.C = 0;
 tmp_s.E = 0;
 tmp_s.S = 0;
+
 Y = repmat(tmp_s, N, n_reps);
 
 n_rep_scens = length(wave_scen);
 
-parfor i = 1:N
+for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     scen_params = params(i, :);
@@ -86,10 +97,20 @@ parfor i = 1:N
     w_scen = wave_scen(:, :, rcp_scens);
     d_scen = dhw_scen(:, :, rcp_scens);
     for j = 1:n_reps
-        Y(i, j) = runADRIAScenario(scen_it, scen_crit, ...
+        tmp = runADRIAScenario(scen_it, scen_crit, ...
                                    scen_params, scen_ecol, ...
                                    TP_data, site_ranks, strongpred, ...
                                    w_scen(:, :, j), d_scen(:, :, j), alg_ind);
+
+        % hacky way of saving data each iteration...
+        if isstring(file_prefix) || ischar(file_prefix)
+            tmp_fn = strcat(file_prefix, '_', num2str(i), '_', ...
+                             num2str(j), '.nc');
+            saveData(tmp, tmp_fn);
+            continue
+        end
+        
+        Y(i, j) = tmp;
     end
 end
 

@@ -27,6 +27,8 @@ function saveData(data, filename, nc_settings)
     %                        0 to 9, where 0 is no compression, and 9 is
     %                        maximum compression.
     %                        Defaults to 4.
+    %                    If a struct is provided as data, attempts to
+    %                    infer variable names and dimensions from fields.
     %
     % Example:
     %     data = rand(5,5)
