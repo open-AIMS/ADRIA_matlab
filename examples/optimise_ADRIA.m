@@ -1,3 +1,4 @@
+% MARKED FOR DEPRECATION
 
 a = 1; % alg_ind
 b = 3; % PrSites

@@ -1,3 +1,5 @@
+% MARKED FOR DEPRECATION
+
 % set random number seed to ensure consistent results for test
 rng(101)
 
