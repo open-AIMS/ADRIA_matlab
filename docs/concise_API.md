@@ -237,7 +237,7 @@ parfor i = 1:ninter
 end
 
 %Save results
-ADRIA_saveResults(Y, "example_results.mat")
+saveData(Y, "example_results.mat")
 ```
 
 ## ADRIA_DMCDA()
