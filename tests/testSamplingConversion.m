@@ -41,11 +41,13 @@ converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 % and nothing is above/below limits
 assert_lb = @(p_name, bnd) ...
              assert(any(converted_tbl.(p_name) >= bnd) & ...
-                    all(~(converted_tbl.(p_name) < bnd)));
+                    all(~(converted_tbl.(p_name) < bnd)), ...
+                    'Sample below expected bound!');
 
 assert_ub = @(p_name, bnd) ...
              assert(any(converted_tbl.(p_name) <= bnd) & ...
-                    all(~(converted_tbl.(p_name) > bnd)));
+                    all(~(converted_tbl.(p_name) > bnd)), ...
+                    'Sample above expected bound!');
 
 tmp = cell2mat(combined_opts.raw_bounds);
 lb_vals = tmp(:, 1);
@@ -67,7 +69,8 @@ for i = 1:length(int_names)
     n = int_names(i);
     vals = converted_tbl.(n{1});
     tmp = int_opts.options{i, 1};
-    assert(all(ismember(vals, cell2mat(tmp{1}))));
+    assert(all(ismember(vals, cell2mat(tmp{1}))), ...
+        'Invalid integer value sampled!');
 end
 
 %% Check categoricals
@@ -83,5 +86,6 @@ for i = 1:length(cat_names)
     n = cat_names(i);
     vals = converted_tbl.(n{1});
     tmp = cats.options{i, 1};
-    assert(all(ismember(vals, cell2mat(values(tmp{1})))));
+    assert(all(ismember(vals, cell2mat(values(tmp{1})))), ...
+        'Invalid categorical value sampled!');
 end

@@ -45,7 +45,7 @@ converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-IT = converted_tbl{:, 1:9};
+interv_scens = converted_tbl{:, 1:9};  % intervention scenarios
 criteria_weights = converted_tbl{:, 10:end};
 
 % use order-ranking for example
@@ -74,7 +74,7 @@ dhw_scen = ncread(fn, "DHW");
 % carlo sequence, or through some user-informed process.
 
 tic
-Y = runScenarios(IT, criteria_weights, param_tbl, ecol_tbl, ...
+Y = runScenarios(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
                  wave_scen, dhw_scen, alg_ind);
 tmp = toc;
@@ -99,5 +99,27 @@ for i = 1:N
 end
 
 %% analysis
-% ecosys_results = coralsToEcosysServices(processed);
-% analyseADRIAresults1(ecosys_results);
+% Prompt for importance balancing
+MetricPrompt = {'Relative importance of coral evenness for cultural ES (proportion):', ...
+        'Relative importance of structural complexity for cultural ES (proportion):', ...
+        'Relative importance of coral evenness for provisioning ES (proportion):', ...
+        'Relative importance of structural complexity for provisioning ES (proportion):', ...
+        'Total coral cover at which scope to support Cultural ES is maximised:', ...
+        'Total coral cover at which scope to support Provisioning ES is maximised:', ...
+        'Row used as counterfactual:'};
+dlgtitle = 'Coral metrics and scope for ecosystem-services provision';
+dims = [1, 50];
+definput = {'0.5', '0.5', '0.2', '0.8', '0.5', '0.5', '1'};
+answer = inputdlg(MetricPrompt, dlgtitle, dims, definput, "off");
+evcult = str2double(answer{1});
+strcult = str2double(answer{2});
+evprov = str2double(answer{3});
+strprov = str2double(answer{4});
+TCsatCult = str2double(answer{5});
+TCsatProv = str2double(answer{6});
+cf = str2double(answer{7}); %counterfactual
+
+ES_vars = [evcult, strcult, evprov, strprov, TCsatCult, TCsatProv, cf];
+
+ecosys_results = coralsToEcosysServices(processed, ES_vars);
+analyseADRIAresults1(ecosys_results);
