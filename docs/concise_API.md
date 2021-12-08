@@ -240,6 +240,25 @@ end
 saveData(Y, "example_results.mat")
 ```
 
+## collectDistributedResults()
+
+Collects results from ADRIA runs written to disk spread across many NetCDF files.
+
+**Inputs:**
+- file_prefix : str, prefix applied to filenames
+- N           : int, number of expected scenarios
+- n_reps      : int, number of expected replicates
+- dir_name    : str, (optional) directory to search
+                Default: current working directory
+- n_species   : int, (optional) number of species considered. Default: 4
+
+**Output:**
+- Y_collated : struct,
+        - TC [n_timesteps, n_sites, N, n_reps]
+        - C  [n_timesteps, n_sites, N, n_species, n_reps]
+        - E  [n_timesteps, n_sites, N, n_reps]
+        - S  [n_timesteps, n_sites, N, n_reps]
+
 ## ADRIA_DMCDA()
 Allows selection from 3 MCDA algorithms to make dynamic site selection decisions within ADRIA. Selection decisions are based on a decision matrix A,
 which currently incoporates connectivity, wave stress, heat stress, coral cover and priority predecessors as criteria. Each algorithm carries out a different decision strategy:
