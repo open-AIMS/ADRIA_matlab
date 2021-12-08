@@ -95,13 +95,8 @@ function saveData(data, filename, nc_settings)
         c_level = nc_settings.compression;
 
         if ~isstruct(data)
-            if ~exist('dim_spec', 'var')
-                error('No data dimension details provided.');
-            end
-
-            if ~exist('nc_varname', 'var')
-                nc_varname = 'data';
-            end
+            dim_spec = nc_settings.dim_spec;
+            nc_varname = nc_settings.var_name;
             
             nccreate(filename, nc_varname, 'Dimensions', dim_spec, ...
                      'DeflateLevel', c_level);

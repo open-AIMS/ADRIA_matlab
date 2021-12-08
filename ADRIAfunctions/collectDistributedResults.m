@@ -19,17 +19,12 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
         file_prefix string
         N {mustBeInteger}
         n_reps {mustBeInteger}
-        opts.dir_name string
+        opts.dir_name string = './'
         opts.n_species {mustBeInteger} = 4
     end
 
-    if ~exist('dir_name', 'var')
-        dir_name = './';
-    end
-    
-    if ~exist('n_species', 'var')
-        n_species = 4;
-    end
+    dir_name = opts.dir_name;
+    n_species = opts.n_species;
     
     file_prefix = strcat(dir_name, file_prefix);
     pat = strcat(file_prefix, '_*.nc');
@@ -39,8 +34,8 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
     
     % TODO: ensure num_files == (N * n_reps)
     msg = ['Mismatch between number of detected files ' ...
-           'and provided scenario combinations.\n' ...
-           strcat('Expected: ', num2str(N * n_reps), '\n') ...
+           'and provided scenario combinations.' newline ...
+           strcat('Expected: ', num2str(N * n_reps)) newline ...
            strcat('Found: ', num2str(num_files))];
     assert((N * n_reps) == num_files, msg)
 
