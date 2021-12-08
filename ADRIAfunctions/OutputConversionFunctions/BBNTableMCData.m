@@ -31,8 +31,7 @@ function BBN_data_table = BBNTableMCData(filetype,rcps,algs,var_names,nsims,yr,s
     nsites = length(sites);
     % number of output metrics captured in the ADRIA data
     nmetrics = length(metrics);
-
-    data_container = [];
+    data_container_total = [];
     % check filetype
     if strcmp(filetype,'mat')
         % iterate through algorithms and rcps
@@ -86,7 +85,7 @@ function BBN_data_table = BBNTableMCData(filetype,rcps,algs,var_names,nsims,yr,s
                         end
                         data_container(:,mm+4+nvars) = temp_cont;
                     end
-                    
+                    data_container_total = [data_container_total;data_container];
                 end
             end
         end
@@ -96,13 +95,13 @@ function BBN_data_table = BBNTableMCData(filetype,rcps,algs,var_names,nsims,yr,s
         BBN_data_table = [];
         return
     end
-    if isempty(data_container)
+    if isempty(data_container_total)
         BBN_data_table = [];
     else
         names = cat(2,var_names,metrics);
         names = cat(2,{'RCP','Alg','Yrs','Sites'},names);
 
-        BBN_data_table = array2table(data_container,'VariableNames',names);
+        BBN_data_table = array2table(data_container_total,'VariableNames',names);
     end
 end
 
