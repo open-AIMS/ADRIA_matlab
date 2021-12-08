@@ -1,15 +1,12 @@
-N_sims =100;
-algs = 1;
-params = cell(7,1);
-params{1} = [0,1];
-params{2} = [1,2,3];
-params{3} = [0,0.0005];
-params{4} = [0,0.0005];
-params{5} = [0,6];
-params{6} = [0,6];
-params{7} = [0,0.05];
-t_s = 10;
-RCPs = 60;
+filetype = 'mat';
+rcps = [26,45,60];
+algs = 1:3;
+sites = 1:26;
+col_names = {'Guided','PrSites','Seed1','Seed2','SRM','Aadpt','Natad','Seedyrs','Shadeyrs'};
+metrics = {'TC','S','E'};
+nsims = 50;
+yr = 1:2:25;
 
+BBN_data_table = BBNTableMCData(filetype,rcps,algs,col_names,nsims,yr,sites,metrics);
 
-BBN_Compatible_Table_Func(params,t_s,RCPs,algs, N_sims)
+head(BBN_data_table)
