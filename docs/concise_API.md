@@ -298,36 +298,41 @@ which currently incoporates connectivity, wave stress, heat stress, coral cover 
 - nprefseedsites : number of seeding sites chosen by MCDA
 - nprefshadesites : number of shading sites chosen by MCDA
 
-## ADRIAOptimisation()
-ADRIAOptimisation takes variables for RCP and PrSites and runs an optimisation algorithm to maximise outputs with
-respect to the intervention variables Seed1, Seed2, SRM, AsAdt, NatAdt. If 2 inputs, will use shell variables for 
-PrSites and RCP. If > 2 inputs, will use these as PrSites and RCP. Saves the outputs to a structure in a .mat file.
+## multiObjOptimisation()
+multiObjOptimisation takes variables for RCP and  and runs an optimisation algorithm to maximise outputs with
+respect to the intervention variables Guided, PrSites, Seed1, Seed2, SRM, AaAdpt, NatAdpt, Seedyrs, Shadeyrs, wave_stress, heat_stress, 
+shade_connectivity, seed_connectivity, coral_cover_high, coral_cover_low, seed_priority, shade_priority, deployed_coral_risk_tol.
+If 2 inputs, will use shell variables for ES_vars and RCP. If > 2 inputs, will use these as ES_sites and RCP.
 
-**Inputs:**
-- alg : indicates MCDA algorithm to be used 
-         1 - Order Ranking
-         2 - TOPSIS
-         3 - VIKOR
-- opti_ind : indicates which outputs to optimise over out of [TC,E,S,CES,PES], sum(opti_ind) >=1 ex., opti_ind = [1 0 0 0 0] 
-         optimises for average TC only
-         1 - include, 
-         0 - don't include, 
-
-- varargin{1} : prsites (1,2,3)
-- varargin{2} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
-- varargin{3} : optional appendage to filename (e.g. run no. etc)
-
+** Inputs :**
+- alg : indicates MCDA algorithm to be used
+             1 - Order Ranking
+             2 - TOPSIS
+             3 - VIKOR
+- out_names: indicates which outputs to optimise over as a cell structture of strings
+                  e.g. out_names = {'TC','CES','PES'};
+- fn: string giving file location within GitRepo of DHW data for reef of interest
+- TP_data: structure generated from ADRIA_TP function
+- site_ranks : structure generated from ADRIA_TP function
+- strongpred : structure generated from ADRIA_TP function
+- varargin : default values used if not specified
+- varargin{1} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
+- varargin{2} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
+                               strprov,TCsatCult,TCsatProv,cf])
+                               
 **Outputs:**
-- x : [Seed1,Seed2,SRM,Aadpt,Natad] which maximise the chosen ADRIA output metrics (will represent a pareto front if
-         multiple values are chosen to optimise over).
+- x : [Guided, PrSites, Seed1,Seed2,SRM,Aadpt,Natad, AaAdpt, NatAdpt, Seedyrs, Shadeyrs, wave_stress, heat_stress, 
+       shade_connectivity, seed_connectivity, coral_cover_high, coral_cover_low, seed_priority, 
+       shade_priority, deployed_coral_risk_tol]
 - fval : the max value/optimal value of the chosen metrics 
 
 See also:
-    [`ObjectiveFunc()`](#objectivefunc)
-    
+    [`allParamMultiObjectiveFunc()`](#allparammultiobjectivefunc)
+   
 **Example:**
 ```matlab
-%Optimise for average total coral cover av_TC and scope for cultural ecosystem services av_CES
+%% Example for simple usage of the optimisation function ADRIAOptimisation
+%% 1 : only optimise for average total coral cover av_TC
 
 use simplest MDCA algorithm for now
 alg = 1;
@@ -350,18 +355,26 @@ sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f
     x(1),x(2),x(3),x(4),x(5),fval(1),fval(2));
 ```  
 
-## ObjectiveFunc() 
-Formulation of runADRIA which allows for optimisation as an objective function with conventional Matlab optimisation functions.
+## allParamMultiObjectiveFunc() 
+Formulation of runADRIA which allows for optimisation as an objective function with conventional Matlab optimisation functions. Gives TC, S, C,
+CES and PES as possible outputs, as specified in tgt_names.
 Currently averages over space and time to acheive suitable format (more descriptive formats such as distribution summary statistics, 
 kdes etc may come in later versions).
 
-**Input:** 
-- x : intervention values vector [Seed1,Seed2,SRM,Aadpt,Natad,RCP]
-- algInd : indicate MCDA alg
-- prSites : indicate site group
-- RCP : RCP scenario
-- opti_ind : indicate number of outputs to optimise over
-
-**Output:**
-- out : scalar or vector with either any combination of [Av_TC, Av_E, Av_S, Av_CES, AV_PES]
+**Input:**
+- x             : array, perturbed parameters
+- alg           : int, ranking algorithm 
+- tgt_names      : cell of strs, name of output to optimize (TC, E, S, CES, PES)
+- combined_opts : table, ADRIA parameter details
+- nsites        : int, number of sites
+- wave_scens    : matrix, available wave damage scenarios
+- dhw_scens     : matrix, available DHW scenarios
+- params        : array, core ADRIA parameter values (TO BE REPLACED)
+- ecol_parms    : array, ADRIA ecological parameter values (TO BE REPLACED)
+- TP_data       : array, Transition probability data
+- site_ranks    : array, site centrality data
+- strongpred    : array, data indicating strongest predecessor per site
+    
+**Output:** 
+- av_res : average result (specified by tgt_name) over time/sites, as an array of dimension 1*(length of tgt_names)
       
