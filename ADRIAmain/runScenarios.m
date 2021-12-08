@@ -74,44 +74,46 @@ end
 N = height(intervs);
 
 [timesteps, nsites, ~] = size(wave_scen);
-zeros(timesteps, nsites, N, n_reps);
 
-% Create temporary struct
-tmp_s.TC = 0;
-tmp_s.C = 0;
-tmp_s.E = 0;
-tmp_s.S = 0;
+% Create output matrices
+n_species = params.nspecies(1);  % total number of species considered
+Y_TC = zeros(timesteps, nsites, N, n_reps);
+Y_C = zeros(timesteps, n_species, nsites, N, n_reps);
+Y_E = zeros(timesteps, nsites, N, n_reps);
+Y_S = zeros(timesteps, nsites, N, n_reps);
 
-Y = repmat(tmp_s, N, n_reps);
-
-n_rep_scens = length(wave_scen);
-
-for i = 1:N
+parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     scen_params = params(i, :);
     scen_ecol = ecol_params(i, :);
-    
-    % Select random subset of RCP conditions WITHOUT replacement
-    rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
-    w_scen = wave_scen(:, :, rcp_scens);
-    d_scen = dhw_scen(:, :, rcp_scens);
+
     for j = 1:n_reps
         tmp = runADRIAScenario(scen_it, scen_crit, ...
-                                   scen_params, scen_ecol, ...
-                                   TP_data, site_ranks, strongpred, ...
-                                   w_scen(:, :, j), d_scen(:, :, j), alg_ind);
+                               scen_params, scen_ecol, ...
+                               TP_data, site_ranks, strongpred, ...
+                               wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
 
-        % hacky way of saving data each iteration...
+        % hacky way of saving data each iteration.
+        % Would be nice/better to be able to batch these...
         if isstring(file_prefix) || ischar(file_prefix)
             tmp_fn = strcat(file_prefix, '_', num2str(i), '_', ...
                              num2str(j), '.nc');
             saveData(tmp, tmp_fn);
             continue
         end
-        
-        Y(i, j) = tmp;
+
+        Y_TC(:, :, i, j) = tmp.TC;
+        Y_C(:, :, :, i, j) = tmp.C;
+        Y_E(:, :, i, j) = tmp.E;
+        Y_S(:, :, i, j) = tmp.S;
     end
 end
+
+% Assign results outside of parfor
+Y.TC = Y_TC;
+Y.C = Y_C;
+Y.E = Y_E;
+Y.S = Y_S;
 
 end
