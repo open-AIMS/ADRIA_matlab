@@ -9,10 +9,10 @@ Parameters of interest are currently grouped over four components:
 
 Functions for each group of parameters use the suffix `Details`:
 
-- interventionDetails()
-- criteriaDetails()
-- coreParamDetails()
-- ecolParamDetails()
+- `interventionDetails()`
+- `criteriaDetails()`
+- `coreParamDetails()`
+- `ecolParamDetails()`
 
 Usage of these functions are identical.
 
@@ -33,14 +33,16 @@ To support this activity, the functions listed above provides a table of paramet
 
 - `name` holds the parameter names
 - `ptype` denotes the parameter type (`categorical`, `integer`, or `float`)
-- `defaults` indicates the raw unmodified assigned value
-- `lower_bound`, discrete min/max values for sampling purposes
-- `upper_bound`
+- `sample_defaults`, indicates the transformed "best guess" value for use with samplers
+- `lower_bound`, discrete min values for sampling purposes
+- `upper_bound`, discrete max values for sampling purposes
 - `options`, column of hashmaps ([`Map Containers`](https://au.mathworks.com/help/matlab/map-containers.html) in MATLAB) which maps possible discrete values back to their categorical options, or NaN if not applicable)
-- `raw_lower_bound` ('raw' min/max of option values indicating their original ADRIA value ranges)
-- `raw_upper_bound`
+- `raw_defaults` indicates the raw untransformed default values
+- `raw_bounds` ('raw' min/max of option values indicating their original ADRIA value ranges)
 
-[TODO: Include description of each entry in the table - could be useful if tooltips are to be incorporated into UIs]
+> TODO: Include description of each entry in the table - could be useful if tooltips are to be incorporated into UIs
+> 
+> Could also specify an expected distribution for use with samplers as well.
 
 ```matlab
 >> interv_opts = interventionDetails()
@@ -152,3 +154,6 @@ objfunc = @(x) someObjectiveFunc(x, interv_opts);
 obj_opts = optimoptions('simulannealbnd', 'MaxTime', 30);
 x = simulannealbnd(objfunc, x0, lb, ub, obj_opts);
 ```
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: {inlineMath: [['$', '$']]}, messageStyle: "none" });</script>
