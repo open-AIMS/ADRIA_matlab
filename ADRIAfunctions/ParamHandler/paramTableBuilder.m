@@ -56,6 +56,34 @@ end
 lower_bound = lower_opt_bound';
 upper_bound = upper_opt_bound';
 
-param_table = table(name, ptype, defaults, lower_bound, upper_bound, ...
-                    options, raw_bounds);
+raw_defaults = defaults;
+sample_defaults = defaults;
+param_table = table(name, ptype, sample_defaults, lower_bound, upper_bound, ...
+                    options, raw_defaults, raw_bounds);
+                
+% Update specified "raw" default values to sample compatible values
+cats = param_table((param_table.ptype == "integer") | (param_table.ptype == "categorical"), :);
+cat_opts = cats.options;
+num_entries = length(cat_opts);
+for ci = 1:num_entries
+    c_i = cat_opts{ci};
+    cont = c_i{1};
+    
+    default_val = cats.raw_defaults{ci};
+    
+    try
+        poss_vals = values(cont);
+        tmp_keys = keys(cont);
+        idx = find([poss_vals{:}] == default_val);
+        mapped_default_val = tmp_keys(idx);
+    catch
+        % not a map container, so use index value
+        poss_vals = cont;
+        idx = find([poss_vals{:}] == default_val);
+        mapped_default_val = {idx};
+    end
+
+    param_table(param_table.name == cats.name{ci}, "sample_defaults") = num2cell(mapped_default_val);
+end
+
 end
