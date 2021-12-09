@@ -58,8 +58,11 @@ dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, ...
     'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, ...
     'wtpredecshade', wtpredecshade);
 
-% None of these should error and cause test failure
+% These should all be zero
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1);
+tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
+assert(all(tmp == 0), "All values expected to be 0, but some were not")
+
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
 
