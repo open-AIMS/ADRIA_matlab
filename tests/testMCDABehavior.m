@@ -5,7 +5,8 @@ eg_vals = table2array(eg_vals);
 
 [TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', 0.1);
 
-%% Weights for connectivity , waves (ww), high cover (whc) and low
+%% Testing randomised sites
+% Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = eg_vals(:, 1); % weight of wave damage in MCDA
 wtheat = eg_vals(:, 2); % weight of heat damage in MCDA
 wtconshade = eg_vals(:, 3); % weight of connectivity for shading in MCDA
@@ -42,4 +43,43 @@ for ns = 1:10
     [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
     [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
 end
+
+%% Testing zero sites
+% Intervene on zero sites - this should give zeros for the output 
+nsiteint = 0;
+p_sites = randi([1,9], 1):randi([10,25], 1);
+
+dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, ...
+    'prioritysites', p_sites, ...
+    'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, ...
+    'heatstressprob', 0, 'sumcover', 0, 'risktol', risktol, ...
+    'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+    'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, ...
+    'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, ...
+    'wtpredecshade', wtpredecshade);
+
+% None of these should error and cause test failure
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
+
+%% Testing one site
+% Intervene on zero sites - this should give zeros for the output 
+nsiteint = 1;
+p_sites = randi([1,9], 1):randi([10,25], 1);
+
+dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, ...
+    'prioritysites', p_sites, ...
+    'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, ...
+    'heatstressprob', 0, 'sumcover', 0, 'risktol', risktol, ...
+    'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+    'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, ...
+    'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, ...
+    'wtpredecshade', wtpredecshade);
+
+% None of these should error and cause test failure
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
+
 
