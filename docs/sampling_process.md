@@ -75,7 +75,7 @@ The translation of sampled values to the so-called "ADRIA values" for integer an
 To illustrate the approach, take a parameter $x_i$ that can take the form of discrete values between 1 and 3 (inclusive). In other words, there are 3 valid options to take: 1, 2, 3.
 
 1. The `upper_bound` value becomes $\text{max}(x_i) + \text{min}(x_i)$ (i.e., 4)
-2. Sample from this range usual a given sampler, which returns a value $v_i$; $1 \leq v_i \lt 4$, where $v_i \in {}\reals$
+2. Sample from this range usual a given sampler, which returns a value $v_i$; $1 \leq v_i \lt 4$, where $v_i \in \reals$
 3. Take the `floor` of $v_i$. If $v_i = 3.9$, then $\text{floor}(v_i) = 3$.
 
 For `categorical` parameters, an extra step is to extract the corresponding `Map Container` from the `options` column and use the floored value as the key to obtain the categorical value.
@@ -83,9 +83,9 @@ For `categorical` parameters, an extra step is to extract the corresponding `Map
 As an example, $x_i$ may in fact represent "high", "medium", "low" (i.e., ADRIA expects a string input) and
 so the relationship between sampled and ADRIA values becomes:
 
-- 1 => "high"
-- 2 => "medium"
-- 3 => "low"
+- `1 => "high"`
+- `2 => "medium"`
+- `3 => "low"`
 
 and this relationship is encapsulated by the `Map Container`.
 
@@ -99,14 +99,20 @@ in which case the index of the matching value is used:
 ```
 
 In the above, the "true" bounds of values are between 10 to 15 (so six entries: 10, 11, 12, 13, 14, 15).
-Following the $\text{max}(x_i) + \text{min}(x_i)$ approach, the sample range becomes 1 to 7.
+In other cases, these may be arrays (e.g., `[[0,1], [1,2], [2,1]]`).
 
-If the "true" default value is 10, then this is mapped to the first entry in the array, thus the `sample_defaults` value is set to 1.
+The sample bounds for `integer` parameters are tied to the number of options rather than their values.
+This is the conversion approach is generic and applicable to both cases outlined above.
+
+Following the $\text{max}(x_i) + \text{min}(x_i)$ approach, the sample range becomes $1 \leq v_i \lt 7$.
+In the first example above, `1 => 10` and $\text{floor}(6.999) = 6$, and resolves to `6 => 15`.
+
+If the "true" default value is 10, then this is mapped to the first entry in the array, thus the `sample_defaults` value is set to 1 (as shown in the table snippet above).
 
 The process described above is conducted by the `convertScenarioSelection()` function, which takes two inputs: (1) an array of sampled values, and (2) the parameter details table.
 
 The only requirement is that the the number and order of items in the sample array has to match what is 
-defined in the table. By satisficing this requirement, a subset of parameters can be used.
+defined in the table. By satisficing this requirement, any subset of parameters can be used.
 
 The following snippet is illustrative only, and should not be expected to work.
 Its only intention is to highlight usage of the `*Details()` group of functions in combination with `convertScenarioSelection()`.
