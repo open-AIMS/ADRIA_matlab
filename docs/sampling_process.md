@@ -74,7 +74,7 @@ For Monte Carlo approaches, the typical process is:
 
 The translation of sampled values to the so-called "ADRIA values" for integer and categorical parameters relies on the "flooring trick".
 
-To illustrate the approach, take a parameter $x_i$ that can take the form of discrete values between 1 and 3 (inclusive). In other words, there are 3 valid options to take: 1, 2, 3.
+To illustrate the approach, take a parameter $x_i$ that can take the form of discrete values between 1 and 3 (inclusive). In other words, there are 3 valid options to take: $x_i = \{1, 2, 3\}$.
 
 1. The `upper_bound` value becomes $\text{max}(x_i) + \text{min}(x_i)$ (i.e., 4)
 2. Sample from this range usual a given sampler, which returns a value $v_i$; $1 \leq v_i \lt 4$, where $v_i \in \reals$
