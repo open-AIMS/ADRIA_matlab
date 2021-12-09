@@ -64,7 +64,13 @@ tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
 assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
+
+tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
+assert(all(tmp == 0), "All values expected to be 0, but some were not")
+
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
+tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
+assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
 %% Testing one site
 % Intervene on zero sites - this should give zeros for the output 
@@ -80,9 +86,15 @@ dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, ...
     'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, ...
     'wtpredecshade', wtpredecshade);
 
-% None of these should error and cause test failure
+% None of these should error and cause test failure (test if 1 or 0 as
+% either the single site does not satify the wave and heat risk tolerances
+% and so = 0 or it does and = 1)
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1);
+tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
+assert(all(tmp == 1) || all(tmp == 0), "All values expected to be 1, but some were not")
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
+tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
+assert(all(tmp == 1) || all(tmp == 0), "All values expected to be 1, but some were not")
 [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
-
-
+tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
+assert(all(tmp == 1) || all(tmp == 0), "All values expected to be 1, but some were not")
