@@ -27,7 +27,7 @@ to accept whole number (integers) or categorical values. These may indicate a sp
 environmental scenario (climate sequences, data held in raster format, etc), and such "scenario configuration" may be held
 in a nested data structure. It is therefore necessary to have a process that is able to pass parameter values from ADRIA
 into samplers for the purpose of sensitivity analysis, uncertainty propagation, optimization and other Monte Carlo or
-probabilistic processes.
+probabilistic processes, and to convert sampled values back to the values as expected by ADRIA.
 
 To support this activity, the functions listed above provides a table of parameter details consisting of:
 
