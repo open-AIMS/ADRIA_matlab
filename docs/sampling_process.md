@@ -40,7 +40,7 @@ To support this activity, the functions listed above provides a table of paramet
 - `raw_lower_bound` ('raw' min/max of option values indicating their original ADRIA value ranges)
 - `raw_upper_bound`
 
-[TODO: Description of each entry - could be useful if tooltips are to be incorporated into UIs]
+[TODO: Include description of each entry in the table - could be useful if tooltips are to be incorporated into UIs]
 
 ```matlab
 >> interv_opts = interventionDetails()
@@ -102,7 +102,7 @@ In the above, the "true" bounds of values are between 10 to 15 (so six entries: 
 In other cases, these may be arrays (e.g., `[[0,1], [1,2], [2,1]]`).
 
 The sample bounds for `integer` parameters are tied to the number of options rather than their values.
-This is the conversion approach is generic and applicable to both cases outlined above.
+This is so the conversion approach is generic and applicable to both cases outlined above.
 
 Following the $\text{max}(x_i) + \text{min}(x_i)$ approach, the sample range becomes $1 \leq v_i \lt 7$.
 In the first example above, `1 => 10` and $\text{floor}(6.999) = 6$, and resolves to `6 => 15`.
