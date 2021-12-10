@@ -1,4 +1,4 @@
-function param_table = paramTableBuilder(name, ptype, defaults, raw_bounds)
+function param_table = paramTableBuilder(name, ptype, defaults, raw_bounds, varargin)
 % Build parameter detail table
 
 % preallocate array
@@ -60,6 +60,21 @@ raw_defaults = defaults;
 sample_defaults = defaults;
 param_table = table(name, ptype, sample_defaults, lower_bound, upper_bound, ...
                     options, raw_defaults, raw_bounds);
+
+% Update both "default" columns with user-provided values (if given)
+varargin = varargin{:};
+if nargin > 0
+    valid_names = name(:);
+    for name_val = [varargin(1:2:end); varargin(2:2:end)]
+        [name, val] = name_val{:};
+        if isempty(find(contains(valid_names, name), 1))
+            error("Parameter '%s' is invalid", name)
+        end
+        
+        param_table{param_table.name == name, "sample_defaults"} = {val};
+        param_table{param_table.name == name, "raw_defaults"} = {val};
+    end
+end
                 
 % Update specified "raw" default values to sample compatible values
 cats = param_table((param_table.ptype == "integer") | (param_table.ptype == "categorical"), :);

@@ -75,20 +75,7 @@ ptype = [
 ];
 
 
-criteria_weights = paramTableBuilder(name, ptype, defaults, p_bounds);
-
-% if number of arguments passed in is 0, then use default values
-% otherwise replace defaults with specified values
-if nargin > 0
-    valid_names = name(:);
-    for name_val = [varargin(1:2:end); varargin(2:2:end)]
-        [name, val] = name_val{:};
-        if isempty(find(contains(valid_names, name), 1))
-            error("Intervention option '%s' is invalid", name)
-        end
-        
-        criteria_weights{criteria_weights.name == name, "defaults"} = {val};
-    end
-end
+criteria_weights = paramTableBuilder(name, ptype, defaults, p_bounds, ...
+                                     varargin);
 
 end

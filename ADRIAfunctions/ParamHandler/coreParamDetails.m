@@ -104,20 +104,6 @@ ptype = [
 % params.RCP = 60;  % RCP scenario to use
 
 
-core_details = paramTableBuilder(name, ptype, defaults, p_bounds);
-
-% if number of arguments passed in is 0, then use default values
-% otherwise replace defaults with specified values
-if nargin > 0
-    valid_names = name(:);
-    for name_val = [varargin(1:2:end); varargin(2:2:end)]
-        [name, val] = name_val{:};
-        if isempty(find(contains(valid_names, name), 1))
-            error("Intervention option '%s' is invalid", name)
-        end
-        
-        core_details{core_details.name == name, "defaults"} = {val};
-    end
-end
+core_details = paramTableBuilder(name, ptype, defaults, p_bounds, varargin);
 
 end
