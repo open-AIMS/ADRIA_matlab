@@ -21,10 +21,15 @@ function criteria_weights = criteriaDetails(varargin)
 %   raw_lower_bound, raw_upper_bound, where
 %       - `name` holds the parameter names
 %       - `ptype` denotes the parameter type (categorical, integer, float)
-%       - `defaults` indicates the raw unmodified assigned value
+%           - categoricals: values have to be exact match
+%           - integers: whole number values ranging between lower/upper
+%           - float: values can range between lower/upper
+%       - `sample_defaults` indicates the default values modified for use
+%           with samplers
 %       - lower/upper bounds indicate the range of mapped ids 
 %       - `options` maps option ids to their values
-%       - raw_lower/raw_upper bounds indicates the original value ranges
+%       - `raw_defaults` indicates the raw unmodified "best guess" value
+%       - `raw_bounds` indicates the original value ranges
 
 name = [
     "wave_stress";
