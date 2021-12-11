@@ -25,7 +25,7 @@ jobs:
           echo $(ls)
 
           echo "DOCBUILDERROR=0" >> $GITHUB_ENV
-          if mdbook build | grep -q 'ERROR'; then
+          if ./mdbook build | grep -q 'ERROR'; then
             echo "Error occurred running mdbook"
             echo "DOCBUILDERROR=1" >> $GITHUB_ENV
           fi
