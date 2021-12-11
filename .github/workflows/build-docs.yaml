@@ -22,11 +22,11 @@ jobs:
           cd docs
           wget https://github.com/rust-lang/mdBook/releases/download/v0.4.14/mdbook-v0.4.14-x86_64-unknown-linux-gnu.tar.gz -O mdbook.tar.gz
           tar -xf mdbook.tar.gz mdbook
+          echo $(ls)
 
           echo "DOCBUILDERROR=0" >> $GITHUB_ENV
           if mdbook build | grep -q 'ERROR'; then
             echo "Error occurred running mdbook"
-            echo $(ls)
             echo "DOCBUILDERROR=1" >> $GITHUB_ENV
           fi
           echo "${{ env.DOCBUILDERROR }}"
