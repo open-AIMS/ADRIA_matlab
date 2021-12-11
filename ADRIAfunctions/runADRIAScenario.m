@@ -109,16 +109,16 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 
     %% temporary allocation to avoid incurring access overhead
     % specify constant odeset option
-    non_neg_opt = odeset('NonNegative', 1:4);
+    non_neg_opt = odeset('NonNegative', 1:nspecies);
 
     % return 3 steps as we're only interested in the last one anyway
     % saves memory
     tspan = [0, 0.5, 1];
 
-    e_r = ecol_params.r;
+    e_r = ecol_params.r; %coral growth rates
     e_P = ecol_params.P;  % max total coral cover
-    e_mb = ecol_params.mb;
-    e_p = ecol_params.p;  % Gompertz shape parameters
+    e_mb = ecol_params.mb;  %background coral mortality
+    e_p = ecol_params.p;  % Gompertz shape parameters for bleaching 
     ode_func = @(t, X) ADRIA4groupsODE(X, e_r, e_P, e_mb);
 
     neg_e_p1 = -e_p(1);  % setting constant values for use in loop
@@ -267,6 +267,11 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     % coral_cover(:, :, :) = Yout(:, :, :);
 
     %% assign results
+    % Suggest we change this such that we only report: 
+    % (1) total coral cover (TC) across sites and time
+    % (2) 'species' across sites and time - in post-hoc analyses we divide
+    % these into real species and their size classes
+    
     [TC, C, E, S] = reefConditionMetrics(Yout);
 
     % seedlog and shadelog are omitted for now
