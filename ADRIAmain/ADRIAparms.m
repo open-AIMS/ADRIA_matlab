@@ -32,7 +32,7 @@ params.psgC = 1:26; % prioritysite group C
 % need a better word than 'species' to signal that we are using different
 % sizes within groups and real taxonomic species.  
 params.nspecies = 36; % total number of species modelled in the current version. Currently this is only corals, so nspecies = ncoralsp.
-params.ncoralsp = 36; % number of coral species modelled in the current version. Currently nspecies = ncoralsp.
+params.ncoralsp = 6; % number of coral species modelled in the current version. Currently nspecies = ncoralsp.
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 % params.ncrit = length(fieldnames(interv)); % number of columns used in the intervention table
 params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
@@ -52,31 +52,40 @@ params.wb2 = 2.24; % weibull parameter 1 for DHW distributions based on Lough et
 % interventions, we express coral abundance as colony numbers in different 
 % size classes and growth rates as linear extention (in cm per year). 
 
-% The coral colony diameter bin edges (cm) are: 0, 2, 5, 10, 20, 40, 80
-% To convert to cover we locate bin means and calculate bin mean areas
-colony_diam_means =  repmat([1, 3.5, 7.5, 15, 30, 60],[params.nspecies,1]);
-colony_area_means = pi.*(colony_diam_means./2).^2;
-diam_bin_widths = repmat([2, 3, 5, 10, 20, 40],[params.nspecies,1]);
-area_bin_widths = pi.*(colony_diam_means./2).^2;
 
-%basecovers
-
-%First expressed as number of colonies per size class
-Xn = [0,0,0,0,0,0;     %Tabular Acropora Enhanced
+%% Base covers
+%First express as number of colonies per size class per 100m2 of reef
+base_coral_numbers = ...
+     [0,0,0,0,0,0;     %Tabular Acropora Enhanced
       2000,500,200,100,100,100;       %Tabular Acropora Unenhanced
       0,0,0,0,0,0;       %Corymbose Acropora Enhanced
       2000,500,200,100,100,100;       %Corymbose Acropora Unenhanced
       2000,200,100,100,100,100;       %small massives
       2000,200,100,100,50,10];      %large massives
 
+% To convert to covers we need to first calculate the area of colonies, 
+% multiply by how many corals in each bin, and divide by reef area
 
-params.basecov1 = 0.40; % initial cover of coral species 1. Acropora unenhanced 
-params.basecov2 = 0.00; % initial cover of coral species 2. Acropora enhanced
-params.basecov3 = 0.15; % initial cover of coral species 3  Other coral unenhanced
-params.basecov4 = 0.15; % initial cover of coral species 4  Other coral enhanced
+% The coral colony diameter bin edges (cm) are: 0, 2, 5, 10, 20, 40, 80
+% To convert to cover we locate bin means and calculate bin mean areas
+colony_diam_means =  repmat([1, 3.5, 7.5, 15, 30, 60],params.ncoralsp,1);
+colony_area_means = pi.*((colony_diam_means./2).^2)./(10^4);%areas in m2 
+
+a_arena = 100; %m2 of reef arena where corals grow, survive and reproduce
+  
+% convert to coral covers (proportions) and convert to vector 
+basecov = ...
+    base_coral_numbers.*colony_area_means./a_arena;
+% convert to vector and embed in structure 
+params.basecov = reshape(basecov', params.nspecies, 1); 
+
+% params.basecov1 = 0.40; % initial cover of coral species 1. Acropora unenhanced 
+% params.basecov2 = 0.00; % initial cover of coral species 2. Acropora enhanced
+% params.basecov3 = 0.15; % initial cover of coral species 3  Other coral unenhanced
+% params.basecov4 = 0.15; % initial cover of coral species 4  Other coral enhanced
 %params.basecov5 = 0.00; % initial cover of rubble
 
-%params.corals = [1, 2, 3, 4]; % species of live corals. This needs to change
+%params.corals = [1, 2, 3, 4]; % species of live corals.
 params.corals = 1:36;
 
 
@@ -88,7 +97,7 @@ linear_extension = ...
        1, 1, 3, 3, 3, 3;         %Corymbose Acropora Enhanced
        1, 1, 3, 3, 3, 3;         %Corymbose Acropora Unenhanced
        1, 1, 1, 1, 0.8, 0.8;     %small massives
-       1, 1, 1, 1, 1.2, 1.2];     %large massives
+      1, 1, 1, 1, 1.2, 1.2];     %large massives
 
 % Convert linear extensions to delta coral in two steps.
 % First calculate what proportion of coral numbers that change size class 
@@ -123,17 +132,17 @@ P = 0.80; % max total coral cover - used as a carrying capacity with 1-P represe
 params.LPdhwcoeff = 0.4; % shape parameters relating dhw affecting cover to larval production
 params.LPDprm2 = 5; % parameter offsetting LPD curve
 
+% coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
+wavemort90 = ...
+      [0, 0, 0.02, 0.03, 0.04, 0.05;   %Tabular Acropora Enhanced
+       0, 0, 0.02, 0.03, 0.04, 0.05;     %Tabular Acropora Unenhanced
+       0, 0, 0.02, 0.02, 0.03, 0.04;     %Corymbose Acropora Enhanced
+       0, 0, 0.02, 0.02, 0.03, 0.04;     %Corymbose Acropora Unenhanced
+       0, 0, 0.00, 0.01, 0.02, 0.02;     %small massives
+       0, 0, 0.00, 0.01, 0.02, 0.02];    %large massives
 
-
-%r = [0.40, 0.40, 0.10, 0.05]; % base growth of species 1 to 4 (1&2: Acropora, 3&4: others)
-
-
-
-mb = [0.07, 0.07, 0.03, 0.01]; % background mortality of the four coral species, not waves and heat stress
-
-
-P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
-
+params.wavemort90 = reshape(wavemort90', params.nspecies,1);  
+  
 % DHW and bleaching mortality-related parameters.
 p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
 natad = zeros(params.nspecies,1); % rate of natural adaptation, DHWs per year for all species
