@@ -5,6 +5,7 @@ on:
       - main-doctest
     paths:
       - docs/**
+      - .github/workflows/build-docs.yaml
 
 jobs:
   build-docs:
