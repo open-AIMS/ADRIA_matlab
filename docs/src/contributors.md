@@ -6,3 +6,5 @@
 - Marji Puotinen
 - Barbara Robson (@BarbaraRobson)
 - Takuya Iwanaga (@ConnectedSystems)
+
+Documentation generated with [mdBook](https://github.com/rust-lang/mdBook)
