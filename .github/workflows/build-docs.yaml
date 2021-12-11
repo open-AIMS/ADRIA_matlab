@@ -10,6 +10,10 @@ jobs:
   build-docs:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: 'main-doctest'
+
       - run: echo "Building documentation from ${{ github.ref }} on ${{ github.repository }}"
 
       - name: Download mdBook and build pages
