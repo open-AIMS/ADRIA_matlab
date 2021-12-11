@@ -1,0 +1,9 @@
+[book]
+title = "ADRIA Documentation"
+authors = ["Ken Anthony", "Rose Crocker", "Veronique Lago", "Takuya Iwanaga"]
+description = "Overview and documentation of the ADRIA decision support platform."
+src = "src"
+language = "en"
+
+[output.html]
+mathjax-support = true
