@@ -133,14 +133,17 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     Yout = zeros(tf, nspecies, nsites);
     % Set initial population sizes at tstep = 1
     for sp = 1:nspecies
-        Yout(1, sp, :) = params.(strcat('basecov', num2str(sp)));
+        %Yout(1, sp, :) = params.(strcat('basecov', num2str(sp)));
+        Yout(1, sp, :) = params.basecov(sp); %new version added to ADRIAparms
+        
     end
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
     for tstep = 2:tf
+        % Larval productivity is reduced as a function of last year's heat 
+        % stress. In other words, surviving coral have reduced fecundity.     
         p_step = tstep - 1; % previous timestep
-
         past_DHW_stress = dhw_scen(p_step, :); % call last year's DHWs (heat stress)
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
