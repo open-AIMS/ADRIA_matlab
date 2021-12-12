@@ -1,4 +1,4 @@
-function Y = ADRIA_36CoralGroups(X, r, P, mb,rec)
+function Y = ADRIA_36CoralGroups(X, r, P, mb, rec, comp)
 
 % X is defined here as number of colonies of 4 species in 6 size classes
 % r is lateral colony extension (cm) of 4 coral species in 6 size classes
@@ -29,7 +29,7 @@ Y(2) = P_x.*(X(2) + X(1).*(1+r(1))) + X(2).*(1-r(2)) - X(2).*mb(2);
 Y(3) = P_x.*(X(3) + X(2).*(1+r(2))) + X(3).*(1-r(3)) - X(3).*mb(3);
 Y(4) = P_x.*(X(4) + X(3).*(1+r(3))) + X(4).*(1-r(4)) - X(4).*mb(4);
 Y(5) = P_x.*(X(5) + X(4).*(1+r(4))) + X(5).*(1-r(5)) - X(5).*mb(5);
-Y(6) = P_x.*(X(6) + X(5).*(1+r(5)))  - X(6).*mb(6);
+Y(6) = P_x.*(X(6) + X(5).*(1+r(5)) + X(6).*comp*sum(X(25:30))) - X(6).*mb(6);
 
 %Tabular Acropora Unenhanced
 Y(7) = P_x.*(X(7) + rec(2)) + X(7).*(1-r(7)) - X(7).*mb(7);
@@ -37,7 +37,7 @@ Y(8) = P_x.*(X(8) + X(7).*(1+r(7))) + X(8).*(1-r(8)) - X(8).*mb(8);
 Y(9) = P_x.*(X(9) + X(8).*(1+r(8))) + X(9).*(1-r(9)) - X(9).*mb(9);
 Y(10) = P_x.*(X(10) + X(9).*(1+r(9))) + X(10).*(1-r(10)) - X(10).*mb(10);
 Y(11) = P_x.*(X(11) + X(10).*(1+r(10))) + X(11).*(1-r(11)) - X(11).*mb(11);
-Y(12) = P_x.*(X(12) + X(11).*(1+r(11))) - X(12).*mb(12);
+Y(12) = P_x.*(X(12) + X(11).*(1+r(11)) + X(12).*comp*sum(X(25:30))) - X(12).*mb(12);
 
 %Corymbose Acropora Enhanced
 Y(13) = P_x.*(X(13) + rec(3)) + X(13).*(1-r(13))- X(13).*mb(13);
@@ -57,11 +57,11 @@ Y(24) = P_x.*(X(24) + X(23).*(1+r(23))) - X(24).*mb(24);
 
 %small massives Unenhanced
 Y(25) = P_x.*(X(25) + rec(5)) + X(25).*(1-r(25))- X(25).*mb(25);
-Y(26) = P_x.*(X(26) + X(25).*(1+r(25))) + X(26).*(1-r(26)) - X(26).*mb(26);
-Y(27) = P_x.*(X(27) + X(26).*(1+r(26))) + X(27).*(1-r(27)) - X(27).*mb(27);
-Y(28) = P_x.*(X(28) + X(27).*(1+r(27))) + X(28).*(1-r(28)) - X(28).*mb(28);
-Y(29) = P_x.*(X(29) + X(28).*(1+r(28))) + X(29).*(1-r(29)) - X(29).*mb(29);
-Y(30) = P_x.*(X(30) + X(29).*(1+r(29))) - X(30).*mb(30);
+Y(26) = P_x.*(X(26) + X(25).*(1+r(25))) + X(26).*(1-r(26)) - X(26).*(mb(26) + comp*(X(6) + X(12)));
+Y(27) = P_x.*(X(27) + X(26).*(1+r(26))) + X(27).*(1-r(27)) - X(27).*(mb(27) + comp*(X(6) + X(12)));
+Y(28) = P_x.*(X(28) + X(27).*(1+r(27))) + X(28).*(1-r(28)) - X(28).*(mb(28) + comp*(X(6) + X(12)));
+Y(29) = P_x.*(X(29) + X(28).*(1+r(28))) - X(29).*(mb(29) + comp*(X(6) + X(12)));
+Y(30) = 0; %small massives and encrusting constrained to less than 40 cm diameter  
 
 %Large massives Unenhanced
 Y(31) = P_x.*(X(31) + rec(6)) + X(31).*(1-r(31))- X(31).*mb(31);
