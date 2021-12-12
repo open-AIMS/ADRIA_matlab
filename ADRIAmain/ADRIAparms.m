@@ -68,8 +68,8 @@ base_coral_numbers = ...
 
 % The coral colony diameter bin edges (cm) are: 0, 2, 5, 10, 20, 40, 80
 % To convert to cover we locate bin means and calculate bin mean areas
-colony_diam_means =  repmat([1, 3.5, 7.5, 15, 30, 60],params.ncoralsp,1);
-colony_area_means = pi.*((colony_diam_means./2).^2)./(10^4);%areas in m2 
+colony_diam_edges =  repmat([2, 5, 10, 20, 40, 80],params.ncoralsp,1);
+colony_area_means = pi.*((colony_diam_edges./2).^2)./(10^4);%areas in m2 
 
 a_arena = 100; %m2 of reef arena where corals grow, survive and reproduce
   
