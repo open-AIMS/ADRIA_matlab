@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 % Example script illustrating running ADRIA scenarios
-=======
-% MARKED FOR DEPRECATION
-
-% set random number seed to ensure consistent results for test
->>>>>>> unify-runADRIA
 rng(101)
 
 %% Generate monte carlo samples
@@ -52,8 +46,8 @@ converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
-criteria_weights = converted_tbl(:, 10:end);
+interv_scens = converted_tbl{:, 1:9};  % intervention scenarios
+criteria_weights = converted_tbl{:, 10:end};
 
 % use order-ranking for example
 alg_ind = 1;
