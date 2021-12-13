@@ -27,6 +27,8 @@ function saveData(data, filename, nc_settings)
     %                        0 to 9, where 0 is no compression, and 9 is
     %                        maximum compression.
     %                        Defaults to 4.
+    %                    If a struct is provided as data, attempts to
+    %                    infer variable names and dimensions from fields.
     %
     % Example:
     %     data = rand(5,5)
@@ -93,13 +95,8 @@ function saveData(data, filename, nc_settings)
         c_level = nc_settings.compression;
 
         if ~isstruct(data)
-            if ~exist('dim_spec', 'var')
-                error('No data dimension details provided.');
-            end
-
-            if ~exist('nc_varname', 'var')
-                nc_varname = 'data';
-            end
+            dim_spec = nc_settings.dim_spec;
+            nc_varname = nc_settings.var_name;
             
             nccreate(filename, nc_varname, 'Dimensions', dim_spec, ...
                      'DeflateLevel', c_level);

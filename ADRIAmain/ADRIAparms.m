@@ -13,7 +13,7 @@ function [params, ecol_params] = ADRIAparms()
 % This is the list of parameters and values used in most of ADRIA.
 % See ReadMe files for more descriptions and explanations
 
-msg = ['Note: ADRIAparms() is marked for deprecation.\n', ...
+msg = ['Note: ADRIAparms() is marked for deprecation.', newline, ...
        'It will be replaced by coreParamDetails().'
 ];
 warning(msg);

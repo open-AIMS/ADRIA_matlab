@@ -36,40 +36,31 @@ criteria_weights = scenarios(:, 10:end);  % need better way of separating values
 num_reps = 10;  % should move this to function definition...
 
 %% Setup output
-% Create temporary struct
-tmp_s.TC = 0;
-tmp_s.C = 0;
-tmp_s.E = 0;
-tmp_s.S = 0;
-
-Y = repmat(tmp_s, 1, num_reps);
+tf = params.tf;
+n_species = params.nspecies(1);  % total number of species considered
+Y_TC = zeros(tf, nsites, num_reps);
+Y_C = zeros(tf, n_species, nsites, num_reps);
+Y_E = zeros(tf, nsites, num_reps);
+Y_S = zeros(tf, nsites, num_reps);
 
 %% Run ADRIA
 parfor i = 1:num_reps
     w_scen = wave_scens(:, :, i);
     d_scen = dhw_scens(:, :, i);
-    Y(i) = runADRIAScenario(interv, criteria_weights, ...
+    tmp = runADRIAScenario(interv, criteria_weights, ...
                             params, ecol_parms, ...
-                            TP_data, site_ranks, strongpred, nsites, ...
+                            TP_data, site_ranks, strongpred, ...
                             w_scen, d_scen, alg);
+    Y_TC(:, :, i) = tmp.TC;
+    Y_C(:, :, :, i) = tmp.C;
+    Y_E(:, :, i) = tmp.E;
+    Y_S(:, :, i) = tmp.S;
 end
+
+
  
 %% Process results
-tf = params.tf;
-processed = struct('TC', zeros(tf, nsites, 1, num_reps), ...
-                   'C', zeros(tf, 4, nsites, 1, num_reps), ...
-                   'E', zeros(tf, nsites, 1, num_reps), ...
-                   'S', zeros(tf, nsites, 1, num_reps));
-
-if tgt_name == 'C'
-    for i = 1:num_reps
-        processed.C(:, :, :, :, i) = Y(i).C;
-    end
-else
-    for i = 1:num_reps
-        processed.(tgt_name)(:, :, :, i) = Y(i).(tgt_name);
-    end
-end
+processed = struct('TC', Y_TC, 'C', Y_C, 'E', Y_E, 'S', Y_S);
 
 %% Average over sites/time
 av_res = mean(processed.(tgt_name), 'all');

@@ -1,4 +1,5 @@
 % Example script illustrating running ADRIA scenarios
+rng(101)
 
 %% Generate monte carlo samples
 
@@ -60,8 +61,8 @@ alg_ind = 1;
 % Generated with generateWaveDHWs.m
 % TODO: Replace these with wave/DHW projection scenarios instead
 fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(params.RCP), ".nc");
-wave_scen = ncread(fn, "wave");
-dhw_scen = ncread(fn, "DHW");
+wave_scens = ncread(fn, "wave");
+dhw_scens = ncread(fn, "DHW");
 
 %% Scenario runs
 % Currently running over unique interventions and criteria weights only for
@@ -73,10 +74,16 @@ dhw_scen = ncread(fn, "DHW");
 % where the unique combinations would be generated via some quasi-monte 
 % carlo sequence, or through some user-informed process.
 
+% Select random subset of RCP conditions WITHOUT replacement
+n_rep_scens = length(wave_scens);
+rcp_scens = datasample(1:n_rep_scens, num_reps, 'Replace', false);
+w_scens = wave_scens(:, :, rcp_scens);
+d_scens = dhw_scens(:, :, rcp_scens);
+
 tic
 Y = runScenarios(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
-                 wave_scen, dhw_scen, alg_ind);
+                 w_scens, d_scens, alg_ind);
 tmp = toc;
 
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
@@ -84,19 +91,21 @@ disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " si
 %% post-processing
 % collate data across all scenario runs
 
-tf = params.tf;
-processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
-                   'C', zeros(tf, 4, nsites, N, num_reps), ...
-                   'E', zeros(tf, nsites, N, num_reps), ...
-                   'S', zeros(tf, nsites, N, num_reps));
-for i = 1:N
-    for j = 1:num_reps
-        processed.TC(:, :, i, j) = Y(i, j).TC;
-        processed.C(:, :, :, i, j) = Y(i, j).C;
-        processed.E(:, :, i, j) = Y(i, j).E;
-        processed.S(:, :, i, j) = Y(i, j).S;
-    end
-end
+% tf = params.tf;
+% nspecies = 4;
+% processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
+%                    'C', zeros(tf, nspecies, nsites, N, num_reps), ...
+%                    'E', zeros(tf, nsites, N, num_reps), ...
+%                    'S', zeros(tf, nsites, N, num_reps));
+% for i = 1:N
+%     for j = 1:num_reps
+%         processed.TC(:, :, i, j) = Y.TC(i, j);
+%         processed.C(:, :, :, i, j) = Y.C(i, j);
+%         processed.E(:, :, i, j) = Y.E(i, j);
+%         processed.S(:, :, i, j) = Y.S(i, j);
+%     end
+% end
+processed = Y;
 
 %% analysis
 % Prompt for importance balancing

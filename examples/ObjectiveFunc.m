@@ -1,3 +1,5 @@
+% MARKED FOR DEPRECATION
+
 function out = ObjectiveFunc(x,CrtWts,params,ecol_parms,algInd,prSites,RCP,optInd)
     % Objective function gives total coral cover TC as single output averaged
     % over sites and time.

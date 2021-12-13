@@ -36,3 +36,5 @@ Outputs/
 
 # Mac related files
 *.DS_Store
+
+config.m

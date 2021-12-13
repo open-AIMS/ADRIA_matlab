@@ -29,6 +29,10 @@ function converted = convertScenarioSelection(sel_values, p_opts)
     converted = table;
     
     if ~istable(sel_values)
+        if iscell(sel_values)
+            sel_values = cell2mat(sel_values);
+        end
+
         sel_values = array2table(sel_values, 'VariableNames', p_opts.name);
     end
     

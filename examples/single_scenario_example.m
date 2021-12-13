@@ -30,12 +30,10 @@ end
 converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
 %% Parameter prep
-scenarios = table2array(converted_tbl);
-
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-IT = scenarios(:, 1:9);
-criteria_weights = scenarios(:, 10:end);
+IT = converted_tbl(:, 1:9);
+criteria_weights = converted_tbl(:, 10:end);
 
 % Environmental and ecological parameter values etc
 [params, ecol_params] = ADRIAparms();
