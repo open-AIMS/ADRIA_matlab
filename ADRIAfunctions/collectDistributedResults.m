@@ -44,8 +44,8 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
     for i = 1:num_files
         f_dir = target_files(i).folder;
         fn = target_files(i).name;
-        run_id = extract(fn, '_' + digitsPattern);
-        run_id = num2cell(sscanf(run_id{1}, '_%i')');
+        run_id = extract(fn, '_[[' + digitsPattern + ']]');
+        run_id = num2cell(sscanf(run_id{1}, '_[[%i]]')');
         
         full_path = fullfile(f_dir, fn);
         

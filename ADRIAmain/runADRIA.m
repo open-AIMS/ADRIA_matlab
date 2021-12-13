@@ -114,7 +114,7 @@ parfor i = 1:N
     end
     
     if isstring(file_prefix) || ischar(file_prefix)
-        tmp_fn = strcat(file_prefix, '_', num2str(i), '.nc');
+        tmp_fn = strcat(file_prefix, '_[[', num2str(i), ']].nc');
         tmp_d = struct();
         tmp_d.TC = TC;
         tmp_d.C = C;
