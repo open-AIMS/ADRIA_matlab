@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 % Example script illustrating running ADRIA scenarios
-=======
-% MARKED FOR DEPRECATION
-
-% set random number seed to ensure consistent results for test
->>>>>>> unify-runADRIA
 rng(101)
 
 %% Generate monte carlo samples

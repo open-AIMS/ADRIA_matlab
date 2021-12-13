@@ -37,7 +37,6 @@ criteria_weights = converted_tbl(:, 10:end);
 
 % Environmental and ecological parameter values etc
 [params, ecol_params] = ADRIAparms();
-% ninter = size(IT, 1);
 alg_ind = 1;
 
 %% Load site data
