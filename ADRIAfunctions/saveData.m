@@ -95,7 +95,12 @@ function saveData(data, filename, nc_settings)
         c_level = nc_settings.compression;
 
         if ~isstruct(data)
-            dim_spec = nc_settings.dim_spec;
+            try
+                dim_spec = nc_settings.dim_spec;
+            catch err
+                disp("Dimension specification not provided");
+                rethrow(err)
+            end
             nc_varname = nc_settings.var_name;
             
             nccreate(filename, nc_varname, 'Dimensions', dim_spec, ...
