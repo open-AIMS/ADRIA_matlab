@@ -35,15 +35,15 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
     % TODO: ensure num_files == (N * n_reps)
     msg = ['Mismatch between number of detected files ' ...
            'and provided scenario combinations.' newline ...
-           strcat('Expected: ', num2str(N * n_reps)) newline ...
+           strcat('Expected: ', N) newline ...
            strcat('Found: ', num2str(num_files))];
-    assert((N * n_reps) == num_files, msg)
+    assert(N == num_files, msg)
 
     for i = 1:num_files
         f_dir = target_files(i).folder;
         fn = target_files(i).name;
-        run_id = extract(fn, digitsPattern + '_' + digitsPattern);
-        run_id = num2cell(sscanf(run_id{1}, '%i_')');
+        run_id = extract(fn, '_' + digitsPattern);
+        run_id = num2cell(sscanf(run_id{1}, '_%i')');
         
         full_path = strcat(f_dir, '/', fn);
         
@@ -53,7 +53,7 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
         
         if ~exist('tmp_s', 'var')
             tmp_read = ncread(full_path, var_names{1});
-            [nsteps, nsites] = size(tmp_read);
+            [nsteps, nsites, sim_len, rep_len] = size(tmp_read);
             
             tmp_s.TC = zeros(nsteps, nsites, N, n_reps);
             tmp_s.C = zeros(nsteps, n_species, nsites, N, n_reps);
@@ -66,7 +66,7 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
             if ~(var_n{1} == "C")
                 tmp_s.(var_n{1})(:, :, run_id{:}, :) = ncread(full_path, var_n{1});
             else
-                tmp_s.C(:, :, :, run_id{:}) = ncread(full_path, 'C');
+                tmp_s.C(:, :, :, run_id{:}, :) = ncread(full_path, 'C');
             end
         end
     end
