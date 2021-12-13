@@ -15,7 +15,7 @@ tmp_dir = strcat(parent_dir, '/', right_now, '/');
 mkdir(tmp_dir)
 
 % Number of scenarios
-N = 3;
+N = 2;
 num_reps = 3;  % Number of replicate RCP scenarios
 
 % Collect details of available parameters
@@ -110,6 +110,18 @@ try
                                          dir_name=tmp_dir, n_species=4);
 
     assert(isequal(Y_true, collated), "Results are not equal!")
+    
+%     Ys = zeros(N, nsites, 4);  % where 4 is number of metrics
+%     for i = 1:N
+%         offset = 0;
+%         for j = 1:nsites
+%             % average across all time, all env scenarios (DHW/wave) for site j, scenario i
+%             Ys(i, j, 1) = mean(collated.TC(:, j, i, :), 'all');
+%             Ys(i, j, 2) = mean(mean(collated.C(:, :, j, i, :)), 'all');
+%             Ys(i, j, 3) = mean(collated.E(:, j, i, :), 'all');
+%             Ys(i, j, 4) = mean(collated.S(:, j, i, :), 'all');
+%         end
+%     end
 catch err
 end
 
