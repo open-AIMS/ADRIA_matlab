@@ -3,17 +3,10 @@ function ADRIAsetup(varargin)
 if size(varargin,1) == 0
     % if no path supplied use pwd
     open('ADRIA.prj');
-<<<<<<< HEAD
     % run('config.m');
 else
     % if path to project supplied, use this
     open(strcat(varargin{1},'ADRIA.prj'));
     % run(strcat(varargin{1}, 'config.m'));
-=======
-    run('config.m');
-else
-    % if path to project supplied, use this
-    open(strcat(varargin{1},'ADRIA.prj'));
-    run(strcat(varargin{1}, 'config.m'));
->>>>>>> unify-runADRIA
+    % run('config.m');
 end

@@ -3,7 +3,7 @@ rng(101)
 
 % set up ADRIA project
 % input path to project or nothing if project is in pwd
-ADRIAsetup()
+ADRIAsetup();
 
 % Create struct with intervention values using system environment
 % variables.
