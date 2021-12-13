@@ -87,11 +87,17 @@ else
     Y_S = zeros(timesteps, nsites, 1, n_reps);
 end
 
-for i = 1:N
+parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     scen_params = params(i, :);
     scen_ecol = ecol_params(i, :);
+    
+    % temp reassignment
+    TC = Y_TC(:, :, i, :);
+    C = Y_C(:, :, :, i, :);
+    E = Y_E(:, :, i, :);
+    S = Y_S(:, :, i, :);
 
     for j = 1:n_reps
         tmp = runADRIAScenario(scen_it, scen_crit, ...
@@ -102,29 +108,26 @@ for i = 1:N
         % hacky way of saving data each iteration.
         % Would be nice/better to be able to batch these...
         if isstring(file_prefix) || ischar(file_prefix)
-%             tmp_fn = strcat(file_prefix, '_', num2str(i), '_', ...
-%                              num2str(j), '.nc');
-%             saveData(tmp, tmp_fn);
-            
-            Y_TC(:, :, 1, j) = tmp.TC;
-            Y_C(:, :, :, 1, j) = tmp.C;
-            Y_E(:, :, 1, j) = tmp.E;
-            Y_S(:, :, 1, j) = tmp.S;
+            TC(:, :, :, j) = tmp.TC;
+            C(:, :, :, :, j) = tmp.C;
+            E(:, :, :, j) = tmp.E;
+            S(:, :, :, j) = tmp.S;
             continue
         end
-
-        Y_TC(:, :, i, j) = tmp.TC;
-        Y_C(:, :, :, i, j) = tmp.C;
-        Y_E(:, :, i, j) = tmp.E;
-        Y_S(:, :, i, j) = tmp.S;
+        
+        TC(:, :, i, j) = tmp.TC;
+        C(:, :, :, i, j) = tmp.C;
+        E(:, :, i, j) = tmp.E;
+        S(:, :, i, j) = tmp.S;
     end
     
     if isstring(file_prefix) || ischar(file_prefix)
         tmp_fn = strcat(file_prefix, '_', num2str(i), '.nc');
-        tmp_d.TC = Y_TC;
-        tmp_d.C = Y_C;
-        tmp_d.E = Y_E;
-        tmp_d.S = Y_S;
+        tmp_d = struct();
+        tmp_d.TC = TC;
+        tmp_d.C = C;
+        tmp_d.E = E;
+        tmp_d.S = S;
         saveData(tmp_d, tmp_fn);
     end
 end
