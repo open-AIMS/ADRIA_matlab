@@ -81,6 +81,8 @@ if ~exist('file_prefix', 'var')
     Y_E = zeros(timesteps, nsites, N, n_reps);
     Y_S = zeros(timesteps, nsites, N, n_reps);
 else
+    % Create much smaller representative subset to return
+    % if saving to disk (saves memory)
     Y_TC = zeros(timesteps, nsites, 1, n_reps);
     Y_C = zeros(timesteps, n_species, nsites, 1, n_reps);
     Y_E = zeros(timesteps, nsites, 1, n_reps);
@@ -94,10 +96,10 @@ parfor i = 1:N
     scen_ecol = ecol_params(i, :);
     
     % temp reassignment
-    TC = Y_TC(:, :, i, :);
-    C = Y_C(:, :, :, i, :);
-    E = Y_E(:, :, i, :);
-    S = Y_S(:, :, i, :);
+    TC = zeros(timesteps, nsites, 1, n_reps);
+    C = zeros(timesteps, n_species, nsites, 1, n_reps);
+    E = zeros(timesteps, nsites, 1, n_reps);
+    S = zeros(timesteps, nsites, 1, n_reps);
 
     for j = 1:n_reps
         tmp = runADRIAScenario(scen_it, scen_crit, ...
@@ -105,20 +107,10 @@ parfor i = 1:N
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
 
-        % hacky way of saving data each iteration.
-        % Would be nice/better to be able to batch these...
-        if isstring(file_prefix) || ischar(file_prefix)
-            TC(:, :, :, j) = tmp.TC;
-            C(:, :, :, :, j) = tmp.C;
-            E(:, :, :, j) = tmp.E;
-            S(:, :, :, j) = tmp.S;
-            continue
-        end
-        
-        TC(:, :, i, j) = tmp.TC;
-        C(:, :, :, i, j) = tmp.C;
-        E(:, :, i, j) = tmp.E;
-        S(:, :, i, j) = tmp.S;
+        TC(:, :, 1, j) = tmp.TC;
+        C(:, :, :, 1, j) = tmp.C;
+        E(:, :, 1, j) = tmp.E;
+        S(:, :, 1, j) = tmp.S;
     end
     
     if isstring(file_prefix) || ischar(file_prefix)
@@ -129,7 +121,13 @@ parfor i = 1:N
         tmp_d.E = E;
         tmp_d.S = S;
         saveData(tmp_d, tmp_fn);
+        continue
     end
+    
+    Y_TC(:, :, i, :) = TC;
+    Y_C(:, :, :, i, :) = C;
+    Y_E(:, :, i, :) = E;
+    Y_S(:, :, i, :) = S;
 end
 
 % Assign results outside of parfor
