@@ -82,9 +82,9 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
     if isempty(A)
         prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-        nprefseedsites = numel(prefseedsites);
+        nprefseedsites = 0;
         prefshadesites = 0;
-        nprefshadesites = numel(prefseedsites);
+        nprefshadesites = 0;
         return
     end
 
