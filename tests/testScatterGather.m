@@ -15,7 +15,7 @@ tmp_dir = strcat(parent_dir, '/', right_now, '/');
 mkdir(tmp_dir)
 
 % Number of scenarios
-N = 3;
+N = 2;
 num_reps = 3;  % Number of replicate RCP scenarios
 
 % Collect details of available parameters

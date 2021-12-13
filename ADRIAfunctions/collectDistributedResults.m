@@ -53,25 +53,23 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
         var_names = {ncinfo(full_path).Variables.Name};
         n_vars = length(var_names);
         
-        if ~exist('tmp_s', 'var')
+        if ~exist('Y_collated', 'var')
             tmp_read = ncread(full_path, var_names{1});
             [nsteps, nsites, sim_len, rep_len] = size(tmp_read);
             
-            tmp_s.TC = zeros(nsteps, nsites, N, n_reps);
-            tmp_s.C = zeros(nsteps, n_species, nsites, N, n_reps);
-            tmp_s.E = zeros(nsteps, nsites, N, n_reps);
-            tmp_s.S = zeros(nsteps, nsites, N, n_reps);
+            Y_collated.TC = zeros(nsteps, nsites, N, n_reps);
+            Y_collated.C = zeros(nsteps, n_species, nsites, N, n_reps);
+            Y_collated.E = zeros(nsteps, nsites, N, n_reps);
+            Y_collated.S = zeros(nsteps, nsites, N, n_reps);
         end
 
         for v = 1:n_vars
-            var_n = var_names(v);
-            if ~(var_n{1} == "C")
-                tmp_s.(var_n{1})(:, :, run_id{:}, :) = ncread(full_path, var_n{1});
+            var_n = var_names{v};
+            if ~(var_n == "C")
+                Y_collated.(var_n)(:, :, run_id{:}, :) = ncread(full_path, var_n);
             else
-                tmp_s.C(:, :, :, run_id{:}, :) = ncread(full_path, 'C');
+                Y_collated.C(:, :, :, run_id{:}, :) = ncread(full_path, 'C');
             end
         end
     end
-    
-    Y_collated = tmp_s;
 end
