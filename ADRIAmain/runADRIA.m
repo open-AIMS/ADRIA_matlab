@@ -81,13 +81,13 @@ if ~exist('file_prefix', 'var')
     Y_E = zeros(timesteps, nsites, N, n_reps);
     Y_S = zeros(timesteps, nsites, N, n_reps);
 else
-    Y_TC = zeros(1);
-    Y_C = zeros(1);
-    Y_E = zeros(1);
-    Y_S = zeros(1);
+    Y_TC = zeros(timesteps, nsites, 1, n_reps);
+    Y_C = zeros(timesteps, n_species, nsites, 1, n_reps);
+    Y_E = zeros(timesteps, nsites, 1, n_reps);
+    Y_S = zeros(timesteps, nsites, 1, n_reps);
 end
 
-parfor i = 1:N
+for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     scen_params = params(i, :);
@@ -102,9 +102,14 @@ parfor i = 1:N
         % hacky way of saving data each iteration.
         % Would be nice/better to be able to batch these...
         if isstring(file_prefix) || ischar(file_prefix)
-            tmp_fn = strcat(file_prefix, '_', num2str(i), '_', ...
-                             num2str(j), '.nc');
-            saveData(tmp, tmp_fn);
+%             tmp_fn = strcat(file_prefix, '_', num2str(i), '_', ...
+%                              num2str(j), '.nc');
+%             saveData(tmp, tmp_fn);
+            
+            Y_TC(:, :, 1, j) = tmp.TC;
+            Y_C(:, :, :, 1, j) = tmp.C;
+            Y_E(:, :, 1, j) = tmp.E;
+            Y_S(:, :, 1, j) = tmp.S;
             continue
         end
 
@@ -112,6 +117,15 @@ parfor i = 1:N
         Y_C(:, :, :, i, j) = tmp.C;
         Y_E(:, :, i, j) = tmp.E;
         Y_S(:, :, i, j) = tmp.S;
+    end
+    
+    if isstring(file_prefix) || ischar(file_prefix)
+        tmp_fn = strcat(file_prefix, '_', num2str(i), '.nc');
+        tmp_d.TC = Y_TC;
+        tmp_d.C = Y_C;
+        tmp_d.E = Y_E;
+        tmp_d.S = Y_S;
+        saveData(tmp_d, tmp_fn);
     end
 end
 
