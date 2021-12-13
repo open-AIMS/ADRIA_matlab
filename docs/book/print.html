@@ -715,6 +715,18 @@ kdes etc may come in later versions).</p>
 <ul>
 <li>av_res : average result (specified by tgt_name) over time/sites, as an array of dimension 1*(length of tgt_names)</li>
 </ul>
+<h2 id="estimateruntime"><a class="header" href="#estimateruntime">estimateRuntime()</a></h2>
+<p>Estimate total runtime based on a separate early indicative trial.</p>
+<p>NOTE:
+Assumes all detected cores are used.
+These are indicative estimates only with no guarantee of accuracy
+or reliability.</p>
+<p><strong>Input:</strong>
+n_sims  : int, number of simulations to be run
+n_steps : int, number of time steps to be run
+n_sites : int, number of sites considered</p>
+<p><strong>Output:</strong>
+est : float, estimated runtime (in seconds)</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contributors"><a class="header" href="#contributors">Contributors</a></h1>
 <ul>
 <li>Ken Anthony (@KRNA01)</li>

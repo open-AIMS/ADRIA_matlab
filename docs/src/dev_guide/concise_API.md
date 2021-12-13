@@ -396,4 +396,21 @@ kdes etc may come in later versions).
     
 **Output:** 
 - av_res : average result (specified by tgt_name) over time/sites, as an array of dimension 1*(length of tgt_names)
+
+
+## estimateRuntime()
+Estimate total runtime based on a separate early indicative trial.
+
+NOTE:
+    Assumes all detected cores are used.
+    These are indicative estimates only with no guarantee of accuracy
+    or reliability.
+
+**Input:**
+    n_sims  : int, number of simulations to be run
+    n_steps : int, number of time steps to be run
+    n_sites : int, number of sites considered
+
+**Output:**
+    est : float, estimated runtime (in seconds)
       
