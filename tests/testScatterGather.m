@@ -56,8 +56,8 @@ converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-interv_scens = converted_tbl{:, 1:9};  % intervention scenarios
-criteria_weights = converted_tbl{:, 10:end};
+interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
+criteria_weights = converted_tbl(:, 10:end);
 
 % use order-ranking for example
 alg_ind = 1;
@@ -94,14 +94,14 @@ d_scens = dhw_scens(:, :, rcp_scens);
 err = [];
 try
     % Run scenarios, keeping results in memory
-    Y_true = runScenarios(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
+    Y_true = runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
                       TP_data, site_ranks, strongpred, num_reps, ...
                       w_scens, d_scens, alg_ind);
 
     file_prefix = strcat(tmp_dir, 'test');
 
     % Run scenarios saving data to files
-    runScenarios(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
+    runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
                  w_scens, d_scens, alg_ind, file_prefix);
 
