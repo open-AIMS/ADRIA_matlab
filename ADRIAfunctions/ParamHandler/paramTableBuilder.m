@@ -71,6 +71,8 @@ if nargin > 0
             error("Parameter '%s' is invalid", name)
         end
         
+        assert(~isempty(val), strcat("Provided value for ", name, " is empty!"));
+        
         param_table{param_table.name == name, "sample_defaults"} = {val};
         param_table{param_table.name == name, "raw_defaults"} = {val};
     end
@@ -97,6 +99,12 @@ for ci = 1:num_entries
         idx = find([poss_vals{:}] == default_val);
         mapped_default_val = {idx};
     end
+
+%     if iscell(mapped_default_val)
+%         assign_val = mapped_default_val;
+%     else
+%         assign_val = num2cell(mapped_default_val);
+%     end
 
     param_table(param_table.name == cats.name{ci}, "sample_defaults") = num2cell(mapped_default_val);
 end
