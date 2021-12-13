@@ -4,9 +4,9 @@ function reef_condition_metrics = runADRIA(interv, crit_weights, params, ecol_pa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Input:
 %    interv        : struct, of intervention options
-%                    (see `interventionSpecification`)
+%                    (see `interventionDetails()`)
 %    crit_weights  : struct, criteria options
-%                    (see `criteriaWeights`)
+%                    (see `criteriaDetails()`)
 %    alg_ind : int, MCDA algorithm flag
 %                  - 1, Order ranking
 %                  - 2, TOPSIS
