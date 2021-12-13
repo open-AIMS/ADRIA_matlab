@@ -15,7 +15,7 @@ function est = estimateRuntime(n_sims, n_steps, n_sites)
 %     est : float, estimated runtime (in seconds)
 
     % Estimate from original run set
-    trial_runtime = 7.9311;
+    trial_runtime = 0.45;
 
     % run time per site/step
     rt_per_site_step = trial_runtime / 26 / 25;
