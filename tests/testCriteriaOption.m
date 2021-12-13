@@ -1,15 +1,15 @@
-criterias = criteriaWeights();
+criterias = criteriaDetails();
 
 % test return is of expected type
-assert(isequal(class(criterias), 'double'))
+assert(isequal(class(criterias), 'table'))
 
-% Test struct gets returned with default values set
-assert(isequal(criterias(:,1), 1))
-assert(isequal(criterias(:,2), 1))
-assert(isequal(criterias(:,3), 0))
-assert(isequal(criterias(:,4), 0))
-assert(isequal(criterias(:,5), 0))
-assert(isequal(criterias(:,6), 0))
-assert(isequal(criterias(:,7), 1))
-assert(isequal(criterias(:,8), 0))
-assert(isequal(criterias(:,9), 1))
+% Test table gets returned with default bounds set
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "wave_stress bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "heat_stress bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "shade_connectivity bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "seed_connectivity bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "coral_cover_high bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "coral_cover_low bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "seed_priority bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "shade_priority bounds incorrect!")
+assert(all(criterias{1, "raw_bounds"}{1} == [0 1]), "deployed_coral_risk_tol bounds incorrect!")

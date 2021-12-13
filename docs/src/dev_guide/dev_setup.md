@@ -36,8 +36,7 @@ An ADRIA app can also be started by running `ADRIAv1.mlapp`
 Tests can be run with the following in the command window:
 
 ```matlab
->> cd tests
->> runtests
+>> runtests('tests')
 ```
 
 **Note:**
