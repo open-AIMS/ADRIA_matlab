@@ -16,8 +16,6 @@ function [x, fval] = multiObjOptimization(alg, out_names, fn, TP_data, site_rank
 %        varargin{1} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
 %        varargin{2} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
 %                      strprov,TCsatCult,TCsatProv,cf]
-%        varargin{3} : Guided (1 if want to use MCDA algorithms to select
-%                      sites (rather than randomised)
 %
 % Outputs :
 %         x : [Seed1,Seed2,SRM,Aadpt,Natad] which maximise the chosen
@@ -54,14 +52,9 @@ function [x, fval] = multiObjOptimization(alg, out_names, fn, TP_data, site_rank
          % set all params to input
         params.RCP = varargin{1};
         ES_vars =  varargin{2};
-    elseif size(varargin, 1) == 3 && varargin{3} == 1
-         % set all params to input
-        params.RCP = varargin{1};
-        ES_vars =  varargin{2};
-        % use guided site seclection algorithm
-        all_params.defaults{1}(1) = 1;
     end
-
+    % use guided site seclection algorithm
+    all_params.defaults{1}(1) = 1;
     % Wave/DHW scenarios
     wave_scen = ncread(fn, "wave");
     dhw_scen = ncread(fn, "DHW");
