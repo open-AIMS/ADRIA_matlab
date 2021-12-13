@@ -22,15 +22,15 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
 %    See `single_scenario_example.m` in the `examples` directory.
 
     %% Weights for connectivity , waves (ww), high cover (whc) and low
-    wtwaves = criteria(:, 1); % weight of wave damage in MCDA
-    wtheat = criteria(:, 2); % weight of heat damage in MCDA
-    wtconshade = criteria(:, 3); % weight of connectivity for shading in MCDA
-    wtconseed = criteria(:, 4); % weight of connectivity for seeding in MCDA
-    wthicover = criteria(:, 5); % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
-    wtlocover = criteria(:, 6); % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
-    wtpredecseed = criteria(:, 7); % weight for the importance of seeding sites that are predecessors of priority reefs
-    wtpredecshade = criteria(:, 8); % weight for the importance of shading sites that are predecessors of priority reefs
-    risktol = criteria(:, 9); % risk tolerance
+    wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
+    wtheat = criteria.heat_stress; % weight of heat damage in MCDA
+    wtconshade = criteria.shade_connectivity; % weight of connectivity for shading in MCDA
+    wtconseed = criteria.seed_connectivity; % weight of connectivity for seeding in MCDA
+    wthicover = criteria.coral_cover_high; % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
+    wtlocover = criteria.coral_cover_low; % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
+    wtpredecseed = criteria.seed_priority; % weight for the importance of seeding sites that are predecessors of priority reefs
+    wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
+    risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
     %% Set up connectivity
     nsites = width(TP_data);
@@ -66,18 +66,18 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     % total_cover = zeros(tf, nsites);
 
     %% Extract intervention options
-    strategy = interv(:, 1); % Intervention strategy: 0 is random, 1 is guided
-    pgs = interv(:, 2); % group of priority sites
-    seed1 = interv(:, 3); %species seeded - here the sensitive Acropora
-    seed2 = interv(:, 4); %species seeded - here the hardier other coral
-    srm = interv(:, 5); %DHW equivalents reduced by fogging or some other shading mechanism
-    seedyears = interv(:, 8); %years to shade are in column 8
-    shadeyears = interv(:, 9); %years to shade are in column 9
+    strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
+    pgs = interv.PrSites; % group of priority sites
+    seed1 = interv.Seed1; %species seeded - here the sensitive Acropora
+    seed2 = interv.Seed2; %species seeded - here the hardier other coral
+    srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
+    seedyears = interv.Seedyrs; %years to shade are in column 8
+    shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
     %% Update ecological parameters based on intervention option
     assistadapt = ecol_params.assistadapt;
-    assistadapt(2) = interv(:, 6); % level of assisted coral adaptation is column 6 in the intervention table
-    natad = ecol_params.natad + interv(:, 7); % level of added natural coral adaptation is column 7 in the intervention table
+    assistadapt(2) = interv.Aadpt;  % level of assisted coral adaptation is column 6 in the intervention table
+    natad = ecol_params.natad + interv.Natad; % level of added natural coral adaptation is column 7 in the intervention table
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
