@@ -15,7 +15,7 @@ tmp_dir = strcat(parent_dir, '/', right_now, '/');
 mkdir(tmp_dir)
 
 % Number of scenarios
-N = 3;
+N = 2;
 num_reps = 3;  % Number of replicate RCP scenarios
 
 % Collect details of available parameters
@@ -56,8 +56,8 @@ converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-interv_scens = converted_tbl{:, 1:9};  % intervention scenarios
-criteria_weights = converted_tbl{:, 10:end};
+interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
+criteria_weights = converted_tbl(:, 10:end);
 
 % use order-ranking for example
 alg_ind = 1;
@@ -94,22 +94,38 @@ d_scens = dhw_scens(:, :, rcp_scens);
 err = [];
 try
     % Run scenarios, keeping results in memory
-    Y_true = runScenarios(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
+    Y_true = runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
                       TP_data, site_ranks, strongpred, num_reps, ...
                       w_scens, d_scens, alg_ind);
 
     file_prefix = strcat(tmp_dir, 'test');
 
     % Run scenarios saving data to files
-    runScenarios(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
+    runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
                  w_scens, d_scens, alg_ind, file_prefix);
+             
+    assert(isfile(strcat(file_prefix, '_[[1]].nc')), "Partial result file not found!");
 
     % Collect all data
     collated = collectDistributedResults('test', N, num_reps, ...
                                          dir_name=tmp_dir, n_species=4);
 
     assert(isequal(Y_true, collated), "Results are not equal!")
+    assert(all(all(collated.TC(:, :, 1, 1) ~= 0)), "Results were zeros!")
+    
+    
+%     Ys = zeros(N, nsites, 4);  % where 4 is number of metrics
+%     for i = 1:N
+%         offset = 0;
+%         for j = 1:nsites
+%             % average across all time, all env scenarios (DHW/wave) for site j, scenario i
+%             Ys(i, j, 1) = mean(collated.TC(:, j, i, :), 'all');
+%             Ys(i, j, 2) = mean(mean(collated.C(:, :, j, i, :)), 'all');
+%             Ys(i, j, 3) = mean(collated.E(:, j, i, :), 'all');
+%             Ys(i, j, 4) = mean(collated.S(:, j, i, :), 'all');
+%         end
+%     end
 catch err
 end
 

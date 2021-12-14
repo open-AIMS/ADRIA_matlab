@@ -42,7 +42,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(sims,params,nsites)
     dhwdisttime = zeros(params.tf,nsites,sims); %initialise matrix that represents projections of DHW in space and time
     
     for sim = 1:sims
-        dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,nsites,mdhwdist0,...
+        dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,mdhwdist0,...
             sdhwdist0,params.dhwmax25,params.RCP,params.wb1,params.wb2);
     end
     dhwdisttime(dhwdisttime <=0) = 0;

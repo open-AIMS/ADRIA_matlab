@@ -10,13 +10,13 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 % 
 %         - nsites : total number of sites
 %         - nsiteint : number of sites to select for priority interventions
-%         - strongpred : strongest predecessor sites (calculated in ADRIA_TP_Moore())
-%         - centr : site centrality (calculated in ADRIA_TP_Moore())
+%         - strongpred : strongest predecessor sites (calculated in ADRIA_TP())
+%         - centr : site centrality (calculated in ADRIA_TP())
 %         - damprob : probability of coral wave damage for each site
 %         - heatstressprob : probability of heat stress for each site
 %         - prioritysites : list of sites in group (i.e. prsites: 1,2,3)
 %         - sumcover : total coral cover
-%         - risktol : risk tolerance (input by user from criteriaWeights/Details)
+%         - risktol : risk tolerance (input by user from criteriaDetails)
 %         - wtconseed : weight of connectivity for seeding
 %         - wtconshade : weight of connectivity for shading
 %         - wtwaves : weight of wave damage
@@ -82,9 +82,9 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
     if isempty(A)
         prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-        nprefseedsites = numel(prefseedsites);
+        nprefseedsites = 0;
         prefshadesites = 0;
-        nprefshadesites = numel(prefseedsites);
+        nprefshadesites = 0;
         return
     end
 
