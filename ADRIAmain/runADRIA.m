@@ -89,7 +89,7 @@ else
     Y_S = zeros(timesteps, nsites, 1, n_reps);
 end
 
-parfor i = 1:N
+for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     scen_params = params(i, :);
