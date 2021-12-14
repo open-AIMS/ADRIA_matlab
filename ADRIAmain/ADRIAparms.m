@@ -115,45 +115,29 @@ linear_extension = ...
 % given linear extensions. This is based on the simple assumption that 
 % coral sizes are evenly distributed within each bin
 bin_widths = [2, 3, 5, 10, 20, 40];
-diam_bin_widths = repmat(bin_widths,[length(bin_widths),1]);
+diam_bin_widths = repmat(bin_widths, [length(bin_widths), 1]);
 prop_change = linear_extension./diam_bin_widths;
 
 %Second, growth as transitions of cover to higher bins is estimated as 
 r = base_coral_numbers.*prop_change.*colony_area_means./a_arena;
-% and coverted to vector and place in structure
-% r = reshape(r', params.nspecies, 1);
-
 for r_i = 1:params.ntaxa
     params.(strcat('growth_rate', num2str(r_i))) = {r(:, r_i)};
 end
 
 %% Background mortality
-% Taken from Bozec et al. 2021 (Table S2)
-mb = [0.2, 0.19, 0.10, 0.05, 0.03, 0.03;   %Tabular Acropora Enhanced
-      0.2, 0.19, 0.10, 0.05, 0.05, 0.03;     %Tabular Acropora Unenhanced
-      0.2, 0.20, 0.17, 0.05, 0.03, 0.03;     %Corymbose Acropora Enhanced
-      0.2, 0.20, 0.17, 0.05, 0.05, 0.05;     %Corymbose Acropora Unenhanced
-      0.2, 0.20, 0.04, 0.04, 0.02, 0.02;     %small massives
-      0.2, 0.20, 0.04, 0.04, 0.02, 0.02];    %large massives
-
-%Converted to vector and embedded in structure
-for mb_i = 1:params.ntaxa
-    vital_params.(strcat('mb_rate', num2str(mb_i))) = {mb(:, mb_i)};
-end
 
 % Bleaching stress and coral fecundity parameters
 params.LPdhwcoeff = 0.4; % shape parameters relating dhw affecting cover to larval production
 params.LPDprm2 = 5; % parameter offsetting LPD curve
 
 % coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
-% NEED EXPLANATION HERE.
 wavemort90 = ...
-      [0, 0, 0.02, 0.03, 0.04, 0.05;   %Tabular Acropora Enhanced
-       0, 0, 0.02, 0.03, 0.04, 0.05;     %Tabular Acropora Unenhanced
-       0, 0, 0.02, 0.02, 0.03, 0.04;     %Corymbose Acropora Enhanced
-       0, 0, 0.02, 0.02, 0.03, 0.04;     %Corymbose Acropora Unenhanced
-       0, 0, 0.00, 0.01, 0.02, 0.02;     %small massives
-       0, 0, 0.00, 0.01, 0.02, 0.02];    %large massives
+      [0, 0, 0.02, 0.03, 0.04, 0.05;     % Tabular Acropora Enhanced
+       0, 0, 0.02, 0.03, 0.04, 0.05;     % Tabular Acropora Unenhanced
+       0, 0, 0.02, 0.02, 0.03, 0.04;     % Corymbose Acropora Enhanced
+       0, 0, 0.02, 0.02, 0.03, 0.04;     % Corymbose Acropora Unenhanced
+       0, 0, 0.00, 0.01, 0.02, 0.02;     % small massives
+       0, 0, 0.00, 0.01, 0.02, 0.02];    % large massives
 
 for wm_i = 1:params.ntaxa
     params.(strcat('wavemort90_', num2str(wm_i))) = {wavemort90(wm_i, :)};
@@ -162,6 +146,19 @@ end
 P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
 p = {[2.74, 0.25]}; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
 vital_params = struct('max_coral_cover', P, 'p', p); % package into structure to use in functions
+
+% Taken from Bozec et al. 2021 (Table S2)
+mb = [0.2, 0.19, 0.10, 0.05, 0.03, 0.03;     % Tabular Acropora Enhanced
+      0.2, 0.19, 0.10, 0.05, 0.05, 0.03;     % Tabular Acropora Unenhanced
+      0.2, 0.20, 0.17, 0.05, 0.03, 0.03;     % Corymbose Acropora Enhanced
+      0.2, 0.20, 0.17, 0.05, 0.05, 0.05;     % Corymbose Acropora Unenhanced
+      0.2, 0.20, 0.04, 0.04, 0.02, 0.02;     % small massives
+      0.2, 0.20, 0.04, 0.04, 0.02, 0.02];    % large massives
+
+%Converted to vector and embedded in structure
+for mb_i = 1:params.ntaxa
+    vital_params.(strcat('mb_rate', num2str(mb_i))) = {mb(mb_i, :)};
+end
 
 % DHW and bleaching mortality-related parameters.
 for r_i = 1:params.ntaxa
