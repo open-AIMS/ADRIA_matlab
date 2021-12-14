@@ -1,8 +1,12 @@
-function [params, ecol_params] = ADRIAparms()
+function [params, vital_params] = ADRIAparms()
 % Create structs with default parameter values for ADRIA
 %
 % Notes:
 % Values for the historical, temporal pattern of degree heating weeks between bleaching years come from [1].
+%
+% Outputs:
+%   params       : struct, core ADRIA parameters
+%   vital_params : struct, vital rate parameters for corals
 %
 % References
 % 1. Lough, J.M., Anderson, K.D. and Hughes, T.P. (2018) 
@@ -31,8 +35,10 @@ params.psgC = 1:26; % prioritysite group C
 % to each coral species, but treat each coral size class as a 'species'. 
 % need a better word than 'species' to signal that we are using different
 % sizes within groups and real taxonomic species.  
-params.nspecies = 36; % total number of species modelled in the current version. Currently this is only corals, so nspecies = ncoralsp.
-params.ncoralsp = 6; % number of coral species modelled in the current version. Currently nspecies = ncoralsp.
+params.ntaxa = 6;  % number of coral taxa
+params.nclasses = 6; % number of coral size classes
+params.nspecies = params.ntaxa * params.nclasses; % total number of species modelled in the current version.
+
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 % params.ncrit = length(fieldnames(interv)); % number of columns used in the intervention table
 params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
@@ -68,7 +74,8 @@ base_coral_numbers = ...
 
 % The coral colony diameter bin edges (cm) are: 0, 2, 5, 10, 20, 40, 80
 % To convert to cover we locate bin means and calculate bin mean areas
-colony_diam_edges =  repmat([2, 5, 10, 20, 40, 80],params.ncoralsp,1);
+size_classes = [2, 5, 10, 20, 40, 80];
+colony_diam_edges =  repmat(size_classes, length(size_classes), 1);
 colony_area_means = pi.*((colony_diam_edges./2).^2)./(10^4);%areas in m2 
 
 a_arena = 100; %m2 of reef arena where corals grow, survive and reproduce
@@ -77,7 +84,11 @@ a_arena = 100; %m2 of reef arena where corals grow, survive and reproduce
 basecov = ...
     base_coral_numbers.*colony_area_means./a_arena;
 % convert to vector and embed in structure 
-params.basecov = reshape(basecov', params.nspecies, 1); 
+% params.basecov = reshape(basecov', params.nspecies, 1); 
+
+for taxa = 1:params.ntaxa
+    params.(strcat('basecov', num2str(taxa))) = {basecov(:, taxa)};
+end
 
 % params.basecov1 = 0.40; % initial cover of coral species 1. Acropora unenhanced 
 % params.basecov2 = 0.00; % initial cover of coral species 2. Acropora enhanced
@@ -103,15 +114,18 @@ linear_extension = ...
 % First calculate what proportion of coral numbers that change size class 
 % given linear extensions. This is based on the simple assumption that 
 % coral sizes are evenly distributed within each bin
-
-diam_bin_widths = repmat([2, 3, 5, 10, 20, 40],[params.ncoralsp,1]);
+bin_widths = [2, 3, 5, 10, 20, 40];
+diam_bin_widths = repmat(bin_widths,[length(bin_widths),1]);
 prop_change = linear_extension./diam_bin_widths;
 
 %Second, growth as transitions of cover to higher bins is estimated as 
 r = base_coral_numbers.*prop_change.*colony_area_means./a_arena;
 % and coverted to vector and place in structure
-r = reshape(r', params.nspecies, 1);
-params.r = r;
+% r = reshape(r', params.nspecies, 1);
+
+for r_i = 1:params.ntaxa
+    params.(strcat('growth_rate', num2str(r_i))) = {r(:, r_i)};
+end
 
 %% Background mortality
 % Taken from Bozec et al. 2021 (Table S2)
@@ -122,17 +136,17 @@ mb = [0.2, 0.19, 0.10, 0.05, 0.03, 0.03;   %Tabular Acropora Enhanced
       0.2, 0.20, 0.04, 0.04, 0.02, 0.02;     %small massives
       0.2, 0.20, 0.04, 0.04, 0.02, 0.02];    %large massives
 
- %Converted to vector and embedded in structure
-  mb = reshape(mb', params.nspecies, 1);  
-
-
-P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
+%Converted to vector and embedded in structure
+for mb_i = 1:params.ntaxa
+    vital_params.(strcat('mb_rate', num2str(mb_i))) = {mb(:, mb_i)};
+end
 
 % Bleaching stress and coral fecundity parameters
 params.LPdhwcoeff = 0.4; % shape parameters relating dhw affecting cover to larval production
 params.LPDprm2 = 5; % parameter offsetting LPD curve
 
 % coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
+% NEED EXPLANATION HERE.
 wavemort90 = ...
       [0, 0, 0.02, 0.03, 0.04, 0.05;   %Tabular Acropora Enhanced
        0, 0, 0.02, 0.03, 0.04, 0.05;     %Tabular Acropora Unenhanced
@@ -141,13 +155,18 @@ wavemort90 = ...
        0, 0, 0.00, 0.01, 0.02, 0.02;     %small massives
        0, 0, 0.00, 0.01, 0.02, 0.02];    %large massives
 
-params.wavemort90 = reshape(wavemort90', params.nspecies,1);  
-  
+for wm_i = 1:params.ntaxa
+    params.(strcat('wavemort90_', num2str(wm_i))) = {wavemort90(wm_i, :)};
+end
+
+P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
+p = {[2.74, 0.25]}; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
+vital_params = struct('max_coral_cover', P, 'p', p); % package into structure to use in functions
+
 % DHW and bleaching mortality-related parameters.
-p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
-natad = zeros(params.nspecies,1); % rate of natural adaptation, DHWs per year for all species
-assistadapt = zeros(params.nspecies,1); % assisted adaptation, expressed as DHWs in absolute terms - i.e. not increasing over time
-ecol_params = struct('r', r, 'mb', mb, 'P', P, 'p', p, 'natad', natad, 'assistadapt', assistadapt); % package into structure to use in functions
+for r_i = 1:params.ntaxa
+    vital_params.(strcat('growth_rate', num2str(r_i))) = {r(:, r_i)};
+end
 
 %% Ecosystem service parameters
 

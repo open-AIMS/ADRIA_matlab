@@ -115,9 +115,9 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
     % saves memory
     tspan = [0, 0.5, 1];
 
-    e_r = ecol_params.r; %coral growth rates
-    e_P = ecol_params.P;  % max total coral cover
-    e_mb = ecol_params.mb;  %background coral mortality
+    e_r = ecol_params.growth_rate; %coral growth rates
+    e_P = ecol_params.max_coral_cover;  % max total coral cover
+    e_mb = ecol_params.mb_rate;  %background coral mortality
     e_p = ecol_params.p;  % Gompertz shape parameters for bleaching 
     ode_func = @(t, X) ADRIA4groupsODE(X, e_r, e_P, e_mb);
 
