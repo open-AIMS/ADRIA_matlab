@@ -12,11 +12,15 @@ function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff,
 ad = assistadapt + tstep .* natad;
 
 tmp_ad = (1 - ad / DHWmaxtot);
-LP1 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(1)-LPDprm2))));
-LP2 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(2)-LPDprm2))));
-LP3 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(3)-LPDprm2))));
-LP4 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(4)-LPDprm2))));
+Y = 1 - exp( -(exp(-LPdhwcoeff*(stresspast' .* tmp_ad - LPDprm2) ) ) )';
 
-Y = [LP1; LP2; LP3; LP4];
+% LP1 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(1)-LPDprm2))));
+% LP2 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(2)-LPDprm2))));
+% LP3 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(3)-LPDprm2))));
+% LP4 = 1-exp(-(exp(-LPdhwcoeff*(stresspast*tmp_ad(4)-LPDprm2))));
+% 
+% Y = [LP1; LP2; LP3; LP4];
+% 
+% assert(isequal(Y_mod, Y), "larval prod not equal");
 
 end
