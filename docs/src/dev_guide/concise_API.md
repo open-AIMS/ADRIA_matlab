@@ -121,7 +121,7 @@ See also:
     [`interventionDetails()`](#interventiondetails), [`criteriaDetails()`](#criteriadetails)
 
 
-## ADRIA_TP()
+## siteConnectivity()
 
 Create transitional probability matrix indicating connectivity between
 sites, level of centrality, and the strongest predecessor for each site.
@@ -220,7 +220,7 @@ environmental and ecological parameter values etc
 
 %Load site data
 [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
-[TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', params.con_cutoff);
+[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
 
 ninter = height(X, 1);
 alg_ind = 1;

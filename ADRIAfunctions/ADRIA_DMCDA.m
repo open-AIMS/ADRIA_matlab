@@ -10,8 +10,8 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 % 
 %         - nsites : total number of sites
 %         - nsiteint : number of sites to select for priority interventions
-%         - strongpred : strongest predecessor sites (calculated in ADRIA_TP())
-%         - centr : site centrality (calculated in ADRIA_TP())
+%         - strongpred : strongest predecessor sites (calculated in siteConnectivity())
+%         - centr : site centrality (calculated in siteConnectivity())
 %         - damprob : probability of coral wave damage for each site
 %         - heatstressprob : probability of heat stress for each site
 %         - prioritysites : list of sites in group (i.e. prsites: 1,2,3)

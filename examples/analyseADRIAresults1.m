@@ -34,11 +34,6 @@ dProvES = dProvES(yoi, soi, ioi, :); %delta provisining ecosystem services for y
 
 N = size(CultES, 3); % number of rows in the intervention table
 
-%%  Identifying Goldilocks sites (disabled here)
-
-% figshow = 0;
-% lowexpsites = ADRIA_lowexp_sites(nlowexpsites,swh_array,resdhwsites,figshow)
-
 %% Display distributions across interventions
 
 %meancov = squeeze(mean(covsim_t_sp_sites(years,:,:,:,:),(1:3)));

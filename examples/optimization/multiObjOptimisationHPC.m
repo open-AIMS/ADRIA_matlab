@@ -17,7 +17,7 @@ names_vec{2} = 'E';
 names_vec{3} = 'S';
 
 % load Moore reef data
-[TP_data, site_ranks, strongpred] = ADRIA_TP('Inputs/MooreTPmean.xlsx', 0.1);
+[TP_data, site_ranks, strongpred] = siteConnectivity('Inputs/MooreTPmean.xlsx', 0.1);
 fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(rcp), ".nc");
 
 % perform optimisation 
