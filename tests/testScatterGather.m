@@ -65,7 +65,7 @@ alg_ind = 1;
 
 % Load site specific data
 [F0, xx, yy, nsites] = ADRIA_siteTable('Inputs/MooreSites.xlsx');
-[TP_data, site_ranks, strongpred] = ADRIA_TP('Inputs/MooreTPmean.xlsx', params.con_cutoff);
+[TP_data, site_ranks, strongpred] = siteConnectivity('Inputs/MooreTPmean.xlsx', params.con_cutoff);
 
 % Setup for the geographical setting including environmental input layers
 % Load wave/DHW scenario data

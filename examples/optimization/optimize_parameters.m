@@ -31,7 +31,7 @@ ub = cell2mat(all_params.upper_bound);
 [params, ecol_parms] = ADRIAparms();
 params.RCP = rcp; % set target RCP scenario
 
-[TP_data, site_ranks, strongpred] = ADRIA_TP('Inputs/MooreTPmean.xlsx', 0.1);
+[TP_data, site_ranks, strongpred] = siteConnectivity('Inputs/MooreTPmean.xlsx', 0.1);
 nsites = 26;
 
 % Wave/DHW scenarios
