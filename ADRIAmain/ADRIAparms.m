@@ -34,9 +34,22 @@ params.psgC = 1:26; % prioritysite group C
 % Below parameters pertaining to species are new. We now add size classes 
 % to each coral species, but treat each coral size class as a 'species'. 
 % need a better word than 'species' to signal that we are using different
-% sizes within groups and real taxonomic species.  
-params.ntaxa = 6;  % number of coral taxa
-params.nclasses = 6; % number of coral size classes
+% sizes within groups and real taxonomic species. 
+
+params.taxa_names = [ ...
+    "tabular_acropora_enhanced", ...
+    "tabular_acropora_unenhanced", ...
+    "corymbose_acropora_enhanced", ...
+    "corymbose_acropora_unenhanced", ...
+    "small_massives", ...
+    "large_massives"
+];
+
+size_classes = [2, 5, 10, 20, 40, 80];
+params.size_classes = size_classes;
+
+params.ntaxa = length(params.taxa_names);  % number of coral taxa
+params.nclasses = length(params.size_classes); % number of coral size classes
 params.nspecies = params.ntaxa * params.nclasses; % total number of species modelled in the current version.
 
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
@@ -74,7 +87,7 @@ base_coral_numbers = ...
 
 % The coral colony diameter bin edges (cm) are: 0, 2, 5, 10, 20, 40, 80
 % To convert to cover we locate bin means and calculate bin mean areas
-size_classes = [2, 5, 10, 20, 40, 80];
+
 colony_diam_edges =  repmat(size_classes, length(size_classes), 1);
 colony_area_means = pi.*((colony_diam_edges./2).^2)./(10^4);%areas in m2 
 
@@ -83,21 +96,14 @@ a_arena = 100; %m2 of reef arena where corals grow, survive and reproduce
 % convert to coral covers (proportions) and convert to vector 
 basecov = ...
     base_coral_numbers.*colony_area_means./a_arena;
-% convert to vector and embed in structure 
-% params.basecov = reshape(basecov', params.nspecies, 1); 
 
+% convert to vector and embed in structure 
 for taxa = 1:params.ntaxa
-    params.(strcat('basecov', num2str(taxa))) = {basecov(:, taxa)};
+    params.(strcat('basecov__', params.taxa_names(taxa))) = {basecov(:, taxa)};
 end
 
-% params.basecov1 = 0.40; % initial cover of coral species 1. Acropora unenhanced 
-% params.basecov2 = 0.00; % initial cover of coral species 2. Acropora enhanced
-% params.basecov3 = 0.15; % initial cover of coral species 3  Other coral unenhanced
-% params.basecov4 = 0.15; % initial cover of coral species 4  Other coral enhanced
-%params.basecov5 = 0.00; % initial cover of rubble
-
-%params.corals = [1, 2, 3, 4]; % species of live corals.
-params.corals = 1:36;
+% as nspecies*1 vector
+params.basecov = reshape(basecov, params.nspecies, 1);
 
 
 %% Coral growth rates as linear extensions (Bozec et al 2021 Table S2)
@@ -121,8 +127,10 @@ prop_change = linear_extension./diam_bin_widths;
 %Second, growth as transitions of cover to higher bins is estimated as 
 r = base_coral_numbers.*prop_change.*colony_area_means./a_arena;
 for r_i = 1:params.ntaxa
-    params.(strcat('growth_rate', num2str(r_i))) = {r(:, r_i)};
+    vital_params.(strcat('growth_rate__', params.taxa_names(taxa))) = {r(:, r_i)};
 end
+
+vital_params.growth_rate = reshape(r, params.nspecies, 1);
 
 %% Background mortality
 
@@ -140,8 +148,9 @@ wavemort90 = ...
        0, 0, 0.00, 0.01, 0.02, 0.02];    % large massives
 
 for wm_i = 1:params.ntaxa
-    params.(strcat('wavemort90_', num2str(wm_i))) = {wavemort90(wm_i, :)};
+    params.(strcat('wavemort90__', params.taxa_names(taxa))) = {wavemort90(wm_i, :)};
 end
+params.wavemort90 = reshape(wavemort90, params.nspecies, 1);
 
 P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
 p = {[2.74, 0.25]}; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
@@ -157,13 +166,10 @@ mb = [0.2, 0.19, 0.10, 0.05, 0.03, 0.03;     % Tabular Acropora Enhanced
 
 %Converted to vector and embedded in structure
 for mb_i = 1:params.ntaxa
-    vital_params.(strcat('mb_rate', num2str(mb_i))) = {mb(mb_i, :)};
+    vital_params.(strcat('mb_rate__', params.taxa_names(taxa))) = {mb(mb_i, :)};
 end
 
-% DHW and bleaching mortality-related parameters.
-for r_i = 1:params.ntaxa
-    vital_params.(strcat('growth_rate', num2str(r_i))) = {r(:, r_i)};
-end
+vital_params.mb_rate = reshape(mb, params.nspecies, 1);
 
 %% Ecosystem service parameters
 
