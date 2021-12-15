@@ -6,7 +6,7 @@ function params = coralDetails()
 % Values for the historical, temporal pattern of degree heating weeks between bleaching years come from [1].
 %
 % Outputs:
-%   params : struct, parameters for each coral taxa, group and size class
+%   params : table, parameters for each coral taxa, group and size class
 %
 % References
 % 1. Lough, J.M., Anderson, K.D. and Hughes, T.P. (2018)
@@ -194,11 +194,11 @@ mid_growth = @(X, P_x, rec, r, mb, comp, ind, P) max(min(P, P_x .* (X(ind, :) + 
 % Growth function for bin 6
 large_growth = @(X, P_x, rec, r, mb, comp, ind, P) max(min(P, P_x .* (X(ind, :) + X(ind-1, :) .* (1+r(ind-1))) - X(ind, :) .* mb(ind)), 0.0);
 
-% Growth function for bin 2 - 5, with competition with Tabular Acropora
+% Growth function for bin 2 - 5, including competition with Tabular Acropora
 % where X6 and X12 relate to the largest size class for Tabular Acropora Enhanced/Unenhanced 
 mid_growth_with_comp = @(X, P_x, rec, r, mb, comp, ind, P) max(min(P, P_x .* (X(ind, :) + X(ind-1, :) .* (1+r(ind-1))) + X(ind, :) .* (1-r(ind)) - X(ind, :) .* comp * (X(6) + X(12))), 0.0);
 
-% Growth function for bin 6, for Tabular Acropora with competition
+% Growth function for bin 6, for Tabular Acropora including competition
 % with Small Massives
 % X(25:30) relate to small massives (need to clean up!)
 large_growth_with_comp = @(X, P_x, rec, r, mb, comp, ind, P) max(min(P, P_x .* (X(ind, :) + X(ind-1, :).*(1+r(ind-1)) + X(ind, :) .* comp * sum(X(25:30))) - X(ind, :) .* mb(ind)), 0.0);
