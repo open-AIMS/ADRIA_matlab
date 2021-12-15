@@ -92,8 +92,6 @@ end
 for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
-    % scen_params = params(i, :);
-    % scen_ecol = ecol_params(i, :);
     
     % temp reassignment
     TC = zeros(timesteps, nsites, 1, n_reps);
