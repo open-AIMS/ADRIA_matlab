@@ -10,6 +10,7 @@ num_reps = 3;  % Number of replicate RCP scenarios
 % Collect details of available parameters
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
+coral_spec = coralDetails();
 
 % Create main table listing all available parameter options
 combined_opts = [inter_opts; criteria_opts];
@@ -31,12 +32,13 @@ end
 % Creating dummy permutations for core ADRIA parameters
 % (environmental and ecological parameter values etc)
 % This process will be replaced
-[params, vital_params] = ADRIAparms();
-param_tbl = struct2table(params);
-vital_tbl = struct2table(vital_params);
+% [params, vital_params] = ADRIAparms();
+% param_tbl = struct2table(params);
+coral_params = coralDetails();
+sim_constants = simConstants();
 
-param_tbl = repmat(param_tbl, N, 1);
-vital_tbl = repmat(vital_tbl, N, 1);
+% param_tbl = repmat(param_tbl, N, 1);
+% vital_tbl = repmat(vital_tbl, N, 1);
 
 % Convert sampled values to ADRIA usable values
 % Necessary as samplers expect real-valued parameters (e.g., floats)
@@ -81,7 +83,7 @@ w_scens = wave_scens(:, :, rcp_scens);
 d_scens = dhw_scens(:, :, rcp_scens);
 
 tic
-Y = runADRIA(interv_scens, criteria_weights, param_tbl, vital_tbl, ...
+Y = runCoralADRIA(interv_scens, criteria_weights, coral_params, sim_constants, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
                  w_scens, d_scens, alg_ind);
 tmp = toc;
