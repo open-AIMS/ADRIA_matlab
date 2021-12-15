@@ -119,16 +119,23 @@ function Y = runADRIAScenario(interv, criteria, params, vital_params, ...
     % saves memory
     tspan = [0, 0.5, 1];
     growth_rates = zeros(ntaxa, nsize_class);
-    
     for taxa = 1:ntaxa
         %including wave vulnerability of different corals here
         growth_rates(taxa, :) = vital_params.(strcat('growth_rate', num2str(taxa))){1};
     end
 
+    mort_rate = zeros(ntaxa, nsize_class);
+    for taxa = 1:ntaxa
+        %including wave vulnerability of different corals here
+        mort_rate(taxa, :) = vital_params.(strcat('mb_rate', num2str(taxa))){1};
+    end
+
     e_r = reshape(growth_rates.',1,[]); % coral growth rates
     e_P = vital_params.max_coral_cover;  % max total coral cover
-    e_mb = vital_params.mb_rate;  %background coral mortality
-    e_p = vital_params.p;  % Gompertz shape parameters for bleaching 
+    e_mb = reshape(mort_rate.',1,[]);  %background coral mortality
+    e_p = vital_params.p;  % Gompertz shape parameters for bleaching
+    
+    % ADRIA_36CoralGroups(X, r, P, mb, rec, comp)
     ode_func = @(t, X) ADRIA4groupsODE(X, e_r, e_P, e_mb);
 
     neg_e_p1 = -e_p(1);  % setting constant values for use in loop
@@ -141,11 +148,12 @@ function Y = runADRIAScenario(interv, criteria, params, vital_params, ...
     % matrix in which to store the output: first branching corals, then
     % foliose corals, then macroalgae
     Yout = zeros(tf, nspecies, nsites);
+    % Yout = zeros(nspecies, nsites, tf);
     % Set initial population sizes at tstep = 1
     for sp = 1:nspecies
-        %Yout(1, sp, :) = params.(strcat('basecov', num2str(sp)));
-        Yout(1, sp, :) = params.basecov(sp); %new version added to ADRIAparms
-        
+        % Yout(1, sp, :) = params.(strcat('basecov', num2str(sp)));
+        % tmp = params.(strcat('basecov', num2str(taxa))){1};
+        Yout(1, sp, :) = params.basecov(sp);
     end
 
     %% Running the model as pulse-impulsive
@@ -240,7 +248,9 @@ function Y = runADRIAScenario(interv, criteria, params, vital_params, ...
             % population * bleaching_survivors * wave_survivors + recruited
             
             % Adjusted: Adding recruited corals here instead of below...
-            Yin1(:, site) = Yout(p_step, :, site) .* Sbl .* Sw_t(p_step, :, site) + rec(:, site)';
+            Yin1(:, site) = Yout(p_step, :, site) .* Sbl .* Sw_t(p_step, :, site, :) + rec(:, site);
+            
+            % Yout(p_step, :, :).* Sbl .* Sw_t(p_step, :, :) + rec(:, :);
 
             % if the site in the loop equals a preferred seeding site
 %             if ismember(site, prefseedsites) && tstep <= seedyears
