@@ -15,9 +15,9 @@ function [TC,C,E,S] = reefConditionMetrics(covsim)
 % calcification from eReefs
 C = covsim; % dimensions: time, species, sites, interventions, sims 
 TC = sum(C,2); %sum over species
-C1 = C(:,1,:,:,:) + C(:,2,:,:,:); %Adding enhanced to unenhanced Acropora
-C2 = C(:,3,:,:,:); %Coral species 2
-C3 = C(:,4,:,:,:); %Coral species 3
+C1 = C(:,1:6,:,:,:) + C(:,7:12,:,:,:); %Adding enhanced to unenhanced Acropora
+C2 = C(:,13:18,:,:,:); %Coral species 2
+C3 = C(:,19:24,:,:,:); %Coral species 3
 
 %% Calculate Evenness
 % Note that evenness may be replaced by other diversity metric 
@@ -30,6 +30,9 @@ E = FuncDiv./n; %evenness
 E(E>1) = 1; %limit to 1, probably unnecessary
 E = squeeze(E); %species dimension squeezed out
 
+% TEMPORARY: Making metrics work with subset of new coral groups for now
+E = squeeze(mean(E, 2));
+
 %% Calculate structural complexity
 % Note that structural complexity will be replaced with functions that 
 % display refuge volume and size distributions as a function of coral 
@@ -38,6 +41,10 @@ E = squeeze(E); %species dimension squeezed out
 S = C1; %use Acropora for now as proxy for structural complexity
 S(S>1) = 1; %limit to 1
 S = squeeze(S); %species dimension squeezed out
+
+% TEMPORARY: Making metrics work with subset of new coral groups for now
+S = squeeze(mean(S, 2));
+
 TC = squeeze(TC); %species dimension squeezed out
 
 end
