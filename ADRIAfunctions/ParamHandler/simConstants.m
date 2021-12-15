@@ -38,5 +38,5 @@ params.comp = 0.8;
 %% Ecosystem service parameters
 params.evcult = 0.5; % assumes that evenness counts half for cultural ES
 params.strcult = 0.5; % assumes that structural complexity counts half for cultural ES
-params.evprov = 0.2; % 0.2 for provisioning ES
-params.strprov = 0.8; % 0.8 for provisioning ES
+params.evprov = 0.2; % 0.2 for provisioning evenness ES
+params.strprov = 0.8; % 0.8 for provisioning structural ES
