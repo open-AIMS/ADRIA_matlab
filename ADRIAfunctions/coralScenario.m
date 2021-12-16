@@ -155,11 +155,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         %% Setup MCDA before bleaching season
 
-        % Factor 1: digraph centrality based on connectivity
-        % sums over species, second index becomes sites
-        % total_cover(tstep, :) = sum(Yout(p_step, :, :), 2);
-
-        % Factor 3:
         % heat stress used as criterion in site selection
         dhw_step = dhw_ss(tstep, :); % subset of DHW for given timestep
 
@@ -204,7 +199,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yin1 = Y_pstep .* tmp_lr;
         
         % Log seed values/sites
-        % TODO: UPDATE FOR 36 CORAL "SPECIES"
         % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
         % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
         s1_idx = find(coral_params.taxa_id == 1 & (coral_params.class_id == 2));
@@ -220,21 +214,16 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
         Y = Y(end, :);
+        Y = reshape(Y, nspecies, nsites);
+        Yout(tstep, :, :) = Y;
         
         try
             assert(all(~isnan(Y)), "nope");
         catch
             % debug plotting
-            Y = reshape(Y, nspecies, nsites);
-            Yout(tstep, :, :) = Y;
-            
             Y_tmp = mean(squeeze(Yout(1:tstep, :, :)), 3);
-            
             plot(Y_tmp)
         end
-
-        Y = reshape(Y, nspecies, nsites);
-        Yout(tstep, :, :) = Y;
 
     end % tstep
 
