@@ -19,15 +19,16 @@ function Y = growthODE(X, r, P, mb, rec, comp)
 %Used here as part of developing the method
 
 %% Work in progress as at 10PM on 9th Nov 21
-% P_x = P - sum(X,'All');
 
 X = reshape(X, 36, 26);
 
-%density dependent growth - constrain to zero at carrying capacity
+% density dependent growth - constrain to zero at carrying capacity
 P_x = min( max(P - sum(X, 3), 0.0), P);  % per species, per site (species * sites)
 
 r_i = 1 - r;
 r_p = 1 + r;
+
+Y = zeros(36, 26);
 
 %Tabular Acropora Enhanced
 Y(1, :) = P_x(1, :) .* (X(1, :) + rec(1, :)) + X(1, :) .* r_i(1) - X(1, :) .* mb(1);
