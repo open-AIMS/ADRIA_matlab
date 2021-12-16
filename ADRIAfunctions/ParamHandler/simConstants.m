@@ -3,6 +3,11 @@ function params = simConstants()
 %
 % Outputs:
 %   params       : struct, simulation constants for ADRIA
+%
+% References:
+%   1. Lough et al 2018
+%   2. Hughes et al 2017 
+%   3. Bozec et al 2021
 
 %% Base scenario parameters
 params.tf = 25; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
@@ -12,7 +17,7 @@ params.psgB = 11:20; % prioritysite group B
 params.psgC = 1:26; % prioritysite group C
 
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
-params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
+% params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
 params.RCP = 60;  % RCP scenario to use
 
 %% Environmental parameters
