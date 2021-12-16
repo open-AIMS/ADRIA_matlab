@@ -56,13 +56,13 @@ alg_ind = 1;
 
 %% Load site specific data
 [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
+[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', sim_constants.con_cutoff);
 
 %% setup for the geographical setting including environmental input layers
 % Load wave/DHW scenario data
 % Generated with generateWaveDHWs.m
 % TODO: Replace these with wave/DHW projection scenarios instead
-fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(params.RCP), ".nc");
+fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(sim_constants.RCP), ".nc");
 wave_scens = ncread(fn, "wave");
 dhw_scens = ncread(fn, "DHW");
 
