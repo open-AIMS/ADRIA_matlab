@@ -76,8 +76,9 @@ Y(33, :) = P_x(33, :) .* (X(33, :) + X(32, :) .* r_p(32)) + X(33, :) .* r_i(33) 
 Y(34, :) = P_x(34, :) .* (X(34, :) + X(33, :) .* r_p(33)) + X(34, :) .* r_i(34) - X(34, :) .* mb(34);
 Y(35, :) = P_x(35, :) .* (X(35, :) + X(34, :) .* r_p(34)) + X(35, :) .* r_i(35) - X(35, :) .* mb(35);
 Y(36, :) = P_x(36, :) .* (X(36, :) + X(35, :) .* r_p(35)) - X(36, :) .* mb(36);
-Y(Y < 0) = 0; % function is called with non-negative = true
 
-Y(Y > P) = P; % constrain to max cover
+% constrain between 0 and max cover
+Y(Y < 0) = 0;
+Y(Y > P) = P; 
 Y = Y(:); % convert to column vector
 end
