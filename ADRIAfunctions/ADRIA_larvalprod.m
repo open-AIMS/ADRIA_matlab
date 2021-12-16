@@ -12,6 +12,6 @@ function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff,
 ad = assistadapt + tstep .* natad;
 
 tmp_ad = (1 - ad / DHWmaxtot);
-Y = 1 - exp(-(exp(-LPdhwcoeff*(stresspast' .* tmp_ad - LPDprm2))))';
+Y = 1 - exp(-(exp(-LPdhwcoeff*(stresspast .* tmp_ad - LPDprm2))));
 
 end
