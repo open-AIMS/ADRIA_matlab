@@ -63,12 +63,12 @@ params.class_id = reshape(repmat(1:nclasses, 1, nclasses), nspecies, []);
 %%% Base covers
 %First express as number of colonies per size class per 100m2 of reef
 base_coral_numbers = ...
-    [0, 0, 0, 0, 0, 0; ...             % Tabular Acropora Enhanced
-    2000, 500, 200, 100, 100, 100; ... % Tabular Acropora Unenhanced
-    0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
-    2000, 500, 200, 100, 100, 100; ... % Corymbose Acropora Unenhanced
-    2000, 200, 100, 100, 100, 100; ... % small massives
-    2000, 200, 100, 100, 50, 10];      % large massives
+    [0, 0, 0, 0, 0, 0; ...              % Tabular Acropora Enhanced
+     2000, 500, 200, 100, 100, 100; ... % Tabular Acropora Unenhanced
+     0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
+     2000, 500, 200, 100, 100, 100; ... % Corymbose Acropora Unenhanced
+     2000, 200, 100, 100, 100, 100; ... % small massives
+     2000, 200, 100, 100, 50, 10];      % large massives
 
 % To convert to covers we need to first calculate the area of colonies,
 % multiply by how many corals in each bin, and divide by reef area
