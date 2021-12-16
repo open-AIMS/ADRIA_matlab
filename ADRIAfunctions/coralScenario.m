@@ -195,8 +195,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
                                            natad, dhw_step);
 
         % proportional loss + proportional recruitment
-        tmp_lr = Sbl .* squeeze(Sw_t(p_step, :, :)) + rec;
-        Yin1 = Y_pstep .* tmp_lr;
+        prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
+        Yin1 = Y_pstep .* prop_loss;
         
         % Log seed values/sites
         % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
