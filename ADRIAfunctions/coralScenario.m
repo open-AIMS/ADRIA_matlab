@@ -147,8 +147,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
         
-        % (squeeze(Yout(tstep-1, 1, :))' * TP_data) .* LP1;
-        
         Y_pstep = squeeze(Yout(p_step, :, :));
 
         % for each species, site and year as a function of past heat exposure
@@ -201,8 +199,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
                                            neg_e_p2, assistadapt, ...
                                            natad, dhw_step);
 
-        ts_tmp = Sbl .* squeeze(Sw_t(p_step, :, :)) + rec;
-        Yin1 = Y_pstep .* ts_tmp;
+        % proportional loss + proportional recruitment
+        tmp_lr = Sbl .* squeeze(Sw_t(p_step, :, :)) + rec;
+        Yin1 = Y_pstep .* tmp_lr;
         
         % Log seed values/sites
         % TODO: UPDATE FOR 36 CORAL "SPECIES"
@@ -225,6 +224,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         try
             assert(all(~isnan(Y)), "nope");
         catch
+            % debug plotting
             Y = reshape(Y, nspecies, nsites);
             Yout(tstep, :, :) = Y;
             
