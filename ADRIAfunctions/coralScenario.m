@@ -71,7 +71,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Update ecological parameters based on intervention option
     assistadapt = interv.Aadpt;  % level of assisted coral adaptation
-    natad = interv.Natad; % level of added natural coral adaptation
+    natad = coral_params.natad + interv.Natad; % level of added natural coral adaptation
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
@@ -104,7 +104,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% temporary allocation to avoid incurring access overhead
     % specify constant odeset option
     % non_neg_opt = odeset('NonNegative', 1:nspecies);
-    non_neg_opt = odeset('NonNegative', 1:nsites);
+    non_neg_opt = odeset('NonNegative', 1:nspecies:nsites);
 
     % return 3 steps as we're only interested in the last one anyway
     % saves memory
@@ -130,6 +130,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     % Set initial population sizes at tstep = 1
     Yout(1, :, :) = repmat(coral_params.basecov, 1, nsites);
+    
+    % Seed/shade log
+    Yseed = zeros(tf, nspecies, nsites);
+    Yshade = zeros(tf, nspecies, nsites);
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
@@ -142,10 +146,14 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % larval production per site
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
+        
+        % (squeeze(Yout(tstep-1, 1, :))' * TP_data) .* LP1;
+        
+        Y_pstep = squeeze(Yout(p_step, :, :));
 
         % for each species, site and year as a function of past heat exposure
         % Format: nspecies * nsites
-        rec = (squeeze(Yout(p_step, :, :)) * TP_data) .* LPs;
+        rec = (Y_pstep * TP_data) .* LPs;
 
         %% Setup MCDA before bleaching season
 
@@ -183,9 +191,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
-            Yshade(:, prefshadesites) = srm;
+            Yshade(tstep, :, prefshadesites) = srm;
         else
-            Yshade(:, :) = 0;
+            Yshade(tstep, :, :) = 0;
         end
         
         % Calculate bleaching mortality
@@ -194,36 +202,40 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
                                            natad, dhw_step);
 
         ts_tmp = Sbl .* squeeze(Sw_t(p_step, :, :)) + rec;
-        Yin1 = squeeze(Yout(p_step, :, :)) .* ts_tmp;
+        Yin1 = Y_pstep .* ts_tmp;
         
         % Log seed values/sites
         % TODO: UPDATE FOR 36 CORAL "SPECIES"
+        % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
+        % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
+        s1_idx = find(coral_params.taxa_id == 1 & (coral_params.class_id == 2));
+        s2_idx = find(coral_params.taxa_id == 3 & (coral_params.class_id == 2));
+        
         if (tstep <= seedyears) && ~all(prefseedsites == 0)
-            Yin1(2, prefseedsites) = Yin1(2, prefseedsites) + seed1; % seed enhanced corals of group 2
-            Yin1(4, prefseedsites) = Yin1(4, prefseedsites) + seed2; % seed enhanced corals of group 4
-            Yseed(2, prefseedsites) = seed1; % log site as seeded with gr2
-            Yseed(4, prefseedsites) = seed2; % log site as seeded with gr4
-        else
-            Yseed(2, :) = 0;
-            Yseed(4, :) = 0;
+            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed enhanced corals of group 2
+            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed enhanced corals of group 4
+            Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with gr2
+            Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with gr4
         end
         
-        cov_tmp = squeeze(Yout(p_step, :, :));
-        P_x = max(e_P - sum(cov_tmp, 2), 0.0);
+        % Run ODE for all species and sites
+        [~, Y] = ode45(@(t, X) growthODE(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
+        Y = Y(end, :);
         
-        %% Run for each species...
-        for sp = 1:nspecies
+        try
+            assert(all(~isnan(Y)), "nope");
+        catch
+            Y = reshape(Y, nspecies, nsites);
+            Yout(tstep, :, :) = Y;
             
-            % [~, Y] = ode45(@(t, X) tmpGrowthFunc(X, e_r(sp), e_P, e_mb(sp)), tspan, Yin1(sp, :), non_neg_opt);
+            Y_tmp = mean(squeeze(Yout(1:tstep, :, :)), 3);
+            
+            plot(Y_tmp)
+        end
 
-            % comp = 0.8
-            % Y = ADRIA_36CoralGroups(Yin1(p_step, sp, :), e_r, e_P, e_mb(sp), rec(sp, :), e_comp);
-            % Y2 = coralGrowth(squeeze(Yout(p_step, :, :)), e_r, e_P, e_mb, rec, e_comp);
-            func = coral_params.growth_function{sp};
-            Y2 = func(cov_tmp, P_x(sp), rec(sp, :), e_r, e_mb, e_comp, sp, e_P);
-            
-            Yout(tstep, sp, :) = Y2; % update population sizes (for species)
-        end
+        Y = reshape(Y, nspecies, nsites);
+        Yout(tstep, :, :) = Y;
+
     end % tstep
 
     %% assign results
