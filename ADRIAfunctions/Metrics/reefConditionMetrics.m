@@ -13,6 +13,7 @@ function [TC,C,E,S] = reefConditionMetrics(covsim)
 % 3: Structural complexity, for now as S = relative cover of large Acropora.
 % 4: Net reef accretion as total coral cover times net rate of reef
 % calcification from eReefs
+
 C = covsim; % dimensions: time, species, sites, interventions, sims 
 TC = sum(C,2); %sum over species
 C1 = C(:,1:6,:,:,:) + C(:,7:12,:,:,:); %Adding enhanced to unenhanced Acropora
