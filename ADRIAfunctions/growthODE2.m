@@ -1,4 +1,4 @@
-function Y = growthODE(X, r, P, mb, rec, comp)
+function Y = growthODE2(X, r, P, mb, rec, comp)
 
 % X is defined here as number of colonies of 4 species in 6 size classes
 % r is lateral colony extension (cm) of 4 coral species in 6 size classes
@@ -31,7 +31,7 @@ r_i = 1 - r;  %indicates the proportion of corals staying in a size class
 Y = zeros(36, 26);
 
 %Tabular Acropora Enhanced
-Y(1, :) = P_x(1, :) .* X(1, :) .* rec(1, :) - X(1, :) .* (r(1) + mb(1));
+Y(1, :) = P_x(1, :) .* rec(1, :) - X(1, :) .* (r(1) + mb(1));
 Y(2, :) = P_x(2, :) .* (X(2, :) .* r_i(2) + X(1, :) .* r(1)) - X(2, :) .* mb(2);
 Y(3, :) = P_x(3, :) .* (X(3, :) .* r_i(3) + X(2, :) .* r(2)) - X(3, :) .* mb(3);
 Y(4, :) = P_x(4, :) .* (X(4, :) .* r_i(4) + X(3, :) .* r(3)) - X(4, :) .* mb(4);
@@ -67,7 +67,7 @@ Y(25, :) = P_x(25, :) .* X(25, :) .* rec(25, :) - X(25, :) .* (r(25) + mb(25));
 Y(26, :) = P_x(26, :) .* (X(26, :) .* r_i(26) + X(25, :) .* r(25)) - X(26, :) .* (mb(26) + comp .* (X(6, :) + X(12, :)));
 Y(27, :) = P_x(27, :) .* (X(27, :) .* r_i(27) + X(26, :) .* r(26)) - X(27, :) .* (mb(27) + comp .* (X(6, :) + X(12, :)));
 Y(28, :) = P_x(28, :) .* (X(28, :) .* r_i(28) + X(27, :) .* r(27)) - X(28, :) .* (mb(28) + comp .* (X(6, :) + X(12, :)));
-Y(29, :) = P_x(29, :) .* (X(29, :) .* r_i(29) - X(29, :) .* (mb(29) + comp .* (X(6, :) + X(12, :)));
+Y(29, :) = P_x(29, :) .* X(29, :) .* r_i(29) - X(29, :) .* (mb(29) + comp .* (X(6, :) + X(12, :)));
 Y(30, :) = 0; %small massives and encrusting constrained to less than 40 cm diameter
 
 %Large massives Unenhanced

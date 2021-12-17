@@ -212,7 +212,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
         
         % Run ODE for all species and sites
-        [~, Y] = ode45(@(t, X) growthODE(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
+        [~, Y] = ode45(@(t, X) growthODE4(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
         Y = Y(end, :);
         Y = reshape(Y, nspecies, nsites);
         Yout(tstep, :, :) = Y;
