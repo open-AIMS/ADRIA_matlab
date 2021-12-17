@@ -79,7 +79,7 @@ base_coral_numbers = ...
       2000,500,200,100,100,100;       %Tabular Acropora Unenhanced
       0,0,0,0,0,0;       %Corymbose Acropora Enhanced
       2000,500,200,100,100,100;       %Corymbose Acropora Unenhanced
-      2000,200,100,100,100,100;       %small massives
+      2000,500,200,100,100,100;       %small massives
       2000,200,100,100,50,10];      %large massives
 
 % To convert to covers we need to first calculate the area of colonies, 
@@ -140,19 +140,19 @@ params.LPDprm2 = 5; % parameter offsetting LPD curve
 
 % coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
 wavemort90 = ...
-      [0, 0, 0.02, 0.03, 0.04, 0.05;     % Tabular Acropora Enhanced
-       0, 0, 0.02, 0.03, 0.04, 0.05;     % Tabular Acropora Unenhanced
-       0, 0, 0.02, 0.02, 0.03, 0.04;     % Corymbose Acropora Enhanced
-       0, 0, 0.02, 0.02, 0.03, 0.04;     % Corymbose Acropora Unenhanced
-       0, 0, 0.00, 0.01, 0.02, 0.02;     % small massives
-       0, 0, 0.00, 0.01, 0.02, 0.02];    % large massives
+      [0, 0, 0.02, 0.03, 0.03, 0.03;     % Tabular Acropora Enhanced
+       0, 0, 0.02, 0.03, 0.03, 0.03;     % Tabular Acropora Unenhanced
+       0, 0, 0.02, 0.02, 0.02, 0.02;     % Corymbose Acropora Enhanced
+       0, 0, 0.02, 0.02, 0.02, 0.02;     % Corymbose Acropora Unenhanced
+       0, 0, 0.00, 0.01, 0.01, 0.01;     % small massives
+       0, 0, 0.00, 0.01, 0.01, 0.01];    % large massives
 
 for wm_i = 1:params.ntaxa
     params.(strcat('wavemort90__', params.taxa_names(taxa))) = {wavemort90(wm_i, :)};
 end
 params.wavemort90 = reshape(wavemort90, params.nspecies, 1);
 
-P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
+P = 1; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
 p = {[2.74, 0.25]}; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
 vital_params = struct('max_coral_cover', P, 'p', p); % package into structure to use in functions
 
