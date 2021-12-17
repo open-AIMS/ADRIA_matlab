@@ -33,7 +33,7 @@ taxa_names = [ ...
     "large_massives" ...
     ];
 
-size_classes = [2; 5; 10; 20; 40; 80];
+size_classes = [2; 5; 10; 20; 40; 80];  % centimeters
 
 % Create combinations of taxa names and size classes
 [sc, tn] = ndgrid(size_classes, taxa_names);
