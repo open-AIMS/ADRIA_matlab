@@ -44,10 +44,13 @@ ecol_tbl = repmat(ecol_tbl, N, 1);
 % parameters
 converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
+% Optional step: Extract unique scenarios
+[u_ss, u_rows, group_idx] = mapDuplicateScenarios(converted_tbl);
+
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
-criteria_weights = converted_tbl(:, 10:end);
+interv_scens = u_ss(:, 1:9);  % intervention scenarios
+criteria_weights = u_ss(:, 10:end);
 
 % use order-ranking for example
 alg_ind = 1;
@@ -87,6 +90,9 @@ Y = runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
 tmp = toc;
 
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
+
+% Map unique scenarios to original scenario list
+Y = mapDuplicateResults(Y, u_rows, group_idx);
 
 %% post-processing
 % collate data across all scenario runs
