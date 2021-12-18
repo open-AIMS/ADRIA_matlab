@@ -219,13 +219,13 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Y = reshape(Y, nspecies, nsites);
         Yout(tstep, :, :) = Y;
         
-        try
-            assert(all(~isnan(Y)), "nope");
-        catch
-            % debug plotting
-            Y_tmp = mean(squeeze(Yout(1:tstep, :, :)), 3);
-            plot(Y_tmp)
-        end
+        % try
+        %     assert(all(all(~isnan(Y) == 1)), "nope");
+        % catch err
+        %     % debug plotting
+        %     Y_tmp = mean(squeeze(Yout(1:tstep, :, :)), 3);
+        %     plot(Y_tmp)
+        % end
 
     end % tstep
 
