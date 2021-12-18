@@ -16,9 +16,10 @@ function [TC,C,E,S] = reefConditionMetrics(covsim)
 
 C = covsim; % dimensions: time, species, sites, interventions, sims 
 TC = sum(C,2); %sum over species
-C1 = C(:,1:6,:,:,:) + C(:,7:12,:,:,:); %Adding enhanced to unenhanced Acropora
-C2 = C(:,13:18,:,:,:); %Coral species 2
-C3 = C(:,19:24,:,:,:); %Coral species 3
+C1 = C(:,1:6,:,:,:) + C(:,7:12,:,:,:); %Adding enhanced to unenhanced tabular Acropora
+C2 = C(:,13:18,:,:,:) + C(:,19:24,:,:,:); %Adding %enhanced to unenhanced corymbose Acropora 
+C3 = C(:,25:30,:,:,:); %Encrusting and small massives 
+C4 = C(:,31:36,:,:,:); %Large massives 
 
 %% Calculate Evenness
 % Note that evenness may be replaced by other diversity metric 
@@ -26,7 +27,8 @@ n = 3; %number of species
 p1 = C1./TC;
 p2 = C2./TC;
 p3 = C3./TC;
-FuncDiv = (p1.^2 + p2.^2 + p3.^2).^(1-(1-2)); %functional diversity
+p4 = C4./TC;
+FuncDiv = (p1.^2 + p2.^2 + p3.^2 + p4.^2).^(1-(1-2)); %functional diversity
 E = FuncDiv./n; %evenness
 E(E>1) = 1; %limit to 1, probably unnecessary
 E = squeeze(E); %species dimension squeezed out
@@ -39,7 +41,9 @@ E = squeeze(mean(E, 2));
 % display refuge volume and size distributions as a function of coral 
 % composition and coral size classes 
 
-S = C1; %use Acropora for now as proxy for structural complexity
+%The following will be replacedd by shelter volume functions developed for
+%ReefMod
+S = C1+C2+C4; %use tabular, corymbose and large massives as proxy for structural complexity
 S(S>1) = 1; %limit to 1
 S = squeeze(S); %species dimension squeezed out
 

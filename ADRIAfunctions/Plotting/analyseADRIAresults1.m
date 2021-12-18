@@ -91,7 +91,7 @@ for int = 1:N
     subplot(rows, cols, int)
     plot_distribution_prctile(yoi, squeeze(mCultESsites(:, int, :))', 'Prctile', [25, 50, 75], ...
         'color', [0.2, 0.2, 0.4], 'alpha', 0.2, 'LineWidth', 0.01);
-    axis([0, max(yoi), 0, 0.7]);
+    axis([0, max(yoi), 0, 0.3]);
     %axis([0,max(yoi),0,max(mCultESsites,[],'All')]);
     title(int);
     set(gca, 'FontSize', 14);

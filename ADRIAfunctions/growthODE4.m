@@ -25,14 +25,13 @@ X = reshape(X, 36, 26);
 % density dependent growth - constrain to zero at carrying capacity
 %P_x = min( max(P - sum(X, 3), 0.0), P);  % per species, per site (species * sites)
 
-P_x = P - sum(X,1); %P - sum over coral covers within each site
-P_x = repmat(P_x, 36,1); %spread results out over corals - i.e rows are similar
-P_x(P_x <0) = 0; %density dependent growth - constrain to zero at carrying capacity
-P_x(P_x >1) = P; %density dependent growth - constrain to P
+P_x = P - sum(X,1); %P - sum over coral covers within each site - this sets the carrying capacity
+P_x = repmat(P_x, 36,1); %spread results out over corals - i.e rows are ...
+% similar but sites vary in the matrix - probably clumsy, but ensures that density depdendence is applied at each site  
+P_x(P_x <0) = 0; %density dependent growth and recruitment - constrain to zero at carrying capacity
+P_x(P_x >1) = P; %density dependent growth - constrain to P 
 
 %P_x = min( max(P - sum(X, 3), 0.0), P);  % per species, per site (species * sites)
-
-rec  = 0.1 * ones(36, 26);
 
 Y = zeros(36, 26);
 
@@ -41,7 +40,7 @@ Y(1, :) = P_x(1, :) .* rec(1, :) - P_x(2, :) .* X(1, :) .* (r(1)  - X(1,:) .* mb
 Y(2, :) = P_x(2, :) .* X(1, :) .* r(1) - P_x(3, :) .* X(2, :) .* r(2) - X(2, :) .* mb(2);
 Y(3, :) = P_x(3, :) .* X(2, :) .* r(2) - P_x(4, :) .* X(3, :) .* r(3) - X(3, :) .* mb(3);
 Y(4, :) = P_x(4, :) .* X(3, :) .* r(3) - P_x(5, :) .* X(4, :) .* r(4) - X(4, :) .* mb(4);
-Y(5, :) = P_x(5, :) .* X(4, :) .* r(4) - P_x(6, :) .* X(5, :) .* r(5) - X(5, :) .* mb(5);
+Y(5, :) = P_x(5, :) .* X(4, :) .* r(4) - P_x(6, :) .* X(5, :) .* (r(5) + comp .* sum(X(25:30, :))) - X(5, :) .* mb(5);
 Y(6, :) = P_x(6, :) .* X(5, :) .* (r(5) + comp .* sum(X(25:30, :))) - X(6, :) .* mb(6);
 
 %Tabular Acropora Unenhanced
@@ -49,7 +48,7 @@ Y(7, :) = P_x(7, :) .* rec(7, :) - P_x(8, :) .* X(7, :) .* r(7) - X(7,:) .* mb(7
 Y(8, :) = P_x(8, :) .* X(7, :) .* r(7) - P_x(9, :) .* X(8, :) .* r(8) - X(8, :) .*mb(8);
 Y(9, :) = P_x(9, :) .* X(8, :) .* r(8) - P_x(10, :) .* X(9, :) .* r(9) - X(9, :) .* mb(9);
 Y(10, :) = P_x(10, :) .* X(9, :) .* r(9) - P_x(11, :) .* X(10, :) .* r(10) - X(10, :) .* mb(10);
-Y(11, :) = P_x(11, :) .* X(10, :) .* r(10) - P_x(12, :) .* X(11, :) .* r(11) - X(11, :) .* mb(11);
+Y(11, :) = P_x(11, :) .* X(10, :) .* r(10) - P_x(12, :) .* X(11, :) .* (r(11) + comp .* sum(X(25:30, :))) - X(11, :) .* mb(11);
 Y(12, :) = P_x(12, :) .* X(11, :) .* (r(11) + comp .* sum(X(25:30, :))) - X(12, :) .* mb(12);
 
 %Corymbose Acropora Enhanced

@@ -54,7 +54,7 @@ defaults = {
     4; % "ncoralsp";
     0.10; % "con_cutoff";
     0; % "years";
-    "60"  % RCP
+    "45"  % RCP
 };
 
 params.tf = 25; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
