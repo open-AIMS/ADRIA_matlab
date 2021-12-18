@@ -150,7 +150,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Y_pstep = squeeze(Yout(p_step, :, :));
 
         % for each species, site and year as a function of past heat exposure
-        % Format: nspecies * nsites
+        % Note: Matrix format is nspecies * nsites, but the values repeat.
+        %       Only the first entry for each taxa is intended to be used.
+        %       Shape of this matrix is simply for convenience.
         rec = (Y_pstep * TP_data) .* LPs;
 
         %% Setup MCDA before bleaching season
