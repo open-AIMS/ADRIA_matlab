@@ -7,10 +7,18 @@ rng(101)
 N = 8;
 num_reps = 3;  % Number of replicate RCP scenarios
 
+%% Parameter prep
 % Collect details of available parameters
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
-coral_spec = coralDetails();
+
+% Creating dummy permutations for core ADRIA parameters
+% (environmental and ecological parameter values etc)
+% This process will be replaced
+% [params, vital_params] = ADRIAparms();
+% param_tbl = struct2table(params);
+coral_params = coralDetails();
+sim_constants = simConstants();
 
 % Create main table listing all available parameter options
 combined_opts = [inter_opts; criteria_opts];
@@ -26,19 +34,6 @@ for p = 1:height(combined_opts)
     
     p_sel.(combined_opts.name{p}) = selection;
 end
-
-%% Parameter prep
-
-% Creating dummy permutations for core ADRIA parameters
-% (environmental and ecological parameter values etc)
-% This process will be replaced
-% [params, vital_params] = ADRIAparms();
-% param_tbl = struct2table(params);
-coral_params = coralDetails();
-sim_constants = simConstants();
-
-% param_tbl = repmat(param_tbl, N, 1);
-% vital_tbl = repmat(vital_tbl, N, 1);
 
 % Convert sampled values to ADRIA usable values
 % Necessary as samplers expect real-valued parameters (e.g., floats)
