@@ -18,7 +18,7 @@ params.psgC = 1:26; % prioritysite group C
 
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 % params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
-params.RCP = 60;  % RCP scenario to use
+params.RCP = 45;  % RCP scenario to use
 
 %% Environmental parameters
 params.beta = [1, 3]; % beta parameters for wave disturbance (distribution parameter)
