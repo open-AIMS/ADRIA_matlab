@@ -1,6 +1,6 @@
 function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
-                              TP_data, site_ranks, strongpred, ...
-                              wave_scen, dhw_scen, alg_ind)
+    TP_data, site_ranks, strongpred, ...
+    wave_scen, dhw_scen, alg_ind)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -15,7 +15,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    strongpred  : matrix, of strongest predecessor for each site
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
-%    alg_ind     : int, ranking algorithm choice 
+%    alg_ind     : int, ranking algorithm choice
 %                    (Order: 1, TOPSIS: 2, Vikor: 3)
 %
 % Example:
@@ -70,7 +70,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
     %% Update ecological parameters based on intervention option
-    assistadapt = interv.Aadpt;  % level of assisted coral adaptation
+    assistadapt = interv.Aadpt; % level of assisted coral adaptation
     natad = coral_params.natad + interv.Natad; % level of added natural coral adaptation
 
     %see ADRIAparms for list of sites in group
@@ -84,8 +84,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Extract other parameters
     LPdhwcoeff = sim_params.LPdhwcoeff; % shape parameters relating dhw affecting cover to larval production
-    DHWmaxtot = sim_params.DHWmaxtot;  % max assumed DHW for all scenarios.  Will be obsolete when we move to new, shared inputs for DHW projections
-    LPDprm2 = sim_params.LPDprm2;  % parameter offsetting LPD curve
+    DHWmaxtot = sim_params.DHWmaxtot; % max assumed DHW for all scenarios.  Will be obsolete when we move to new, shared inputs for DHW projections
+    LPDprm2 = sim_params.LPDprm2; % parameter offsetting LPD curve
 
     wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
 
@@ -97,7 +97,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     mwaves(mwaves < 0) = 0;
     mwaves(mwaves > 1) = 1;
-    
+
     % Pre-calculate proportional survivors from wave damage
     Sw_t = 1 - mwaves;
 
@@ -111,17 +111,17 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     tspan = [0, 0.5, 1];
 
     e_r = coral_params.growth_rate; % coral growth rates
-    e_mb = coral_params.mb_rate;  %background coral mortality
+    e_mb = coral_params.mb_rate; %background coral mortality
 
-    e_P = sim_params.max_coral_cover;  % max total coral cover
-    e_p = sim_params.p;  % Gompertz shape parameters for bleaching
+    e_P = sim_params.max_coral_cover; % max total coral cover
+    e_p = sim_params.p; % Gompertz shape parameters for bleaching
     e_comp = sim_params.comp;
 
-    neg_e_p1 = -e_p(1);  % setting constant values for use in loop
+    neg_e_p1 = -e_p(1); % setting constant values for use in loop
     neg_e_p2 = -e_p(2);
-    
-    dhw_ss = max(dhw_scen - srm, 0.0);  % avoid negative values
-    
+
+    dhw_ss = max(dhw_scen-srm, 0.0); % avoid negative values
+
     %% States at time = 1
     % Set base cover for all species, and initial population sizes
     % matrix in which to store the output: first branching corals, then
@@ -130,7 +130,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     % Set initial population sizes at tstep = 1
     Yout(1, :, :) = repmat(coral_params.basecov, 1, nsites);
-    
+
     % Seed/shade log
     Yseed = zeros(tf, nspecies, nsites);
     Yshade = zeros(tf, nspecies, nsites);
@@ -138,15 +138,15 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% Running the model as pulse-impulsive
     % Loop for time steps
     for tstep = 2:tf
-        % Larval productivity is reduced as a function of last year's heat 
-        % stress. In other words, surviving coral have reduced fecundity.     
+        % Larval productivity is reduced as a function of last year's heat
+        % stress. In other words, surviving coral have reduced fecundity.
         p_step = tstep - 1; % previous timestep
         past_DHW_stress = dhw_scen(p_step, :); % last year's heat stress
-        
+
         % larval production per site
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
-        
+
         Y_pstep = squeeze(Yout(p_step, :, :));
 
         % for each species, site and year as a function of past heat exposure
@@ -164,13 +164,13 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         if strategy == 1 % guided
 
             % Update values for dMCDA
-            
+
             % Factor 2
             % probability of coral damage from waves used as criterion in
             % site selection
             dMCDA_vars.damprob = wave_scen(tstep, :)';
-            dMCDA_vars.heatstressprob = dhw_step';  % heat stress
-            
+            dMCDA_vars.heatstressprob = dhw_step'; % heat stress
+
             %Factor 4: total coral cover state used as criterion in site selection;
             dMCDA_vars.sumcover = sum(Yout(p_step, :, :), 2);
             dMCDA_vars.prioritysites = prioritysites;
@@ -190,35 +190,35 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         else
             Yshade(tstep, :, :) = 0;
         end
-        
+
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
-                                           neg_e_p2, assistadapt, ...
-                                           natad, dhw_step);
+            neg_e_p2, assistadapt, ...
+            natad, dhw_step);
 
         % proportional loss + proportional recruitment
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
         Yin1 = Y_pstep .* prop_loss;
-        
+
         % Log seed values/sites
         % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
         % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
         s1_idx = find(coral_params.taxa_id == 1 & (coral_params.class_id == 2));
         s2_idx = find(coral_params.taxa_id == 3 & (coral_params.class_id == 2));
-        
+
         if (tstep <= seedyears) && ~all(prefseedsites == 0)
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed enhanced corals of group 2
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed enhanced corals of group 4
             Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with gr2
             Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with gr4
         end
-        
+
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE4(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
         Y = Y(end, :);
         Y = reshape(Y, nspecies, nsites);
         Yout(tstep, :, :) = Y;
-        
+
         % try
         %     assert(all(all(~isnan(Y) == 1)), "nope");
         % catch err
@@ -230,11 +230,11 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
 
     %% assign results
-    % Suggest we change this such that we only report: 
+    % Suggest we change this such that we only report:
     % (1) total coral cover (TC) across sites and time
     % (2) 'species' across sites and time - in post-hoc analyses we divide
     % these into real species and their size classes
-    
+
     [TC, C, E, S] = reefConditionMetrics(Yout);
 
     % seedlog and shadelog are omitted for now
@@ -242,4 +242,4 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         'C', C, ...
         'E', E, ...
         'S', S);
-    end
+end
