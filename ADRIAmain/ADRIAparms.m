@@ -55,7 +55,7 @@ params.nspecies = params.ntaxa * params.nclasses; % total number of species mode
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 % params.ncrit = length(fieldnames(interv)); % number of columns used in the intervention table
 params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
-params.RCP = 60;  % RCP scenario to use
+params.RCP = 45;  % RCP scenario to use
 
 %% Environmental parameters
 
@@ -75,12 +75,12 @@ params.wb2 = 2.24; % weibull parameter 1 for DHW distributions based on Lough et
 %% Base covers
 %First express as number of colonies per size class per 100m2 of reef
 base_coral_numbers = ...
-     [0,0,0,0,0,0;     %Tabular Acropora Enhanced
-      2000,500,200,100,100,100;       %Tabular Acropora Unenhanced
-      0,0,0,0,0,0;       %Corymbose Acropora Enhanced
-      2000,500,200,100,100,100;       %Corymbose Acropora Unenhanced
-      2000,500,200,100,100,100;       %small massives
-      2000,200,100,100,50,10];      %large massives
+     [20000,500,0,0,0,0;               %Tabular Acropora Enhanced
+      2000,500,400,300,200,500;       %Tabular Acropora Unenhanced
+      20000,500,0,0,0,0;               %Corymbose Acropora Enhanced
+      2000,500,400,300,200,500;       %Corymbose Acropora Unenhanced
+      2000,2000,1000,300,100,0;     %small massives or encrusting
+      2000,500,400,300,200,200];      %large massives
 
 % To convert to covers we need to first calculate the area of colonies, 
 % multiply by how many corals in each bin, and divide by reef area
@@ -157,9 +157,9 @@ p = {[2.74, 0.25]}; % Gompertz shape parameters 1 and 2 - for now applied to all
 vital_params = struct('max_coral_cover', P, 'p', p); % package into structure to use in functions
 
 % Taken from Bozec et al. 2021 (Table S2)
-mb = [0.2, 0.19, 0.10, 0.05, 0.03, 0.03;     % Tabular Acropora Enhanced
+mb = [0.2, 0.19, 0.10, 0.03, 0.03, 0.03;     % Tabular Acropora Enhanced
       0.2, 0.19, 0.10, 0.05, 0.05, 0.03;     % Tabular Acropora Unenhanced
-      0.2, 0.20, 0.17, 0.05, 0.03, 0.03;     % Corymbose Acropora Enhanced
+      0.2, 0.20, 0.17, 0.03, 0.03, 0.03;     % Corymbose Acropora Enhanced
       0.2, 0.20, 0.17, 0.05, 0.05, 0.05;     % Corymbose Acropora Unenhanced
       0.2, 0.20, 0.04, 0.04, 0.02, 0.02;     % small massives
       0.2, 0.20, 0.04, 0.04, 0.02, 0.02];    % large massives

@@ -28,7 +28,7 @@ X = reshape(X, 36, 26);
 P_x = P - sum(X,1); %P - sum over coral covers within each site
 P_x = repmat(P_x, 36,1); %spread results out over corals - i.e rows are similar, sites vary
 P_x(P_x <0) = 0; %density dependent growth - constrain to zero at carrying capacity
-P_x(P_x >1) = P; %density dependent growth - constrain to P
+% P_x(P_x >1) = P; %density dependent growth - constrain to P
 
 %P_x = min( max(P - sum(X, 3), 0.0), P);  % per species, per site (species * sites)
 
@@ -59,7 +59,7 @@ Y(17, :) = P_x(17, :) .* X(17, :) .* X(16, :) .* r(16) - P_x(18, :) .* X(18, :) 
 Y(18, :) = P_x(18, :) .* X(18, :) .* X(17, :) .* r(17) + X(18, :) .* mb(18);
 
 %Corymbose Acropora Unenhanced
-Y(19, :) = P_x(19, :) .* rec(19, :) - P_x(20, :) .*X(20, :) .* X(19, :) .* r(19)  - X(19,:) .* mb(19);
+Y(19, :) = P_x(19, :) .* rec(19, :) - P_x(20, :) .*X(20, :) .* X(19, :) .* r(19) - X(19,:) .* mb(19);
 Y(20, :) = P_x(20, :) .* X(20, :) .* X(19, :) .* r(19) - P_x(21, :) .* (X(21, :) .* X(20, :) .* r(20)) - X(20, :) .*mb(20);
 Y(21, :) = P_x(21, :) .* X(21, :) .* X(20, :) .* r(20) - P_x(22, :) .* (X(22, :) .* X(21, :) .* r(21)) - X(21, :) .* mb(21);
 Y(22, :) = P_x(22, :) .* X(22, :) .* X(21, :) .* r(21) - P_x(23, :) .* (X(23, :) .* X(22, :) .* r(22)) - X(22, :) .* mb(22);
