@@ -90,9 +90,9 @@ else
     end
     
     pathparts = strsplit(file_prefix, {filesep,'/'});
-    target_dir = pathparts(end-1);
+    target_dir = join(pathparts(1:end-1), filesep);
     if ~isfolder(target_dir)
-        warning('Target directory ', target_dir, 'not found! Creating...')
+        warning(strcat("Target directory '", target_dir, "' not found! Creating..."))
         mkdir(target_dir);
     end
     
