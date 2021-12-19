@@ -39,7 +39,9 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
            'and provided scenario combinations.' newline ...
            strcat('Expected: ', num2str(N)) newline ...
            strcat('Found: ', num2str(num_files))];
-    assert(N == num_files, msg)
+    if ~(N == num_files)
+        warning(msg);
+    end
 
     for i = 1:num_files
         f_dir = target_files(i).folder;
