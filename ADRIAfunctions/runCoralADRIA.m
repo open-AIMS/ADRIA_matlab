@@ -81,6 +81,8 @@ if ~exist('file_prefix', 'var')
     Y_E = zeros(timesteps, nsites, N, n_reps);
     Y_S = zeros(timesteps, nsites, N, n_reps);
 else
+    file_prefix = string(file_prefix);
+
     % Ensure directory exists
     has_sep = contains(file_prefix, filesep) | contains(file_prefix, "/");
     if ~has_sep
