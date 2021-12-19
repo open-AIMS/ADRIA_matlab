@@ -82,7 +82,6 @@ if ~exist('file_prefix', 'var')
     Y_S = zeros(timesteps, nsites, N, n_reps);
 else
     % Ensure directory exists
-    
     has_sep = contains(file_prefix, filesep) | contains(file_prefix, "/");
     if ~has_sep
         msg = ['Provided file prefix does not specify folder.' newline ...
@@ -90,7 +89,7 @@ else
         error(msg);
     end
     
-    pathparts = strsplit(file_prefix, filesep);
+    pathparts = strsplit(file_prefix, {filesep,'/'});
     target_dir = pathparts(end-1);
     if ~isfolder(target_dir)
         warning(["Target directory " target_dir "not found! Creating..."])
