@@ -82,7 +82,8 @@ if ~exist('file_prefix', 'var')
     Y_S = zeros(timesteps, nsites, N, n_reps);
 else
     % Ensure directory exists
-    has_sep = strcmp(file_prefix, filesep);
+    
+    has_sep = contains(file_prefix, filesep) | contains(file_prefix, "/");
     if ~has_sep
         msg = ['Provided file prefix does not specify folder.' newline ...
                'Use "./" if current working directory is intended.'];
