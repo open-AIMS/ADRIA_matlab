@@ -81,6 +81,21 @@ if ~exist('file_prefix', 'var')
     Y_E = zeros(timesteps, nsites, N, n_reps);
     Y_S = zeros(timesteps, nsites, N, n_reps);
 else
+    % Ensure directory exists
+    has_sep = strcmp(file_prefix, filesep);
+    if ~has_sep
+        msg = ['Provided file prefix does not specify folder.' newline ...
+               'Use "./" if current working directory is intended.'];
+        error(msg);
+    end
+    
+    pathparts = strsplit(file_prefix, filesep);
+    target_dir = pathparts(end-1);
+    if ~isfolder(target_dir)
+        warning(["Target directory " target_dir "not found! Creating..."])
+        mkdir(target_dir);
+    end
+    
     % Create much smaller representative subset to return
     % if saving to disk (saves memory)
     Y_TC = zeros(timesteps, nsites, 1, n_reps);
