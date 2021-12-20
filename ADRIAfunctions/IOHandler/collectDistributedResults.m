@@ -1,14 +1,13 @@
-function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
+function Y_collated = collectDistributedResults(file_loc, N, n_reps, opts)
 % Collects results from ADRIA runs spread across many NetCDF files.
 % This implementation assumes there is sufficient memory available to hold
 % the resulting data set.
 %
 % Inputs:
-%   file_prefix : str, prefix applied to filenames
+%   file_loc    : str, directory location and filename prefix
+%                   e.g., "./some_folder/file_prefix"
 %   N           : int, number of expected scenarios
 %   n_reps      : int, number of expected replicates
-%   dir_name    : str, (optional) directory to search
-%                   Default: current working directory
 %   n_species   : int, (optional) number of species considered. Default: 4
 %
 % Output:
@@ -18,17 +17,15 @@ function Y_collated = collectDistributedResults(file_prefix, N, n_reps, opts)
 %          - E  [n_timesteps, n_sites, N, n_reps]
 %          - S  [n_timesteps, n_sites, N, n_reps]
     arguments
-        file_prefix string
+        file_loc string
         N {mustBeInteger}
         n_reps {mustBeInteger}
-        opts.dir_name string = './'
         opts.n_species {mustBeInteger} = 36
     end
 
-    dir_name = opts.dir_name;
     n_species = opts.n_species;
 
-    file_prefix = fullfile(dir_name, file_prefix);
+    file_prefix = fullfile(file_loc);
     pat = strcat(file_prefix, '_*.nc');
     target_files = dir(pat);
 
