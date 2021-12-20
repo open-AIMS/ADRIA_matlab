@@ -76,13 +76,23 @@ for b_i = 1:n_batches
     b_cws{b_i} = crit_weights(b_start:b_end, :);
 end
 
+% Remove vars to save memory
+clear('intervs')
+clear('crit_weights')
+
 % TODO: Write simulation metadata to netcdfs (n_species, batch length, etc)
 %       Currently relying on indicating data lengths in filename.
 parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
-    b_len = (b_end - b_start) + 1;
     
+    tmp_fn = strcat(file_prefix, '_[[', num2str(b_start), '-', num2str(b_end), ']].nc');
+    if isfile(tmp_fn)
+        % sims already run, skip...
+        continue
+    end
+    
+    b_len = (b_end - b_start) + 1;
     b_interv = b_intervs{b_i};
     b_cw = b_cws{b_i};
     
@@ -110,13 +120,19 @@ parfor b_i = 1:n_batches
     end
     
     % save results
-    tmp_fn = strcat(file_prefix, '_[[', num2str(b_start), '-', num2str(b_end), ']].nc');
     tmp_d = struct();
     tmp_d.TC = TC;
     tmp_d.C = C;
     tmp_d.E = E;
     tmp_d.S = S;
     saveData(tmp_d, tmp_fn);
+    
+    % Clear vars to save memory
+    tmp_d = [];
+    TC = [];
+    C = [];
+    E = [];
+    S = [];
 end
 
 end
