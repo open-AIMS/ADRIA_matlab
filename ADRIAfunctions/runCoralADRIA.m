@@ -1,7 +1,6 @@
 function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
                            TP_data, site_ranks, strongpred, ...
-                           n_reps, wave_scen, dhw_scen, alg_ind, ...
-                           file_prefix, batch_size)
+                           n_reps, wave_scen, dhw_scen, alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -18,9 +17,6 @@ function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
 %                  - 1, Order ranking
 %                  - 2, TOPSIS
 %                  - 3, VIKOR
-%    file_prefix : str, (optional) write results to netcdf instead of 
-%                    storing in memory.
-%                    If provided, output `Y` will be a struct of zeros.
 %
 % Output:
 %    Y : struct,
@@ -74,53 +70,11 @@ N = height(intervs);
 % Create output matrices
 n_species = height(coral_params);  % total number of species considered
 
-if ~exist('file_prefix', 'var')
-    file_prefix = false;
-    Y_TC = zeros(timesteps, nsites, N, n_reps);
-    Y_C = zeros(timesteps, n_species, nsites, N, n_reps);
-    Y_E = zeros(timesteps, nsites, N, n_reps);
-    Y_S = zeros(timesteps, nsites, N, n_reps);
-    batch_len = 1;
-    batch_i = 1;
-else
-    file_prefix = string(file_prefix);
+Y_TC = zeros(timesteps, nsites, N, n_reps);
+Y_C = zeros(timesteps, n_species, nsites, N, n_reps);
+Y_E = zeros(timesteps, nsites, N, n_reps);
+Y_S = zeros(timesteps, nsites, N, n_reps);
 
-    % Ensure directory exists
-    has_sep = contains(file_prefix, filesep) | contains(file_prefix, "/");
-    if ~has_sep
-        msg = ['Provided file prefix does not specify folder.' newline ...
-               'Use "./" if current working directory is intended.'];
-        error(msg);
-    end
-    
-    pathparts = strsplit(file_prefix, {filesep,'/'});
-    target_dir = join(pathparts(1:end-1), filesep);
-    if ~isfolder(target_dir)
-        warning(strcat("Target directory '", target_dir, "' not found! Creating..."))
-        mkdir(target_dir);
-    end
-    
-    % get/check batch size
-    batch_start = 1;
-    batch_end = min(batch_size, N);
-    batch_len = (batch_end - batch_start) + 1;
-    batch_i = 1;
-    
-    % Create much smaller representative subset to return
-    % if saving to disk (saves memory)
-    Y_TC = zeros(timesteps, nsites, 1, n_reps);
-    Y_C = zeros(timesteps, n_species, nsites, 1, n_reps);
-    Y_E = zeros(timesteps, nsites, 1, n_reps);
-    Y_S = zeros(timesteps, nsites, 1, n_reps);
-end
-
-% cache array
-TC = zeros(timesteps, nsites, batch_len, n_reps);
-C = zeros(timesteps, n_species, nsites, batch_len, n_reps);
-E = zeros(timesteps, nsites, batch_len, n_reps);
-S = zeros(timesteps, nsites, batch_len, n_reps);
-
-save_batch = isstring(file_prefix) || ischar(file_prefix);
 for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
@@ -130,51 +84,16 @@ for i = 1:N
                                coral_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
-
-        TC(:, :, batch_i, j) = tmp.TC;
-        C(:, :, :, batch_i, j) = tmp.C;
-        E(:, :, batch_i, j) = tmp.E;
-        S(:, :, batch_i, j) = tmp.S;
+                           
+        Y_TC(:, :, i, j) = tmp.TC;
+        Y_C(:, :, :, i, j) = tmp.C;
+        Y_E(:, :, i, j) = tmp.E;
+        Y_S(:, :, i, j) = tmp.S;
     end
-    
-    if save_batch
-        batch_i = batch_i + 1;
-        
-        if i == batch_end
-            % save results
-            tmp_fn = strcat(file_prefix, '_[[', num2str(batch_start), '-', num2str(batch_end), ']].nc');
-            tmp_d = struct();
-            tmp_d.TC = TC;
-            tmp_d.C = C;
-            tmp_d.E = E;
-            tmp_d.S = S;
-            saveData(tmp_d, tmp_fn);
-
-            % Update batch range
-            batch_start = batch_end + 1;
-            batch_end = min(batch_end + batch_size, N);
-            batch_len = (batch_end - batch_start) + 1;
-            batch_i = 1;
-            
-            % Reset cache array
-            % Note: cannot simply reset values to zero as `batch_len` may
-            %       change between loops
-            TC = zeros(timesteps, nsites, batch_len, n_reps);
-            C = zeros(timesteps, n_species, nsites, batch_len, n_reps);
-            E = zeros(timesteps, nsites, batch_len, n_reps);
-            S = zeros(timesteps, nsites, batch_len, n_reps);
-        end
-        
-        continue
-    end
-    
-    Y_TC(:, :, i, :) = TC;
-    Y_C(:, :, :, i, :) = C;
-    Y_E(:, :, i, :) = E;
-    Y_S(:, :, i, :) = S;
 end
 
 % Assign results outside of parfor
+Y = struct();
 Y.TC = Y_TC;
 Y.C = Y_C;
 Y.E = Y_E;
