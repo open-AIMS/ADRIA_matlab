@@ -103,9 +103,9 @@ try
     % Run scenarios saving data to files
     runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
-                 w_scens, d_scens, alg_ind, file_prefix);
+                 w_scens, d_scens, alg_ind, file_prefix, N);
              
-    assert(isfile(strcat(file_prefix, '_[[1]].nc')), "Partial result file not found!");
+    assert(isfile(strcat(file_prefix, '_[[1-2]].nc')), "Partial result file not found!");
 
     % Collect all data
     collated = collectDistributedResults('test', N, num_reps, ...
