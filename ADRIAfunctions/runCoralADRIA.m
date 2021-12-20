@@ -1,7 +1,7 @@
 function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
-                          TP_data, site_ranks, strongpred, ...
-                          n_reps, wave_scen, dhw_scen, alg_ind, ...
-                          file_prefix)
+                           TP_data, site_ranks, strongpred, ...
+                           n_reps, wave_scen, dhw_scen, alg_ind, ...
+                           file_prefix, batch_size)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,6 +80,8 @@ if ~exist('file_prefix', 'var')
     Y_C = zeros(timesteps, n_species, nsites, N, n_reps);
     Y_E = zeros(timesteps, nsites, N, n_reps);
     Y_S = zeros(timesteps, nsites, N, n_reps);
+    batch_len = 1;
+    batch_i = 1;
 else
     file_prefix = string(file_prefix);
 
@@ -98,6 +100,12 @@ else
         mkdir(target_dir);
     end
     
+    % get/check batch size
+    batch_start = 1;
+    batch_end = min(batch_size, N);
+    batch_len = (batch_end - batch_start) + 1;
+    batch_i = 1;
+    
     % Create much smaller representative subset to return
     % if saving to disk (saves memory)
     Y_TC = zeros(timesteps, nsites, 1, n_reps);
@@ -106,15 +114,16 @@ else
     Y_S = zeros(timesteps, nsites, 1, n_reps);
 end
 
+% cache array
+TC = zeros(timesteps, nsites, batch_len, n_reps);
+C = zeros(timesteps, n_species, nsites, batch_len, n_reps);
+E = zeros(timesteps, nsites, batch_len, n_reps);
+S = zeros(timesteps, nsites, batch_len, n_reps);
+
+save_batch = isstring(file_prefix) || ischar(file_prefix);
 for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
-    
-    % temp reassignment
-    TC = zeros(timesteps, nsites, 1, n_reps);
-    C = zeros(timesteps, n_species, nsites, 1, n_reps);
-    E = zeros(timesteps, nsites, 1, n_reps);
-    S = zeros(timesteps, nsites, 1, n_reps);
 
     for j = 1:n_reps
         tmp = coralScenario(scen_it, scen_crit, ...
@@ -122,20 +131,40 @@ for i = 1:N
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
 
-        TC(:, :, 1, j) = tmp.TC;
-        C(:, :, :, 1, j) = tmp.C;
-        E(:, :, 1, j) = tmp.E;
-        S(:, :, 1, j) = tmp.S;
+        TC(:, :, batch_i, j) = tmp.TC;
+        C(:, :, :, batch_i, j) = tmp.C;
+        E(:, :, batch_i, j) = tmp.E;
+        S(:, :, batch_i, j) = tmp.S;
     end
     
-    if isstring(file_prefix) || ischar(file_prefix)
-        tmp_fn = strcat(file_prefix, '_[[', num2str(i), ']].nc');
-        tmp_d = struct();
-        tmp_d.TC = TC;
-        tmp_d.C = C;
-        tmp_d.E = E;
-        tmp_d.S = S;
-        saveData(tmp_d, tmp_fn);
+    if save_batch
+        batch_i = batch_i + 1;
+        
+        if i == batch_end
+            % save results
+            tmp_fn = strcat(file_prefix, '_[[', num2str(batch_start), '-', num2str(batch_end), ']].nc');
+            tmp_d = struct();
+            tmp_d.TC = TC;
+            tmp_d.C = C;
+            tmp_d.E = E;
+            tmp_d.S = S;
+            saveData(tmp_d, tmp_fn);
+
+            % Update batch range
+            batch_start = batch_end + 1;
+            batch_end = min(batch_end + batch_size, N);
+            batch_len = (batch_end - batch_start) + 1;
+            batch_i = 1;
+            
+            % Reset cache array
+            % Note: cannot simply reset values to zero as `batch_len` may
+            %       change between loops
+            TC = zeros(timesteps, nsites, batch_len, n_reps);
+            C = zeros(timesteps, n_species, nsites, batch_len, n_reps);
+            E = zeros(timesteps, nsites, batch_len, n_reps);
+            S = zeros(timesteps, nsites, batch_len, n_reps);
+        end
+        
         continue
     end
     
