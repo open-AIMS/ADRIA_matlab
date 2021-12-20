@@ -5,7 +5,7 @@ rng(101)
 
 % Number of scenarios
 N = 8;
-num_reps = 3;  % Number of replicate RCP scenarios
+n_reps = 3;  % Number of replicate RCP scenarios
 
 %% Parameter prep
 % Collect details of available parameters
@@ -73,17 +73,25 @@ dhw_scens = ncread(fn, "DHW");
 
 % Select random subset of RCP conditions WITHOUT replacement
 n_rep_scens = length(wave_scens);
-rcp_scens = datasample(1:n_rep_scens, num_reps, 'Replace', false);
+rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
 w_scens = wave_scens(:, :, rcp_scens);
 d_scens = dhw_scens(:, :, rcp_scens);
 
 tic
 Y = runCoralADRIA(interv_scens, criteria_weights, coral_params, sim_constants, ...
-                 TP_data, site_ranks, strongpred, num_reps, ...
+                 TP_data, site_ranks, strongpred, n_reps, ...
                  w_scens, d_scens, alg_ind);
+% runCoralToDisk(interv_scens, criteria_weights, coral_params, sim_constants, ...
+%                  TP_data, site_ranks, strongpred, n_reps, ...
+%                  w_scens, d_scens, alg_ind, './test', 4);
+
 tmp = toc;
 
-disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
+% If saving results to disk
+% Y = collectDistributedResults('./test', N, n_reps);
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+
+
 
 %% post-processing
 % collate data across all scenario runs
