@@ -67,8 +67,8 @@ b_starts = 1:batch_size:N;
 b_ends = [batch_size:batch_size:N, N];
 
 % pre-assign scenario specs for each batch
-b_intervs = cell(5,1);
-b_cws = cell(5,1);
+b_intervs = cell(n_batches,1);
+b_cws = cell(n_batches,1);
 for b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
