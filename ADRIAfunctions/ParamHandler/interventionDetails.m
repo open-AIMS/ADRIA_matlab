@@ -45,7 +45,7 @@ name = [
 defaults = {
     0;  % Guided
     3;  % PrSites
-    0.0005;  % Seed1
+    10000;  % Seed1
     0;  % Seed2
     0;  % SRM
     6;  % Aadpt
