@@ -64,9 +64,9 @@ params.class_id = reshape(repmat(1:nclasses, 1, nclasses), nspecies, []);
 %First express as number of colonies per size class per 100m2 of reef
 base_coral_numbers = ...
     [0, 0, 0, 0, 0, 0; ...              % Tabular Acropora Enhanced
-     2000, 1000, 300, 100, 100, 100; ... % Tabular Acropora Unenhanced
+     2000, 1000, 300, 100, 100, 50; ... % Tabular Acropora Unenhanced
      0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
-     2000, 1000, 300, 100, 100, 100; ... % Corymbose Acropora Unenhanced
+     2000, 1000, 300, 100, 100, 50; ... % Corymbose Acropora Unenhanced
      2000, 500, 100, 100, 100, 0; ... % small massives
      2000, 200, 100, 100, 50, 10];      % large massives
 
@@ -89,11 +89,11 @@ params.basecov = reshape(basecov', [], 1);
 %% Coral growth rates as linear extensions (Bozec et al 2021 Table S2)
 % we assume similar growth rates for enhanced and unenhanced corals
 linear_extension = ...
-    [1, 1, 2, 4.4, 4.4, 4.4; ... % Tabular Acropora Enhanced
-    1, 1, 2, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
-    1, 1, 3, 3, 3, 3; ...        % Corymbose Acropora Enhanced
-    1, 1, 3, 3, 3, 3; ...        % Corymbose Acropora Unenhanced
-    1, 1, 1, 1, 0.8, 0.8; ...    % small massives
+   [1, 1, 2, 3, 4, 4.4; ... % Tabular Acropora Enhanced
+    1, 1, 2, 3, 4, 4.4; ...  % Tabular Acropora Unenhanced
+    1, 1, 2, 2.5, 3, 3; ...        % Corymbose Acropora Enhanced
+    1, 1, 2, 2.5, 3, 3; ...        % Corymbose Acropora Unenhanced
+    1, 1, 1, 0.9, 0.8, 0.8; ...    % small massives
     1, 1, 1, 1, 1.2, 1.2];       % large massives
 
 % Convert linear extensions to delta coral in two steps.
@@ -122,18 +122,18 @@ wavemort90 = ...
 params.wavemort90 = reshape(wavemort90', [], 1);
 
 % Taken from Bozec et al. 2021 (Table S2)
-mb = [0.2, 0.19, 0.10, 0.05, 0.03, 0.03; ... % Tabular Acropora Enhanced
+mb = [0.2, 0.19, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
     0.2, 0.19, 0.10, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
-    0.2, 0.20, 0.17, 0.05, 0.03, 0.03; ...   % Corymbose Acropora Enhanced
-    0.2, 0.20, 0.17, 0.05, 0.05, 0.05; ...   % Corymbose Acropora Unenhanced
+    0.2, 0.20, 0.17, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
+    0.2, 0.20, 0.17, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
     0.2, 0.20, 0.04, 0.04, 0.02, 0.02; ...   % small massives
     0.2, 0.20, 0.04, 0.04, 0.02, 0.02];      % large massives
 
 params.mb_rate = reshape(mb', [], 1);
 
 natad = [...
-    0.2, 0.2, 0.2, 0.2, 0.2, 0.2; ...
-    0.2, 0.2, 0.2, 0.2, 0.2, 0.2; ...
+    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
+    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
     0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
     0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
     0.10, 0.10, 0.10, 0.10, 0.10, 0.10; ...
