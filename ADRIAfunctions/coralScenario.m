@@ -63,8 +63,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% Extract intervention options
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
     pgs = interv.PrSites; % group of priority sites
-    seed1 = interv.Seed1; %species seeded - here the sensitive Acropora
-    seed2 = interv.Seed2; %species seeded - here the hardier other coral
+    seed1 = interv.Seed1*(pi*((5-2)/2)^2)/10^4/10^2; %tabular Acropora size class 2, converted to rel cover
+    seed2 = interv.Seed2*(pi*((5-2)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
     srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
