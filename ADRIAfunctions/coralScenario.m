@@ -200,13 +200,12 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
         Yin1 = Y_pstep .* prop_loss;
 
-        % Log seed values/sites
-        % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
-        % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
-        s1_idx = find(coral_params.taxa_id == 1 & (coral_params.class_id == 2));
-        s2_idx = find(coral_params.taxa_id == 3 & (coral_params.class_id == 2));
-
         if (tstep <= seedyears) && ~all(prefseedsites == 0)
+            % Log seed values/sites
+            % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
+            % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
+            s1_idx = find(coral_params.taxa_id == 1 & (coral_params.class_id == 2));
+            s2_idx = find(coral_params.taxa_id == 3 & (coral_params.class_id == 2));
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed enhanced corals of group 2
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed enhanced corals of group 4
             Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with gr2
