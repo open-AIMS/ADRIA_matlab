@@ -58,13 +58,13 @@ defaults = {
 p_bounds = {
     [0, 1];  % Guided
     [1, 3];  % PrSites
-    [0.0, 0.0010];  % Seed1
-    [0.0, 1.0];  % Seed2
-    [0, 1];  % SRM
-    [6, 12];  % Aadpt
-    [0.01, 0.1];  % Natad
+    [0.0, 1e6];  % Seed1
+    [0.0, 1e6];  % Seed2
+    [0, 12];  % SRM
+    [0.0, 12];  % Aadpt
+    [0.0, 0.1];  % Natad
     [10, 15];  % Seedyrs
-    [1, 5];  % Shadeyrs
+    [10, 25];  % Shadeyrs
 };
 
 ptype = [
@@ -72,8 +72,8 @@ ptype = [
     "integer";      % integer: option is whole number between upper/lower
     "float";        % float: value ranges between upper/lower
     "float";
-    "categorical";
-    "integer";
+    "float";
+    "float";
     "float";
     "integer";
     "integer";
