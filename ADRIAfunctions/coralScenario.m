@@ -65,14 +65,25 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
+    %% Define constant table location for seed values
+    % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
+    % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
+    tabular_enhanced = coral_params.taxa_id == 1;
+    corymbose_enhanced = coral_params.taxa_id == 3;
+    s1_idx = find(tabular_enhanced & (coral_params.class_id == 2));
+    s2_idx = find(corymbose_enhanced & (coral_params.class_id == 2));
+
     %% Update ecological parameters based on intervention option
-    assistadapt = interv.Aadpt; % level of assisted coral adaptation
-    assistadapt = repmat(assistadapt,36,1); %convert assistadapt to column vector
-    assistadapt([7:12,19:36]) = 0; % set unenhanced corals to zero assisted adaptation
-    natad = coral_params.natad + interv.Natad; % level of added natural coral adaptation
-    
-%     natad = coral_params.natad + interv.Natad; % level of added natural coral adaptation
-%     assistadapt = coral_params.natad + interv.Aadpt; % level of assisted coral adaptation
+
+    % Set up assisted adaptation values
+    assistadapt = zeros(nspecies, 1);
+
+    % assign level of assisted coral adaptation
+    assistadapt(tabular_enhanced) = interv.Aadpt;
+    assistadapt(corymbose_enhanced) = interv.Aadpt;
+
+    % level of added natural coral adaptation
+    natad = coral_params.natad + interv.Natad;
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
@@ -204,10 +215,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         if (tstep <= seedyears) && ~all(prefseedsites == 0)
             % Log seed values/sites
-            % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
-            % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
-            s1_idx = find(coral_params.taxa_id == 1 & (coral_params.class_id == 2));
-            s2_idx = find(coral_params.taxa_id == 3 & (coral_params.class_id == 2));
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed enhanced corals of group 2
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed enhanced corals of group 4
             Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with gr2
