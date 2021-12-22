@@ -8,7 +8,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 % Inputs:
 %    interv      : table, row of intervention table
 %    criteria    : table, row of criteria weights table
-%    coral_params: table, row of environment parameter permutations
+%    coral_params: table, row of coral parameters
 %    sim_params  : struct, of simulation constants
 %    TP_data     : matrix, transitional probability matrix
 %    site_ranks  : matrix, of site centrality
