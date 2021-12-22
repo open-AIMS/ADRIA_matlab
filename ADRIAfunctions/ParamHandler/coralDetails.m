@@ -109,7 +109,7 @@ diam_bin_widths = repmat(bin_widths, [length(bin_widths), 1]);
 prop_change = linear_extension ./ diam_bin_widths;
 
 %Second, growth as transitions of cover to higher bins is estimated as
-r = base_coral_numbers .* prop_change .* colony_area_m2_to ./ a_arena;
+r = prop_change .* (colony_area_m2_to./colony_area_m2_from);
 params.growth_rate = reshape(r', [], 1);
 %note that we use proportion of bin widths and linear extension to estimate 
 % number of corals changing size class, but we use the bin means to estimate 
@@ -130,10 +130,10 @@ wavemort90 = ...
 params.wavemort90 = reshape(wavemort90', [], 1);
 
 % Taken from Bozec et al. 2021 (Table S2)
-mb = [0.2, 0.10, 0.05, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
-      0.2, 0.10, 0.05, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
-      0.2, 0.10, 0.05, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
-      0.2, 0.10, 0.05, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
+mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
+      0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
+      0.2, 0.10, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
+      0.2, 0.10, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
       0.2, 0.10, 0.04, 0.04, 0.02, 0.02; ...   % small massives
       0.2, 0.10, 0.04, 0.04, 0.02, 0.02];      % large massives
 

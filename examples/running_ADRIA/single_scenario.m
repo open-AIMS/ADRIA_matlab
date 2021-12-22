@@ -125,3 +125,44 @@ d_scens = dhw_scens(:, :, rcp_scens);
 Y = coralScenario(new_interv_opts, new_criteria_opts, coral_params, new_sim_opts, ...
               TP_data, site_ranks, strongpred, ...
               w_scens, d_scens, alg_ind);
+
+Y2 = zeros(25,6,26);
+for sp = 1:6; 
+    Y2(:,sp,:) = sum(Y.C(:,6*sp-5:sp*6,:),2); 
+end
+figure; 
+LO = tiledlayout(2,3, 'TileSpacing','Compact');
+
+% Tile 1
+nexttile
+plot(squeeze(Y2(:,1,:)));
+title('Enhanced Tab Acr')
+
+% Tile 2
+nexttile
+plot(squeeze(Y2(:,2,:)));
+title('Unenhanced Tab Acr')
+
+% Tile 3
+nexttile
+plot(squeeze(Y2(:,3,:)))
+title('Enhanced Cor Acr')
+
+% Tile 4
+nexttile
+plot(squeeze(Y2(:,4,:)))
+title('unenhanced Cor Acr')
+
+% Tile 5
+nexttile
+plot(squeeze(Y2(:,5,:)))
+title('Small massives')
+
+% Tile 6
+nexttile
+plot(squeeze(Y2(:,6,:)))
+title('Small massives')
+
+xlabel(LO,'Years')
+ylabel(LO,'Cover (prop)')
+          
