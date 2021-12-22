@@ -28,10 +28,15 @@ params.wb1 = 0.55; % weibull parameter 2 for DHW distributions based on Lough et
 params.wb2 = 2.24; % weibull parameter 1 for DHW distributions based on Lough et al 2018
 
 P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
-p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
-
 params.max_coral_cover = P;
-params.p = p;
+
+p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
+params.p = p;  % TODO: Remove in favour of gompertz_* vars.
+
+% Gompertz shape parameters 1 and 2 - for now applied to all coral species
+% equally. Based on Hughes et al 2017 and Bozec et al 2021.
+params.gompertz_p1 = 2.74;
+params.gompertz_p2 = 0.25;
 
 % Bleaching stress and coral fecundity parameters
 params.LPdhwcoeff = 0.4; % shape parameters relating dhw affecting cover to larval production
