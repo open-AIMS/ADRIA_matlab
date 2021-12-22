@@ -17,6 +17,9 @@ combined_opts = [inter_opts; criteria_opts];
 
 %% 2. Build a parameter table using default values
 % Extract the default values directly from the parameter tables
+% Parameter definitions hold defaults for `sample` and `raw` values.
+% Here we use `raw` values as the `sample` columns are only intended for 
+% use with samplers and `convertScenarioSelection()`.
 name_values = combined_opts(:, {'name', 'raw_defaults'});
 names = name_values.name;
 default_values = name_values.raw_defaults;
@@ -24,8 +27,8 @@ default_values = name_values.raw_defaults;
 % Final list of name->value 
 param_table = cell2table(default_values', 'VariableNames', cellstr(names));
 
-% Resulting table consists of 1 row and P columns, where P is the number of
-% parameters, and "1" relates to the scenario.
+% Resulting table consists of 1 row and `P` columns, where `P` is the 
+% number of parameters, and "1" relates to the scenario (we only want 1).
 
 %% 3. Modify table as desired...
 param_table(1, 'Guided') = {1};
