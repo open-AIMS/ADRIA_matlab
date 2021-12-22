@@ -56,10 +56,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     prioritysites = []; % set the list of priority sites to empty
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
 
-    Yseed = zeros(nspecies, nsites);
-    Yshade = zeros(1, nsites);
-    % total_cover = zeros(tf, nsites);
-
     %% Extract intervention options
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
     pgs = interv.PrSites; % group of priority sites
@@ -134,6 +130,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Seed/shade log
     Yseed = zeros(tf, nspecies, nsites);
     Yshade = zeros(tf, nspecies, nsites);
+    % total_cover = zeros(tf, nsites);
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
