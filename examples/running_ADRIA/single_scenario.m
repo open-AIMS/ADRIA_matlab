@@ -1,3 +1,5 @@
+% Example script running a single scenario.
+
 rng(101) % set seed for reproducibility
 
 % Collect details of parameters that can be varied
@@ -118,6 +120,7 @@ rcp_scens = datasample(1:n_rep_scens, 1, 'Replace', false);
 w_scens = wave_scens(:, :, rcp_scens);
 d_scens = dhw_scens(:, :, rcp_scens);
 
+%% Run ADRIA
 % Run a single simulation
 Y = coralScenario(new_interv_opts, new_criteria_opts, coral_params, new_sim_opts, ...
               TP_data, site_ranks, strongpred, ...
