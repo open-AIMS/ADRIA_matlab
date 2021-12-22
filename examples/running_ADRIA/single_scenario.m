@@ -161,7 +161,7 @@ title('Small massives')
 % Tile 6
 nexttile
 plot(squeeze(Y2(:,6,:)))
-title('Small massives')
+title('Large massives')
 
 xlabel(LO,'Years')
 ylabel(LO,'Cover (prop)')
