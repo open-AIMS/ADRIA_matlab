@@ -71,7 +71,12 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Update ecological parameters based on intervention option
     assistadapt = interv.Aadpt; % level of assisted coral adaptation
+    assistadapt = repmat(assistadapt,36,1); %convert assistadapt to column vector
+    assistadapt([7:12,19:36]) = 0; % set unenhanced corals to zero assisted adaptation
     natad = coral_params.natad + interv.Natad; % level of added natural coral adaptation
+    
+%     natad = coral_params.natad + interv.Natad; % level of added natural coral adaptation
+%     assistadapt = coral_params.natad + interv.Aadpt; % level of assisted coral adaptation
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
