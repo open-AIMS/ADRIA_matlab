@@ -127,7 +127,7 @@ Y = coralScenario(new_interv_opts, new_criteria_opts, coral_params, new_sim_opts
               w_scens, d_scens, alg_ind);
 
 Y2 = zeros(25,6,26);
-for sp = 1:6; 
+for sp = 1:6
     Y2(:,sp,:) = sum(Y.C(:,6*sp-5:sp*6,:),2); 
 end
 figure; 
@@ -151,7 +151,7 @@ title('Enhanced Cor Acr')
 % Tile 4
 nexttile
 plot(squeeze(Y2(:,4,:)))
-title('unenhanced Cor Acr')
+title('Unenhanced Cor Acr')
 
 % Tile 5
 nexttile
