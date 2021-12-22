@@ -11,9 +11,9 @@ coral_params = coralDetails();
 sim_constants = simConstants();
 
 
-%% Ask for number of RCP replicates
+%% Ask for which MCDA algorithm to use
 dims = [1, 50];
-dlgtitle = 'RCP';
+dlgtitle = 'MCDA Options';
 definput = {'1'};
 prompt = {'MCDA Algorithm (1 - 4)'};
 mcda_alg = inputdlg(prompt, dlgtitle, dims, definput);
@@ -22,7 +22,7 @@ alg_ind = str2num(mcda_alg{1});
 %% Ask for interventions
 prompt = cell(height(inter_opts), 1);
 for n = 1:height(inter_opts)
-    bnds = inter_opts.raw_bounds(n);
+    bnds = inter_opts.raw_bounds(n);  % range of values
     bnds = bnds{1};
     bs = num2str(bnds(1));
     be = num2str(bnds(2));
