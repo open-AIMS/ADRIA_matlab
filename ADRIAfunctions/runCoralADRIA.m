@@ -1,4 +1,4 @@
-function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
+function Y = runCoralADRIA(intervs, crit_weights, coral_vals, sim_params, ...
                            TP_data, site_ranks, strongpred, ...
                            n_reps, wave_scen, dhw_scen, alg_ind)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9,7 +9,7 @@ function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
 % Inputs:
 %    interv       : table, of intervention scenarios
 %    criteria     : table, of criteria weights for each scenario
-%    coral_params : table, of ecological parameter permutations
+%    coral_vals   : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
@@ -67,6 +67,9 @@ N = height(intervs);
 
 [timesteps, nsites, ~] = size(wave_scen);
 
+% generate template struct for coral parameters
+coral_params = coralParams();
+
 % Create output matrices
 n_species = height(coral_params);  % total number of species considered
 
@@ -78,13 +81,14 @@ Y_S = zeros(timesteps, nsites, N, n_reps);
 for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
+    c_params = extractCoralSamples(coral_vals(i, :), coral_params);
 
     for j = 1:n_reps
         tmp = coralScenario(scen_it, scen_crit, ...
-                               coral_params, sim_params, ...
+                               c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
-                           
+
         Y_TC(:, :, i, j) = tmp.TC;
         Y_C(:, :, :, i, j) = tmp.C;
         Y_E(:, :, i, j) = tmp.E;
