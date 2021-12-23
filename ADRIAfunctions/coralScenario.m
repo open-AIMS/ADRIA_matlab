@@ -115,7 +115,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% temporary allocation to avoid incurring access overhead
     % specify constant odeset option
-    % non_neg_opt = odeset('NonNegative', 1:nspecies);
     non_neg_opt = odeset('NonNegative', 1:nspecies:nsites);
 
     % return 3 steps as we're only interested in the last one anyway
@@ -225,17 +224,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Y = reshape(Y, nspecies, nsites);
         Yout(tstep, :, :) = Y;
 
-        % try
-        %     assert(all(all(~isnan(Y) == 1)), "nope");
-        % catch err
-        %     % debug plotting
-        %     Y_tmp = mean(squeeze(Yout(1:tstep, :, :)), 3);
-        %     plot(Y_tmp)
-        % end
-
     end % tstep
 
-    %% assign results
+    %% Assign results
     % Suggest we change this such that we only report:
     % (1) total coral cover (TC) across sites and time
     % (2) 'species' across sites and time - in post-hoc analyses we divide
