@@ -26,7 +26,7 @@ function interventions = interventionDetails(varargin)
 %           - float: values can range between lower/upper
 %       - `sample_defaults` indicates the default values modified for use
 %           with samplers
-%       - lower/upper bounds indicate the range of mapped ids 
+%       - lower/upper bounds indicate the range of mapped ids
 %       - `options` maps option ids to their values
 %       - `raw_defaults` indicates the raw unmodified "best guess" value
 %       - `raw_bounds` indicates the original value ranges
@@ -42,7 +42,7 @@ name = [
     "Shadeyrs";
 ];
 
-defaults = {
+defaults = [
     0;  % Guided
     3;  % PrSites
     10000;  % Seed1
@@ -51,11 +51,11 @@ defaults = {
     6;  % Aadpt
     0.05;  % Natad
     10;  % Seedyrs
-    1;  % Shadeyrs
-};
+    10;  % Shadeyrs
+];
 
 % TODO: lower and upper bounds are dummy values and need to be replaced!
-p_bounds = {
+p_bounds = [
     [0, 1];  % Guided
     [1, 3];  % PrSites
     [0.0, 1e6];  % Seed1
@@ -65,7 +65,7 @@ p_bounds = {
     [0.0, 0.1];  % Natad
     [10, 15];  % Seedyrs
     [10, 25];  % Shadeyrs
-};
+];
 
 ptype = [
     "categorical";  % categoricals: values have to be exact match

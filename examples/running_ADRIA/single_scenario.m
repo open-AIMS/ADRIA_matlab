@@ -6,8 +6,8 @@ rng(101) % set seed for reproducibility
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
 
-% Parameters that are treated as constants (for now)
-coral_params = coralDetails();
+% Parameters that are treated as constants
+coral_params = coralParams();
 sim_constants = simConstants();
 
 
@@ -22,8 +22,7 @@ alg_ind = str2num(mcda_alg{1});
 %% Ask for interventions
 prompt = cell(height(inter_opts), 1);
 for n = 1:height(inter_opts)
-    bnds = inter_opts.raw_bounds(n);  % range of values
-    bnds = bnds{1};
+    bnds = inter_opts.raw_bounds(n, :);  % range of values
     bs = num2str(bnds(1));
     be = num2str(bnds(2));
     prompt(n) = {strcat(inter_opts.name(n), " (", bs, " - ", be, ")")};
@@ -37,8 +36,7 @@ user_interv_opts = inputdlg(prompt, dlgtitle, dims, definput);
 %% Ask for criteria weights
 prompt = cell(height(criteria_opts), 1);
 for n = 1:height(criteria_opts)
-    bnds = criteria_opts.raw_bounds(n);
-    bnds = bnds{1};
+    bnds = criteria_opts.raw_bounds(n, :);
     bs = num2str(bnds(1));
     be = num2str(bnds(2));
     prompt(n) = {strcat(criteria_opts.name(n), " (", bs, " - ", be, ")")};
