@@ -87,8 +87,8 @@ Y(35, :) = P_x(35, :) .* X(28, :) .* r(28) - P_x(35, :) .* X(34, :) .* r(34) - X
 Y(36, :) = P_x(36, :) .* X(35, :) .* r(35) - X(36, :) .* mb(36, :);
 
 % constrain between 0 and max cover
-Y(Y < 0) = 0;
-Y(Y > P) = P; 
+Y = max(Y, 0);
+Y = min(Y, P);
 
 Y = Y(:); % convert to column vector (necessary for ODE to work)
 end
