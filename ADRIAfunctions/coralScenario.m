@@ -113,7 +113,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Pre-calculate proportional survivors from wave damage
     Sw_t = 1 - mwaves;
 
-    %% temporary allocation to avoid incurring access overhead
+    %% Setting constant vars to avoid incurring access overhead
     % specify constant odeset option
     non_neg_opt = odeset('NonNegative', 1:nspecies:nsites);
 
@@ -125,11 +125,13 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     e_mb = coral_params.mb_rate; %background coral mortality
 
     e_P = sim_params.max_coral_cover; % max total coral cover
-    e_p = sim_params.p; % Gompertz shape parameters for bleaching
+
+    % competition factor between Small Massives and Acropora
     e_comp = sim_params.comp;
 
-    neg_e_p1 = -e_p(1); % setting constant values for use in loop
-    neg_e_p2 = -e_p(2);
+    % Gompertz shape parameters for bleaching
+    neg_e_p1 = -sim_params.gompertz_p1;
+    neg_e_p2 = -sim_params.gompertz_p2;
 
     dhw_ss = max(dhw_scen-srm, 0.0); % avoid negative values
 
