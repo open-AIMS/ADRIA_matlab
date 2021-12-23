@@ -1,151 +1,55 @@
-function params = coralDetails()
-% Create structs with coral parameter values for ADRIA.
-% Includes "vital" bio/ecological parameters.
+function coral_params = coralDetails(varargin)
+% Detail coral parameter values and expected ranges.
+% Default values for each parameter can be specified
+% to override default values.
 %
-% Notes:
-% Values for the historical, temporal pattsiern of degree heating weeks between bleaching years come from [1].
+% Inputs:
+%    Argument list of parameters to override.
 %
 % Outputs:
-%   params : table, parameters for each coral taxa, group and size class
-%
-% References
-% 1. Lough, J.M., Anderson, K.D. and Hughes, T.P. (2018)
-%        'Increasing thermal stress for tropical coral reefs: 1871–2017',
-%        Scientific Reports, 8(1), p. 6079.
-%        doi: 10.1038/s41598-018-24530-9.
-%
-% 2. (Bozec et al 2021 Table S2) ...
+%   table of name, ptype, defaults, lower_bound, upper_bound, options,
+%   raw_lower_bound, raw_upper_bound, where
+%       - `name` holds the parameter names
+%       - `ptype` denotes the parameter type (categorical, integer, float)
+%           - categoricals: values have to be exact match
+%           - integers: whole number values ranging between lower/upper
+%           - float: values can range between lower/upper
+%       - `sample_defaults` indicates the default values modified for use
+%           with samplers
+%       - lower/upper bounds indicate the range of mapped ids
+%       - `options` maps option ids to their values
+%       - `raw_defaults` indicates the raw unmodified "best guess" value
+%       - `raw_bounds` indicates the original value ranges
 
-% Below parameters pertaining to species are new. We now add size classes
-% to each coral species, but treat each coral size class as a 'species'.
-% need a better word than 'species' to signal that we are using different
-% sizes within groups and real taxonomic species.
+coral_spec = coralParams();  % load default parameter table
 
-params = table();
+coral_ids = coral_spec.coral_id;
 
-% Coral species are divided into taxa and size classes
-taxa_names = [ ...
-    "tabular_acropora_enhanced"; ...
-    "tabular_acropora_unenhanced"; ...
-    "corymbose_acropora_enhanced"; ...
-    "corymbose_acropora_unenhanced"; ...
-    "small_massives"; ...
-    "large_massives" ...
-    ];
+% get last N columns, which relate to perturbable parameters
+params = coral_spec(:, 6:end);
+base_p_names = string(coral_spec.Properties.VariableNames(6:end))';
 
-size_cm = [2; 5; 10; 20; 40; 80];  % centimeters
-size_class_means_from = [1; 3.5; 7.5; 15; 30; 60]; 
-size_class_means_to = [size_class_means_from(2:end); 100.0];
+n_corals = length(coral_ids);
+n_param_names = length(base_p_names);
 
-% Create combinations of taxa names and size classes
-[sc, tn] = ndgrid(size_cm, taxa_names);
-taxa_size_ids = join([tn(:), sc(:)], "_");
+i = 1;
+name = string.empty;
+defaults = zeros(n_corals * n_param_names, 1);
+p_bounds = zeros(n_corals * n_param_names, 2);
+for c_id = 1:n_corals
+    row_name = coral_ids(c_id);
+    for p_id = 1:n_param_names
+        bp_name = base_p_names(p_id);
+        name(i, :) = strcat(coral_ids(c_id), '__', bp_name);
+        tmp = coral_spec(coral_spec.coral_id == row_name, bp_name);
+        defaults(i, :) = tmp{1, :};
+        p_bounds(i, :) = [defaults(i, :) * 0.8, defaults(i, :) * 1.2];
+        i = i + 1;
+    end
+end
 
-params.coral_id = taxa_size_ids;
-params.name = humanReadableName(tn(:), true);
-params.size_cm = sc(:);
+ptype = repmat("float", length(defaults), 1);
 
-% total number of "species" modelled in the current version.
-nspecies = height(params);
-
-nclasses = length(size_cm);
-params.taxa_id = reshape(repmat(1:nclasses, nclasses, 1), nspecies, []);
-
-params.class_id = reshape(repmat(1:nclasses, 1, nclasses), nspecies, []);
-
-% rec = [0.00, 0.01, 0.00, 0.01, 0.01, 0.01];
-% params.recruitment_factor = repmat(rec, 1, nclasses)';
-
-%% Ecological parameters
-
-% To be more consistent with parameters in ReefMod, IPMF and RRAP
-% interventions, we express coral abundance as colony numbers in different
-% size classes and growth rates as linear extention (in cm per year).
-
-%%% Base covers
-%First express as number of colonies per size class per 100m2 of reef
-base_coral_numbers = ...
-    [0, 0, 0, 0, 0, 0; ...              % Tabular Acropora Enhanced
-     2000, 100, 50, 20, 20, 5; ... % Tabular Acropora Unenhanced
-     0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
-     2000, 100, 50, 20, 20, 5; ... % Corymbose Acropora Unenhanced
-     2000, 100, 20, 20, 10, 0; ... % small massives
-     2000, 500, 20, 10, 5, 3];      % large massives
-
-% To convert to covers we need to first calculate the area of colonies,
-% multiply by how many corals in each bin, and divide by reef area
-
-% The coral colony diameter bin edges (cm) are: 0, 2, 5, 10, 20, 40, 80
-% To convert to cover we locate bin means and calculate bin mean areas
-colony_diam_means_from = repmat(size_class_means_from', length(size_cm), 1);
-colony_diam_means_to = repmat(size_class_means_to', length(size_cm), 1);
-
-colony_area_m2_from = pi .* ((colony_diam_means_from ./ 2).^2) ./ (10^4);
-colony_area_m2_to = pi .* ((colony_diam_means_to ./ 2).^2) ./ (10^4);
-a_arena = 100; % m2 of reef arena where corals grow, survive and reproduce
-
-% convert to coral covers (proportions) and convert to vector
-basecov = base_coral_numbers .* colony_area_m2_from ./ a_arena;
-
-% as nspecies*1 vector
-params.basecov = reshape(basecov', [], 1);
-
-%% Coral growth rates as linear extensions (Bozec et al 2021 Table S2)
-% we assume similar growth rates for enhanced and unenhanced corals
-linear_extension = ...
-   [1, 2, 3, 4.4, 4.4, 4.4; ... % Tabular Acropora Enhanced
-    1, 2, 3, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
-    1, 2, 3, 3, 3, 3; ...        % Corymbose Acropora Enhanced
-    1, 2, 3, 3, 3, 3; ...        % Corymbose Acropora Unenhanced
-    1, 1, 1, 0.9, 0.8, 0.8; ...    % small massives
-    1, 1, 1, 1, 1.2, 1.2];       % large massives
-
-% Convert linear extensions to delta coral in two steps.
-% First calculate what proportion of coral numbers that change size class
-% given linear extensions. This is based on the simple assumption that
-% coral sizes are evenly distributed within each bin
-bin_widths = [2, 3, 5, 10, 20, 40];
-diam_bin_widths = repmat(bin_widths, [length(bin_widths), 1]);
-prop_change = linear_extension ./ diam_bin_widths;
-
-%Second, growth as transitions of cover to higher bins is estimated as
-r = prop_change .* (colony_area_m2_to./colony_area_m2_from);
-params.growth_rate = reshape(r', [], 1);
-%note that we use proportion of bin widths and linear extension to estimate 
-% number of corals changing size class, but we use the bin means to estimate 
-% the cover equivalent because we assume coral sizes shift from edges to mean 
-% over the year (used in 'growthODE4()'.
-
-%% Background mortality
-
-% coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
-wavemort90 = ...
-    [0, 0, 0.00, 0.00, 0.02, 0.05; ... % Tabular Acropora Enhanced
-    0, 0, 0.00, 0.00, 0.02, 0.05; ...  % Tabular Acropora Unenhanced
-    0, 0, 0.00, 0.00, 0.01, 0.02; ...  % Corymbose Acropora Enhanced
-    0, 0, 0.00, 0.00, 0.01, 0.02; ...  % Corymbose Acropora Unenhanced
-    0, 0, 0.00, 0.00, 0.00, 0.00; ...  % Small massives
-    0, 0, 0.00, 0.00, 0.00, 0.00];     % Large massives
-
-params.wavemort90 = reshape(wavemort90', [], 1);
-
-% Taken from Bozec et al. 2021 (Table S2)
-mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
-      0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
-      0.2, 0.10, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
-      0.2, 0.10, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
-      0.2, 0.10, 0.04, 0.04, 0.02, 0.02; ...   % small massives
-      0.2, 0.10, 0.04, 0.04, 0.02, 0.02];      % large massives
-
-params.mb_rate = reshape(mb', [], 1);
-
-natad = [...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
-    0.10, 0.10, 0.10, 0.10, 0.10, 0.10; ...
-    0.10, 0.10, 0.10, 0.10, 0.10, 0.10];
-
-params.natad = reshape(natad', [], 1);
-
+coral_params = paramTableBuilder(name, ptype, defaults, p_bounds, ...
+                                 varargin);
+end
