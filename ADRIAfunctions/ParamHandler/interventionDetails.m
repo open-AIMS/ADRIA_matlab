@@ -51,7 +51,7 @@ defaults = {
     6;  % Aadpt
     0.05;  % Natad
     10;  % Seedyrs
-    1;  % Shadeyrs
+    10;  % Shadeyrs
 };
 
 % TODO: lower and upper bounds are dummy values and need to be replaced!
