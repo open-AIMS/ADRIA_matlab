@@ -6,7 +6,7 @@ function params = simConstants()
 %
 % References:
 %   1. Lough et al 2018
-%   2. Hughes et al 2017 
+%   2. Hughes et al 2017
 %   3. Bozec et al 2021
 
 %% Base scenario parameters
@@ -22,16 +22,15 @@ params.RCP = 45;  % RCP scenario to use
 
 %% Environmental parameters
 params.beta = [1, 3]; % beta parameters for wave disturbance (distribution parameter)
-params.dhwmax25 = 7; % dhwmax at year 2025. NOTE: all warming simulations will change with new common DHW input for MDS team  
+params.dhwmax25 = 7; % dhwmax at year 2025. NOTE: all warming simulations will change with new common DHW input for MDS team
 params.DHWmaxtot = 50; % max assumed DHW for all scenarios.  Will be obsolete when we move to new, shared inputs for DHW projections
 params.wb1 = 0.55; % weibull parameter 2 for DHW distributions based on Lough et al 2018
 params.wb2 = 2.24; % weibull parameter 1 for DHW distributions based on Lough et al 2018
 
-P = 0.80; % max total coral cover - used as a carrying capacity with 1-P representing space that is not colonisable for corals
-params.max_coral_cover = P;
-
-p = [2.74, 0.25]; % Gompertz shape parameters 1 and 2 - for now applied to all coral species equally. Based on Hughes et al 2017 and Bozec et al 2021. 
-params.p = p;  % TODO: Remove in favour of gompertz_* vars.
+% max total coral cover
+% used as a carrying capacity with 1-P representing space that is not
+% colonisable for corals
+params.max_coral_cover = 0.8;
 
 % Gompertz shape parameters 1 and 2 - for now applied to all coral species
 % equally. Based on Hughes et al 2017 and Bozec et al 2021.
