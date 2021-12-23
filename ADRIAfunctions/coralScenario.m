@@ -200,8 +200,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
             Yshade(tstep, :, prefshadesites) = srm;
-        else
-            Yshade(tstep, :, :) = 0;
         end
 
         % Calculate bleaching mortality
