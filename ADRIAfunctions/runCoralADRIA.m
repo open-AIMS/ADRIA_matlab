@@ -81,6 +81,9 @@ Y_S = zeros(timesteps, nsites, N, n_reps);
 for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
+    
+    % Note: This slows things down considerably
+    % Could rejig everything to use (subset of) the table directly...
     c_params = extractCoralSamples(coral_vals(i, :), coral_params);
 
     for j = 1:n_reps
