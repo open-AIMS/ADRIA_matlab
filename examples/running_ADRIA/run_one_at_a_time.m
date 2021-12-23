@@ -40,7 +40,6 @@ criteria_weights = converted_tbl(:, 10:end);
 alg_ind = 1;
 
 %% Load site data
-[F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
 
 %% ... generate parameter permutations ...
@@ -64,7 +63,6 @@ num_reps = 3;  % Number of replicate RCP scenarios
 Y = repmat(tmp_s, N, num_reps);
 
 %% setup for the geographical setting including environmental input layers
-% [wave_scen, dhw_scen] = setupADRIAsims(num_sims, params, nsites);
 
 % Load wave/DHW scenario data
 % Generated with generateWaveDHWs.m
@@ -101,23 +99,6 @@ tmp = toc;
 
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " scenarios (", num2str(tmp/(N*num_reps)), " seconds per run)"))
 
-%% post-processing
-% collate data across all scenario runs
-
-tf = params.tf;
-processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
-                   'C', zeros(tf, 4, nsites, N, num_reps), ...
-                   'E', zeros(tf, nsites, N, num_reps), ...
-                   'S', zeros(tf, nsites, N, num_reps));
-for i = 1:N
-    for j = 1:num_reps
-        processed.TC(:, :, i, j) = Y(i, j).TC;
-        processed.C(:, :, :, i, j) = Y(i, j).C;
-        processed.E(:, :, i, j) = Y(i, j).E;
-        processed.S(:, :, i, j) = Y(i, j).S;
-    end
-end
-
 %% analysis
 
 % Prompt for importance balancing
@@ -142,5 +123,5 @@ cf = str2double(answer{7}); %counterfactual
 
 ES_vars = [evcult, strcult, evprov, strprov, TCsatCult, TCsatProv, cf];
 
-ecosys_results = coralsToEcosysServices(processed, ES_vars);
+ecosys_results = coralsToEcosysServices(Y, ES_vars);
 analyseADRIAresults1(ecosys_results);

@@ -56,7 +56,6 @@ criteria_weights = u_ss(:, 10:end);
 alg_ind = 1;
 
 %% Load site specific data
-[F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
 
 %% setup for the geographical setting including environmental input layers
@@ -94,25 +93,6 @@ disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " si
 % Map unique scenarios to original scenario list
 Y = mapDuplicateResults(Y, u_rows, group_idx);
 
-%% post-processing
-% collate data across all scenario runs
-
-% tf = params.tf;
-% nspecies = 4;
-% processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
-%                    'C', zeros(tf, nspecies, nsites, N, num_reps), ...
-%                    'E', zeros(tf, nsites, N, num_reps), ...
-%                    'S', zeros(tf, nsites, N, num_reps));
-% for i = 1:N
-%     for j = 1:num_reps
-%         processed.TC(:, :, i, j) = Y.TC(i, j);
-%         processed.C(:, :, :, i, j) = Y.C(i, j);
-%         processed.E(:, :, i, j) = Y.E(i, j);
-%         processed.S(:, :, i, j) = Y.S(i, j);
-%     end
-% end
-processed = Y;
-
 %% analysis
 % Prompt for importance balancing
 MetricPrompt = {'Relative importance of coral evenness for cultural ES (proportion):', ...
@@ -136,5 +116,5 @@ cf = str2double(answer{7}); %counterfactual
 
 ES_vars = [evcult, strcult, evprov, strprov, TCsatCult, TCsatProv, cf];
 
-ecosys_results = coralsToEcosysServices(processed, ES_vars);
+ecosys_results = coralsToEcosysServices(Y, ES_vars);
 analyseADRIAresults1(ecosys_results);

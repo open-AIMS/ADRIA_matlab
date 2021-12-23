@@ -50,7 +50,6 @@ criteria_weights = converted_tbl(:, 10:end);
 alg_ind = 1;
 
 %% Load site specific data
-[F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', sim_constants.con_cutoff);
 
 %% setup for the geographical setting including environmental input layers
@@ -110,7 +109,6 @@ disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simu
 %         processed.S(:, :, i, j) = Y.S(i, j);
 %     end
 % end
-processed = Y;
 
 %% analysis
 % Prompt for importance balancing
@@ -135,5 +133,5 @@ cf = str2double(answer{7}); %counterfactual
 
 ES_vars = [evcult, strcult, evprov, strprov, TCsatCult, TCsatProv, cf];
 
-ecosys_results = coralsToEcosysServices(processed, ES_vars);
+ecosys_results = coralsToEcosysServices(Y, ES_vars);
 analyseADRIAresults1(ecosys_results);

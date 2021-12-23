@@ -52,7 +52,6 @@ criteria_vals = param_table(:, 10:end);
 %% Prep other inputs
 
 % Load site data
-[F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', sim_constants.con_cutoff);
 
 % Load wave/DHW scenario data

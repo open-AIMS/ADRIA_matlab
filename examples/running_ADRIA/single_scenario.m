@@ -103,7 +103,6 @@ new_criteria_opts = array2table(user_criteria_opts', 'VariableNames', criteria_o
 
 
 %% Load site data
-[F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', new_sim_opts.con_cutoff);
 
 %% setup for the geographical setting including environmental input layers

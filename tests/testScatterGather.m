@@ -62,9 +62,7 @@ criteria_weights = converted_tbl(:, 10:end);
 % use order-ranking for example
 alg_ind = 1;
 
-
 % Load site specific data
-[F0, xx, yy, nsites] = ADRIA_siteTable('Inputs/MooreSites.xlsx');
 [TP_data, site_ranks, strongpred] = siteConnectivity('Inputs/MooreTPmean.xlsx', params.con_cutoff);
 
 % Setup for the geographical setting including environmental input layers
@@ -113,19 +111,7 @@ try
 
     assert(isequal(Y_true, collated), "Results are not equal!")
     assert(all(all(collated.TC(:, :, 1, 1) ~= 0)), "Results were zeros!")
-    
-    
-%     Ys = zeros(N, nsites, 4);  % where 4 is number of metrics
-%     for i = 1:N
-%         offset = 0;
-%         for j = 1:nsites
-%             % average across all time, all env scenarios (DHW/wave) for site j, scenario i
-%             Ys(i, j, 1) = mean(collated.TC(:, j, i, :), 'all');
-%             Ys(i, j, 2) = mean(mean(collated.C(:, :, j, i, :)), 'all');
-%             Ys(i, j, 3) = mean(collated.E(:, j, i, :), 'all');
-%             Ys(i, j, 4) = mean(collated.S(:, j, i, :), 'all');
-%         end
-%     end
+
 catch err
 end
 
