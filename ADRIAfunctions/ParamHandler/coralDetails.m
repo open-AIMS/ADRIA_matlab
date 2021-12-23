@@ -33,22 +33,22 @@ taxa_names = [ ...
     "large_massives" ...
     ];
 
-size_classes = [2; 5; 10; 20; 40; 80];  % centimeters
+size_cm = [2; 5; 10; 20; 40; 80];  % centimeters
 size_class_means_from = [1; 3.5; 7.5; 15; 30; 60]; 
-size_class_means_to = [3.5; 7.5; 15; 30; 60; 100]; 
+size_class_means_to = [size_class_means_from(2:end); 100.0];
 
 % Create combinations of taxa names and size classes
-[sc, tn] = ndgrid(size_classes, taxa_names);
+[sc, tn] = ndgrid(size_cm, taxa_names);
 taxa_size_ids = join([tn(:), sc(:)], "_");
 
 params.coral_id = taxa_size_ids;
 params.name = humanReadableName(tn(:), true);
-params.size_class = sc(:);
+params.size_cm = sc(:);
 
 % total number of "species" modelled in the current version.
 nspecies = height(params);
 
-nclasses = length(size_classes);
+nclasses = length(size_cm);
 params.taxa_id = reshape(repmat(1:nclasses, nclasses, 1), nspecies, []);
 
 params.class_id = reshape(repmat(1:nclasses, 1, nclasses), nspecies, []);
@@ -77,8 +77,8 @@ base_coral_numbers = ...
 
 % The coral colony diameter bin edges (cm) are: 0, 2, 5, 10, 20, 40, 80
 % To convert to cover we locate bin means and calculate bin mean areas
-colony_diam_means_from = repmat(size_class_means_from', length(size_classes), 1);
-colony_diam_means_to = repmat(size_class_means_to', length(size_classes), 1);
+colony_diam_means_from = repmat(size_class_means_from', length(size_cm), 1);
+colony_diam_means_to = repmat(size_class_means_to', length(size_cm), 1);
 
 colony_area_m2_from = pi .* ((colony_diam_means_from ./ 2).^2) ./ (10^4);
 colony_area_m2_to = pi .* ((colony_diam_means_to ./ 2).^2) ./ (10^4);
