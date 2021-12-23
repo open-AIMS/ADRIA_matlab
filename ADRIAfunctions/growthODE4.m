@@ -30,21 +30,27 @@ P_x = repmat(k, size(r));
 
 Y = zeros(size(X));  % output matrix
 
+% Total size of small massives
+X_sm = sum(X(25:30, :));
+
+% Total size of largest enhanced tabular and corymbose acropora
+X_enhanced = (X(6, :) + X(12, :));
+
 %Tabular Acropora Enhanced
 Y(1, :) = P_x(1, :) .* rec(1, :) - P_x(2, :) .* X(1, :) .* (r(1)  - X(1,:) .* mb(1));
 Y(2, :) = P_x(2, :) .* X(1, :) .* r(1) - P_x(3, :) .* X(2, :) .* r(2) - X(2, :) .* mb(2);
 Y(3, :) = P_x(3, :) .* X(2, :) .* r(2) - P_x(4, :) .* X(3, :) .* r(3) - X(3, :) .* mb(3);
 Y(4, :) = P_x(4, :) .* X(3, :) .* r(3) - P_x(5, :) .* X(4, :) .* r(4) - X(4, :) .* mb(4);
-Y(5, :) = P_x(5, :) .* X(4, :) .* r(4) - P_x(6, :) .* X(5, :) .* (r(5) + comp .* sum(X(25:30, :))) - X(5, :) .* mb(5);
-Y(6, :) = P_x(6, :) .* X(5, :) .* (r(5) + comp .* sum(X(25:30, :))) - X(6, :) .* mb(6);
+Y(5, :) = P_x(5, :) .* X(4, :) .* r(4) - P_x(6, :) .* X(5, :) .* (r(5) + comp .* X_sm) - X(5, :) .* mb(5);
+Y(6, :) = P_x(6, :) .* X(5, :) .* (r(5) + comp .* X_sm) - X(6, :) .* mb(6);
 
 %Tabular Acropora Unenhanced
 Y(7, :) = P_x(7, :) .* rec(7, :) - P_x(8, :) .* X(7, :) .* r(7) - X(7,:) .* mb(7);
 Y(8, :) = P_x(8, :) .* X(7, :) .* r(7) - P_x(9, :) .* X(8, :) .* r(8) - X(8, :) .*mb(8);
 Y(9, :) = P_x(9, :) .* X(8, :) .* r(8) - P_x(10, :) .* X(9, :) .* r(9) - X(9, :) .* mb(9);
 Y(10, :) = P_x(10, :) .* X(9, :) .* r(9) - P_x(11, :) .* X(10, :) .* r(10) - X(10, :) .* mb(10);
-Y(11, :) = P_x(11, :) .* X(10, :) .* r(10) - P_x(12, :) .* X(11, :) .* (r(11) + comp .* sum(X(25:30, :))) - X(11, :) .* mb(11);
-Y(12, :) = P_x(12, :) .* X(11, :) .* (r(11) + comp .* sum(X(25:30, :))) - X(12, :) .* mb(12);
+Y(11, :) = P_x(11, :) .* X(10, :) .* r(10) - P_x(12, :) .* X(11, :) .* (r(11) + comp .* X_sm) - X(11, :) .* mb(11);
+Y(12, :) = P_x(12, :) .* X(11, :) .* (r(11) + comp .* X_sm) - X(12, :) .* mb(12);
 
 %Corymbose Acropora Enhanced
 Y(13, :) = P_x(13, :) .* rec(13, :) - P_x(14, :) .* X(13, :) .* r(13) - X(13,:) .* mb(13);
@@ -64,11 +70,13 @@ Y(24, :) = P_x(24, :) .* X(23, :) .* r(23) - X(24, :) .* mb(24);
 
 %small massives Unenhanced
 Y(25, :) = P_x(25, :) .* rec(25, :) - P_x(26, :) .* X(25, :) .* r(25) - X(25,:) .* mb(25);
-Y(26, :) = P_x(26, :) .* X(25, :) .* r(25) - P_x(26, :) .*  X(25, :) .* r(25) - X(26, :) .* (mb(26)+ comp .* (X(6, :) + X(12, :)));
-Y(27, :) = P_x(27, :) .* X(26, :) .* r(26) - P_x(27, :) .*  X(26, :) .* r(26) - X(27, :) .* (mb(27)+ comp .* (X(6, :) + X(12, :)));
-Y(28, :) = P_x(28, :) .* X(27, :) .* r(27) - P_x(28, :) .*  X(27, :) .* r(27) - X(28, :) .* (mb(28)+ comp .* (X(6, :) + X(12, :)));
-Y(29, :) = P_x(29, :) .* X(28, :) .* r(28) - X(29, :) .* (mb(29) + comp .* (X(6, :) + X(12, :)));
-Y(30, :) = 0; %small massives and encrusting constrained to less than 40 cm diameter
+Y(26, :) = P_x(26, :) .* X(25, :) .* r(25) - P_x(26, :) .*  X(25, :) .* r(25) - X(26, :) .* (mb(26)+ comp .* X_enhanced);
+Y(27, :) = P_x(27, :) .* X(26, :) .* r(26) - P_x(27, :) .*  X(26, :) .* r(26) - X(27, :) .* (mb(27)+ comp .* X_enhanced);
+Y(28, :) = P_x(28, :) .* X(27, :) .* r(27) - P_x(28, :) .*  X(27, :) .* r(27) - X(28, :) .* (mb(28)+ comp .* X_enhanced);
+Y(29, :) = P_x(29, :) .* X(28, :) .* r(28) - X(29, :) .* (mb(29) + comp .* X_enhanced);
+
+% Unnecessary as Y is initialized to all zeros
+% Y(30, :) = 0; %small massives and encrusting constrained to less than 40 cm diameter
 
 %Large massives Unenhanced
 Y(31, :) = P_x(31, :) .* rec(31, :) - P_x(32, :) .* X(31, :) .* r(31) - X(31,:) .* mb(31);
@@ -81,5 +89,6 @@ Y(36, :) = P_x(36, :) .* X(35, :) .* r(35) - X(36, :) .* mb(36, :);
 % constrain between 0 and max cover
 Y(Y < 0) = 0;
 Y(Y > P) = P; 
+
 Y = Y(:); % convert to column vector (necessary for ODE to work)
 end
