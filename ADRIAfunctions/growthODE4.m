@@ -18,22 +18,17 @@ function Y = growthODE4(X, r, P, mb, rec, comp)
 %These values should be set outside of function (in the parameters).
 %Used here as part of developing the method
 
-%% Work in progress as at 10PM on 9th Nov 21
+X = reshape(X, size(rec));
 
-X = reshape(X, 36, 26);
+%% Density dependent growth
+% P - sum over coral covers within each site
+% This sets the carrying capacity P_x := 0.0 <= k <= P
+% resulting in a matrix of (species * sites)
+% ensuring that density dependence is applied per site
+k = min( max(P - sum(X, 1), 0.0), P);
+P_x = repmat(k, size(r));  
 
-% density dependent growth - constrain to zero at carrying capacity
-%P_x = min( max(P - sum(X, 3), 0.0), P);  % per species, per site (species * sites)
-
-P_x = P - sum(X,1); %P - sum over coral covers within each site - this sets the carrying capacity
-P_x = repmat(P_x, 36,1); %spread results out over corals - i.e rows are ...
-% similar but sites vary in the matrix - probably clumsy, but ensures that density depdendence is applied at each site  
-P_x(P_x <0) = 0; %density dependent growth and recruitment - constrain to zero at carrying capacity
-P_x(P_x >1) = P; %density dependent growth - constrain to P 
-
-%P_x = min( max(P - sum(X, 3), 0.0), P);  % per species, per site (species * sites)
-
-Y = zeros(36, 26);
+Y = zeros(size(X));  % output matrix
 
 %Tabular Acropora Enhanced
 Y(1, :) = P_x(1, :) .* rec(1, :) - P_x(2, :) .* X(1, :) .* (r(1)  - X(1,:) .* mb(1));
@@ -86,5 +81,5 @@ Y(36, :) = P_x(36, :) .* X(35, :) .* r(35) - X(36, :) .* mb(36, :);
 % constrain between 0 and max cover
 Y(Y < 0) = 0;
 Y(Y > P) = P; 
-Y = Y(:); % convert to column vector
+Y = Y(:); % convert to column vector (necessary for ODE to work)
 end
