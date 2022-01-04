@@ -1,4 +1,4 @@
-function param_table = paramTableBuilder(name, ptype, defaults, raw_bounds)
+function param_table = paramTableBuilder(name, ptype, defaults, raw_bounds, varargin)
 % Build parameter detail table
 
 % preallocate array
@@ -56,6 +56,57 @@ end
 lower_bound = lower_opt_bound';
 upper_bound = upper_opt_bound';
 
-param_table = table(name, ptype, defaults, lower_bound, upper_bound, ...
-                    options, raw_bounds);
+raw_defaults = defaults;
+sample_defaults = defaults;
+param_table = table(name, ptype, sample_defaults, lower_bound, upper_bound, ...
+                    options, raw_defaults, raw_bounds);
+
+% Update both "default" columns with user-provided values (if given)
+varargin = varargin{:};
+if nargin > 0
+    valid_names = name(:);
+    for name_val = [varargin(1:2:end); varargin(2:2:end)]
+        [name, val] = name_val{:};
+        if isempty(find(contains(valid_names, name), 1))
+            error("Parameter '%s' is invalid", name)
+        end
+        
+        assert(~isempty(val), strcat("Provided value for ", name, " is empty!"));
+        
+        param_table{param_table.name == name, "sample_defaults"} = {val};
+        param_table{param_table.name == name, "raw_defaults"} = {val};
+    end
+end
+                
+% Update specified "raw" default values to sample compatible values
+cats = param_table((param_table.ptype == "integer") | (param_table.ptype == "categorical"), :);
+cat_opts = cats.options;
+num_entries = length(cat_opts);
+for ci = 1:num_entries
+    c_i = cat_opts{ci};
+    cont = c_i{1};
+    
+    default_val = cats.raw_defaults{ci};
+    
+    try
+        poss_vals = values(cont);
+        tmp_keys = keys(cont);
+        idx = find([poss_vals{:}] == default_val);
+        mapped_default_val = tmp_keys(idx);
+    catch
+        % not a map container, so use index value
+        poss_vals = cont;
+        idx = find([poss_vals{:}] == default_val);
+        mapped_default_val = {idx};
+    end
+
+%     if iscell(mapped_default_val)
+%         assign_val = mapped_default_val;
+%     else
+%         assign_val = num2cell(mapped_default_val);
+%     end
+
+    param_table(param_table.name == cats.name{ci}, "sample_defaults") = num2cell(mapped_default_val);
+end
+
 end

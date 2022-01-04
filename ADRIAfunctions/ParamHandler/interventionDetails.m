@@ -5,7 +5,7 @@ function interventions = interventionDetails(varargin)
 %
 % Inputs:
 %    Argument list of parameters to override.
-%    Possible arguments (with default values):
+%    Possible arguments (with default values/ranges):
 %      - Guided   : [0, 1]
 %      - PrSites  : 3
 %      - Seed1    : [0, 0.0005, 0.0010]
@@ -24,10 +24,12 @@ function interventions = interventionDetails(varargin)
 %           - categoricals: values have to be exact match
 %           - integers: whole number values ranging between lower/upper
 %           - float: values can range between lower/upper
-%       - `defaults` indicates the raw unmodified assigned value
+%       - `sample_defaults` indicates the default values modified for use
+%           with samplers
 %       - lower/upper bounds indicate the range of mapped ids 
 %       - `options` maps option ids to their values
-%       - raw_lower/raw_upper bounds indicates the original value ranges
+%       - `raw_defaults` indicates the raw unmodified "best guess" value
+%       - `raw_bounds` indicates the original value ranges
 name = [
     "Guided";
     "PrSites";
@@ -78,20 +80,7 @@ ptype = [
 ];
 
 
-interventions = paramTableBuilder(name, ptype, defaults, p_bounds);
-
-% if number of arguments passed in is 0, then use default values
-% otherwise replace defaults with specified values
-if nargin > 0
-    valid_names = name(:);
-    for name_val = [varargin(1:2:end); varargin(2:2:end)]
-        [name, val] = name_val{:};
-        if isempty(find(contains(valid_names, name), 1))
-            error("Intervention option '%s' is invalid", name)
-        end
-        
-        interventions{interventions.name == name, "defaults"} = {val};
-    end
-end
+interventions = paramTableBuilder(name, ptype, defaults, p_bounds, ...
+                                  varargin);
 
 end

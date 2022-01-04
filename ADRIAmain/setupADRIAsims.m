@@ -19,7 +19,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(sims,params,nsites)
     % This latter analysis is handled in `analyseADRIA`.
 
     %% Simulate future wave exposure patterns from Puotinen and Callaghan SWH data
-    swhtbl = readtable('swhMoore_interp.xlsx', 'PreserveVariableNames', true); % import Marji's significant wave heights 
+    swhtbl = readtable('swhMoore_interp.xlsx', 'PreserveVariableNames', true); % import Marji's significant wave heights
     
     % col: SiteID, SiteAddress, Lon, Lat, Hs70, Hs80, Hs90, Hs95, Hs96, Hs97, Hs98, Hs99, Hs100
     swh90 =  table2array(swhtbl(:,7)); % we use swhs within the 90 percentile  
@@ -42,7 +42,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(sims,params,nsites)
     dhwdisttime = zeros(params.tf,nsites,sims); %initialise matrix that represents projections of DHW in space and time
     
     for sim = 1:sims
-        dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,nsites,mdhwdist0,...
+        dhwdisttime(:,:,sim) = ADRIA_DHWprojectfun(params.tf,mdhwdist0,...
             sdhwdist0,params.dhwmax25,params.RCP,params.wb1,params.wb2);
     end
     dhwdisttime(dhwdisttime <=0) = 0;

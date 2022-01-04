@@ -89,3 +89,29 @@ for i = 1:length(cat_names)
     assert(all(ismember(vals, cell2mat(values(tmp{1})))), ...
         'Invalid categorical value sampled!');
 end
+
+%% Check default value override
+i_tbl = interventionDetails();
+mod_i_tbl = interventionDetails(Guided=0, Seedyrs=13);
+
+sample_val = mod_i_tbl{mod_i_tbl.name == "Seedyrs", "sample_defaults"};
+raw_val = mod_i_tbl{mod_i_tbl.name == "Seedyrs", "raw_defaults"};
+
+received = num2str(sample_val{1});
+assert(sample_val{1} == 4, ...
+        strcat("Unexpected value: Sample Seedyrs, 4 == ", received));
+
+received = num2str(raw_val{1});
+assert(raw_val{1} == 13, ...
+        strcat("Unexpected value: Raw Seedyrs, 13 == ", received));
+
+sample_val = mod_i_tbl{mod_i_tbl.name == "Guided", "sample_defaults"};
+raw_val = mod_i_tbl{mod_i_tbl.name == "Guided", "raw_defaults"};
+
+received = num2str(sample_val{1});
+assert(sample_val{1} == 1, ...
+        strcat("Unexpected value: Sample Guided, 1 == ", received));
+
+received = num2str(raw_val{1});
+assert(raw_val{1} == 0, ...
+        strcat("Unexpected value: Raw Guided, 0 == ", received));
