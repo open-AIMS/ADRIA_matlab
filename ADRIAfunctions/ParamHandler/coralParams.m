@@ -95,10 +95,10 @@ params.basecov = reshape(basecov', [], 1);
 %% Coral growth rates as linear extensions (Bozec et al 2021 Table S2)
 % we assume similar growth rates for enhanced and unenhanced corals
 linear_extension = ...
-   [1, 2, 3, 4.4, 4.4, 4.4; ... % Tabular Acropora Enhanced
-    1, 2, 3, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
-    1, 2, 3, 3, 3, 3; ...        % Corymbose Acropora Enhanced
-    1, 2, 3, 3, 3, 3; ...        % Corymbose Acropora Unenhanced
+   [1, 3, 4.4, 4.4, 4.4, 4.4; ... % Tabular Acropora Enhanced
+    1, 3, 4.4, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
+    1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Enhanced
+    1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Unenhanced
     1, 1, 1, 0.9, 0.8, 0.8; ...    % small massives
     1, 1, 1, 1, 1.2, 1.2];       % large massives
 
@@ -131,11 +131,11 @@ wavemort90 = ...
 
 params.wavemort90 = reshape(wavemort90', [], 1);
 
-% Taken from Bozec et al. 2021 (Table S2)
+% Background mortality taken from Bozec et al. 2021 (Table S2)
 mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
       0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
-      0.2, 0.10, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
-      0.2, 0.10, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
+      0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
+      0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
       0.2, 0.10, 0.04, 0.04, 0.02, 0.02; ...   % small massives
       0.2, 0.10, 0.04, 0.04, 0.02, 0.02];      % large massives
 
