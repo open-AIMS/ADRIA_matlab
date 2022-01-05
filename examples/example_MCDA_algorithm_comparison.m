@@ -133,7 +133,6 @@ end
 % scenario varies significantly, and hence should be probably be optimised
 % for
 figure(1)
-title('TC comparison')
 count = 1;
 for nn = 1:4
     for mm = 1:2
@@ -147,7 +146,7 @@ for nn = 1:4
      count = count+1;
     end
 end
-
+title('TC Comparison');
 figure(2)
 title('E comparison')
 count = 1;
@@ -177,6 +176,7 @@ for nn = 1:4
         legend('alg1','alg2','alg3')
         hold off
      end
+     [count,mm,nn]
      count = count+1;
     end
 end
