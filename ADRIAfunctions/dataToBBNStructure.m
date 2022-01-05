@@ -36,7 +36,7 @@ function [R, ParentCell] = dataToBBNStructure(nodeNames,Data,outputVars,visVars)
     end
     % output variables assumed to be dependent on all input variables
     for l = ((nNodes-nOutput)+1):nNodes
-        ParentCell{l} = 1:(nNodes-nOutput)
+        ParentCell{l} = 1:(nNodes-nOutput);
     end
     
     % generate rank correlation matrix

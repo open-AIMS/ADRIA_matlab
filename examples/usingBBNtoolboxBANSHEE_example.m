@@ -12,8 +12,8 @@ outputVars = [10,11,12];
 % sense)
 Data = readmatrix('ADRIA_BBN_Data.csv');
 
-% this data has an irrelevant column for the DMCDA algorithm variable (the
-% same for every variable permutation in this case, so not included)
+% this data has no variance in the DMCDA algorithm variable so it is not
+% included here
 Data(:,2) = [];
 
 % visualise both the correlation matrix and the BBN DAG
@@ -22,7 +22,7 @@ visVars = [1,1];
 [R,ParentCell] = dataToBBNStructure(nodeNames,Data,outputVars,visVars);
 
 %% Inference example
-% the function inference (self-explanatory) is used to make inferences on
+% the function inference is used to make inferences on
 % the network
 
 % for example - what is the mean coral cover, CES and PES for an RCP of 2.6,
@@ -34,16 +34,18 @@ inf_cells = [1:9];
 % their values
 vals = [26,30,1,3,0.0005,0.0005,0,0,0];
 % make inference
-% 1000,'near' -> 1000 iterations of nearest neighbour alg. to calculate
-% distributions
-% 'mean' -> just give the means of the distribution as output
+% 1000,'near' -> 1000 iterations of nearest neighbour
+% 'mean' -> just give the means of the distributions as output
 outcome1 = inference(inf_cells,vals,R,Data,'mean',1000,'near');
 
 % print results
 fprintf('The average coral cover is : %1.3f, the average CES is : %1.3f, the average PES is : %1.3f \n',outcome1(1),outcome1(2),outcome1(3));
 
 %% make the same inference but now with incrementally increasing years 
-% and plot as histogram
+% and plot as histograms
+
+% want to plot hists
+plotInd = 1;
 
 % perform inference for RCP 2.6, Guided = 1, PrSites = 3, seed1 = 0.0005,
 % Seed2 = 0.0005 and the other interventions = 0. CC, S and E are unknowns.
@@ -54,7 +56,7 @@ increArray = 10:10:50;
 % cover) is the first output unknown variable)
 nodePos = [2,1];
 
-F0 = plotHistsBBNInf(Data, R, ParentCell, knownVars,inf_cells,increArray,nodePos);
+F0 = multiBBNInf(Data, R, knownVars,inf_cells,increArray,nodePos, plotInd);
 
 legend('year 10','year 20','year 30','year 40','year 50');
 
@@ -64,9 +66,9 @@ legend('year 10','year 20','year 30','year 40','year 50');
  F0 = inference([1:4 10:12],[60, 10, 1, 3, 0.8,0.2,0.2],R,Data,'mean',1000,'near');
 fprintf('The average intervention levels predicted are Seed1 %1.3f, Seed2 %1.3f, SRM %1.2f, As.Adt. %2.2f, Nat.Adt. %1.3f \n',F0)
  
- %% calculate the probability of coral cover >0.8 with no constraint on ES,
- % at year 20, with rcp 6.0, with SRM = 5 and ass adpt = 6
- % calculate full distribution first
+ %% calculate the probability of coral cover >0.8 
+ % with no constraint on ES, at year 20, with rcp 6.0, with SRM = 5 and 
+ % ass adpt = 6 and calculate full distribution first
   F0 = inference([1:9],[60,30,1,3,0,0,5,6,0],R,Data,'full',1000,'near');
   
   % find probability

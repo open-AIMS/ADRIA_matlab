@@ -1,4 +1,4 @@
-function F0 = plotHistsBBNInf(Data, R, ParentCell, knownVars,infNodes,increArray,nodePos)
+function F0 = multiBBNInf(Data, R, knownVars,infNodes,increArray,nodePos,plotInd)
 % Plots a series of histograms based on a BBN inference given a vector of known variables,
 % a vector of the incremented variable, and information about the BBN.
 % structure.
@@ -7,8 +7,6 @@ function F0 = plotHistsBBNInf(Data, R, ParentCell, knownVars,infNodes,increArray
 %           Data : aray of data used to build the BBN size no. cases * no.
 %                  nodes
 %           R : rank correlation matrix for BBN
-%           ParentCell : cell structure designating links between nodes in
-%                        the BBN.
 %           knownVars : vector of values which are known in the inference
 %                       (in same order as ParentCell.
 %           infNodes : vector of node numbers for nodes to perform inference on
@@ -20,6 +18,8 @@ function F0 = plotHistsBBNInf(Data, R, ParentCell, knownVars,infNodes,increArray
 %                     for the incremented variable (as designated in ParentCell) 
 %                     and nodePos(2) indicates the position of the output variable 
 %                     to plot as a histogram.
+%           plotInd : indicates whether to plot the generated distributions
+%                     as histograms.
 %
 % Outputs -
 %           F0 : Cell strucutre containing the full distributions for each
@@ -28,15 +28,20 @@ function F0 = plotHistsBBNInf(Data, R, ParentCell, knownVars,infNodes,increArray
 % Cell strucutre to store distributions
     F0 = cell(1,length(increArray));
     
+    for l = 1:length(increArray)
+        F0{l} = inference(infNodes,[knownVars(1:nodePos(1)-1) increArray(l) knownVars(nodePos(1):end)],...
+            R,Data,'full',1000,'near');   
+    end
+    
+    if plotInd ==1
     figure;
     hold on
     for l = 1:length(increArray)
-        F0{l} = inference(infNodes,[knownVars(1:nodePos(1)-1) increArray(l) knownVars(nodePos(1):end)],...
-            R,Data,'full',1000,'near');
         hist_dat = F0{l};
         % plot the coral cover distribution as a histogram
-        h = histogram(hist_dat{nodePos(2)},'NumBins',30,'Normalization','probability');     
+        h = histogram(hist_dat{nodePos(2)},'NumBins',30,'Normalization','probability');  
     end
     hold off
+    end
 end
 
