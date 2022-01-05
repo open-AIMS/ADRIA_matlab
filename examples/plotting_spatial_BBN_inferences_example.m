@@ -40,25 +40,36 @@ visVars = [1,1];
 
 [R, ParentCell] = dataToBBNStructure(Names,Data,outputVars,visVars);
 
-%% example - what is the mean coral cover, E and S on site 26 for an RCP of 4.5,
-% at year 10, with guided interventions, using all sites (Prsites = 3 ) and
-% only seed1 and seed2 = 0.0005,seedyrs 12 and shadeyrs 3
-
-% note that when performing inferences in this larger network, not enough
-% degrees of freedom (e.g. setting too many variables as known) can result
-% in Nans. It seems at least 5 variables need to be unknown to allow
-% calculation.
+%% example - comparison of MCDA algorithms
 
 % nodes we know
-inf_cells = 1:8;
+inf_cells = [1:2,4:6 10:11];
 % their values
-vals = [26,3,10,26,1,3,0.0009,0.0009];
-outcome1 = inference(inf_cells,vals,R,Data,'mean',1000,'near');
+vals = [45,3,21,1,3,6,0.01];
+outcome1 = inference(inf_cells,vals,R,Data,'full',1000,'near');
+
+% their values
+vals = [45,2,21,1,3,6,0.01];
+outcome2 = inference(inf_cells,vals,R,Data,'full',1000,'near');
 
 % their values, now with algorithm 1 for comparison
-vals = [26,1,10,26,1,3,0.0009,0.0009];
-outcome2 = inference(inf_cells,vals,R,Data,'mean',1000,'near');
+vals = [45,1,21,1,3,6,0.01];
+outcome3 = inference(inf_cells,vals,R,Data,'full',1000,'near');
 
+[f1,x1] = ksdensity(outcome1{end-2}); 
+[f2,x2] = ksdensity(outcome2{end-2}); 
+[f3,x3] = ksdensity(outcome3{end-2}); 
+
+figure
+hold on 
+% histogram(outcome1{end-2},'NumBins',30,'Normalization','probability'); 
+% histogram(outcome2{end-2},'NumBins',30,'Normalization','probability'); 
+% histogram(outcome3{end-2},'NumBins',30,'Normalization','probability'); 
+plot(x1,f1);
+plot(x2,f2);
+plot(x3,f3);
+legend('Alg3','Alg2','Alg1')
+hold off
 %% make the same inference but now with incrementally increasing years and
 % retrieve the full distribution
 
@@ -97,9 +108,6 @@ legend('year 1','year 5','year 9','year 13','year 17','year 21','year 25');
 % probability indicated with colours
 % nodes we know
 inf_cells = 1:8;
-
-% don't plot histograms when generating multiple distributions
-plotInd = 0;
 
 % storage for probabilities
 Fp = zeros(1,length(increArray));
