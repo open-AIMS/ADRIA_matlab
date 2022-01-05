@@ -16,8 +16,6 @@ function F0 = multiBBNInf(Data, R, knownVars,infNodes,increArray,nodePos)
 %                        histogram for (e.g. for years [10 20 30 40])
 %           nodePos : indicator array where nodePos(1) indicates the node number
 %                     for the incremented variable (as designated in ParentCell) 
-%                     and nodePos(2) indicates the position of the output variable 
-%                     to plot as a histogram.
 %           plotInd : indicates whether to plot the generated distributions
 %                     as histograms.
 %

@@ -66,14 +66,16 @@ increArray = 1:4:25;
 knownVars = [26,3,26,1,3,0.0009,0.0009];
 % position of coral cover within the unknown variables can be calculated as
 % (length(Names)-length(knownVars)-3)
-nodePos = [3,(length(Names)-length(knownVars)-3)];
+hist_ind = (length(Names)-length(knownVars)-3);
+
+nodePos = 3;
 F1 = multiBBNInf(Data, R, knownVars,inf_cells,increArray,nodePos);
 figure;
 hold on
 for l = 1:length(increArray)
     hist_dat = F1{l};
     % plot the coral cover distribution as a histogram
-    h = histogram(hist_dat{nodePos(2)},'NumBins',30,'Normalization','probability');  
+    h = histogram(hist_dat{hist_ind},'NumBins',30,'Normalization','probability');  
 end
 hold off
 legend('year 1','year 5','year 9','year 13','year 17','year 21','year 25');
@@ -86,7 +88,7 @@ hold on
 for l = 1:length(increArray)
     hist_dat = F2{l};
     % plot the coral cover distribution as a histogram
-    h = histogram(hist_dat{nodePos(2)},'NumBins',30,'Normalization','probability');  
+    h = histogram(hist_dat{hist_ind},'NumBins',30,'Normalization','probability');  
 end
 hold off
 legend('year 1','year 5','year 9','year 13','year 17','year 21','year 25');
@@ -101,20 +103,21 @@ plotInd = 0;
 
 % storage for probabilities
 Fp = zeros(1,length(increArray));
-nodePos = [3,(length(Names)-length(knownVars)-3)];
+hist_ind = (length(Names)-length(knownVars)-3);
+
 increArray = 1:26;
 knownVars = [60,3,10,1,3,0.0009,0.0009];
 
 % position of coral cover within the unknown variables can be calculated as
 % (length(Names)-length(knownVars)-3)
-nodePos = [4,(length(Names)-length(knownVars)-3)];
+nodePos = 4;
 F1 = multiBBNInf(Data, R, knownVars,inf_cells,increArray,nodePos);
 
 val = 0.7;
 % loop over 26 sites
 for l = 1:length(increArray)
     f = F1{l};
-    Fp(l) = calcBBNProb(f{nodePos(2)},val,1);
+    Fp(l) = calcBBNProb(f{hist_ind},val,1);
 end
 
 % RCP 45 for comparison
@@ -127,7 +130,7 @@ F2 = multiBBNInf(Data, R, knownVars,inf_cells,increArray,nodePos);
 % loop over 26 sites
 for l = 1:length(increArray)
     f = F2{l};
-    Fp2(l) = calcBBNProb(f{nodePos(2)},val,1);
+    Fp2(l) = calcBBNProb(f{hist_ind},val,1);
 end
 
 

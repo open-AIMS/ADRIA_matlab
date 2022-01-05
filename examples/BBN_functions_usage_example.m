@@ -51,7 +51,7 @@ knownVars = [26,1,3,0.0005,0.0005,0,0,0];
 increArray = 10:10:50;
 % the incremented var (years) is in node 2 and the output variable (coral
 % cover) is the first output unknown variable)
-nodePos = [2,1];
+nodePos = 2;
 
 F0 = multiBBNInf(Data, R, knownVars,inf_cells,increArray,nodePos);
 
@@ -60,7 +60,7 @@ hold on
     for l = 1:length(increArray)
         hist_dat = F0{l};
         % plot the coral cover distribution as a histogram
-        h = histogram(hist_dat{nodePos(2)},'NumBins',30,'Normalization','probability');  
+        h = histogram(hist_dat{1},'NumBins',30,'Normalization','probability');  
     end
 hold off
 legend('year 10','year 20','year 30','year 40','year 50');
