@@ -1,4 +1,4 @@
-function F0 = multiBBNInf(Data, R, knownVars,infNodes,increArray,nodePos,plotInd)
+function F0 = multiBBNInf(Data, R, knownVars,infNodes,increArray,nodePos)
 % Plots a series of histograms based on a BBN inference given a vector of known variables,
 % a vector of the incremented variable, and information about the BBN.
 % structure.
@@ -33,15 +33,5 @@ function F0 = multiBBNInf(Data, R, knownVars,infNodes,increArray,nodePos,plotInd
             R,Data,'full',1000,'near');   
     end
     
-    if plotInd ==1
-    figure;
-    hold on
-    for l = 1:length(increArray)
-        hist_dat = F0{l};
-        % plot the coral cover distribution as a histogram
-        h = histogram(hist_dat{nodePos(2)},'NumBins',30,'Normalization','probability');  
-    end
-    hold off
-    end
 end
 
