@@ -119,11 +119,13 @@ params.growth_rate = reshape(r', [], 1);
 % over the year (used in 'growthODE4()'.
 
 %Scope for fecundity as a function of colony area (Hall and Hughes 1996)
-fec_par_a = [1.02; 1.02; 1.06; 1.06; 0.85; 0.87]; %fecundity parameter a 
-fec_par_b = [1.28; 1.28; 1.05; 1.05; 1.20; 1.22]; %fecundity parameter b 
+fec_par_a = [1.02; 1.02; 1.69; 1.69; 0.86; 0.86]; %fecundity parameter a 
+fec_par_b = [1.28; 1.28; 1.05; 1.05; 1.21; 1.21]; %fecundity parameter b 
+%fecundity as a function of colony basal area (cm2) from Hall and Hughes 1996
 fec = exp(fec_par_a + fec_par_b.*log(colony_area_m2_from.*10^4));
-fec_m2 =fec.*colony_area_m2_from;
-params.fec = reshape(fec_m2', [], 1);
+fec_m2 = fec./colony_area_m2_from; %convert from per colony to per m2
+fec_m2_rel = fec_m2./ mean(fec_m2(:,5:6),2); %as a proportion of largest corals
+params.fec = reshape(fec_m2_rel', [], 1);
 
 %% Background mortality
 
@@ -143,8 +145,8 @@ mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
       0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
       0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
       0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
-      0.2, 0.10, 0.04, 0.04, 0.02, 0.02; ...   % small massives
-      0.2, 0.10, 0.04, 0.04, 0.02, 0.02];      % large massives
+      0.2, 0.04, 0.02, 0.02, 0.02, 0.02; ...   % small massives
+      0.2, 0.04, 0.02, 0.01, 0.01, 0.01];      % large massives
 
 params.mb_rate = reshape(mb', [], 1);
 

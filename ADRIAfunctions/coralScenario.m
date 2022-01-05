@@ -157,20 +157,25 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         p_step = tstep - 1; % previous timestep
         past_DHW_stress = dhw_scen(p_step, :); % last year's heat stress
 
-        % larval production per site
+        % relative scope for coral larval production per site
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
-
+        % for each species, site and year as a function of past heat exposure
+        
         Y_pstep = squeeze(Yout(p_step, :, :));  %size: species and sites
         
-        % fec = fecundityScope(Y_pstep); %calculates scope for coral fedundity 
-        % for each size class and at each site
-        
-        % for each species, site and year as a function of past heat exposure
+        fecundity_scope = fecundityScope(Y_pstep, coral_params); %calculates scope 
+        % for coral fedundity for each size class and at each site
+               
         % Note: Matrix format is nspecies * nsites, but the values repeat.
         %       Only the first entry for each taxa is intended to be used.
         %       Shape of this matrix is simply for convenience.
-        rec = (Y_pstep * TP_data) .* LPs;
+        %rec = (Y_pstep * TP_data) .* LPs;  %old version
+        
+        max_settler_density = 10; %more optimistic value than used by Bozec et al 2021
+        rel_cover_of_settlers = max_settler_density *pi*((1/100)^2);  
+        
+        rec = rel_cover_of_settlers *(fecundity_scope * TP_data) .* LPs;
 
         %% Setup MCDA before bleaching season
 
