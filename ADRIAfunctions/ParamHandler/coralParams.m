@@ -118,6 +118,13 @@ params.growth_rate = reshape(r', [], 1);
 % the cover equivalent because we assume coral sizes shift from edges to mean
 % over the year (used in 'growthODE4()'.
 
+%Scope for fecundity as a function of colony area (Hall and Hughes 1996)
+fec_par_a = [1.02; 1.02; 1.06; 1.06; 0.85; 0.87]; %fecundity parameter a 
+fec_par_b = [1.28; 1.28; 1.05; 1.05; 1.20; 1.22]; %fecundity parameter b 
+fec = exp(fec_par_a + fec_par_b.*log(colony_area_m2_from.*10^4));
+fec_m2 =fec.*colony_area_m2_from;
+params.fec = reshape(fec_m2', [], 1);
+
 %% Background mortality
 
 % coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress

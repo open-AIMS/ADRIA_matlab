@@ -161,8 +161,11 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
 
-        Y_pstep = squeeze(Yout(p_step, :, :));
-
+        Y_pstep = squeeze(Yout(p_step, :, :));  %size: species and sites
+        
+        % fec = fecundityScope(Y_pstep); %calculates scope for coral fedundity 
+        % for each size class and at each site
+        
         % for each species, site and year as a function of past heat exposure
         % Note: Matrix format is nspecies * nsites, but the values repeat.
         %       Only the first entry for each taxa is intended to be used.
