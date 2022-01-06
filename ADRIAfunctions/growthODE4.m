@@ -11,7 +11,7 @@ function Y = growthODE4(X, r, P, mb, rec, comp)
 % class up is based on the assumption that colony sizes within each size
 % bin are evenly distributed within bins. Transitions are then a simple
 % ratio of the change in colony size to the width of the bin. Similarly,
-% proporions of corals that do not change bin is 1 - transitions.
+% proportions of corals that do not change bin is 1 - transitions.
 %
 
 %Establish 6 coral size bins. Needed for structure and habitat (shelter).
@@ -31,13 +31,13 @@ P_x = repmat(k, size(r));
 Y = zeros(size(X));  % output matrix
 
 % Total cover of small massives and encrusting
-X_sm = sum(X(25:30, :));
+X_sm = sum(X(26:28, :));
 
 % Total cover of largest tabular Acropora
 X_tabular = (X(6, :) + X(12, :)); % this is for enhanced and unenhanced
 
 %Tabular Acropora Enhanced
-Y(1, :) = P_x(1, :) .* rec(1, :) - P_x(2, :) .* X(1, :) .* (r(1)  - X(1,:) .* mb(1));
+Y(1, :) = P_x(1, :) .* rec(1, :) - P_x(2, :) .* X(1, :) .* r(1)  - X(1,:) .* mb(1);
 Y(2, :) = P_x(2, :) .* X(1, :) .* r(1) - P_x(3, :) .* X(2, :) .* r(2) - X(2, :) .* mb(2);
 Y(3, :) = P_x(3, :) .* X(2, :) .* r(2) - P_x(4, :) .* X(3, :) .* r(3) - X(3, :) .* mb(3);
 Y(4, :) = P_x(4, :) .* X(3, :) .* r(3) - P_x(5, :) .* X(4, :) .* r(4) - X(4, :) .* mb(4);
@@ -70,11 +70,11 @@ Y(24, :) = P_x(24, :) .* X(23, :) .* r(23) + P_x(24, :) .* X(24, :) .* r(24) - X
 
 %small massives and encrusting Unenhanced
 Y(25, :) = P_x(25, :) .* rec(25, :) - P_x(26, :) .* X(25, :) .* r(25) - X(25,:) .* mb(25);
-Y(26, :) = P_x(26, :) .* X(25, :) .* r(25) - P_x(27, :) .*  X(26, :) .* r(26) - X(26, :) .* (mb(26)+ comp .* X_tabular);
-Y(27, :) = P_x(27, :) .* X(26, :) .* r(26) - P_x(28, :) .*  X(27, :) .* r(27) - X(27, :) .* (mb(27)+ comp .* X_tabular);
-Y(28, :) = P_x(28, :) .* X(27, :) .* r(27) - P_x(29, :) .*  X(28, :) .* r(28) - X(28, :) .* (mb(28)+ comp .* X_tabular);
-Y(29, :) = P_x(29, :) .* X(28, :) .* r(28) - P_x(30, :) .*  X(29, :) .* r(29) - X(29, :) .* (mb(29) + comp .* X_tabular);
-Y(30, :) = P_x(30, :) .* X(29, :) .* r(29) + P_x(30, :) .*  X(30, :) .* r(30) - X(30, :) .* (mb(30) + comp .* X_tabular); 
+Y(26, :) = P_x(26, :) .* X(25, :) .* r(25) - P_x(27, :) .*  X(26, :) .* r(26) - X(26, :) .* (mb(26) + comp .* X_tabular);
+Y(27, :) = P_x(27, :) .* X(26, :) .* r(26) - P_x(28, :) .*  X(27, :) .* r(27) - X(27, :) .* (mb(27) + comp .* X_tabular);
+Y(28, :) = P_x(28, :) .* X(27, :) .* r(27) - P_x(29, :) .*  X(28, :) .* r(28) - X(28, :) .* (mb(28) + comp .* X_tabular);
+Y(29, :) = P_x(29, :) .* X(28, :) .* r(28) - P_x(30, :) .*  X(29, :) .* r(29) - X(29, :) .* mb(29);
+Y(30, :) = P_x(30, :) .* X(29, :) .* r(29) + P_x(30, :) .*  X(30, :) .* r(30) - X(30, :) .* mb(30); 
 
 %Large massives Unenhanced
 Y(31, :) = P_x(31, :) .* rec(31, :) - P_x(32, :) .* X(31, :) .* r(31) - X(31,:) .* mb(31);

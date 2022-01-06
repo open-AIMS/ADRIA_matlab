@@ -125,8 +125,10 @@ Y = coralScenario(new_interv_opts, new_criteria_opts, coral_params, new_sim_opts
 
 Y2 = zeros(25,6,26);
 for sp = 1:6
-    Y2(:,sp,:) = sum(Y.C(:,6*sp-5:sp*6,:),2); 
+    Y2(:,sp,:) = sum(Y.all(:,6*sp-5:sp*6,:),2); 
 end
+
+
 figure; 
 LO = tiledlayout(2,3, 'TileSpacing','Compact');
 
