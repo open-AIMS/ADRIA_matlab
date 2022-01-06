@@ -162,7 +162,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
         % for each species, site and year as a function of past heat exposure
         
-        Y_pstep = squeeze(Yout(p_step, :, :));  %size: species and sites
+        Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
         
         fecundity_scope = fecundityScope(Y_pstep, coral_params); %calculates scope 
         % for coral fedundity for each size class and at each site

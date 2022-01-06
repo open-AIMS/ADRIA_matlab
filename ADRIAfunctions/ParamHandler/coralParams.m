@@ -68,11 +68,11 @@ params.class_id = reshape(repmat(1:nclasses, 1, nclasses), nspecies, []);
 %First express as number of colonies per size class per 100m2 of reef
 base_coral_numbers = ...
     [0, 0, 0, 0, 0, 0; ...              % Tabular Acropora Enhanced
-     2000, 100, 50, 20, 20, 5; ... % Tabular Acropora Unenhanced
+     2000, 200, 100, 50, 30, 10; ... % Tabular Acropora Unenhanced
      0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
-     2000, 100, 50, 20, 20, 5; ... % Corymbose Acropora Unenhanced
-     2000, 100, 20, 20, 10, 0; ... % small massives
-     2000, 500, 20, 10, 5, 3];      % large massives
+     2000, 200, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
+     2000, 500, 200, 200, 100, 0; ... % small massives
+     2000, 500, 20, 20, 20, 10];      % large massives
 
 % To convert to covers we need to first calculate the area of colonies,
 % multiply by how many corals in each bin, and divide by reef area
@@ -99,7 +99,7 @@ linear_extension = ...
     1, 3, 4.4, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
     1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Enhanced
     1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Unenhanced
-    1, 1, 1, 0.9, 0.8, 0.8; ...    % small massives
+    1, 1, 1, 1, 1, 1; ...    % small massives
     1, 1, 1, 1, 1.2, 1.2];       % large massives
 
 % Convert linear extensions to delta coral in two steps.
@@ -145,7 +145,7 @@ mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
       0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
       0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
       0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
-      0.2, 0.04, 0.02, 0.02, 0.02, 0.02; ...   % small massives
+      0.2, 0.04, 0.02, 0.02, 0.02, 0.02; ...   % small massives and encrusting
       0.2, 0.04, 0.02, 0.01, 0.01, 0.01];      % large massives
 
 params.mb_rate = reshape(mb', [], 1);

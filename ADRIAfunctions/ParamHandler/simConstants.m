@@ -43,6 +43,7 @@ params.LPDprm2 = 5; % parameter offsetting LPD curve
 
 % competition: probability that large tabular Acropora overtop small massives
 params.comp = 0.8;
+%params.max_settler_density = 20; %per m2, more optimistic than Bozec et al 2021
 
 %% Ecosystem service parameters
 params.evcult = 0.5; % assumes that evenness counts half for cultural ES

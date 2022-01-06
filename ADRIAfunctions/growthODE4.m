@@ -30,11 +30,11 @@ P_x = repmat(k, size(r));
 
 Y = zeros(size(X));  % output matrix
 
-% Total size of small massives
+% Total cover of small massives and encrusting
 X_sm = sum(X(25:30, :));
 
-% Total size of largest enhanced tabular and corymbose acropora
-X_enhanced = (X(6, :) + X(12, :));
+% Total cover of largest tabular Acropora
+X_tabular = (X(6, :) + X(12, :)); % this is for enhanced and unenhanced
 
 %Tabular Acropora Enhanced
 Y(1, :) = P_x(1, :) .* rec(1, :) - P_x(2, :) .* X(1, :) .* (r(1)  - X(1,:) .* mb(1));
@@ -68,15 +68,13 @@ Y(22, :) = P_x(22, :) .* X(21, :) .* r(21) - P_x(23, :) .* X(22, :) .* r(22) - X
 Y(23, :) = P_x(23, :) .* X(22, :) .* r(22) - P_x(24, :) .* X(23, :) .* r(23) - X(23, :) .* mb(23);
 Y(24, :) = P_x(24, :) .* X(23, :) .* r(23) + P_x(24, :) .* X(24, :) .* r(24) - X(24, :) .* mb(24);
 
-%small massives Unenhanced
+%small massives and encrusting Unenhanced
 Y(25, :) = P_x(25, :) .* rec(25, :) - P_x(26, :) .* X(25, :) .* r(25) - X(25,:) .* mb(25);
-Y(26, :) = P_x(26, :) .* X(25, :) .* r(25) - P_x(26, :) .*  X(25, :) .* r(25) - X(26, :) .* (mb(26)+ comp .* X_enhanced);
-Y(27, :) = P_x(27, :) .* X(26, :) .* r(26) - P_x(27, :) .*  X(26, :) .* r(26) - X(27, :) .* (mb(27)+ comp .* X_enhanced);
-Y(28, :) = P_x(28, :) .* X(27, :) .* r(27) - P_x(28, :) .*  X(27, :) .* r(27) - X(28, :) .* (mb(28)+ comp .* X_enhanced);
-Y(29, :) = P_x(29, :) .* X(28, :) .* r(28) + P_x(29, :) .*  X(29, :) .* r(29) - X(29, :) .* (mb(29) + comp .* X_enhanced);
-
-% Unnecessary as Y is initialized to all zeros
-% Y(30, :) = 0; %small massives and encrusting constrained to less than 40 cm diameter
+Y(26, :) = P_x(26, :) .* X(25, :) .* r(25) - P_x(27, :) .*  X(26, :) .* r(26) - X(26, :) .* (mb(26)+ comp .* X_tabular);
+Y(27, :) = P_x(27, :) .* X(26, :) .* r(26) - P_x(28, :) .*  X(27, :) .* r(27) - X(27, :) .* (mb(27)+ comp .* X_tabular);
+Y(28, :) = P_x(28, :) .* X(27, :) .* r(27) - P_x(29, :) .*  X(28, :) .* r(28) - X(28, :) .* (mb(28)+ comp .* X_tabular);
+Y(29, :) = P_x(29, :) .* X(28, :) .* r(28) - P_x(30, :) .*  X(29, :) .* r(29) - X(29, :) .* (mb(29) + comp .* X_tabular);
+Y(30, :) = P_x(30, :) .* X(29, :) .* r(29) + P_x(30, :) .*  X(30, :) .* r(30) - X(30, :) .* (mb(30) + comp .* X_tabular); 
 
 %Large massives Unenhanced
 Y(31, :) = P_x(31, :) .* rec(31, :) - P_x(32, :) .* X(31, :) .* r(31) - X(31,:) .* mb(31);
