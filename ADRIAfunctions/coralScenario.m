@@ -176,10 +176,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
         basal_area_per_settler = pi*((1/100)^2); % in m2 assuming 2 cm diameter
         
-        potential_cover_of_settlers = max_settler_density * basal_area_per_settler ...
+        potential_settler_cover = max_settler_density * basal_area_per_settler ...
                                 * density_ratio_of_larvae_to_settlers;
         
-        rec = potential_cover_of_settlers *(fecundity_scope * TP_data); %.* LPs';
+        rec = potential_settler_cover * (fecundity_scope * TP_data); %.* LPs';
         
         
         
