@@ -26,12 +26,12 @@ coral_spec = coralParams();  % load default parameter table
 coral_ids = coral_spec.coral_id;
 
 % get last N columns, which relate to perturbable parameters
-params = coral_spec(:, 6:end);
 base_p_names = string(coral_spec.Properties.VariableNames(6:end))';
 
 n_corals = length(coral_ids);
 n_param_names = length(base_p_names);
 
+% Set arbitrary bounds +/- 20% of best guess values
 i = 1;
 name = string.empty;
 defaults = zeros(n_corals * n_param_names, 1);

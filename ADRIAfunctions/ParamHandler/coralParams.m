@@ -39,21 +39,27 @@ size_cm = [2; 5; 10; 20; 40; 80];  % centimeters
 size_class_means_from = [1; 3.5; 7.5; 15; 30; 60];
 size_class_means_to = [size_class_means_from(2:end); 100.0];
 
-% Create combinations of taxa names and size classes
-[sc, tn] = ndgrid(size_cm, taxa_names);
-taxa_size_ids = join([tn(:), sc(:)], "_");
-
-params.coral_id = taxa_size_ids;
-params.name = humanReadableName(tn(:), true);
-params.size_cm = sc(:);
-
 % total number of "species" modelled in the current version.
-nspecies = height(params);
-
+nspecies = length(taxa_names) * length(size_cm);
 nclasses = length(size_cm);
-params.taxa_id = reshape(repmat(1:nclasses, nclasses, 1), nspecies, []);
 
-params.class_id = reshape(repmat(1:nclasses, 1, nclasses), nspecies, []);
+% params.taxa_id = reshape(repmat(1:nclasses, nclasses, 1), nspecies, []);
+% 
+% params.class_id = reshape(repmat(1:nclasses, 1, nclasses), nspecies, []);
+
+% Create combinations of taxa names and size classes
+
+tn = repmat(taxa_names, 1, nclasses)';
+tn = tn(:);
+params.name = humanReadableName(tn(:), true);
+
+taxa_ids = reshape(repmat(1:nclasses, nclasses, 1), nspecies, []);
+params.taxa_id = taxa_ids;
+
+params.class_id = repmat(1:nclasses, 1, nclasses)';
+params.size_cm = repmat(size_cm, nclasses, 1);
+
+params.coral_id = join([tn(:), params.taxa_id, params.class_id], "_");
 
 % rec = [0.00, 0.01, 0.00, 0.01, 0.01, 0.01];
 % params.recruitment_factor = repmat(rec, 1, nclasses)';

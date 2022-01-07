@@ -18,12 +18,12 @@ combined_opts = [inter_opts; criteria_opts];
 % Create selection table based on lower/upper parameter bounds
 p_sel = table;
 for p = 1:height(combined_opts)
-    a = combined_opts.lower_bound{p};
-    b = combined_opts.upper_bound{p};
+    a = combined_opts.lower_bound(p);
+    b = combined_opts.upper_bound(p);
     
     selection = (b - a).*rand(N, 1) + a;
     
-    p_sel.(combined_opts.name{p}) = selection;
+    p_sel.(combined_opts.name(p)) = selection;
 end
 
 %% Parameter prep

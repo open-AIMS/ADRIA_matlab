@@ -7,8 +7,13 @@ inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
 
 % Parameters that are treated as constants
-coral_params = coralParams();
+coral_params = coralDetails();
 sim_constants = simConstants();
+
+% list of name->value for coral parameters
+names = coral_params.name;
+default_values = coral_params.raw_defaults;
+param_table = array2table(default_values', 'VariableNames', names);
 
 
 %% Ask for which MCDA algorithm to use
@@ -119,8 +124,11 @@ d_scens = dhw_scens(:, :, rcp_scens);
 
 %% Run ADRIA
 % Run a single simulation
-Y = coralScenario(new_interv_opts, new_criteria_opts, coral_params, new_sim_opts, ...
-              TP_data, site_ranks, strongpred, ...
+global rec_log
+rec_log = zeros(25, 36, 26);
+coral_spec = coralParams();
+Y = coralScenario(new_interv_opts, new_criteria_opts, param_table, new_sim_opts, ...
+              coral_spec, TP_data, site_ranks, strongpred, ...
               w_scens, d_scens, alg_ind);
 
 Y2 = zeros(25,6,26);
@@ -162,4 +170,30 @@ title('Large massives')
 
 xlabel(LO,'Years')
 ylabel(LO,'Cover (prop)')
-          
+
+
+figure
+h = heatmap(squeeze(rec_log(1, 25:end, :)));
+lim = caxis;
+caxis([0.0, 0.005]);
+ylabel("Species");
+xlabel("Sites");
+title("Time step 1");
+
+fr = getframe(gcf);
+im = frame2im(fr);
+[imind,cm] = rgb2ind(im,256);
+imwrite(imind,cm,'recruitment_log_massives.gif','gif', 'Loopcount',inf);
+
+for i = 2:25
+    title(strcat("Time step ", num2str(i)));
+    h.ColorData = squeeze(rec_log(i, 25:end, :));
+
+    % Capture the plot as an image 
+    fr = getframe(gcf);
+    im = frame2im(fr); 
+    [imind,cm] = rgb2ind(im,256);
+    
+    % Write to the GIF File
+    imwrite(imind,cm,'recruitment_log_massives.gif','gif','WriteMode','append');
+end

@@ -13,7 +13,7 @@ coral_params = coralDetails();
 sim_constants = simConstants();
 
 % Create a single table of all parameters that can be perturbed
-combined_opts = [inter_opts; criteria_opts];
+combined_opts = [inter_opts; criteria_opts; coral_params];
 
 %% 2. Build a parameter table using default values
 % Extract the default values directly from the parameter tables
@@ -24,8 +24,8 @@ name_values = combined_opts(:, {'name', 'raw_defaults'});
 names = name_values.name;
 default_values = name_values.raw_defaults;
 
-% Final list of name->value 
-param_table = cell2table(default_values', 'VariableNames', cellstr(names));
+% Final list of name->value
+param_table = array2table(default_values', 'VariableNames', names);  % cell2table(default_values', 'VariableNames', cellstr(names));
 
 % Resulting table consists of 1 row and `P` columns, where `P` is the 
 % number of parameters, and "1" relates to the scenario (we only want 1).
@@ -70,8 +70,10 @@ d_scens = dhw_scens(:, :, rcp_scens);
 
 %% Run ADRIA
 alg_ind = 1;  % MCDA algorithm choice
+coral_spec = coralParams();
 
 % Run a single simulation
-Y = coralScenario(interv_vals, criteria_vals, coral_params, sim_constants, ...
+Y = coralScenario(interv_vals, criteria_vals, param_table, sim_constants, ...
+                  coral_spec, ...
                   TP_data, site_ranks, strongpred, ...
                   w_scens, d_scens, alg_ind);

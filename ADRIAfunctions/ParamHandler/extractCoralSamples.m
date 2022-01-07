@@ -1,5 +1,5 @@
 function param_spec = extractCoralSamples(samples, param_spec)
-% Modify provided coral parameter table with sampled values.
+% Extract coral specific sample values from parameter table.
 %
 % Input:
 %     samples    : table,
