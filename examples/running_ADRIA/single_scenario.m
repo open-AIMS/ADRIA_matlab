@@ -1,6 +1,6 @@
 % Example script running a single scenario.
 
-rng(101) % set seed for reproducibility
+%rng(101) % set seed for reproducibility
 
 % Collect details of parameters that can be varied
 inter_opts = interventionDetails();

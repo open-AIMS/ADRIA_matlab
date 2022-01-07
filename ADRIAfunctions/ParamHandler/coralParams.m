@@ -127,16 +127,16 @@ fec_m2 = fec./colony_area_m2_from; %convert from per colony area to per m2
 fec_m2_rel = fec_m2./ mean(fec_m2(:,3:6),2); %as a proportion of adult corals
 params.fec = reshape(fec_m2_rel', [], 1);
 
-%% Background mortality
+%% Mortality
 
-% coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
+% Wave mortality risk : wave damage for the 90 percentile of routine wave stress
 wavemort90 = ...
-   [0, 0, 0.00, 0.02, 0.03, 0.05; ... % Tabular Acropora Enhanced
-    0, 0, 0.00, 0.02, 0.03, 0.05; ...  % Tabular Acropora Unenhanced
-    0, 0, 0.00, 0.01, 0.02, 0.03; ...  % Corymbose Acropora Enhanced
-    0, 0, 0.00, 0.01, 0.02, 0.03; ...  % Corymbose Acropora Unenhanced
-    0, 0, 0.00, 0.00, 0.00, 0.00; ...  % Small massives
-    0, 0, 0.00, 0.00, 0.00, 0.00];     % Large massives
+   [0, 0, 0.00, 0.02, 0.05, 0.10; ... % Tabular Acropora Enhanced
+    0, 0, 0.00, 0.02, 0.05, 0.10; ...  % Tabular Acropora Unenhanced
+    0, 0, 0.00, 0.02, 0.03, 0.05; ...  % Corymbose Acropora Enhanced
+    0, 0, 0.00, 0.02, 0.04, 0.05; ...  % Corymbose Acropora Unenhanced
+    0, 0, 0.00, 0.02, 0.02, 0.02; ...  % Small massives
+    0, 0, 0.00, 0.02, 0.01, 0.01];     % Large massives
 
 params.wavemort90 = reshape(wavemort90', [], 1);
 
@@ -150,11 +150,13 @@ mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
 
 params.mb_rate = reshape(mb', [], 1);
 
+% Background rates of natural adaptation. User-defined natad rates will be 
+% added to these
 natad = [...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
-    0.05, 0.05, 0.05, 0.05, 0.05, 0.05; ...
+    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
+    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
+    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
+    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
     0.10, 0.10, 0.10, 0.10, 0.10, 0.10; ...
     0.10, 0.10, 0.10, 0.10, 0.10, 0.10];
 
