@@ -1,7 +1,18 @@
-function Y = coralEvennessADRIA(covers)  
+function [sumpsqr,Y] = coralEvennessADRIA(covers)  
 
-%%Calculate evenness across functional coral groups in ReefMod
-% X dimensions: time, species, sites, interventions, sims 
+% Inputs:
+%  covers: structure
+%  covers.all: array.  Dims: timesteps, species, sites, interventions, sims 
+%  covers.tab_acr: array. Dims: timesteps, sites, interventions, sims 
+%  covers.cor_acr: array. Dims: timesteps, sites, interventions, sims 
+%  covers.sml_enc: array. Dims: timesteps, sites, interventions, sims 
+%  covers.lrg_mas: array. Dims: timesteps, sites, interventions, sims
+%  covers.TC = TC; array. Dims: timesteps, sites, interventions, sims 
+
+% Calculates evenness across functional coral groups in ADRIA
+
+% filter negative values and values >1
+covers.all = min( max(covers.all, 0), 1);
 
 % Functional diversity metric 
 n = 4; %number of taxa

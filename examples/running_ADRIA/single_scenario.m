@@ -121,11 +121,20 @@ Y = coralScenario(new_interv_opts, new_criteria_opts, coral_params, new_sim_opts
               w_scens, d_scens, alg_ind);
 
 Y2 = zeros(25,6,26);
+
+%extract outputs from coralCovers() function for plotting
 for sp = 1:6
     Y2(:,sp,:) = sum(Y.all(:,6*sp-5:sp*6,:),2); 
 end
 
+%% Calculate coral evenness
+E = coralEvennessADRIA(Y);
 
+%% Extract juvenile corals (< 5 cm diameter)
+BC = Y.all(:,1:6:end,:) + Y.all(:,2:6:end,:);
+BC = squeeze(sum(BC,2));
+
+%% Plot coral covers over time and sites
 figure; 
 LO = tiledlayout(2,3, 'TileSpacing','Compact');
 
@@ -161,4 +170,20 @@ title('Large massives')
 
 xlabel(LO,'Years')
 ylabel(LO,'Cover (prop)')
-          
+      
+
+%% Plot coral evenness over time and sites
+figure; 
+plot(E);
+title('Coral Evenness')
+xlabel('Years')
+ylabel('Evenness (prop)')
+
+%% Plot juvenile corals (<5 cm diam) over time and sites
+figure; 
+plot(BC);
+title('Baby Corals')
+xlabel('Years')
+ylabel('Cover (prop)')
+ 
+      
