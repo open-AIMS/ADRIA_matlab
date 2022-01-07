@@ -166,9 +166,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         p_step = tstep - 1; % previous timestep
         past_DHW_stress = dhw_scen(p_step, :); % last year's heat stress
 
-        % larval productivity per site
+        % relative scope for coral larval production per site
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
-            LPdhwcoeff, DHWmaxtot, LPDprm2);
+            LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
+        % larval productivity per site
 
         Y_pstep = squeeze(Yout(p_step, :, :));
 
