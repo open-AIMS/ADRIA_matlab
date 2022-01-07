@@ -4,7 +4,7 @@ rng(101)
 %% Generate monte carlo samples
 
 % Number of scenarios
-N = 8;
+N = 3;
 num_reps = 3;  % Number of replicate RCP scenarios
 
 % Collect details of available parameters
