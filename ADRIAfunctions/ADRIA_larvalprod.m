@@ -9,6 +9,10 @@ function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff,
 %    LPdhwcoeff : float,
 %    DHWmaxtot : int, maximum DHW
 %    LPDprm2 : int, larval production parameter 2?
+
+
+% Notes:  need to apply this only to coral groups
+
 ad = assistadapt + tstep .* natad;
 
 tmp_ad = (1 - ad / DHWmaxtot);

@@ -157,19 +157,33 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         p_step = tstep - 1; % previous timestep
         past_DHW_stress = dhw_scen(p_step, :); % last year's heat stress
 
-        % larval production per site
+        % relative scope for coral larval production per site
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
-
-        Y_pstep = squeeze(Yout(p_step, :, :));
-
         % for each species, site and year as a function of past heat exposure
+        
+        Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
+        
+        fecundity_scope = fecundityScope2(Y_pstep, coral_params) %calculates scope 
+        % for coral fedundity for each size class and at each site
+               
         % Note: Matrix format is nspecies * nsites, but the values repeat.
         %       Only the first entry for each taxa is intended to be used.
         %       Shape of this matrix is simply for convenience.
-        rec = (Y_pstep * TP_data) .* LPs;
-
-        %% Setup MCDA before bleaching season
+        %rec = (Y_pstep * TP_data) .* LPs;  %old version
+        
+        max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
+        density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+        basal_area_per_settler = pi*((1/100)^2); % in m2 assuming 2 cm diameter
+        
+        potential_settler_cover = max_settler_density * basal_area_per_settler ...
+                                * density_ratio_of_larvae_to_settlers;
+        
+        rec = potential_settler_cover * (fecundity_scope * TP_data); %.* LPs';
+        
+        
+        
+              %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
         dhw_step = dhw_ss(tstep, :); % subset of DHW for given timestep
@@ -234,11 +248,12 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % (2) 'species' across sites and time - in post-hoc analyses we divide
     % these into real species and their size classes
 
-    [TC, C, E, S] = reefConditionMetrics(Yout);
-
+%    [TC, C, E, S] = reefConditionMetrics(Yout);
+    covers = coralCovers(Yout);
     % seedlog and shadelog are omitted for now
-    Y = struct('TC', TC, ...
-        'C', C, ...
-        'E', E, ...
-        'S', S);
+%     Y = struct('TC', TC, ...
+%         'C', C, ...
+%         'E', E, ...
+%         'S', S);
+Y = covers;
 end

@@ -15,7 +15,7 @@ function [TC,C,E,S] = reefConditionMetrics(covsim)
 % calcification from eReefs
 
 C = covsim; % dimensions: time, species, sites, interventions, sims 
-TC = sum(C,2); %sum over species
+TC = sum(C,2); %sum over all species and size classes
 C1 = C(:,1:6,:,:,:) + C(:,7:12,:,:,:); %Adding enhanced to unenhanced tabular Acropora
 C2 = C(:,13:18,:,:,:) + C(:,19:24,:,:,:); %Adding %enhanced to unenhanced corymbose Acropora 
 C3 = C(:,25:30,:,:,:); %Encrusting and small massives 
