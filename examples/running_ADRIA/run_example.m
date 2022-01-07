@@ -10,9 +10,13 @@ num_reps = 3;  % Number of replicate RCP scenarios
 % Collect details of available parameters
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
+coral_opts = coralDetails();
+
+% Constant values across all simulations
+sim_constants = simConstants();
 
 % Create main table listing all available parameter options
-combined_opts = [inter_opts; criteria_opts];
+combined_opts = [inter_opts; criteria_opts; coral_opts];
 
 % Generate samples using simple monte carlo
 % Create selection table based on lower/upper parameter bounds
@@ -31,12 +35,12 @@ end
 % Creating dummy permutations for core ADRIA parameters
 % (environmental and ecological parameter values etc)
 % This process will be replaced
-[params, ecol_params] = ADRIAparms();
-param_tbl = struct2table(params);
-ecol_tbl = struct2table(ecol_params);
-
-param_tbl = repmat(param_tbl, N, 1);
-ecol_tbl = repmat(ecol_tbl, N, 1);
+% [params, ecol_params] = ADRIAparms();
+% param_tbl = struct2table(params);
+% ecol_tbl = struct2table(ecol_params);
+% 
+% param_tbl = repmat(param_tbl, N, 1);
+% ecol_tbl = repmat(ecol_tbl, N, 1);
 
 % Convert sampled values to ADRIA usable values
 % Necessary as samplers expect real-valued parameters (e.g., floats)
@@ -49,8 +53,9 @@ converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-interv_scens = u_ss(:, 1:9);  % intervention scenarios
-criteria_weights = u_ss(:, 10:end);
+interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
+criteria_weights = converted_tbl(:, 10:18);
+coral_vals = converted_tbl(:, 19:end);
 
 % use order-ranking for example
 alg_ind = 1;
@@ -83,7 +88,7 @@ w_scens = wave_scens(:, :, rcp_scens);
 d_scens = dhw_scens(:, :, rcp_scens);
 
 tic
-Y = runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
+Y = runADRIA(interv_scens, criteria_weights, coral_opts, sim_constants, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
                  w_scens, d_scens, alg_ind);
 tmp = toc;

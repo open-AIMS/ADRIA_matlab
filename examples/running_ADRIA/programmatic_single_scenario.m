@@ -46,8 +46,9 @@ param_table(1, 'Seed2') = {50000};
 % number of parameters, and their location in the table is not yet
 % finalized. Extracting parameters by name is possible, but would incur
 % a slight runtime cost.
-interv_vals = param_table(:, 1:9);
-criteria_vals = param_table(:, 10:end);
+interv_scens = param_table(:, 1:9);  % intervention scenarios
+criteria_weights = param_table(:, 10:18);
+coral_vals = param_table(:, 19:end);
 
 %% Prep other inputs
 
@@ -70,10 +71,10 @@ d_scens = dhw_scens(:, :, rcp_scens);
 
 %% Run ADRIA
 alg_ind = 1;  % MCDA algorithm choice
-coral_spec = coralParams();
+coral_spec = coralSpec();
 
 % Run a single simulation
-Y = coralScenario(interv_vals, criteria_vals, param_table, sim_constants, ...
+Y = coralScenario(interv_scens, criteria_weights, coral_vals, sim_constants, ...
                   coral_spec, ...
                   TP_data, site_ranks, strongpred, ...
                   w_scens, d_scens, alg_ind);

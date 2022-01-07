@@ -126,7 +126,7 @@ d_scens = dhw_scens(:, :, rcp_scens);
 % Run a single simulation
 global rec_log
 rec_log = zeros(25, 36, 26);
-coral_spec = coralParams();
+coral_spec = coralSpec();
 Y = coralScenario(new_interv_opts, new_criteria_opts, param_table, new_sim_opts, ...
               coral_spec, TP_data, site_ranks, strongpred, ...
               w_scens, d_scens, alg_ind);
