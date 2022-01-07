@@ -45,10 +45,10 @@ name = [
 defaults = [
     0;  % Guided
     3;  % PrSites
-    10000;  % Seed1
-    0;  % Seed2
+    1000;  % Seed1
+    1000;  % Seed2
     0;  % SRM
-    6;  % Aadpt
+    0;  % Aadpt
     0.05;  % Natad
     10;  % Seedyrs
     10;  % Shadeyrs
