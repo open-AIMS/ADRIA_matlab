@@ -57,15 +57,12 @@ prompt = cell(height(sim_names), 1);
 definput = zeros(height(sim_names), 1);
 for n = 1:length(sim_names)
     field_name = sim_names(n);
-    if contains(field_name, 'psg')
+    if contains(field_name, 'psg') || ...
+            contains(field_name, 'beta') || ...
+            contains(field_name, 'gompertz')
         continue
     end
-    if contains(field_name, 'beta')
-        continue
-    end
-    if field_name{1} == 'p'
-        continue
-    end
+
     prompt(n) = field_name;
     definput(n) = sim_constants.(field_name{1});
 end
@@ -76,7 +73,7 @@ definput = string(definput(~definput==0));
 dlgtitle = 'Simulation Options';
 user_sim_opts = inputdlg(prompt, dlgtitle, dims, definput);
 
-% Assign new values
+% Assign new values (again, skipping psg, beta, and p)
 new_sim_opts = struct();
 i = 1;
 for n = 1:length(sim_names)
@@ -84,7 +81,7 @@ for n = 1:length(sim_names)
     
     is_psg = contains(field_name, 'psg');
     is_beta = contains(field_name, 'beta');
-    is_p = field_name{1} == "p";
+    is_p = contains(field_name, 'gompertz');
     if is_psg || is_beta || is_p
         new_sim_opts.(field_name{1}) = sim_constants.(field_name{1});
         continue
@@ -133,8 +130,10 @@ Y = coralScenario(new_interv_opts, new_criteria_opts, param_table, new_sim_opts,
 
 Y2 = zeros(25,6,26);
 for sp = 1:6
-    Y2(:,sp,:) = sum(Y.C(:,6*sp-5:sp*6,:),2); 
+    Y2(:,sp,:) = sum(Y.all(:,6*sp-5:sp*6,:),2); 
 end
+
+
 figure; 
 LO = tiledlayout(2,3, 'TileSpacing','Compact');
 
