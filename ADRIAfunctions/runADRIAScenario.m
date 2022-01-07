@@ -107,7 +107,6 @@ function Y = runADRIAScenario(interv, criteria, params, vital_params, ...
 
     mwaves(mwaves < 0) = 0;
     mwaves(mwaves > 1) = 1;
-    
     % Pre-calculate proportional survivors from wave damage
     Sw_t = 1 - mwaves;
 
@@ -135,8 +134,9 @@ function Y = runADRIAScenario(interv, criteria, params, vital_params, ...
     e_mb = reshape(mort_rate.',1,[]);  %background coral mortality
     e_p = vital_params.p;  % Gompertz shape parameters for bleaching
     
-    % ADRIA_36CoralGroups(X, r, P, mb, rec, comp)
-    ode_func = @(t, X) ADRIA4groupsODE(X, e_r, e_P, e_mb);
+    %  ADRIA4groupsODE(X, e_r, e_P, e_mb); 
+    ode_func = @(t, X) 
+    %ADRIA_36CoralGroups(X, r, P, mb, rec, comp);
 
     neg_e_p1 = -e_p(1);  % setting constant values for use in loop
     neg_e_p2 = -e_p(2);
