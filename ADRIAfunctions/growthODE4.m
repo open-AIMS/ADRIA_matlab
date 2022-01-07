@@ -1,5 +1,11 @@
 function Y = growthODE4(X, r, P, mb, rec, comp)
 
+% Inputs:   X, array, coral state. Dimensions: nspecies (36) by nsites (26)
+%           r: array, growth rates (transitions). Dimensions: nspecies
+%           mb: array, mortality rates (background). Dimensions: nspecies
+%           P: scalar, max cover. Will be changed to a site function
+%           rec: array, recruitment. Dimensions: ngroups (6) by sites (26)
+
 % coral parameter values are defined in 'coralParams()'
 % X is relative cover of 6 coral groups in 6 size classes
 % r is the transition of relative covers between size classes
@@ -9,8 +15,14 @@ function Y = growthODE4(X, r, P, mb, rec, comp)
 % Proportions of corals within a size class transitioning to the next size
 % class up (r) is based on the assumption that colony sizes within each size
 % bin are evenly distributed within bins. Transitions are then a simple
-% ratio of the change in colony size to the width of the bin. 
+% ratio of the change in colony size to the width of the bin. See
+% coralParms for further explanation of these coral metrics. 
 
+%Note that recruitment pertains to coral groups (n = 6) and represents 
+% the contribution to the cover of the smallest size class within each
+% group.  While growth and mortality metrics pertain to groups (6) as well 
+% as size classes (6) across all sites (total of 36 by 26), recruitment is
+% a 6 by 26 array. 
 
 X = reshape(X, [36, 26]); %reshape(X, size(rec));  %why are we reshaping X here?
 
@@ -72,10 +84,10 @@ Y(30, :) = P_x(30, :) .* X(29, :) .* r(29) + P_x(30, :) .*  X(30, :) .* r(30) - 
 
 %Large massives Unenhanced
 Y(31, :) = P_x(31, :) .* rec(6, :) - P_x(32, :) .* X(31, :) .* r(31) - X(31,:) .* mb(31);
-Y(32, :) = P_x(32, :) .* X(31, :) .* r(31) - P_x(32, :) .* X(31, :) .* r(31) - X(32, :) .* mb(32);
-Y(33, :) = P_x(33, :) .* X(32, :) .* r(32) - P_x(33, :) .* X(32, :) .* r(32) - X(33, :) .* mb(33);
-Y(34, :) = P_x(34, :) .* X(33, :) .* r(33) - P_x(34, :) .* X(33, :) .* r(33) - X(34, :) .* mb(34);
-Y(35, :) = P_x(35, :) .* X(28, :) .* r(28) - P_x(35, :) .* X(34, :) .* r(34) - X(35, :) .* mb(35);
+Y(32, :) = P_x(32, :) .* X(31, :) .* r(31) - P_x(33, :) .* X(32, :) .* r(32) - X(32, :) .* mb(32);
+Y(33, :) = P_x(33, :) .* X(32, :) .* r(32) - P_x(34, :) .* X(33, :) .* r(33) - X(33, :) .* mb(33);
+Y(34, :) = P_x(34, :) .* X(33, :) .* r(33) - P_x(35, :) .* X(34, :) .* r(34) - X(34, :) .* mb(34);
+Y(35, :) = P_x(35, :) .* X(34, :) .* r(34) - P_x(36, :) .* X(35, :) .* r(35) - X(35, :) .* mb(35);
 Y(36, :) = P_x(36, :) .* X(35, :) .* r(35) + P_x(36, :) .* X(36, :) .* r(36) - X(36, :) .* mb(36);
 
 % constrain between 0 and max cover
