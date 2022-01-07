@@ -1,4 +1,4 @@
-function Y = fecundityScope(Y_pstep,coral_params)
+function Y = fecundityScope_obsolete(Y_pstep,coral_params)
 % The scope that different coral size classes have for .
 %
 % Inputs:

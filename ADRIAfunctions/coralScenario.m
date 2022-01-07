@@ -164,7 +164,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         
         Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
         
-        fecundity_scope = fecundityScope2(Y_pstep, coral_params) %calculates scope 
+        fecundity_scope = fecundityScope2(Y_pstep, coral_params); %calculates scope 
         % for coral fedundity for each size class and at each site
                
         % Note: Matrix format is nspecies * nsites, but the values repeat.
@@ -181,8 +181,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         
         rec = potential_settler_cover * (fecundity_scope * TP_data); %.* LPs';
         
-        
-        
+                
               %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
