@@ -1,7 +1,8 @@
 % Example script illustrating differences in algorithm performance for the
 % total coral cover metric (shows how algorithm choice could be optimised
 % for a given intervention scenario)
-
+nalgs = 4;
+nmetrics = 3;
 example_file = 'Inputs/MCDA_example.nc';
 if isfile(example_file)
     % Load example data from file if pre-prepared
@@ -9,16 +10,14 @@ if isfile(example_file)
     alg_cont_E = ncread(example_file, 'E');
     alg_cont_S = ncread(example_file, 'S');
 else
-    % timesteps, n_algs, n_scenarios, n_metrics
-    results = zeros(25, 3, 8, 3);
-
-    for al = 1:3
+   
         %% Generate monte carlo samples
 
         % Number of scenarios
         N = 8;
         num_reps = 50;  % Number of replicate RCP scenarios
-
+        % timesteps, n_algs, n_scenarios, n_metrics
+         results = zeros(25, nalgs, N, nmetrics);
         % Collect details of available parameters
         inter_opts = interventionDetails();
         criteria_opts = criteriaDetails();
@@ -37,6 +36,7 @@ else
 
             p_sel.(combined_opts.name{p}) = selection;
         end
+    
 
         %% Parameter prep
 
@@ -55,17 +55,19 @@ else
         % where as in practice ADRIA makes use of integer and categorical
         % parameters
         converted_tbl = convertScenarioSelection(p_sel, combined_opts);
-
+       
+        % Optional step: Extract unique scenarios
+        [u_ss, u_rows, group_idx] = mapDuplicateScenarios(converted_tbl);
+        
         % Separate parameters into components
         % (to be replaced with a better way of separating these...)
-        IT = converted_tbl{:, 1:9};
-        criteria_weights = converted_tbl{:, 10:end};
+        IT = u_ss(:, 1:9);
+        criteria_weights = u_ss(:, 10:end);
 
         % make sure all scenarios are guided and use every site each time
-        IT(:,1) = ones(size(IT(:,1)));
-        IT(:,2) = 3*ones(size(IT(:,1)));
-        % use order-ranking for example
-        alg_ind = al;
+        IT.Guided = ones(size(IT.Guided));
+        IT.PrSites = 3*ones(size(IT.PrSites));
+
 
         %% Load site specific data
         [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
@@ -88,7 +90,15 @@ else
         %     * wave_scen * dhw_scen * alg_ind * N_sims
         % where the unique combinations would be generated via some quasi-monte 
         % carlo sequence, or through some user-informed process.
-
+        
+        % Select random subset of RCP conditions WITHOUT replacement
+        n_rep_scens = length(wave_scen);
+        rcp_scens = datasample(1:n_rep_scens, num_reps, 'Replace', false);
+        w_scen = wave_scen(:, :, rcp_scens);
+        d_scen = dhw_scen(:, :, rcp_scens);
+   for al = 1:nalgs
+         % for each algorithm
+        alg_ind = al;
         tic
         Y = runADRIA(IT, criteria_weights, param_tbl, ecol_tbl, ...
                          TP_data, site_ranks, strongpred, num_reps, ...
@@ -97,32 +107,14 @@ else
 
         disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
 
-        %% post-processing
-        % collate data across all scenario runs
-
-        tf = params.tf;
-        processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
-                           'C', zeros(tf, 4, nsites, N, num_reps), ...
-                           'E', zeros(tf, nsites, N, num_reps), ...
-                           'S', zeros(tf, nsites, N, num_reps));
-        for i = 1:N
-            for j = 1:num_reps
-                processed.TC(:, :, i, j) = Y(i, j).TC;
-                processed.C(:, :, :, i, j) = Y(i, j).C;
-                processed.E(:, :, i, j) = Y(i, j).E;
-                processed.S(:, :, i, j) = Y(i, j).S;
-            end
-        end
         % store total coral cover for each scenario averaged over sites and
-        % simulations
-        results(:, al, :, 1) = mean(mean(processed.TC(:,:,:,:),4),2);
-        results(:, al, :, 2) = mean(mean(processed.E(:,:,:,:),4),2);
-        results(:, al, :, 3) = mean(mean(processed.S(:,:,:,:),4),2);
+         % simulations
+         results(:, al, :, 1) = mean(mean(Y.TC(:,:,:,:),4),2);
+         results(:, al, :, 2) = mean(mean(Y.E(:,:,:,:),4),2);
+         results(:, al, :, 3) = mean(mean(Y.S(:,:,:,:),4),2);
     end
-    
-    tmp = struct('TC', results(:, :, :, 1), 'E', results(:, :, :, 2), ...
-                 'S', results(:, :, :, 3));
-    saveData(tmp, 'Inputs/MCDA_example.nc');
+    tmp = struct('TC',results(:,:,:,1),'E',results(:,:,:,2),'S',results(:,:,:,3 ));
+    saveData(tmp,'Inputs/MCDA_example.nc');
 end
 
 %% plotting comparisons
@@ -137,7 +129,7 @@ title('TC comparison')
 count = 1;
 for nn = 1:4
     for mm = 1:2
-     for k =1:3
+     for k =1:nalgs
         hold on
         subplot(2,4,count)
         plot(1:25,alg_cont_TC(:,k,count))
@@ -153,7 +145,7 @@ title('E comparison')
 count = 1;
 for nn = 1:4
     for mm = 1:2
-     for k =1:3
+     for k =1:nalgs
         hold on
         subplot(2,4,count)
         plot(1:25,alg_cont_E(:,k,count))
@@ -169,14 +161,25 @@ title('S comparison')
 count = 1;
 for nn = 1:4
     for mm = 1:2
-     for k =1:3
+     for k =1:nalgs
         hold on
         subplot(2,4,count)
         plot(1:25,alg_cont_S(:,k,count))
-        
         legend('alg1','alg2','alg3')
         hold off
      end
      count = count+1;
+    end
+end
+
+%%
+temp_cont = [];
+for alg = 1:3
+    for t = 2:25
+        filename = sprintf('DMCDA_vals_Alg%1.0f_time%2.0f.mat',alg,t);
+        if isfile(filename)
+            load(filename)
+            temp_cont = [temp_cont; [repmat(alg,length(temp.seedsites),1), repmat(t,length(temp.seedsites),1), temp.seedsites,temp.shadesites]];
+        end
     end
 end

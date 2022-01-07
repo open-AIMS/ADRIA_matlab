@@ -72,27 +72,27 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     A(:,6) = 1 - prop_cover;
     A(:,7) = predec(:,3);
 
-    % Filter out sites that have high risk of wave damage, specifically 
-    % exceeding the risk tolerance 
-    A(A(:, 3) > risktol, 3) = nan;
-    rule = (A(:, 3) <= risktol) & (A(:, 4) > risktol);
-
-    A(rule, 4) = nan;
-    
-    A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
-    if isempty(A)
-        prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-        nprefseedsites = 0;
-        prefshadesites = 0;
-        nprefshadesites = 0;
-        return
-    end
-
-    %number of sites left after risk filtration
-    %nsitesrem = length(A(:,1));
-    if nsiteint > length(A(:,1))
-        nsiteint = length(A(:,1));
-    end
+% %     % Filter out sites that have high risk of wave damage, specifically 
+% %     % exceeding the risk tolerance 
+%     A(A(:, 3) > risktol, 3) = nan;
+%     rule = (A(:, 3) <= risktol) & (A(:, 4) > risktol);
+% 
+%     A(rule, 4) = nan;
+%     
+%     A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
+%     if isempty(A)
+%         prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+%         nprefseedsites = 0;
+%         prefshadesites = 0;
+%         nprefshadesites = 0;
+%         return
+%     end
+% 
+%     %number of sites left after risk filtration
+%     %nsitesrem = length(A(:,1));
+%     if nsiteint > length(A(:,1))
+%         nsiteint = length(A(:,1));
+%     end
 
 switch alg_ind 
     case 1
@@ -345,6 +345,7 @@ switch alg_ind
         nprefshadesites = numel(prefshadesites);
         nprefseedsites = numel(prefseedsites);
 end 
+
 end
 
 

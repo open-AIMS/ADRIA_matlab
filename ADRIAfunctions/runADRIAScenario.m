@@ -182,7 +182,8 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
             prefseedsites = randi(nsites, [nsiteint, 1])'; % if unguided, then seed corals anywhere
             prefshadesites = randi(nsites, [nsiteint, 1])'; % if unguided, then shade corals anywhere
         end
-        
+        temp = struct('seedsites',prefseedsites,'shadesites',prefshadesites);
+        save(sprintf('DMCDA_vals_Alg%1.0f_time%2.0f.mat',alg_ind,tstep),'temp');
         % Determine survivors from bleaching events across all sites
         % Slower than explicit for loop :(
         % Sbl_t = arrayfun(@(x) 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, neg_e_p2, assistadapt, natad, x), dhw_ss, 'UniformOutput', false);
@@ -228,15 +229,15 @@ function Y = runADRIAScenario(interv, criteria, params, ecol_params, ...
             Yin1(:, site) = Yout(p_step, :, site) .* Sbl .* Sw_t(p_step, :, site) + rec(:, site)';
 
             % if the site in the loop equals a preferred seeding site
-%             if ismember(site, prefseedsites) && tstep <= seedyears
-%                 Yin1(2, site) = Yin1(2, site) + seed1; % seed enhanced corals of group 2
-%                 Yin1(4, site) = Yin1(4, site) + seed2; % seed enhanced corals of group 4
-%                 Yseed(2, site) = seed1; % log site as seeded with gr2
-%                 Yseed(4, site) = seed2; % log site as seeded with gr4
-%             else
-%                 Yseed(2, site) = 0;
-%                 Yseed(4, site) = 0;
-%             end
+            if ismember(site, prefseedsites) && tstep <= seedyears
+                Yin1(2, site) = Yin1(2, site) + seed1; % seed enhanced corals of group 2
+                Yin1(4, site) = Yin1(4, site) + seed2; % seed enhanced corals of group 4
+                Yseed(2, site) = seed1; % log site as seeded with gr2
+                Yseed(4, site) = seed2; % log site as seeded with gr4
+            else
+                Yseed(2, site) = 0;
+                Yseed(4, site) = 0;
+            end
 
             %% Recruitment and seeding
 
