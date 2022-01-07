@@ -1,4 +1,4 @@
-function params = coralParams()
+function params = coralSpec()
 % Create a template struct for coral parameter values for ADRIA.
 % Includes "vital" bio/ecological parameters, to be filled with
 % sampled or user-specified values.

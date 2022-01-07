@@ -21,7 +21,7 @@ function coral_params = coralDetails(varargin)
 %       - `raw_defaults` indicates the raw unmodified "best guess" value
 %       - `raw_bounds` indicates the original value ranges
 
-coral_spec = coralParams();  % load default parameter table
+coral_spec = coralSpec();  % load default parameter table
 
 coral_ids = coral_spec.coral_id;
 

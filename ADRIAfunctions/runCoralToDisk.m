@@ -43,7 +43,8 @@ N = height(intervs);
 [timesteps, nsites, ~] = size(wave_scen);
 
 % Create output matrices
-n_species = height(coral_params);  % total number of species considered
+coral_spec = coralSpec();
+nspecies = height(coral_spec);  % total number of species considered
 
 file_prefix = string(file_prefix);
 
@@ -80,9 +81,7 @@ end
 clear('intervs')
 clear('crit_weights')
 
-% TODO: Write simulation metadata to netcdfs (n_species, batch length, etc)
-%       Currently relying on indicating data lengths in filename.
-parfor b_i = 1:n_batches
+for b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
     
@@ -98,17 +97,19 @@ parfor b_i = 1:n_batches
     
     % Create batch cache
     TC = zeros(timesteps, nsites, b_len, n_reps);
-    C = zeros(timesteps, n_species, nsites, b_len, n_reps);
+    C = zeros(timesteps, nspecies, nsites, b_len, n_reps);
     E = zeros(timesteps, nsites, b_len, n_reps);
     S = zeros(timesteps, nsites, b_len, n_reps);
     
     for i = 1:b_len
         scen_it = b_interv(i, :);
         scen_crit = b_cw(i, :);
+        scen_coral_params = coral_params(i, :);
 
         for j = 1:n_reps
             tmp = coralScenario(scen_it, scen_crit, ...
-                                   coral_params, sim_params, ...
+                                   scen_coral_params, sim_params, ...
+                                   coral_spec, ...
                                    TP_data, site_ranks, strongpred, ...
                                    wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
 
@@ -125,7 +126,18 @@ parfor b_i = 1:n_batches
     tmp_d.C = C;
     tmp_d.E = E;
     tmp_d.S = S;
-    saveData(tmp_d, tmp_fn);
+    
+    % include metadata
+    nc_md = struct();
+    nc_md.record_start = b_start;
+    nc_md.record_end = b_end;
+    nc_md.n_sims = b_len;
+    nc_md.n_reps = n_reps;
+    nc_md.n_timesteps = timesteps;
+    nc_md.n_sites = nsites;
+    nc_md.n_species = nspecies;
+    
+    saveData(tmp_d, tmp_fn, attributes=nc_md);
     
     % Clear vars to save memory
     tmp_d = [];

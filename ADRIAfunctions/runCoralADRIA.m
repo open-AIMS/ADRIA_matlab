@@ -68,10 +68,10 @@ N = height(intervs);
 [timesteps, nsites, ~] = size(wave_scen);
 
 % generate template struct for coral parameters
-coral_params = coralParams();
+coral_spec = coralSpec();
 
 % Create output matrices
-n_species = height(coral_params);  % total number of species considered
+n_species = height(coral_spec);  % total number of species considered
 
 Y_TC = zeros(timesteps, nsites, N, n_reps);
 Y_C = zeros(timesteps, n_species, nsites, N, n_reps);
@@ -89,6 +89,7 @@ for i = 1:N
     for j = 1:n_reps
         tmp = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
+                               coral_spec, ...
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
 

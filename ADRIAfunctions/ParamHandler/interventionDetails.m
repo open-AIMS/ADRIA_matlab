@@ -1,6 +1,6 @@
 function interventions = interventionDetails(varargin)
 % Detail intervention parameter values and expected ranges.
-% Default values for each intervention option can be specified
+% Parameter values for each intervention option can be specified
 % to override defaults.
 %
 % Inputs:
