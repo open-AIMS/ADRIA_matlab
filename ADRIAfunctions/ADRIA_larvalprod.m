@@ -16,7 +16,6 @@ function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff,
 ad = assistadapt + tstep .* natad;
 
 tmp_ad = (1 - ad / DHWmaxtot);
-
 % one way around dimensional issue - tmp_ad for each class as the averaged
 % of the enhanced and unenhanced corals in that class
 tmp_ad2 = mean(reshape(tmp_ad,length(tmp_ad)/6,6));
