@@ -169,10 +169,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % relative scope for coral larval production per site
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
-        % larval productivity per site
 
         Y_pstep = squeeze(Yout(p_step, :, :));
-
+        
         % for each species, site and year as a function of past heat exposure
         % Note: Matrix format is nspecies * nsites, but the values repeat.
         %       Only the first entry for each taxa is intended to be used.
