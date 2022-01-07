@@ -95,8 +95,8 @@ params.basecov = reshape(basecov', [], 1);
 %% Coral growth rates as linear extensions (Bozec et al 2021 Table S2)
 % we assume similar growth rates for enhanced and unenhanced corals
 linear_extension = ...
-   [1, 3, 4.4, 4.4, 4.4, 4.4; ... % Tabular Acropora Enhanced
-    1, 3, 4.4, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
+   [1, 3, 3, 4.4, 4.4, 4.4; ... % Tabular Acropora Enhanced
+    1, 3, 3, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
     1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Enhanced
     1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Unenhanced
     1, 1, 1, 1, 1, 1; ...    % small massives
@@ -123,18 +123,18 @@ fec_par_a = [1.02; 1.02; 1.69; 1.69; 0.86; 0.86]; %fecundity parameter a
 fec_par_b = [1.28; 1.28; 1.05; 1.05; 1.21; 1.21]; %fecundity parameter b 
 %fecundity as a function of colony basal area (cm2) from Hall and Hughes 1996
 fec = exp(fec_par_a + fec_par_b.*log(colony_area_m2_from.*10^4));
-fec_m2 = fec./colony_area_m2_from; %convert from per colony to per m2
-fec_m2_rel = fec_m2./ mean(fec_m2(:,5:6),2); %as a proportion of largest corals
+fec_m2 = fec./colony_area_m2_from; %convert from per colony area to per m2
+fec_m2_rel = fec_m2./ mean(fec_m2(:,3:6),2); %as a proportion of adult corals
 params.fec = reshape(fec_m2_rel', [], 1);
 
 %% Background mortality
 
 % coral mortality risk attributable to 38: wave damage for the 90 percentile of routine wave stress
 wavemort90 = ...
-    [0, 0, 0.00, 0.00, 0.02, 0.05; ... % Tabular Acropora Enhanced
-    0, 0, 0.00, 0.00, 0.02, 0.05; ...  % Tabular Acropora Unenhanced
-    0, 0, 0.00, 0.00, 0.01, 0.02; ...  % Corymbose Acropora Enhanced
-    0, 0, 0.00, 0.00, 0.01, 0.02; ...  % Corymbose Acropora Unenhanced
+   [0, 0, 0.00, 0.02, 0.03, 0.05; ... % Tabular Acropora Enhanced
+    0, 0, 0.00, 0.02, 0.03, 0.05; ...  % Tabular Acropora Unenhanced
+    0, 0, 0.00, 0.01, 0.02, 0.03; ...  % Corymbose Acropora Enhanced
+    0, 0, 0.00, 0.01, 0.02, 0.03; ...  % Corymbose Acropora Unenhanced
     0, 0, 0.00, 0.00, 0.00, 0.00; ...  % Small massives
     0, 0, 0.00, 0.00, 0.00, 0.00];     % Large massives
 

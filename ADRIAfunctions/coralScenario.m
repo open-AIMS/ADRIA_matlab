@@ -164,7 +164,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         
         Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
         
-        fecundity_scope = fecundityScope(Y_pstep, coral_params); %calculates scope 
+        fecundity_scope = fecundityScope2(Y_pstep, coral_params) %calculates scope 
         % for coral fedundity for each size class and at each site
                
         % Note: Matrix format is nspecies * nsites, but the values repeat.
@@ -172,12 +172,18 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         %       Shape of this matrix is simply for convenience.
         %rec = (Y_pstep * TP_data) .* LPs;  %old version
         
-        max_settler_density = 10; %more optimistic value than used by Bozec et al 2021
-        rel_cover_of_settlers = max_settler_density *pi*((1/100)^2);  
+        max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
+        density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+        basal_area_per_settler = pi*((1/100)^2); % in m2 assuming 2 cm diameter
         
-        rec = rel_cover_of_settlers *(fecundity_scope * TP_data) .* LPs;
-
-        %% Setup MCDA before bleaching season
+        potential_cover_of_settlers = max_settler_density * basal_area_per_settler ...
+                                * density_ratio_of_larvae_to_settlers;
+        
+        rec = potential_cover_of_settlers *(fecundity_scope * TP_data); %.* LPs';
+        
+        
+        
+              %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
         dhw_step = dhw_ss(tstep, :); % subset of DHW for given timestep

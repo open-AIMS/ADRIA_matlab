@@ -6,6 +6,12 @@ function Y = fecundityScope(Y_pstep,coral_params)
 %    coral_params, structure
 %    coral_params.fec, vector
 
+% Coral fecundity per coral area of the different size classes from 
+% coralParams are normalised (non-dimensionalised) such that relative 
+% fecundity of the largest coral size classes = 1.  When multiplied by relative cover, this allows us to
+% calculate the total 
+
+
 %relative scope for fecundity of all size classes and species by multiplying with
 %proportional cover
 fec_all =  coral_params.fec.*Y_pstep; 
