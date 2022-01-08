@@ -134,6 +134,9 @@ E = coralEvennessADRIA(Y);
 BC = Y.all(:,1:6:end,:) + Y.all(:,2:6:end,:);
 BC = squeeze(sum(BC,2));
 
+%% Calculate coral shelter volume per ha
+SV_per_ha = shelterVolumeADRIA(Y, coral_params);
+
 %% Plot coral covers over time and sites
 figure; 
 LO = tiledlayout(2,3, 'TileSpacing','Compact');
@@ -171,19 +174,56 @@ title('Large massives')
 xlabel(LO,'Years')
 ylabel(LO,'Cover (prop)')
       
-
-%% Plot coral evenness over time and sites
+% 
+% %% Plot coral evenness over time and sites
+% figure; 
+% plot(E);
+% title('Coral Evenness')
+% xlabel('Years')
+% ylabel('Evenness (prop)')
+% 
+% %% Plot juvenile corals (<5 cm diam) over time and sites
+% figure; 
+% plot(BC);
+% title('Baby Corals')
+% xlabel('Years')
+% ylabel('Cover (prop)')
+%  
+% %% Plot shelter volume over time and sites
+% figure; 
+% plot(SV_per_ha);
+% title('Shelter volume per hectare')
+% xlabel('Years')
+% ylabel('SV (per ha)')
+%  
+%       
+%% Plot reef condition metrics over time and sites
 figure; 
+LO2 = tiledlayout(2,2, 'TileSpacing','Compact');
+
+% Tile 1
+nexttile
+plot(Y.TC);
+title('Total Coral Cover')
+ylabel('Cover, prop')
+
+% Tile 2
+nexttile
 plot(E);
 title('Coral Evenness')
-xlabel('Years')
-ylabel('Evenness (prop)')
+ylabel('E, prop')
 
-%% Plot juvenile corals (<5 cm diam) over time and sites
-figure; 
-plot(BC);
-title('Baby Corals')
-xlabel('Years')
-ylabel('Cover (prop)')
- 
-      
+% Tile 3
+nexttile
+plot(BC)
+title('Juvenile Corals (<5 cm diam)')
+ylabel('Cover, prop')
+
+% Tile 4
+nexttile
+plot(SV_per_ha)
+title('Shelter Volume per ha')
+ylabel('Volume, m3 / ha') 
+
+xlabel(LO2,'Years')
+%ylabel(LO,'Cover (prop)')
