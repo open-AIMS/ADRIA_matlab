@@ -1,4 +1,4 @@
-function [sumpsqr,Y] = coralEvennessADRIA(covers)  
+function Y = coralEvennessADRIA(covers)  
 
 % Inputs:
 %  covers: structure
