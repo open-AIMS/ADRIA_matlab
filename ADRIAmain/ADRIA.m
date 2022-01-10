@@ -27,7 +27,7 @@ classdef ADRIA < handle
             % Helper accessor to extract parameter detail table.
             % Determines correct column automatically based on method name.
             st = dbstack;
-            namestr = st(end).name;
+            namestr = st(end-1).name;
             stack = string(split(namestr, "."));
             prop_name = stack(end);
 
