@@ -1,31 +1,24 @@
 function param_spec = extractCoralSamples(samples, param_spec)
 % Extract coral specific sample values from parameter table.
+% WARNING: Assumes parameters are in the same order between `samples` and
+% `param_spec`.
 %
 % Input:
-%     samples    : table,
-%     param_spec : struct,
+%     samples    : table, of coral parameter values
+%     param_spec : struct, of coral specifications
 %
 % Output:
 %     param_spec : table, of sampled parameters
-coral_ids = param_spec.coral_id;
-n_coral_ids = length(coral_ids);
-p_delimiter = '__';  % parameter delimiter to search for
+% p_delimiter = '__';  % parameter delimiter to search for
 
-sample_names = samples.Properties.VariableNames';
-
-% function handle to extract variable name from column name
-v_func = @(v) getfield(strsplit(v, p_delimiter), {2});
-
-for c_id = 1:n_coral_ids
-    c_name = coral_ids(c_id);
-    col_idx = contains(sample_names, strcat(c_name, p_delimiter));
-    tbl_ss = samples(:, col_idx);
-    v_names = tbl_ss.Properties.VariableNames';
-    tmp = cellfun(v_func, v_names, 'UniformOutput', false);
-    n_vars = length(tmp);
-    for vn = 1:n_vars
-        param_spec{c_id, tmp{vn}{1}} = tbl_ss{1, vn};
-    end
+varnames = string(samples.Properties.VariableNames);
+for coral_id = string(param_spec.coral_id)'
+    vals = samples{:, contains(varnames, coral_id)};
+    nlen = length(vals)-1 ;
+    
+    % Batch assign sample values to parameter spec table.
+    % This is for performance, at the cost of flexibility
+    param_spec{param_spec.coral_id == coral_id, end-nlen:end} = vals;
 end
 
 end
