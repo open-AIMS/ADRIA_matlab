@@ -2,27 +2,22 @@
 
 %rng(101) % set seed for reproducibility
 
+% Create ADRIA Interface object
+ai = ADRIA();
+
+% Get default parameters
+default_params = ai.raw_defaults;
+
 % Collect details of parameters that can be varied
-inter_opts = interventionDetails();
-criteria_opts = criteriaDetails();
+inter_opts = ai.interventions;
+criteria_opts = ai.criterias;
 
-% Parameters that are treated as constants
-coral_params = coralDetails();
-sim_constants = simConstants();
+% Get the coral parameters, which are not modified for this example
+[~, ~, coral_params] = ai.splitParameterTable(default_params);
 
-% list of name->value for coral parameters
-names = coral_params.name;
-default_values = coral_params.raw_defaults;
-param_table = array2table(default_values', 'VariableNames', names);
+% Values that are constant across all simulations
+sim_constants = ai.constants;
 
-
-%% Ask for which MCDA algorithm to use
-dims = [1, 50];
-dlgtitle = 'MCDA Options';
-definput = {'1'};
-prompt = {'MCDA Algorithm (1 - 4)'};
-mcda_alg = inputdlg(prompt, dlgtitle, dims, definput);
-alg_ind = str2num(mcda_alg{1});
 
 %% Ask for interventions
 prompt = cell(height(inter_opts), 1);
@@ -92,7 +87,6 @@ for n = 1:length(sim_names)
 end
 
 
-
 %% Prep user-defined simulation into tables
 % Convert string inputs to numbers
 user_interv_opts = cellfun(@str2num, user_interv_opts);
@@ -103,30 +97,18 @@ new_criteria_opts = array2table(user_criteria_opts', 'VariableNames', criteria_o
 
 
 %% Load site data
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', new_sim_opts.con_cutoff);
+ai.loadConnectivity('MooreTPmean.xlsx')
 
-%% setup for the geographical setting including environmental input layers
-% Load wave/DHW scenario data
-% Generated with generateWaveDHWs.m
-% TODO: Replace these with wave/DHW projection scenarios instead
-fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(new_sim_opts.RCP), ".nc");
-wave_scens = ncread(fn, "wave");
-dhw_scens = ncread(fn, "DHW");
+%% Update ADRIA Interface with user specified constants
+ai.constants = new_sim_opts;
 
-% Select random subset of RCP conditions WITHOUT replacement
-n_rep_scens = length(wave_scens);
-rcp_scens = datasample(1:n_rep_scens, 1, 'Replace', false);
-w_scens = wave_scens(:, :, rcp_scens);
-d_scens = dhw_scens(:, :, rcp_scens);
+%% Create input table
+param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
 %% Run ADRIA
 % Run a single simulation
-global rec_log
-rec_log = zeros(25, 36, 26);
-coral_spec = coralSpec();
-Y = coralScenario(new_interv_opts, new_criteria_opts, param_table, new_sim_opts, ...
-              coral_spec, TP_data, site_ranks, strongpred, ...
-              w_scens, d_scens, alg_ind);
+Y = ai.run(param_table, sampled_values=false, nreps=1);
+
 
 Y2 = zeros(25,6,26);
 

@@ -1,6 +1,6 @@
 function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               TP_data, site_ranks, strongpred, ...
-                              n_reps, wave_scen, dhw_scen, alg_ind, ...
+                              n_reps, wave_scen, dhw_scen, ...
                               file_prefix, batch_size)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
@@ -14,10 +14,6 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %    sim_params   : struct, of simulation constants
 %    wave_scen    : matrix[timesteps, nsites, n_reps], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, n_reps], degree heating weeek scenario
-%    alg_ind      : int, MCDA ranking algorithm flag
-%                  - 1, Order ranking
-%                  - 2, TOPSIS
-%                  - 3, VIKOR
 %    file_prefix : str, write results to netcdf instead of 
 %                    storing in memory.
 %                    If provided, output `Y` will be a struct of zeros.
@@ -35,7 +31,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %     >> runCoralToDisk(interv_scens, criteria_weights, coral_params, ...
 %                       sim_constants, ...
 %                       TP_data, site_ranks, strongpred, n_reps, ...
-%                       w_scens, d_scens, alg_ind, './test', 4);
+%                       w_scens, d_scens, './test', 4);
 %     >> Y = collectDistributedResults('./test', N, n_reps, n_species=36);
 
 N = height(intervs);
@@ -96,36 +92,32 @@ for b_i = 1:n_batches
     b_cw = b_cws{b_i};
     
     % Create batch cache
-    TC = zeros(timesteps, nsites, b_len, n_reps);
-    C = zeros(timesteps, nspecies, nsites, b_len, n_reps);
-    E = zeros(timesteps, nsites, b_len, n_reps);
-    S = zeros(timesteps, nsites, b_len, n_reps);
+    % TC = zeros(timesteps, nsites, b_len, n_reps);
+    raw = zeros(timesteps, nspecies, nsites, b_len, n_reps);
+    % E = zeros(timesteps, nsites, b_len, n_reps);
+    % S = zeros(timesteps, nsites, b_len, n_reps);
     
     for i = 1:b_len
         scen_it = b_interv(i, :);
         scen_crit = b_cw(i, :);
-        scen_coral_params = coral_params(i, :);
+        
+        % Note: This slows things down considerably
+        % Could rejig everything to use (subset of) the table directly...
+        scen_coral_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
         for j = 1:n_reps
             tmp = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
-                                   coral_spec, ...
                                    TP_data, site_ranks, strongpred, ...
-                                   wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
+                                   wave_scen(:, :, j), dhw_scen(:, :, j));
 
-            TC(:, :, i, j) = tmp.TC;
-            C(:, :, :, i, j) = tmp.C;
-            E(:, :, i, j) = tmp.E;
-            S(:, :, i, j) = tmp.S;
+            raw(:, :, :, i, j) = tmp.all;
         end
     end
     
     % save results
     tmp_d = struct();
-    tmp_d.TC = TC;
-    tmp_d.C = C;
-    tmp_d.E = E;
-    tmp_d.S = S;
+    tmp_d.raw = raw;
     
     % include metadata
     nc_md = struct();
@@ -141,10 +133,7 @@ for b_i = 1:n_batches
     
     % Clear vars to save memory
     tmp_d = [];
-    TC = [];
-    C = [];
-    E = [];
-    S = [];
+    raw = [];
 end
 
 end

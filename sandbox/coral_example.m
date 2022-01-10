@@ -7,81 +7,40 @@ rng(101)
 N = 8;
 n_reps = 3;  % Number of replicate RCP scenarios
 
+ai = ADRIA();
+
 %% Parameter prep
 % Collect details of available parameters
-inter_opts = interventionDetails();
-criteria_opts = criteriaDetails();
-coral_opts = coralDetails();
-
-% Creating dummy permutations for core ADRIA parameters
-% (environmental and ecological parameter values etc)
-sim_constants = simConstants();
-
-% Create main table listing all available parameter options
-combined_opts = [inter_opts; criteria_opts; coral_opts];
+combined_opts = ai.parameterDetails();
+sim_constants = ai.constants;
 
 % Generate samples using simple monte carlo
 % Create selection table based on lower/upper parameter bounds
-p_sel = table;
+sample_table = table;
 for p = 1:height(combined_opts)
     a = combined_opts.lower_bound(p);
     b = combined_opts.upper_bound(p);
     
     selection = (b - a).*rand(N, 1) + a;
     
-    p_sel.(combined_opts.name(p)) = selection;
+    sample_table.(combined_opts.name(p)) = selection;
 end
 
-% Convert sampled values to ADRIA usable values
-% Necessary as samplers expect real-valued parameters (e.g., floats)
-% where as in practice ADRIA makes use of integer and categorical
-% parameters
-converted_tbl = convertScenarioSelection(p_sel, combined_opts);
-
-% Separate parameters into components
-% (to be replaced with a better way of separating these...)
-interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
-criteria_weights = converted_tbl(:, 10:18);
-coral_vals = converted_tbl(:, 19:end);
-
-% use order-ranking for example
-alg_ind = 1;
+% Set MCDA algorithm choice to `2` as we only want to use TOPSIS 
+% for this example
+sample_table.alg_ind(:) = 2;
 
 %% Load site specific data
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', sim_constants.con_cutoff);
-
-%% setup for the geographical setting including environmental input layers
-% Load wave/DHW scenario data
-% Generated with generateWaveDHWs.m
-% TODO: Replace these with wave/DHW projection scenarios instead
-fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(sim_constants.RCP), ".nc");
-wave_scens = ncread(fn, "wave");
-dhw_scens = ncread(fn, "DHW");
+ai.loadConnectivity('MooreTPmean.xlsx');
 
 %% Scenario runs
-% Currently running over unique interventions and criteria weights only for
-% a limited number of RCP scenarios.
-%
-% In actuality, this would be done for some combination of:
-% intervention * criteria * environment parameters * ecological parameter
-%     * wave_scen * dhw_scen * alg_ind * N_sims
-% where the unique combinations would be generated via some quasi-monte 
-% carlo sequence, or through some user-informed process.
-
-% Select random subset of RCP conditions WITHOUT replacement
-n_rep_scens = length(wave_scens);
-rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
-w_scens = wave_scens(:, :, rcp_scens);
-d_scens = dhw_scens(:, :, rcp_scens);
 
 tic
-Y = runCoralADRIA(interv_scens, criteria_weights, coral_vals, sim_constants, ...
-                 TP_data, site_ranks, strongpred, n_reps, ...
-                 w_scens, d_scens, alg_ind);
+Y = ai.run(sample_table, sampled_values=true, nreps=n_reps);
 % runCoralToDisk(interv_scens, criteria_weights, coral_vals, sim_constants, ...
 %                  TP_data, site_ranks, strongpred, n_reps, ...
 %                  w_scens, d_scens, alg_ind, './test', 4);
-
+ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, file_prefix='./test', batch_size=4);
 tmp = toc;
 
 % If saving results to disk

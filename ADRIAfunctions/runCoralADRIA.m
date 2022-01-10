@@ -69,10 +69,10 @@ coral_spec = coralSpec();
 % Create output matrices
 n_species = height(coral_spec);  % total number of species considered
 
-Y_TC = zeros(timesteps, nsites, N, n_reps);
-Y_C = zeros(timesteps, n_species, nsites, N, n_reps);
-Y_E = zeros(timesteps, nsites, N, n_reps);
-Y_S = zeros(timesteps, nsites, N, n_reps);
+% Y_TC = zeros(timesteps, nsites, N, n_reps);
+Y_all = zeros(timesteps, n_species, nsites, N, n_reps);
+% Y_E = zeros(timesteps, nsites, N, n_reps);
+% Y_S = zeros(timesteps, nsites, N, n_reps);
 
 for i = 1:N
     scen_it = intervs(i, :);
@@ -88,18 +88,18 @@ for i = 1:N
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j));
 
-        Y_TC(:, :, i, j) = tmp.TC;
-        Y_C(:, :, :, i, j) = tmp.C;
-        Y_E(:, :, i, j) = tmp.E;
-        Y_S(:, :, i, j) = tmp.S;
+        % Y_TC(:, :, i, j) = tmp.TC;
+        Y_all(:, :, :, i, j) = tmp.all;
+%         Y_E(:, :, i, j) = tmp.E;
+%         Y_S(:, :, i, j) = tmp.S;
     end
 end
 
 % Assign results outside of parfor
 Y = struct();
-Y.TC = Y_TC;
-Y.C = Y_C;
-Y.E = Y_E;
-Y.S = Y_S;
+Y.all = Y_all;
+% Y.C = Y_C;
+% Y.E = Y_E;
+% Y.S = Y_S;
 
 end
