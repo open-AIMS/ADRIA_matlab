@@ -1,6 +1,6 @@
-function Y = runCoralADRIA(intervs, crit_weights, coral_vals, sim_params, ...
+function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
                            TP_data, site_ranks, strongpred, ...
-                           n_reps, wave_scen, dhw_scen, alg_ind)
+                           n_reps, wave_scen, dhw_scen)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9,14 +9,10 @@ function Y = runCoralADRIA(intervs, crit_weights, coral_vals, sim_params, ...
 % Inputs:
 %    interv       : table, of intervention scenarios
 %    criteria     : table, of criteria weights for each scenario
-%    coral_vals   : table, of coral parameter values for each scenario
+%    coral_params : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
-%    alg_ind      : int, MCDA ranking algorithm flag
-%                  - 1, Order ranking
-%                  - 2, TOPSIS
-%                  - 3, VIKOR
 %
 % Output:
 %    Y : struct,
@@ -84,14 +80,13 @@ for i = 1:N
     
     % Note: This slows things down considerably
     % Could rejig everything to use (subset of) the table directly...
-    c_params = extractCoralSamples(coral_vals(i, :), coral_params);
+    c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
     for j = 1:n_reps
         tmp = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
-                               coral_spec, ...
                                TP_data, site_ranks, strongpred, ...
-                               wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
+                               wave_scen(:, :, j), dhw_scen(:, :, j));
 
         Y_TC(:, :, i, j) = tmp.TC;
         Y_C(:, :, :, i, j) = tmp.C;

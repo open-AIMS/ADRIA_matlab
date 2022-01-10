@@ -1,6 +1,6 @@
 function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
-    coral_spec, TP_data, site_ranks, strongpred, ...
-    wave_scen, dhw_scen, alg_ind)
+    TP_data, site_ranks, strongpred, ...
+    wave_scen, dhw_scen)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -10,14 +10,11 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    criteria    : table, row of criteria weights table
 %    coral_params: table, row of coral parameters
 %    sim_params  : struct, of simulation constants
-%    coral_spec  : table, of base coral variables
 %    TP_data     : matrix, transitional probability matrix
 %    site_ranks  : matrix, of site centrality
 %    strongpred  : matrix, of strongest predecessor for each site
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
-%    alg_ind     : int, ranking algorithm choice
-%                    (Order: 1, TOPSIS: 2, Vikor: 3)
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
@@ -33,6 +30,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
     risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
+    % Order: 1, TOPSIS: 2, Vikor: 3, MultiObj-GA: 4
+    alg_ind = interv.alg_ind;
+
     %% Set up connectivity
     nsites = width(TP_data);
 
@@ -46,7 +46,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% Set up result structure
     tf = sim_params.tf; % timeframe: total number of time steps
 
-    nspecies = height(coral_spec);
+    nspecies = height(coral_params);
 
     % containers for seeding, shading and cooling
     nprefseed = zeros(tf, 1);
@@ -68,10 +68,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
     %% Define constant table location for seed values
-    tabular_enhanced = coral_spec.taxa_id == 1;
-    corymbose_enhanced = coral_spec.taxa_id == 3;
-    s1_idx = find(tabular_enhanced & (coral_spec.class_id == 2));
-    s2_idx = find(corymbose_enhanced & (coral_spec.class_id == 2));
+    tabular_enhanced = coral_params.taxa_id == 1;
+    corymbose_enhanced = coral_params.taxa_id == 3;
+    s1_idx = find(tabular_enhanced & (coral_params.class_id == 2));
+    s2_idx = find(corymbose_enhanced & (coral_params.class_id == 2));
 
     %% Update ecological parameters based on intervention option
 
@@ -86,7 +86,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     natad_idx = contains(prop_cols, "natad");
 
     % level of added natural coral adaptation
-    natad = coral_params{:, natad_idx}' + interv.Natad;
+    natad = coral_params{:, natad_idx} + interv.Natad;
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
@@ -126,10 +126,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     tspan = [0, 0.5, 1];
 
     gr_idx = contains(prop_cols, "growth_rate");
-    e_r = coral_params{:, gr_idx}'; % coral growth rates
+    e_r = coral_params{:, gr_idx}; % coral growth rates
     
     mb_idx = contains(prop_cols, "mb_rate");
-    e_mb = coral_params{:, mb_idx}'; %background coral mortality
+    e_mb = coral_params{:, mb_idx}; %background coral mortality
 
     e_P = sim_params.max_coral_cover; % max total coral cover
 
@@ -151,7 +151,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     % Set initial population sizes at tstep = 1
     bc_idx = contains(prop_cols, "basecov");
-    Yout(1, :, :) = repmat(coral_params{:, bc_idx}', 1, nsites);
+    Yout(1, :, :) = repmat(coral_params{:, bc_idx}, 1, nsites);
 
     % Seed/shade log
     Yseed = zeros(tf, nspecies, nsites);
