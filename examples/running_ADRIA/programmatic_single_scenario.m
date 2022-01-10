@@ -12,6 +12,10 @@ ai = ADRIA();
 % number of scenarios (here, just one), and D is the number of parameters.
 param_table = ai.raw_defaults;
 
+% See the "Parameter Interface" section in the documentation for
+% details on how these two differ.
+% sample_value_table = ai.sample_defaults;
+
 %% 3. Modify table as desired...
 param_table(1, 'alg_ind') = {3};
 param_table(1, 'Guided') = {1};
