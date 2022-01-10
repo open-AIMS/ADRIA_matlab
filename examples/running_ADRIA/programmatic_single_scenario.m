@@ -18,11 +18,10 @@ param_table = ai.raw_defaults;
 % sample_value_table = ai.sample_defaults;
 
 %% 3. Modify table as desired...
-param_table(1, 'alg_ind') = {3};
-param_table(1, 'Guided') = {1};
-param_table(1, 'Seed1') = {15000};
-param_table(1, 'Seed2') = {50000};
-
+param_table.alg_ind = 3;
+param_table.Guided = 1;
+param_table.Seed1 = 15000;
+param_table.Seed2 = 50000;
 
 %% Run ADRIA
 
