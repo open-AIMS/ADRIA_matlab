@@ -64,6 +64,9 @@ addFolderIncludingChildFiles(proj, './ADRIAfunctions/Translation');
 addFolderIncludingChildFiles(proj, './ADRIAfunctions');
 addFolderIncludingChildFiles(proj, './ADRIAmain');
 addFolderIncludingChildFiles(proj, './examples');
+addFolderIncludingChildFiles(proj, './examples/running_ADRIA');
+addFolderIncludingChildFiles(proj, './examples/running_ADRIA_HPC');
+addFolderIncludingChildFiles(proj, './examples/optimization');
 addFolderIncludingChildFiles(proj, './Inputs');
 
 % Add to MATLAB path
@@ -77,6 +80,9 @@ addPath(proj, './ADRIAfunctions/Translation');
 addPath(proj, './ADRIAfunctions');
 addPath(proj, './ADRIAmain');
 addPath(proj, './examples');
+addPath(proj, './examples/running_ADRIA');
+addPath(proj, './examples/running_ADRIA_HPC');
+addPath(proj, './examples/optimization');
 addPath(proj, './Inputs');
 
 

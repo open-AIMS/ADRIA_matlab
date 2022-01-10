@@ -3,7 +3,7 @@ criteria = criteriaDetails();
 eg_vals = convertScenarioSelection(cell2mat(criteria.defaults)', criteria);
 eg_vals = table2array(eg_vals);
 
-[TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', 0.1);
+[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', 0.1);
 
 %% Testing randomised sites
 % Weights for connectivity , waves (ww), high cover (whc) and low

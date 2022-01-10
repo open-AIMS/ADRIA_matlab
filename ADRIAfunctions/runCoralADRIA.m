@@ -1,7 +1,6 @@
-function Y = runADRIA(intervs, crit_weights, coral_params, sim_params, ...
-                          TP_data, site_ranks, strongpred, ...
-                          n_reps, wave_scen, dhw_scen, alg_ind, ...
-                          file_prefix)
+function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
+                           TP_data, site_ranks, strongpred, ...
+                           n_reps, wave_scen, dhw_scen)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -10,17 +9,10 @@ function Y = runADRIA(intervs, crit_weights, coral_params, sim_params, ...
 % Inputs:
 %    interv       : table, of intervention scenarios
 %    criteria     : table, of criteria weights for each scenario
-%    coral_params : table, of ecological parameter permutations
+%    coral_params : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
-%    alg_ind      : int, MCDA ranking algorithm flag
-%                  - 1, Order ranking
-%                  - 2, TOPSIS
-%                  - 3, VIKOR
-%    file_prefix : str, (optional) write results to netcdf instead of 
-%                    storing in memory.
-%                    If provided, output `Y` will be a struct of zeros.
 %
 % Output:
 %    Y : struct,
@@ -71,69 +63,43 @@ N = height(intervs);
 
 [timesteps, nsites, ~] = size(wave_scen);
 
+% generate template struct for coral parameters
+coral_spec = coralSpec();
+
 % Create output matrices
-n_species = height(coral_params);  % total number of species considered
+n_species = height(coral_spec);  % total number of species considered
 
-if ~exist('file_prefix', 'var')
-    file_prefix = false;
-    Y_TC = zeros(timesteps, nsites, N, n_reps);
-    Y_C = zeros(timesteps, n_species, nsites, N, n_reps);
-    Y_E = zeros(timesteps, nsites, N, n_reps);
-    Y_S = zeros(timesteps, nsites, N, n_reps);
-else
-    % Create much smaller representative subset to return
-    % if saving to disk (saves memory)
-    Y_TC = zeros(timesteps, nsites, 1, n_reps);
-    Y_C = zeros(timesteps, n_species, nsites, 1, n_reps);
-    Y_E = zeros(timesteps, nsites, 1, n_reps);
-    Y_S = zeros(timesteps, nsites, 1, n_reps);
-end
+% Y_TC = zeros(timesteps, nsites, N, n_reps);
+Y_all = zeros(timesteps, n_species, nsites, N, n_reps);
+% Y_E = zeros(timesteps, nsites, N, n_reps);
+% Y_S = zeros(timesteps, nsites, N, n_reps);
 
-parfor i = 1:N
+for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
-    % scen_params = params(i, :);
-    % scen_ecol = ecol_params(i, :);
     
-    % temp reassignment
-    TC = zeros(timesteps, nsites, 1, n_reps);
-    C = zeros(timesteps, n_species, nsites, 1, n_reps);
-    E = zeros(timesteps, nsites, 1, n_reps);
-    S = zeros(timesteps, nsites, 1, n_reps);
+    % Note: This slows things down considerably
+    % Could rejig everything to use (subset of) the table directly...
+    c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
     for j = 1:n_reps
-        tmp = runADRIAScenario(scen_it, scen_crit, ...
-                               coral_params, sim_params, ...
+        tmp = coralScenario(scen_it, scen_crit, ...
+                               c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
-                               wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
+                               wave_scen(:, :, j), dhw_scen(:, :, j));
 
-        TC(:, :, 1, j) = tmp.TC;
-        C(:, :, :, 1, j) = tmp.C;
-        E(:, :, 1, j) = tmp.E;
-        S(:, :, 1, j) = tmp.S;
+        % Y_TC(:, :, i, j) = tmp.TC;
+        Y_all(:, :, :, i, j) = tmp.all;
+%         Y_E(:, :, i, j) = tmp.E;
+%         Y_S(:, :, i, j) = tmp.S;
     end
-    
-    if isstring(file_prefix) || ischar(file_prefix)
-        tmp_fn = strcat(file_prefix, '_[[', num2str(i), ']].nc');
-        tmp_d = struct();
-        tmp_d.TC = TC;
-        tmp_d.C = C;
-        tmp_d.E = E;
-        tmp_d.S = S;
-        saveData(tmp_d, tmp_fn);
-        continue
-    end
-    
-    Y_TC(:, :, i, :) = TC;
-    Y_C(:, :, :, i, :) = C;
-    Y_E(:, :, i, :) = E;
-    Y_S(:, :, i, :) = S;
 end
 
 % Assign results outside of parfor
-Y.TC = Y_TC;
-Y.C = Y_C;
-Y.E = Y_E;
-Y.S = Y_S;
+Y = struct();
+Y.all = Y_all;
+% Y.C = Y_C;
+% Y.E = Y_E;
+% Y.S = Y_S;
 
 end

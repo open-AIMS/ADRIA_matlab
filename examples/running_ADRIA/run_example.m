@@ -4,26 +4,30 @@ rng(101)
 %% Generate monte carlo samples
 
 % Number of scenarios
-N = 8;
+N = 3;
 num_reps = 3;  % Number of replicate RCP scenarios
 
 % Collect details of available parameters
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
+coral_opts = coralDetails();
+
+% Constant values across all simulations
+sim_constants = simConstants();
 
 % Create main table listing all available parameter options
-combined_opts = [inter_opts; criteria_opts];
+combined_opts = [inter_opts; criteria_opts; coral_opts];
 
 % Generate samples using simple monte carlo
 % Create selection table based on lower/upper parameter bounds
 p_sel = table;
 for p = 1:height(combined_opts)
-    a = combined_opts.lower_bound{p};
-    b = combined_opts.upper_bound{p};
+    a = combined_opts.lower_bound(p);
+    b = combined_opts.upper_bound(p);
     
     selection = (b - a).*rand(N, 1) + a;
     
-    p_sel.(combined_opts.name{p}) = selection;
+    p_sel.(combined_opts.name(p)) = selection;
 end
 
 %% Parameter prep
@@ -31,12 +35,12 @@ end
 % Creating dummy permutations for core ADRIA parameters
 % (environmental and ecological parameter values etc)
 % This process will be replaced
-[params, ecol_params] = ADRIAparms();
-param_tbl = struct2table(params);
-ecol_tbl = struct2table(ecol_params);
-
-param_tbl = repmat(param_tbl, N, 1);
-ecol_tbl = repmat(ecol_tbl, N, 1);
+% [params, ecol_params] = ADRIAparms();
+% param_tbl = struct2table(params);
+% ecol_tbl = struct2table(ecol_params);
+% 
+% param_tbl = repmat(param_tbl, N, 1);
+% ecol_tbl = repmat(ecol_tbl, N, 1);
 
 % Convert sampled values to ADRIA usable values
 % Necessary as samplers expect real-valued parameters (e.g., floats)
@@ -49,15 +53,15 @@ converted_tbl = convertScenarioSelection(p_sel, combined_opts);
 
 % Separate parameters into components
 % (to be replaced with a better way of separating these...)
-interv_scens = u_ss(:, 1:9);  % intervention scenarios
-criteria_weights = u_ss(:, 10:end);
+interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
+criteria_weights = converted_tbl(:, 10:18);
+coral_vals = converted_tbl(:, 19:end);
 
 % use order-ranking for example
 alg_ind = 1;
 
 %% Load site specific data
-[F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
-[TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', params.con_cutoff);
+[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
 
 %% setup for the geographical setting including environmental input layers
 % Load wave/DHW scenario data
@@ -84,7 +88,7 @@ w_scens = wave_scens(:, :, rcp_scens);
 d_scens = dhw_scens(:, :, rcp_scens);
 
 tic
-Y = runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
+Y = runADRIA(interv_scens, criteria_weights, coral_opts, sim_constants, ...
                  TP_data, site_ranks, strongpred, num_reps, ...
                  w_scens, d_scens, alg_ind);
 tmp = toc;
@@ -93,25 +97,6 @@ disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " si
 
 % Map unique scenarios to original scenario list
 Y = mapDuplicateResults(Y, u_rows, group_idx);
-
-%% post-processing
-% collate data across all scenario runs
-
-% tf = params.tf;
-% nspecies = 4;
-% processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
-%                    'C', zeros(tf, nspecies, nsites, N, num_reps), ...
-%                    'E', zeros(tf, nsites, N, num_reps), ...
-%                    'S', zeros(tf, nsites, N, num_reps));
-% for i = 1:N
-%     for j = 1:num_reps
-%         processed.TC(:, :, i, j) = Y.TC(i, j);
-%         processed.C(:, :, :, i, j) = Y.C(i, j);
-%         processed.E(:, :, i, j) = Y.E(i, j);
-%         processed.S(:, :, i, j) = Y.S(i, j);
-%     end
-% end
-processed = Y;
 
 %% analysis
 % Prompt for importance balancing
@@ -136,5 +121,5 @@ cf = str2double(answer{7}); %counterfactual
 
 ES_vars = [evcult, strcult, evprov, strprov, TCsatCult, TCsatProv, cf];
 
-ecosys_results = coralsToEcosysServices(processed, ES_vars);
+ecosys_results = coralsToEcosysServices(Y, ES_vars);
 analyseADRIAresults1(ecosys_results);

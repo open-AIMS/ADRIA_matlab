@@ -13,10 +13,10 @@ Functions for each group of parameters use the suffix `Details`:
 
 - `interventionDetails()`
 - `criteriaDetails()`
-- `coreParamDetails()`
-- `ecolParamDetails()`
+- `coreParamDetails()` (under development)
+- `ecolParamDetails()` (under development)
 
-Usage of these functions are identical.
+Usage of these functions are identical and are showcased under the `examples/running_ADRIA` directory.
 
 These functions produce a table of parameter names, and "raw" and "sample" values and bounds (see details in sections below) for use with usual optimization and/or sampling methods.
 
@@ -143,7 +143,14 @@ If the "true" default value is 10, then this is mapped to the first entry in the
 
 The process described above is conducted by the `convertScenarioSelection()` function, which takes two inputs: (1) an array of sampled values, and (2) the parameter details table.
 
+The process above comes with a risk of biased samples being produced as unique combinations of sampled parameter values could be mapped to non-unique combinations.
+Care should be taken to determine the level of bias. To conform to some sampling design and reduce runtime, non-unique scenarios could be identified and results for a single simulation assigned to match indices of relevant rows. The functions listed here aid in doing so:
+
+- `mapDuplicateScenarios()`
+- `mapDuplicateResults()`
+
 **Note:** The only requirement is that the the number and order of items in the sample array has to match what is defined in the table. By satisficing this requirement, any subset of parameters can be used.
+
 
 ## Usage
 

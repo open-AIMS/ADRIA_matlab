@@ -1,7 +1,7 @@
 function saveData(data, filename, nc_settings)
     % Save data to file in CSV, `.mat` or NetCDF format.
     %
-    % If file is not specified, generates a filename based on date/time.
+    % If filename is not specified, generates a filename based on date/time.
     %
     % If NetCDF format is specified, attempts to create a new NetCDF file
     % and field/variable (specified by `nc_varname`). If the file already
@@ -50,6 +50,7 @@ function saveData(data, filename, nc_settings)
         filename string
         nc_settings.var_name string
         nc_settings.dim_spec cell
+        nc_settings.attributes struct
         nc_settings.compression {mustBeNumeric} = 4
     end
         
@@ -121,8 +122,15 @@ function saveData(data, filename, nc_settings)
                 ncwrite(filename, tmp_fn, t_data)
             end
         end
-
         
+        attributes = nc_settings.attributes;
+        if ~isempty(attributes)
+            fns = string(fieldnames(attributes));
+            for f = 1:length(fns)
+                fn = fns(f);
+                ncwriteatt(filename, '/', fn, attributes.(fn))
+            end
+        end
     else
         error(file_msg)
     end
