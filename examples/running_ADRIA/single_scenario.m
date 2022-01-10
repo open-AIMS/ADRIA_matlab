@@ -1,6 +1,6 @@
 % Example script running a single scenario.
 
-rng(101) % set seed for reproducibility
+%rng(101) % set seed for reproducibility
 
 % Collect details of parameters that can be varied
 inter_opts = interventionDetails();
@@ -129,11 +129,23 @@ Y = coralScenario(new_interv_opts, new_criteria_opts, param_table, new_sim_opts,
               w_scens, d_scens, alg_ind);
 
 Y2 = zeros(25,6,26);
+
+%extract outputs from coralCovers() function for plotting
 for sp = 1:6
     Y2(:,sp,:) = sum(Y.all(:,6*sp-5:sp*6,:),2); 
 end
 
+%% Calculate coral evenness
+E = coralEvennessADRIA(Y);
 
+%% Extract juvenile corals (< 5 cm diameter)
+BC = Y.all(:,1:6:end,:) + Y.all(:,2:6:end,:);
+BC = squeeze(sum(BC,2));
+
+%% Calculate coral shelter volume per ha
+SV_per_ha = shelterVolumeADRIA(Y, coral_params);
+
+%% Plot coral covers over time and sites
 figure; 
 LO = tiledlayout(2,3, 'TileSpacing','Compact');
 
@@ -169,6 +181,61 @@ title('Large massives')
 
 xlabel(LO,'Years')
 ylabel(LO,'Cover (prop)')
+      
+% 
+% %% Plot coral evenness over time and sites
+% figure; 
+% plot(E);
+% title('Coral Evenness')
+% xlabel('Years')
+% ylabel('Evenness (prop)')
+% 
+% %% Plot juvenile corals (<5 cm diam) over time and sites
+% figure; 
+% plot(BC);
+% title('Baby Corals')
+% xlabel('Years')
+% ylabel('Cover (prop)')
+%  
+% %% Plot shelter volume over time and sites
+% figure; 
+% plot(SV_per_ha);
+% title('Shelter volume per hectare')
+% xlabel('Years')
+% ylabel('SV (per ha)')
+%  
+%       
+%% Plot reef condition metrics over time and sites
+figure; 
+LO2 = tiledlayout(2,2, 'TileSpacing','Compact');
+
+% Tile 1
+nexttile
+plot(Y.TC);
+title('Total Coral Cover')
+ylabel('Cover, prop')
+
+% Tile 2
+nexttile
+plot(E);
+title('Coral Evenness')
+ylabel('E, prop')
+
+% Tile 3
+nexttile
+plot(BC)
+title('Juvenile Corals (<5 cm diam)')
+ylabel('Cover, prop')
+
+% Tile 4
+nexttile
+plot(SV_per_ha)
+title('Shelter Volume per ha')
+ylabel('Volume, m3 / ha') 
+
+xlabel(LO2,'Years')
+%ylabel(LO,'Cover (prop)')
+
 
 
 figure

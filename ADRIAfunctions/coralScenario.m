@@ -170,6 +170,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         LPs = ADRIA_larvalprod(tstep, assistadapt, natad, past_DHW_stress, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
         % for each species, site and year as a function of past heat exposure
+        %LP_graph(tstep,:,:) = LPs
         
         Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
         
@@ -182,13 +183,13 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         %rec = (Y_pstep * TP_data) .* LPs;  %old version
         
         max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
-        density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+        density_ratio_of_larvae_to_settlers = 3000; %Bozec et al. 2021
         basal_area_per_settler = pi*((1/100)^2); % in m2 assuming 2 cm diameter
         
         potential_settler_cover = max_settler_density * basal_area_per_settler ...
                                 * density_ratio_of_larvae_to_settlers;
         
-        rec = potential_settler_cover * (fecundity_scope * TP_data); %.* LPs';
+        rec = potential_settler_cover * (fecundity_scope * TP_data).* LPs;
         
                 
               %% Setup MCDA before bleaching season
@@ -243,7 +244,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
 
         % Run ODE for all species and sites
-        [~, Y] = ode45(@(t, X) growthODE4(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
+        [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
         Y = Y(end, :);
         Y = reshape(Y, nspecies, nsites);
         Yout(tstep, :, :) = Y;

@@ -42,7 +42,7 @@ params.LPdhwcoeff = 0.4; % shape parameters relating dhw affecting cover to larv
 params.LPDprm2 = 5; % parameter offsetting LPD curve
 
 % competition: probability that large tabular Acropora overtop small massives
-params.comp = 0.8;
+params.comp = 0.3;
 %params.max_settler_density = 20; %per m2, more optimistic than Bozec et al 2021
 
 %% Ecosystem service parameters

@@ -52,7 +52,7 @@ defaults = [
     1000;  % Seed2
     0;  % SRM
     0;  % Aadpt
-    0.05;  % Natad
+    0.025;  % Natad
     10;  % Seedyrs
     10;  % Shadeyrs
 ];
