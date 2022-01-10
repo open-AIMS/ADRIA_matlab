@@ -217,31 +217,3 @@ ylabel('Volume, m3 / ha')
 
 xlabel(LO2,'Years')
 %ylabel(LO,'Cover (prop)')
-
-
-
-figure
-h = heatmap(squeeze(rec_log(1, 25:end, :)));
-lim = caxis;
-caxis([0.0, 0.005]);
-ylabel("Species");
-xlabel("Sites");
-title("Time step 1");
-
-fr = getframe(gcf);
-im = frame2im(fr);
-[imind,cm] = rgb2ind(im,256);
-imwrite(imind,cm,'recruitment_log_massives.gif','gif', 'Loopcount',inf);
-
-for i = 2:25
-    title(strcat("Time step ", num2str(i)));
-    h.ColorData = squeeze(rec_log(i, 25:end, :));
-
-    % Capture the plot as an image 
-    fr = getframe(gcf);
-    im = frame2im(fr); 
-    [imind,cm] = rgb2ind(im,256);
-    
-    % Write to the GIF File
-    imwrite(imind,cm,'recruitment_log_massives.gif','gif','WriteMode','append');
-end
