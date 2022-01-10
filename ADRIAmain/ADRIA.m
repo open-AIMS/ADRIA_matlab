@@ -193,5 +193,30 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
                      w_scens, d_scens);
         end
+        
+        function runToDisk(obj, X, runargs)
+            arguments
+               obj
+               X table
+               runargs.sampled_values logical
+               runargs.nreps {mustBeInteger}
+               runargs.file_prefix string
+               runargs.batch_size {mustBeInteger} = 500
+            end
+            
+            nreps = runargs.nreps;
+
+            [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+
+            if runargs.sampled_values
+                X = obj.convertSamples(X);
+            end
+
+            [interv, crit, coral] = obj.splitParameterTable(X);
+
+            runCoralToDisk(interv, crit, coral, obj.constants, ...
+                     obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
+                     w_scens, d_scens, runargs.file_prefix, runargs.batch_size);
+        end
     end
 end
