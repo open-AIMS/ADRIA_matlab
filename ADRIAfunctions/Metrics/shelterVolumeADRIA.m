@@ -1,25 +1,13 @@
 function Y = shelterVolumeADRIA(X, coral_params)
-%Inputs:  X.all; array, Dimensions: time, species, sites, interventions, sims 
-%  covers: structure
-%  covers.all: array.     Dims: timesteps, species, sites, interventions, sims 
-%  covers.tab_acr: array. Dims: timesteps, sizes, sites, interventions, sims 
-%  covers.cor_acr: array. Dims: timesteps, sizes, sites, interventions, sims 
-%  covers.sml_enc: array. Dims: timesteps, sizes, sites, interventions, sims 
-%  covers.lrg_mas: array. Dims: timesteps, sizes, sites, interventions, sims
-%  covers.TC = TC; array. Dims: timesteps, sizes, sites, interventions, sims 
 
 % Calculates evenness across functional coral groups in ADRIA
-% colony_diameter_edges = coral_params.size_cm(1:6); 
-% colony_diameter_edges_to = [colony_diameter_edges(2:end);120]; %column vector
-% colony_diameter_means_to = colony_diameter_edges + (colony_diameter_edges_to - ...
-%                             colony_diameter_edges)/2;
-% % colony diameter converted to planar areas (cm2)
-% colony_areas_cm2 = pi*((0.5*colony_diameter_means_to).^2);
-% %extend to column vector for all groups and sizes 
-% colony_areas_cm2 = repmat(colony_areas_cm2, 6,1);   
 
+% Inputs: 
+% results from@coralScenarioarray, array. Dimensions: time, species, sites, interventions, sims 
+% coralParams, structure
+
+% Coral sizes and parameters needed to convert size to colony shelter volume  
 colony_area_cm2 = coral_params.colony_area_cm2;
-
 sheltervolume_parameters = ...
         [-8.32, 1.50; %tabular from Urbina-Barretto 2021 
         -8.32, 1.50; %tabular from Urbina-Barretto 2021
@@ -37,7 +25,7 @@ sheltervolume_parameters = repelem(sheltervolume_parameters, 6,1);
     ntsteps = size(X,1);
     nsites = size(X,3);
 
-% Estimate log (natural) colony volume (litres) based on relationship 
+% Estimate log colony volume (litres) based on relationship 
 % established by Urbina-Barretto 2021
 logcolony_sheltervolume = sheltervolume_parameters(:,1) + ... 
         sheltervolume_parameters(:,2).*log10(colony_area_cm2);
