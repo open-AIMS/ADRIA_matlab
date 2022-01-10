@@ -56,12 +56,21 @@ classdef ADRIA < handle
     methods
         %% Getter/setters
         function defaults = get.raw_defaults(obj)
-           defaults = obj.getParameterTable();
+            defaults = obj.getParameterTable();
         end
 
         function bounds = get.raw_bounds(obj)
-           details = obj.parameterDetails();
-           bounds = details(:, ["name", "raw_bounds"]);
+            % Returns table of name, lower_bound, upper_bound
+            details = obj.parameterDetails();
+            bounds = details(:, ["name", "raw_bounds"]);
+
+            for n = 1:height(details)
+                bnds = details.raw_bounds(n, :);
+                bounds.lower_bound(n) = bnds(1);
+                bounds.upper_bound(n) = bnds(2);
+            end
+
+            bounds.raw_bounds = [];  % remove column
         end
 
         function defaults = get.sample_defaults(obj)
@@ -69,6 +78,7 @@ classdef ADRIA < handle
         end
 
         function bounds = get.sample_bounds(obj)
+            % Returns table of name, lower_bound, upper_bound
             details = obj.parameterDetails();
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
         end
