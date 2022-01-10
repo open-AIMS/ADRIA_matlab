@@ -37,10 +37,8 @@ ai.loadConnectivity('MooreTPmean.xlsx');
 
 tic
 Y = ai.run(sample_table, sampled_values=true, nreps=n_reps);
-% runCoralToDisk(interv_scens, criteria_weights, coral_vals, sim_constants, ...
-%                  TP_data, site_ranks, strongpred, n_reps, ...
-%                  w_scens, d_scens, alg_ind, './test', 4);
-ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, file_prefix='./test', batch_size=4);
+% ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
+%     file_prefix='./test', batch_size=4);
 tmp = toc;
 
 % If saving results to disk
