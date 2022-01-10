@@ -73,7 +73,7 @@ classdef ADRIA < handle
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
         end
 
-        %% class methods
+        %% object methods
         function obj = ADRIA(interv, crit, coral, constants, coral_spec)
            % Base constructor for ADRIA Input object.
 
@@ -129,25 +129,6 @@ classdef ADRIA < handle
             coral = x(coral_r, :);
         end
 
-        function [it, crit, coral] = splitSamples(obj, X)
-            if ~exist('X', 'var')
-               X = obj.sampled_values;
-            end
-
-            t = obj.parameterDetails();
-            ht = height(t);
-            msg = "Table widths is not as expected!";
-            msg = strcat(msg, " Received: ", num2str(width(X)), " vs Expected: ", num2str(ht));
-            assert(width(X) == ht, msg);
-
-            % Split provided combined sample table into separate tables.
-            [it_r, crit_r, coral_r] = obj.componentIndices();
-
-            it = X(:, it_r);
-            crit = X(:, crit_r);
-            coral = X(:, coral_r);
-        end
-
         function tbl = convertSamples(obj, X)
             % Convert sample values back to ADRIA expected values
             tbl = convertScenarioSelection(X, obj.parameterDetails());
@@ -168,25 +149,8 @@ classdef ADRIA < handle
             coral_r = coral_s:coral_e;
         end
 
-%         function obj = setSampleValues(obj, X, sample)
-%             % Store raw simulation values. If modified sample values are 
-%             % provided (indicated by `raw=false`), these are converted back
-%             % to their ADRIA-expected values.
-%             arguments
-%                obj
-%                X table
-%                sample.raw logical = false
-%             end
-% 
-%             if sample.raw
-%                obj.sampled_values = X;
-%                return
-%             end
-% 
-%             obj.sampled_values = obj.convertSamples(X);
-%         end
-
         function obj = loadConnectivity(obj, filename, conargs)
+            % Load site connectivity data from a given file.
             arguments
                obj
                filename string
@@ -222,8 +186,8 @@ classdef ADRIA < handle
             if runargs.sampled_values
                 X = obj.convertSamples(X);
             end
-            
-            [interv, crit, coral] = obj.splitSamples(X);
+
+            [interv, crit, coral] = obj.splitParameterTable(X);
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
