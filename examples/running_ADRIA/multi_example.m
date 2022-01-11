@@ -31,7 +31,8 @@ end
 sample_table.Guided(:) = 2;
 
 %% Load site specific data
-ai.loadConnectivity('MooreTPmean.xlsx');
+% ai.loadConnectivity('MooreTPmean.xlsx');
+ai.loadConnectivity('MooreTPmean_ExpandedExample.xlsx');
 
 %% Scenario runs
 
