@@ -94,12 +94,6 @@ for i = 1:N
 %         Y_S(:, :, i, j) = tmp.S;
     end
 end
-
-% Assign results outside of parfor
-Y = struct();
-Y.all = Y_all;
-% Y.C = Y_C;
-% Y.E = Y_E;
-% Y.S = Y_S;
+Y = Y_all;
 
 end

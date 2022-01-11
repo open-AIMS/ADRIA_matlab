@@ -4,13 +4,13 @@
 % use simplest MDCA algorithm for now
 alg = 1;
 rcp = 60;
-Nreps = 50;
+Nreps = 10;
 
 filename = 'MooreTPMean.xlsx';
 % optimisation specification - want to optimise TC and CES
 names_vec = cell(1,1);
 names_vec{1} = 'TC';
-%names_vec{2} = 'E';
+names_vec{2} = 'E';
 
 % perform optimisation 
 [x,fval] = multiObjOptimization(alg, rcp, Nreps, filename, names_vec);

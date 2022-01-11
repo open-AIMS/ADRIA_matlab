@@ -1,4 +1,4 @@
-function Y = coralCovers(X)
+function Y = coralCovers(X,taxa_id)
 %
 % ADRIA Reef Condition Metrics as indicators of scope for ecosystem 
 % service provision
@@ -13,10 +13,15 @@ function Y = coralCovers(X)
 % 1: Total coral cover (relative)
 % 
 TC = squeeze(sum(X,2)); %sum over all species and size classes
-C1 = X(:,1:6,:,:,:) + X(:,7:12,:,:,:); %Adding enhanced to unenhanced tabular Acropora
-C2 = X(:,13:18,:,:,:) + X(:,19:24,:,:,:); %Adding %enhanced to unenhanced corymbose Acropora 
-C3 = X(:,25:30,:,:,:); %Encrusting and small massives 
-C4 = X(:,31:36,:,:,:); %Large massives 
+
+C1 = X(:,taxaIndex(1,taxa_id),:,:,:)+X(:,taxaIndex(2,taxa_id),:,:,:);
+%X(:,1:6,:,:,:) + X(:,7:12,:,:,:); %Adding enhanced to unenhanced tabular Acropora
+C2 = X(:,taxaIndex(3,taxa_id),:,:,:) + X(:,taxaIndex(4,taxa_id),:,:,:);
+%X(:,13:18,:,:,:) + X(:,19:24,:,:,:); %Adding %enhanced to unenhanced corymbose Acropora 
+C3 = X(:,taxaIndex(5,taxa_id),:,:,:);
+%X(:,25:30,:,:,:); %Encrusting and small massives 
+C4 = X(:,taxaIndex(6,taxa_id),:,:,:);
+%X(:,31:36,:,:,:); %Large massives 
 
 Y.all = X; 
 Y.tab_acr = C1;

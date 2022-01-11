@@ -29,9 +29,10 @@ function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps,
      for m = 1:length(tgt_names)
          % total coral cover
          if strcmp(tgt_names{m},'TC')
-             out_metrics(m)= mean(Y.all,'all');
+             out_metrics(m)= mean(Y,'all');
              %eveness
          elseif strcmp(tgt_names{m},'E')
+             coral_tab = ai.coral_spec; 
              [~,E] = coralEvennessADRIA(Y);
              out_metrics(m) = mean(E,'all');
              %shelter volume
@@ -40,7 +41,7 @@ function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps,
              out_metrics(m) = mean(SV,'all');
              % density of juvinile corals
          elseif strcmp(tgt_names{m},'DJ')
-             DJ = Y.all(:,1:6:end,:)+ Y.all(:,2:6:end,:);
+             DJ = Y(:,1:6:end,:)+ Y(:,2:6:end,:);
              DJ = squeeze(sum(DJ,2));
              out_metrics(m) = mean(DJ,'all');
          end
