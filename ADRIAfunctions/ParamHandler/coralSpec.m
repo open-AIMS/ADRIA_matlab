@@ -90,6 +90,9 @@ colony_diam_means_to = repmat(size_class_means_to', length(size_cm), 1);
 
 colony_area_m2_from = pi .* ((colony_diam_means_from ./ 2).^2) ./ (10^4);
 colony_area_m2_to = pi .* ((colony_diam_means_to ./ 2).^2) ./ (10^4);
+
+params.colony_area_cm2 = reshape(colony_area_m2_to', 36, 1)*(10^4);
+
 a_arena = 100; % m2 of reef arena where corals grow, survive and reproduce
 
 % convert to coral covers (proportions) and convert to vector

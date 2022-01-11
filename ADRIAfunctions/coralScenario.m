@@ -1,6 +1,6 @@
 function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, ...
-    wave_scen, dhw_scen)
+    wave_scen, dhw_scen, alg_ind)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -15,6 +15,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    strongpred  : matrix, of strongest predecessor for each site
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
+%    alg_ind     : int, ranking algorithm choice
+%                    (Order: 1, TOPSIS: 2, Vikor: 3)
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
@@ -30,9 +32,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
     risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
-    % Order: 1, TOPSIS: 2, Vikor: 3, MultiObj-GA: 4
-    alg_ind = interv.alg_ind;
-
     %% Set up connectivity
     nsites = width(TP_data);
 
@@ -45,7 +44,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Set up result structure
     tf = sim_params.tf; % timeframe: total number of time steps
-
     nspecies = height(coral_params);
 
     % containers for seeding, shading and cooling
@@ -68,6 +66,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
     %% Define constant table location for seed values
+    % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
+    % Seed2 = Corymbose Acropora Enhanced (taxa 3, size class 2)
     tabular_enhanced = coral_params.taxa_id == 1;
     corymbose_enhanced = coral_params.taxa_id == 3;
     s1_idx = find(tabular_enhanced & (coral_params.class_id == 2));
@@ -81,12 +81,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % assign level of assisted coral adaptation
     assistadapt(tabular_enhanced) = interv.Aadpt;
     assistadapt(corymbose_enhanced) = interv.Aadpt;
-    
-    prop_cols = string(coral_params.Properties.VariableNames)';
-    natad_idx = contains(prop_cols, "natad");
 
     % level of added natural coral adaptation
-    natad = coral_params{:, natad_idx} + interv.Natad;
+    natad = coral_params.natad + interv.Natad;
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
@@ -102,8 +99,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     DHWmaxtot = sim_params.DHWmaxtot; % max assumed DHW for all scenarios.  Will be obsolete when we move to new, shared inputs for DHW projections
     LPDprm2 = sim_params.LPDprm2; % parameter offsetting LPD curve
 
-    wavemort90_idx = contains(prop_cols, "wavemort90");
-    wavemort90 = coral_params{:, wavemort90_idx}'; % 90th percentile wave mortality
+    wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
 
     %% project wave mortality
     mwaves = zeros(tf, nspecies, nsites);
@@ -125,17 +121,13 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % saves memory
     tspan = [0, 0.5, 1];
 
-    gr_idx = contains(prop_cols, "growth_rate");
-    e_r = coral_params{:, gr_idx}; % coral growth rates
-    
-    mb_idx = contains(prop_cols, "mb_rate");
-    e_mb = coral_params{:, mb_idx}; %background coral mortality
+    e_r = coral_params.growth_rate; % coral growth rates
+    e_mb = coral_params.mb_rate; %background coral mortality
 
     e_P = sim_params.max_coral_cover; % max total coral cover
 
     % competition factor between Small Massives and Acropora
     e_comp = sim_params.comp;
-    
 
     % Gompertz shape parameters for bleaching
     neg_e_p1 = -sim_params.gompertz_p1;
@@ -150,8 +142,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     Yout = zeros(tf, nspecies, nsites);
 
     % Set initial population sizes at tstep = 1
-    bc_idx = contains(prop_cols, "basecov");
-    Yout(1, :, :) = repmat(coral_params{:, bc_idx}, 1, nsites);
+    Yout(1, :, :) = repmat(coral_params.basecov, 1, nsites);
 
     % Seed/shade log
     Yseed = zeros(tf, nspecies, nsites);
@@ -258,10 +249,11 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % these into real species and their size classes
 
 %    [TC, C, E, S] = reefConditionMetrics(Yout);
-    Y = coralCovers(Yout,coral_params.taxa_id);
-    % seedlog and shadelog are omitted for now
-%     Y = struct('TC', TC, ...
-%         'C', C, ...
-%         'E', E, ...
-%         'S', S);
+     covers = coralCovers(Yout);
+%     % seedlog and shadelog are omitted for now
+% %     Y = struct('TC', TC, ...
+% %         'C', C, ...
+% %         'E', E, ...
+% %         'S', S);
+Y = coralCovers(Yout,coral_params.taxa_id);
 end
