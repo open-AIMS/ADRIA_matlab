@@ -19,7 +19,7 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(sims,params,nsites)
     % This latter analysis is handled in `analyseADRIA`.
 
     %% Simulate future wave exposure patterns from Puotinen and Callaghan SWH data
-    swhtbl = readtable('swhMoore_interp.xlsx', 'PreserveVariableNames', true); % import Marji's significant wave heights
+    swhtbl = readtable('swhMoore_interp_ExpandedExample.xlsx', 'PreserveVariableNames', true); % import Marji's significant wave heights
     
     % col: SiteID, SiteAddress, Lon, Lat, Hs70, Hs80, Hs90, Hs95, Hs96, Hs97, Hs98, Hs99, Hs100
     swh90 =  table2array(swhtbl(:,7)); % we use swhs within the 90 percentile  
@@ -37,8 +37,18 @@ function [wavedisttime, dhwdisttime] = setupADRIAsims(sims,params,nsites)
     % Data is structure with resdhwsites, dhw_surf and z
     F = load('MooreDHWs'); % load data that are previously generated
     z = F.z; % bathymetry
-    mdhwdist0 = mean(F.resdhwsites(:,5:7),2)'; %mean residual dhw at sites
-    sdhwdist0 =std(F.resdhwsites(:,5:7),0,2)'; %standard deviation of residual dhws at sites
+    
+    tmp_F = F.resdhwsites(:,5:7);
+    
+    [rows, ~] = size(tmp_F);
+    
+    if nsites ~= rows
+        dummy_F = repmat(tmp_F, ceil(nsites/rows), 1);
+        tmp_F = dummy_F(1:244, :);
+    end
+    
+    mdhwdist0 = mean(tmp_F,2)'; %mean residual dhw at sites
+    sdhwdist0 =std(tmp_F,0,2)'; %standard deviation of residual dhws at sites
     dhwdisttime = zeros(params.tf,nsites,sims); %initialise matrix that represents projections of DHW in space and time
     
     for sim = 1:sims
