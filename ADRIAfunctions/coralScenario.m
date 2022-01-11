@@ -206,7 +206,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, interv.alg_ind); % site selection function for intervention deployment
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, alg_ind); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
         elseif strategy == 0 % unguided deployment
@@ -237,7 +237,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
 
         % Run ODE for all species and sites
-        [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
+        [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp, nsites), tspan, Yin1, non_neg_opt);
         Y = Y(end, :);
         Yout(tstep, :, :) = reshape(Y, nspecies, nsites);
 
