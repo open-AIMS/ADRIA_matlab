@@ -97,37 +97,33 @@ new_criteria_opts = array2table(user_criteria_opts', 'VariableNames', criteria_o
 
 
 %% Load site data
-ai.loadConnectivity('MooreTPmean.xlsx')
+ai.loadConnectivity('MooreTPmean.xlsx');
 
 %% Update ADRIA Interface with user specified constants
 ai.constants = new_sim_opts;
 
-%% Create input table
+%% Create input table of user-defined values
 param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
 %% Run ADRIA
 % Run a single simulation
 Y = ai.run(param_table, sampled_values=false, nreps=1);
 
+% Collect metrics
+metric_results = collectMetrics(Y, coral_params, ...
+                    {@coralTaxaCover, @coralSpeciesCover, ...
+                     @coralEvenness, @shelterVolume});
 
-covs = zeros(25,6,26);
+covs = metric_results.coralSpeciesCover;
 
-%extract outputs from coralCovers() function for plotting
-for sp = 1:6
-    covs(:,sp,:) = sum(Y(:,6*sp-5:sp*6,:),2); 
-end
-
-f = @coralCovers;
-covers = f(Y);
-
-%% Calculate coral evenness
-E = coralEvenness(Y, @coralCovers);
+% Evenness
+E = metric_results.coralEvenness;
 
 %% Extract juvenile corals (< 5 cm diameter)
-BC = covers.juveniles;
+BC = metric_results.coralTaxaCover.juveniles;
 
 %% Calculate coral shelter volume per ha
-SV_per_ha = shelterVolume(Y, coral_params);
+SV_per_ha = metric_results.shelterVolume;
 
 %% Plot coral covers over time and sites
 figure; 
@@ -172,7 +168,7 @@ LO2 = tiledlayout(2,2, 'TileSpacing','Compact');
 
 % Tile 1
 nexttile
-plot(covers.total_cover);
+plot(metric_results.coralTaxaCover.total_cover);
 title('Total Coral Cover')
 ylabel('Cover, prop')
 
