@@ -1,7 +1,11 @@
 num_sims = 50;
-num_sites = 26;
-[params, ecol_params] = ADRIAparms();
-params.RCP = 85;
+num_sites = 244;
 
-filename = strcat('Inputs/example_wave_DHWs_RCP', num2str(params.RCP), '.nc');
+RCP = "6085";
+ai = ADRIA();
+sim_constants = ai.constants;
+sim_constants.RCP = RCP;
+
+
+filename = strcat('Inputs/example_wave_DHWs_RCP_expanded_', RCP, '.nc');
 generateWaveDHWs(num_sims, params, num_sites, filename)

@@ -1,4 +1,4 @@
-function Y = growthODE4_KA(X, r, P, mb, rec, comp)
+function Y = growthODE4_KA(X, r, P, mb, rec, comp, nsites)
 
 % Inputs:   X, array, coral state. Dimensions: nspecies (36) by nsites (26)
 %           r: array, growth rates (transitions). Dimensions: nspecies
