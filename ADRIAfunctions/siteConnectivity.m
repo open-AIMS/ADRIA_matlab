@@ -50,7 +50,7 @@ for s = 1:nsites
         X = table2array(DGbase.Edges(eid,:));
         X(:,2) =[];
         mxm = max(X(:,2));
-        strongpred(s,2) = find(X(:,2)==mxm);
+        strongpred(s,2) = find(X(:,2)==mxm, 1);
     end
 end
 

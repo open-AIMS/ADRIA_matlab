@@ -42,12 +42,12 @@ classdef ADRIA < handle
             % Load wave/DHW scenario data
             % Generated with generateWaveDHWs.m
             % TODO: Replace these with wave/DHW projection scenarios instead
-            fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(obj.constants.RCP), ".nc");
+            fn = strcat("Inputs/example_wave_DHWs_RCP_expanded_", num2str(obj.constants.RCP), ".nc");
             wave_scens = ncread(fn, "wave");
             dhw_scens = ncread(fn, "DHW");
 
             % Select random subset of RCP conditions WITHOUT replacement
-            n_rep_scens = length(wave_scens);
+            [~, ~, n_rep_scens] = size(wave_scens);
             rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
             w_scens = wave_scens(:, :, rcp_scens);
             d_scens = dhw_scens(:, :, rcp_scens);
