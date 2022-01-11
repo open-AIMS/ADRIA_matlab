@@ -12,13 +12,19 @@ function param_spec = extractCoralSamples(samples, param_spec)
 % p_delimiter = '__';  % parameter delimiter to search for
 
 varnames = string(samples.Properties.VariableNames);
-for coral_id = string(param_spec.coral_id)'
-    vals = samples{:, contains(varnames, coral_id)};
-    nlen = length(vals)-1 ;
+col_names = ["basecov", "growth_rate", "fec", ...
+             "wavemort90", "mb_rate", "natad"];
+
+unique_coral_names = unique(replace(lower(param_spec.name), " ", "_"));
+num_corals = length(unique_coral_names);
+num_params = length(col_names);
+for c_idx = 1:num_corals
+    coral_name = unique_coral_names(c_idx);
+    idx = contains(param_spec.coral_id, coral_name);
     
-    % Batch assign sample values to parameter spec table.
-    % This is for performance, at the cost of flexibility
-    param_spec{param_spec.coral_id == coral_id, end-nlen:end} = vals;
+    % find and assign parameter values related to this coral taxa
+    param_spec{idx, col_names} = ...
+        reshape(samples{:, contains(varnames, coral_name)}, num_corals, num_params)';
 end
 
 end
