@@ -83,13 +83,14 @@ for i = 1:N
     c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
     for j = 1:n_reps
-        tmp = coralScenario(scen_it, scen_crit, ...
+        Y_all(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j));
 
         % Y_TC(:, :, i, j) = tmp.TC;
-        Y_all(:, :, :, i, j) = tmp.all;
+         
+        %= tmp.all;
 %         Y_E(:, :, i, j) = tmp.E;
 %         Y_S(:, :, i, j) = tmp.S;
     end

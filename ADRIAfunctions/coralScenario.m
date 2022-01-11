@@ -1,6 +1,6 @@
 function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, ...
-    wave_scen, dhw_scen, alg_ind)
+    wave_scen, dhw_scen)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -20,7 +20,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
-
+       
     %% Weights for connectivity , waves (ww), high cover (whc) and low
     wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
     wtheat = criteria.heat_stress; % weight of heat damage in MCDA
@@ -204,7 +204,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, alg_ind); % site selection function for intervention deployment
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, interv.alg_ind); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
         elseif strategy == 0 % unguided deployment
@@ -242,6 +242,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     end % tstep
 
+    Y = Yout;
     %% Assign results
     % Suggest we change this such that we only report:
     % (1) total coral cover (TC) across sites and time
@@ -249,11 +250,11 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % these into real species and their size classes
 
 %    [TC, C, E, S] = reefConditionMetrics(Yout);
-     covers = coralCovers(Yout);
+ %    covers = coralCovers(Yout,taxa_id);
 %     % seedlog and shadelog are omitted for now
 % %     Y = struct('TC', TC, ...
 % %         'C', C, ...
 % %         'E', E, ...
 % %         'S', S);
-Y = coralCovers(Yout,coral_params.taxa_id);
+ %covers = coralCovers(Yout,coral_params.taxa_id);
 end
