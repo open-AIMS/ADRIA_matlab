@@ -20,7 +20,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
-
+       
     %% Weights for connectivity , waves (ww), high cover (whc) and low
     wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
     wtheat = criteria.heat_stress; % weight of heat damage in MCDA
@@ -206,7 +206,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, alg_ind); % site selection function for intervention deployment
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, interv.alg_ind); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
         elseif strategy == 0 % unguided deployment

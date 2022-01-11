@@ -23,16 +23,15 @@ function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps,
      modified_params(1,'Aadapt') = {x(5)};
      
      Y = ai.run(modified_params, sampled_values = false, nreps = Nreps);
-     
+     covers = coralCovers(Y,ai.coral_spec.taxa_id);
      
      out_metrics = zeros(Nreps,length(tgt_names));
      for m = 1:length(tgt_names)
          % total coral cover
          if strcmp(tgt_names{m},'TC')
-             out_metrics(m)= mean(Y,'all');
+             out_metrics(m)= mean(covers.TC,'all');
              %eveness
          elseif strcmp(tgt_names{m},'E')
-             coral_tab = ai.coral_spec; 
              [~,E] = coralEvennessADRIA(Y);
              out_metrics(m) = mean(E,'all');
              %shelter volume
