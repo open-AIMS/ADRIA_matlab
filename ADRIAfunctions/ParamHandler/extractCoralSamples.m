@@ -13,18 +13,18 @@ function param_spec = extractCoralSamples(samples, param_spec)
 
 varnames = string(samples.Properties.VariableNames);
 col_names = ["basecov", "growth_rate", "fec", ...
-             "wavemort90", "mb_rate", "natad"];
+             "wavemort90", "mb_rate", "natad", "colony_area_cm2"];
 
 unique_coral_names = unique(replace(lower(param_spec.name), " ", "_"));
-num_corals = length(unique_coral_names);
+num_taxa = length(unique_coral_names);
 num_params = length(col_names);
-for c_idx = 1:num_corals
+for c_idx = 1:num_taxa
     coral_name = unique_coral_names(c_idx);
     idx = contains(param_spec.coral_id, coral_name);
     
     % find and assign parameter values related to this coral taxa
     param_spec{idx, col_names} = ...
-        reshape(samples{:, contains(varnames, coral_name)}, num_corals, num_params)';
+        reshape(samples{:, contains(varnames, coral_name)}, num_params, num_taxa)';
 end
 
 end
