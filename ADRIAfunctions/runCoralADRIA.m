@@ -69,10 +69,7 @@ coral_spec = coralSpec();
 % Create output matrices
 n_species = height(coral_spec);  % total number of species considered
 
-% Y_TC = zeros(timesteps, nsites, N, n_reps);
-Y_all = zeros(timesteps, n_species, nsites, N, n_reps);
-% Y_E = zeros(timesteps, nsites, N, n_reps);
-% Y_S = zeros(timesteps, nsites, N, n_reps);
+Y = zeros(timesteps, n_species, nsites, N, n_reps);
 
 for i = 1:N
     scen_it = intervs(i, :);
@@ -83,17 +80,11 @@ for i = 1:N
     c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
     for j = 1:n_reps
-        tmp = coralScenario(scen_it, scen_crit, ...
+        Y(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j));
-
-        % Y_TC(:, :, i, j) = tmp.TC;
-        Y_all(:, :, :, i, j) = tmp.all;
-%         Y_E(:, :, i, j) = tmp.E;
-%         Y_S(:, :, i, j) = tmp.S;
     end
 end
-Y = Y_all;
 
 end

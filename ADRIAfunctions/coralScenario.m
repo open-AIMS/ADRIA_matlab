@@ -1,6 +1,6 @@
 function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, ...
-    wave_scen, dhw_scen, alg_ind)
+    wave_scen, dhw_scen)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -45,6 +45,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% Set up result structure
     tf = sim_params.tf; % timeframe: total number of time steps
     nspecies = height(coral_params);
+    
+    alg_ind = interv.alg_ind;
 
     % containers for seeding, shading and cooling
     nprefseed = zeros(tf, 1);
@@ -237,23 +239,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
         Y = Y(end, :);
-        Y = reshape(Y, nspecies, nsites);
-        Yout(tstep, :, :) = Y;
+        Yout(tstep, :, :) = reshape(Y, nspecies, nsites);
 
     end % tstep
-
-    %% Assign results
-    % Suggest we change this such that we only report:
-    % (1) total coral cover (TC) across sites and time
-    % (2) 'species' across sites and time - in post-hoc analyses we divide
-    % these into real species and their size classes
-
-%    [TC, C, E, S] = reefConditionMetrics(Yout);
-     covers = coralCovers(Yout);
-%     % seedlog and shadelog are omitted for now
-% %     Y = struct('TC', TC, ...
-% %         'C', C, ...
-% %         'E', E, ...
-% %         'S', S);
-Y = coralCovers(Yout,coral_params.taxa_id);
+    
+    % Assign to output variable
+    Y = Yout;
 end
