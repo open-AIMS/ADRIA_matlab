@@ -1,7 +1,7 @@
 % Example script illustrating differences in algorithm performance for the
 % total coral cover metric (shows how algorithm choice could be optimised
 % for a given intervention scenario)
-nalgs = 4;
+nalgs = 3;
 nmetrics = 3;
 example_file = 'Inputs/MCDA_example.nc';
 if isfile(example_file)
@@ -14,7 +14,7 @@ else
         %% Generate monte carlo samples
 
         % Number of scenarios
-        N = 8;
+        N = 50;
         num_reps = 50;  % Number of replicate RCP scenarios
         % timesteps, n_algs, n_scenarios, n_metrics
          results = zeros(25, nalgs, N, nmetrics);
@@ -126,60 +126,66 @@ end
 % for
 figure(1)
 title('TC comparison')
-count = 1;
-for nn = 1:4
-    for mm = 1:2
+
+for count = 1:50
      for k =1:nalgs
         hold on
-        subplot(2,4,count)
+        subplot(5,10,count)
         plot(1:25,alg_cont_TC(:,k,count))
-        legend('alg1','alg2','alg3')
+        title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
         hold off
      end
-     count = count+1;
-    end
 end
 
-figure(2)
-title('E comparison')
-count = 1;
-for nn = 1:4
-    for mm = 1:2
-     for k =1:nalgs
+for count = 1:50
         hold on
-        subplot(2,4,count)
-        plot(1:25,alg_cont_E(:,k,count))
-        legend('alg1','alg2','alg3')
+        subplot(5,10,count)
+        plot(1:25,alg_cont_TC(:,3,count)-alg_cont_TC(:,1,count))
+        title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
+        ylim([0,0.3])
         hold off
-     end
-     count = count+1;
-    end
 end
+%        legend('alg1','alg2','alg3','alg4')
+% figure(2)
+% title('E comparison')
+% count = 1;
+% for nn = 1:4
+%     for mm = 1:2
+%      for k =1:nalgs
+%         hold on
+%         subplot(2,4,count)
+%         plot(1:25,alg_cont_E(:,k,count))
+%         legend('alg1','alg2','alg3','alg4')
+%         hold off
+%      end
+%      count = count+1;
+%     end
+% end
+% 
+% figure(3)
+% title('S comparison')
+% count = 1;
+% for nn = 1:4
+%     for mm = 1:2
+%      for k =1:nalgs
+%         hold on
+%         subplot(2,4,count)
+%         plot(1:25,alg_cont_S(:,k,count))
+%         legend('alg1','alg2','alg3','alg4')
+%         hold off
+%      end
+%      count = count+1;
+%     end
+% end
 
-figure(3)
-title('S comparison')
-count = 1;
-for nn = 1:4
-    for mm = 1:2
-     for k =1:nalgs
-        hold on
-        subplot(2,4,count)
-        plot(1:25,alg_cont_S(:,k,count))
-        legend('alg1','alg2','alg3')
-        hold off
-     end
-     count = count+1;
-    end
-end
-
-%%
-temp_cont = [];
-for alg = 1:3
-    for t = 2:25
-        filename = sprintf('DMCDA_vals_Alg%1.0f_time%2.0f.mat',alg,t);
-        if isfile(filename)
-            load(filename)
-            temp_cont = [temp_cont; [repmat(alg,length(temp.seedsites),1), repmat(t,length(temp.seedsites),1), temp.seedsites,temp.shadesites]];
-        end
-    end
-end
+% %%
+% temp_cont = [];
+% for alg = 1:3
+%     for t = 2:25
+%         filename = sprintf('DMCDA_vals_Alg%1.0f_time%2.0f.mat',alg,t);
+%         if isfile(filename)
+%             load(filename)
+%             temp_cont = [temp_cont; [repmat(alg,length(temp.seedsites),1), repmat(t,length(temp.seedsites),1), temp.seedsites,temp.shadesites]];
+%         end
+%     end
+% end
