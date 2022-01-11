@@ -1,4 +1,4 @@
-function Y = coralEvennessADRIA(X, coralCovers)  
+function Y = coralEvenness(X, coralCovers)  
 % Calculates evenness across functional coral groups in ADRIA
 % Inputs:
 %  results from coralScenario, array.  Dims: timesteps, species, sites, interventions, sims 

@@ -1,4 +1,4 @@
-function Y = shelterVolumeADRIA(X, coral_params)
+function Y = shelterVolume(X, coral_params)
 
 % Calculates evenness across functional coral groups in ADRIA
 

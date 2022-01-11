@@ -131,13 +131,13 @@ f = @coralCovers;
 covers = f(Y);
 
 %% Calculate coral evenness
-E = coralEvennessADRIA(Y, @coralCovers);
+E = coralEvenness(Y, @coralCovers);
 
 %% Extract juvenile corals (< 5 cm diameter)
 BC = covers.juveniles;
 
 %% Calculate coral shelter volume per ha
-SV_per_ha = shelterVolumeADRIA(Y, coral_params);
+SV_per_ha = shelterVolume(Y, coral_params);
 
 %% Plot coral covers over time and sites
 figure; 
