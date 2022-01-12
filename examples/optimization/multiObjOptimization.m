@@ -24,7 +24,7 @@ function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_names)
      % create ADRIA class
      ai = ADRIA();
      % load connectivity data
-     ai.loadConnectivity(filename,cutoff = 0.1)
+     ai.loadConnectivity(filename,cutoff = 0.1);
       
      % define parameters which will not be perturbed during optimisation
      modified_params = ai.raw_defaults;
@@ -37,7 +37,7 @@ function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_names)
     ObjectiveFunction = @(x) -1 * allParamMultiObjectiveFunc(x, ai, modified_params, Nreps, func_names);
     
     % number of parameters being optimised over
-     nvar = 5;
+     nvar = 7;
      
     % no constraint equations for now
     A = [];
@@ -46,8 +46,8 @@ function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_names)
     beq = [];
     
     % use parameter lower and upper bounds in ai to define lb and ub
-    lb = ai.raw_bounds.lower_bound(4:8);
-    ub = ai.raw_bounds.lower_bound(4:8);
+    lb = ai.raw_bounds.lower_bound(4:10);
+    ub = ai.raw_bounds.upper_bound(4:10);
     
     % begin optimisation algorithm
     [x, fval] = gamultiobj(ObjectiveFunction, nvar, A, b, Aeq, beq, lb, ub);
