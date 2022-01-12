@@ -8,12 +8,12 @@ Nreps = 10;
 
 filename = 'MooreTPMean.xlsx';
 % optimisation specification - want to optimise TC and CES
-names_vec = cell(1,1);
-names_vec{1} = 'TC';
-names_vec{2} = 'E';
+
+func_vec = {@coralTaxaCover, @coralSpeciesCover, ...
+                     @coralEvenness, @shelterVolume};
 
 % perform optimisation 
-[x,fval] = multiObjOptimization(alg, rcp, Nreps, filename, names_vec);
+[x,fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_vec);
 
 % print results 
 sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f',...

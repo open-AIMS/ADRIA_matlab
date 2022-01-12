@@ -1,4 +1,4 @@
-function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps, tgt_names)
+function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps, func_names)
     % Objective function that runs a single ADRIA simulation for all
     % parameters, allowing variable parameter inputs for interventions.
     %
@@ -23,27 +23,18 @@ function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps,
      modified_params(1,'Aadapt') = {x(5)};
      
      Y = ai.run(modified_params, sampled_values = false, nreps = Nreps);
-     covers = coralCovers(Y,ai.coral_spec.taxa_id);
+     [~, ~, coral_params] = ai.splitParameterTable(modified_params);
      
-     out_metrics = zeros(Nreps,length(tgt_names));
-     for m = 1:length(tgt_names)
-         % total coral cover
-         if strcmp(tgt_names{m},'TC')
-             out_metrics(m)= mean(covers.TC,'all');
-             %eveness
-         elseif strcmp(tgt_names{m},'E')
-             [~,E] = coralEvennessADRIA(Y);
-             out_metrics(m) = mean(E,'all');
-             %shelter volume
-         elseif strcmp(tgt_names{m},'SV')
-             SV = shelterVolumeADRIA(Y,ai.corals);
-             out_metrics(m) = mean(SV,'all');
-             % density of juvinile corals
-         elseif strcmp(tgt_names{m},'DJ')
-             DJ = Y(:,1:6:end,:)+ Y(:,2:6:end,:);
-             DJ = squeeze(sum(DJ,2));
-             out_metrics(m) = mean(DJ,'all');
+     % Collect metrics
+     metric_results = collectMetrics(Y, coral_params,func_names);
+     out_metrics = zeros(1,length(func_names));
+     
+     for m = 1:length(func_names)
+         switch func2str(func_names{m})
+             case 'coralTaxaCover'
+                   out_metrics(m)= mean(metric_results.(func2str(func_names{m})).total_cover,'all');
+             otherwise
+                 out_metrics(m)= mean(metric_results.(func2str(func_names{m})),'all');
          end
      end
-
 end

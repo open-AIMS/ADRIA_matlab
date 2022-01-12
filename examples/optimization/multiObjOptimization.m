@@ -1,4 +1,4 @@
-function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, tgt_names)
+function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_names)
 % Inputs :
 %        alg : indicates MCDA algorithm to be used
 %              1 - Order Ranking
@@ -34,7 +34,7 @@ function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, tgt_names)
      ai.constants.RCP = rcp;
 
     % define multi-objective function
-    ObjectiveFunction = @(x) -1 * allParamMultiObjectiveFunc(x, ai, modified_params, Nreps, tgt_names);
+    ObjectiveFunction = @(x) -1 * allParamMultiObjectiveFunc(x, ai, modified_params, Nreps, func_names);
     
     % number of parameters being optimised over
      nvar = 5;
