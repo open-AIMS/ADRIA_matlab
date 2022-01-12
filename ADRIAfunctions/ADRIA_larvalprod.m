@@ -12,6 +12,8 @@ function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff,
 %    LPdhwcoeff : float,
 %    DHWmaxtot : int, maximum DHW
 %    LPDprm2 : int, larval production parameter 2
+% Output:  
+%    array of ngroups by nsites
 
 ad = assistadapt + tstep .* natad;
 
@@ -21,7 +23,7 @@ tmp_ad = (1 - ad / (DHWmaxtot/2)); %using half of DHWmaxtot as a placeholder
 % one way around dimensional issue - tmp_ad for each class as the averaged
 % % of the enhanced and unenhanced corals in that class
 tmp_ad2 = mean(reshape(tmp_ad,length(tmp_ad)/6,6));
-% KA note: okay if this averages over size classes, but can't average across groups.  
+% KA note: this works as it averages over size classes and not across groups.  
 
 Y = 1 - exp(-(exp(-LPdhwcoeff*(stresspast .* tmp_ad2' - LPDprm2))));
 end
