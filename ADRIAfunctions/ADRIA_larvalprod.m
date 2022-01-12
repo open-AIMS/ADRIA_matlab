@@ -1,5 +1,8 @@
 function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff, DHWmaxtot, LPDprm2)
-% Project larval production for each coral type for the given time step.
+% Estimate how scope for larval production by each coral type changes as a 
+% function of last year's heat stress. The function is theoretical and is 
+% not yet verified by data. The rationale is that 
+
 %
 % Inputs:
 %    tstep : int,
@@ -10,9 +13,6 @@ function Y = ADRIA_larvalprod(tstep, assistadapt, natad, stresspast, LPdhwcoeff,
 %    DHWmaxtot : int, maximum DHW
 %    LPDprm2 : int, larval production parameter 2
 
-
-% Notes:  need to apply this only to coral groups
-
 ad = assistadapt + tstep .* natad;
 
 tmp_ad = (1 - ad / (DHWmaxtot/2)); %using half of DHWmaxtot as a placeholder 
@@ -21,6 +21,7 @@ tmp_ad = (1 - ad / (DHWmaxtot/2)); %using half of DHWmaxtot as a placeholder
 % one way around dimensional issue - tmp_ad for each class as the averaged
 % % of the enhanced and unenhanced corals in that class
 tmp_ad2 = mean(reshape(tmp_ad,length(tmp_ad)/6,6));
+% KA note: okay if this averages over size classes, but can't average across groups.  
 
 Y = 1 - exp(-(exp(-LPdhwcoeff*(stresspast .* tmp_ad2' - LPDprm2))));
 end
