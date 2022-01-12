@@ -7,7 +7,6 @@
 #PBS -S /bin/bash
 
 echo $RCP
-echo $PrSites
 echo $Seed1
 echo $Seed2
 echo $SRM
@@ -18,4 +17,5 @@ module load MATLAB/R2019a
 
 cd $PBS_O_WORKDIR
 
-matlab -nodisplay -r "ADRIAOptimisation" > ADRIA_opt_output_RCP"$RCP"_PrSites"$PrSites"_Seed1"$Seed1"_Seed2"$Seed2"_SRM"$SRM"_Aadpt"$Aadpt"_Natad"$Natad".log
+matlab -nodisplay -r "ADRIASetup" 
+matlab -nodisplay -r "example_runs_BBN_data_HPC" > ADRIA_multipar_output_RCP"$RCP"_Seed1"$Seed1"_Seed2"$Seed2"_SRM"$SRM"_Aadpt"$Aadpt"_Natad"$Natad".log

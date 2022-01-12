@@ -1,4 +1,4 @@
-function [TP_data, site_ranks, strongpred] =  ADRIA_TP(file, con_cutoff)
+function [TP_data, site_ranks, strongpred] =  siteConnectivity(file, con_cutoff)
 % Create transitional probability matrix indicating connectivity between
 % sites, level of centrality, and the strongest predecessor for each site.
 %
@@ -14,7 +14,7 @@ function [TP_data, site_ranks, strongpred] =  ADRIA_TP(file, con_cutoff)
 %   strongpred : matrix[float], strongest predecessor for each site
 %
 % Example: 
-%     ADRIA_TP('MooreTPmean.xlsx', 0.1)
+%     siteConnectivity('MooreTPmean.xlsx', 0.1)
 %% Load transitional probability matrix (connectivity between sites)
 F1 = readtable(file, 'PreserveVariableNames', true);
 F1(:,1:2) = [];  % remove the ID and address columns

@@ -21,13 +21,16 @@ function Y = mapDuplicateResults(Yi, u_r, g_idx)
         Y_ss = Yi.(fn);
         Y.(fn) = zeros(size(Y_ss));
         
-        if ~(fn == "C")
-            for i = 1:num_unique
-                Y.(fn)(:, :, g_idx == i, :) = Y_ss(:, :, i, :);
-            end
-        else
-            for i = 1:num_unique
-                Y.(fn)(:, :, :, g_idx == i, :) = Y_ss(:, :, :, i, :);
+        for i = 1:num_unique
+            t_idx = g_idx == i;
+            num_copies = sum(t_idx);
+            
+            if ~(fn == "C")
+                target_result = Y_ss(:, :, i, :);
+                Y.(fn)(:, :, t_idx, :) = repmat(target_result, 1, 1, num_copies, 1);
+            else
+                target_result = Y_ss(:, :, :, i, :);
+                Y.(fn)(:, :, :, t_idx, :) = repmat(target_result, 1, 1, 1, num_copies, 1);
             end
         end
     end

@@ -1,5 +1,5 @@
 function est = estimateRuntime(n_sims, n_steps, n_sites)
-% Estimate total runtime based on a separate early indicative trial.
+% Estimate total runtime based on a separate indicative trial.
 %
 % NOTE: 
 %     Assumes all detected cores are used.
@@ -15,7 +15,7 @@ function est = estimateRuntime(n_sims, n_steps, n_sites)
 %     est : float, estimated runtime (in seconds)
 
     % Estimate from original run set
-    trial_runtime = 0.45;
+    trial_runtime = 0.08;
 
     % run time per site/step
     rt_per_site_step = trial_runtime / 26 / 25;

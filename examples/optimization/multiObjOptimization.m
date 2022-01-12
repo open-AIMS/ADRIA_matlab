@@ -1,85 +1,54 @@
-function [x, fval] = multiObjOptimization(alg, out_names, fn, TP_data, site_ranks, strongpred, varargin)
-% multiObjOptimization runs a multi-objective genetic optimisation algorithm 
-% to maximise outputs specified in out_names with respect to the intervention 
-% variables Seed1, Seed2, SRM, AsAdt, NatAdt
-%
+function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_names)
 % Inputs :
-%        if no inputs for prsites and/or rcp, uses standard parameters
-%        Input order:
 %        alg : indicates MCDA algorithm to be used
 %              1 - Order Ranking
 %              2 - TOPSIS
 %              3 - VIKOR
-%        out_names: indicates which outputs to optimise over as a cell structture of strings
-%                   e.g. out_names = {'TC','CES','PES'};
-%        varargin : default values used if not specified
-%        varargin{1} : rcp (rcp scenario value 2.6,4.5,6.0,8.5)
-%        varargin{2} : ES_vars (1*7 array with structure [evcult, strcult, evprov, 
-%                      strprov,TCsatCult,TCsatProv,cf]
+%        rcp: indicates rcp scenario
+%        Nreps : number of runs for climate scenario simulation
+%        filename : filename to load connectivity data from
+%        tgt_names : cell of strings indicating which outputs to optimise
+%                    over (must contain at least 2 strings, otherwise use
+%                    single output optimisation function objOptimisation).
+%                           - 'TC' : total coral cover
+%                           - 'E' : Evenness
+%                           - 'SV' : Shelter Volume
+%                           - 'DJ' : Density of juvenile corals
 %
 % Outputs :
 %         x : [Seed1,Seed2,SRM,Aadpt,Natad] which maximise the chosen
 %             ADRIA output metrics (will represent a pareto front if
 %             multiple values are chosen to optimise over.
-%         fval : the max value/optimal value of the chosen metrics
+%         fval : the max value/optimal value of the chosen metrics     
 
-    % Perturb all available parameters
-    i_params = interventionDetails();
-    criteria_weights = criteriaDetails();
-    all_params = [i_params; criteria_weights];
+     % create ADRIA class
+     ai = ADRIA();
+     % load connectivity data
+     ai.loadConnectivity(filename,cutoff = 0.1)
+      
+     % define parameters which will not be perturbed during optimisation
+     modified_params = ai.raw_defaults;
+     modified_params(1,'alg_ind') = {alg};
+     modified_params(1,'Guided') = {1};
+     modified_params(1,'PrSites') = {3};
+     ai.constants.RCP = rcp;
 
-    nsites = 26;
-    [params, ecol_parms] = ADRIAparms();
-
-    % Filter to target interventions
-    p_names = i_params.name;
-    rules = false;
-
-    for target = {'Seed1', 'Seed2', 'SRM', 'Aadpt', 'Natad'}
-        rules = rules | (p_names == target);
-    end
+    % define multi-objective function
+    ObjectiveFunction = @(x) -1 * allParamMultiObjectiveFunc(x, ai, modified_params, Nreps, func_names);
     
-    if size(varargin, 1) == 0
-        % if nothing provided, use defaults
-        % already in params and i_params except for ES_vars
-        ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
-    elseif size(varargin, 1) == 1
-        % set rcp to input
-        params.RCP = varargin{1};
-        % other params defaults
-        ES_vars =  [0.5,0.5,0.2,0.8,0.5,0.5,1];
-    elseif size(varargin, 1) == 2
-         % set all params to input
-        params.RCP = varargin{1};
-        ES_vars =  varargin{2};
-    end
-    % use guided site seclection algorithm
-    all_params.defaults{1}(1) = 1;
-    % Wave/DHW scenarios
-    wave_scen = ncread(fn, "wave");
-    dhw_scen = ncread(fn, "DHW");
-    subset = i_params(rules, :);
-
-    % Upper/Lower bounds of x
-    lb = cell2mat(subset.lower_bound);
-    ub = cell2mat(subset.upper_bound);
-
-    % no. of variables to optimise for = no. of interventions
-    nvar = 18;
-    ObjectiveFunction = @(x) -1 * allParamMultiObjectiveFunc(x, alg, out_names, ...
-        all_params, ...
-        nsites, wave_scen, ...
-        dhw_scen, params, ...
-        ecol_parms, ...
-        TP_data, site_ranks, ...
-        strongpred, ES_vars);
-    
+    % number of parameters being optimised over
+     nvar = 5;
+     
     % no constraint equations for now
     A = [];
     b = [];
     Aeq = [];
     beq = [];
-
+    
+    % use parameter lower and upper bounds in ai to define lb and ub
+    lb = ai.raw_bounds.lower_bound(4:8);
+    ub = ai.raw_bounds.lower_bound(4:8);
+    
     % begin optimisation algorithm
     [x, fval] = gamultiobj(ObjectiveFunction, nvar, A, b, Aeq, beq, lb, ub);
     fval = -1 * fval;
