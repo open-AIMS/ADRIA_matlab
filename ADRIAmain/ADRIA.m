@@ -244,6 +244,17 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
                      w_scens, d_scens, fprefix, runargs.batch_size);
         end
+        
+        function Y = gatherResults(obj, file_loc, metrics)
+            seps = split(file_loc, "_[[");
+            prefix = seps(1);
+            
+            input_file = dir(fullfile(strcat(prefix, "*_inputs.mat")));
+            samples = load(input_file.name);
+            params = samples.sim_inputs.parameters;
+            [~, ~, coral] = obj.splitParameterTable(params);
+
+            Y = gatherResults(file_loc, coral, metrics);
         end
     end
 end
