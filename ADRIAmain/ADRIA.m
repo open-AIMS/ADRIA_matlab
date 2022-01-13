@@ -250,7 +250,7 @@ classdef ADRIA < handle
             prefix = seps(1);
             
             input_file = dir(fullfile(strcat(prefix, "*_inputs.mat")));
-            samples = load(input_file.name);
+            samples = load(fullfile(input_file.folder, input_file.name));
             params = samples.sim_inputs.parameters;
             [~, ~, coral] = obj.splitParameterTable(params);
 
