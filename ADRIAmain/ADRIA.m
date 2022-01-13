@@ -217,16 +217,33 @@ classdef ADRIA < handle
             nreps = runargs.nreps;
 
             [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            [~, n_sites, ~] = size(w_scens);
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
             end
 
+            % Quick fix - save as mat file as apparently saving structs in 
+            % an open format is too hard for matlab :(
+            sim_inputs = struct();
+            sim_inputs.parameters = table2array(X);
+            sim_inputs.constants = obj.constants;
+            sim_inputs.n_reps = nreps;
+            sim_inputs.n_timesteps = obj.constants.tf;
+            sim_inputs.n_sites = n_sites;
+            sim_inputs.n_species = length(obj.coral_spec.coral_id);
+
+            fprefix = runargs.file_prefix;
+            tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.mat');
+            save(tmp_fn, 'sim_inputs')
+
+            % Run ADRIA
             [interv, crit, coral] = obj.splitParameterTable(X);
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, runargs.file_prefix, runargs.batch_size);
+                     w_scens, d_scens, fprefix, runargs.batch_size);
+        end
         end
     end
 end
