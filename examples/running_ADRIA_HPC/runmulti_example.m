@@ -37,10 +37,10 @@ ai.loadConnectivity('MooreTPmean.xlsx');
 
 tic
 ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
-    file_prefix='./test', batch_size=4);
+    file_prefix='./example_multirun', batch_size=4);
 
 % Gather results, applying a metric to each result set.
-Y = ai.gatherResults('./test', {@coralTaxaCover});
+Y = ai.gatherResults('./example_multirun', {@coralTaxaCover});
 
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
