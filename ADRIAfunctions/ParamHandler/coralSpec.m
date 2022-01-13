@@ -4,7 +4,7 @@ function params = coralSpec()
 % sampled or user-specified values.
 %
 % Notes:
-% Values for the historical, temporal pattsiern of degree heating weeks
+% Values for the historical, temporal patterns of degree heating weeks
 % between bleaching years come from [1].
 %
 % Outputs:
