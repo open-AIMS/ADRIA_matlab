@@ -50,7 +50,7 @@ else
         alg_ind = al;
         p_sel.alg_ind(:) = al*ones(length(p_sel.alg_ind(:)),1);
         tic
-        Y = ai.run(p_sel,sampled_values = true, nreps = num_reps);
+        Y = ai.run(p_sel,sampled_values = false, nreps = num_reps);
         tmp = toc;
 
         disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
@@ -91,7 +91,7 @@ for count = 1:50
         subplot(5,10,count)
         plot(1:25,alg_cont_TC(:,3,count)-alg_cont_TC(:,1,count))
         %title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
-        ylim([0,0.3])
+       % ylim([0,0.3])
         hold off
 end
 

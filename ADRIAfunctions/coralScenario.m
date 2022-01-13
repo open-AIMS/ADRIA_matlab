@@ -210,14 +210,14 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
         elseif strategy == 0 % unguided deployment
-            prefseedsites = randi(nsites, [nsiteint, 1])'; % if unguided, then seed corals anywhere
+            prefshadesites = randi(nsites, [nsiteint, 1])'; % if unguided, then seed corals anywhere
             prefshadesites = randi(nsites, [nsiteint, 1])'; % if unguided, then shade corals anywhere
         end
 
-        % Warming and disturbance event going into the pulse function
-        if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
-            Yshade(tstep, :, prefshadesites) = srm;
-        end
+%         % Warming and disturbance event going into the pulse function
+%         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
+%             Yshade(tstep, :, prefshadesites) = srm;
+%         end
 
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
@@ -234,6 +234,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed enhanced corals of group 4
             Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with gr2
             Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with gr4
+            
         end
 
         % Run ODE for all species and sites
@@ -242,7 +243,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yout(tstep, :, :) = reshape(Y, nspecies, nsites);
 
     end % tstep
-    
+    save(sprintf('Alg%1.0f_sites.mat',alg_ind),'prefseedsites','prefshadesites')
     % Assign to output variable
     Y = Yout;
 end
