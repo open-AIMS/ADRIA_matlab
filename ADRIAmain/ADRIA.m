@@ -205,6 +205,7 @@ classdef ADRIA < handle
         end
         
         function runToDisk(obj, X, runargs)
+            % Run ADRIA, storing results to file.
             arguments
                obj
                X table
@@ -246,6 +247,7 @@ classdef ADRIA < handle
         end
         
         function Y = gatherResults(obj, file_loc, metrics)
+            % Gather results from a given file.
             seps = split(file_loc, "_[[");
             prefix = seps(1);
             
