@@ -24,7 +24,9 @@ function Y = growthODE4_KA(X, r, P, mb, rec, comp)
 % as size classes (6) across all sites (total of 36 by 26), recruitment is
 % a 6 by 26 array. 
 
-X = reshape(X, [36, 26]); %reshape(X, size(rec));  %why are we reshaping X here?
+% Reshape flattened input from ODE back to expected matrix shape
+% Dims: (coral species, sites)
+X = reshape(X, [length(r), length(X) / length(r)]);
 
 %% Density dependent growth and recruitment
 % P - sum over coral covers within each site
