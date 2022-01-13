@@ -94,6 +94,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 %         nsiteint = length(A(:,1));
 %     end
 
+
 switch alg_ind 
     case 1
         %% Order ranking
