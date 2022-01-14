@@ -25,8 +25,11 @@ function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
 %        'Global warming transforms coral reef assemblages', 
 %        Nature, 556(7702), pp. 492–496. 
 %        doi:10.1038/s41586-018-0041-2.
+
 ad = a_adapt + tstep .* n_adapt;
-Y = exp(n_p1 * (exp(n_p2 * (dhw - ad) )));
+
+% Model 1: %Based on delta covers observed by Hughes et al. 2018 (Fig 2A)
+Y = exp(n_p1 * (exp(n_p2 * (dhw - ad) ))); 
 
 end
 

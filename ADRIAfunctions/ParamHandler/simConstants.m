@@ -34,6 +34,7 @@ params.max_coral_cover = 0.8;
 
 % Gompertz shape parameters 1 and 2 - for now applied to all coral species
 % equally. Based on Hughes et al 2017 and Bozec et al 2021.
+% Corrected to be consistent with zero bleaching mortality at DHW < 3.
 params.gompertz_p1 = 2.74;
 params.gompertz_p2 = 0.25;
 

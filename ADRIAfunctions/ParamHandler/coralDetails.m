@@ -31,7 +31,8 @@ base_p_names = string(coral_spec.Properties.VariableNames(6:end))';
 n_corals = length(coral_ids);
 n_param_names = length(base_p_names);
 
-% Set arbitrary bounds +/- 20% of best guess values
+% Coral ecosystems are highly uncertain.
+% Here, we set arbitrary bounds +/- 40% of best guess values
 i = 1;
 name = string.empty;
 defaults = zeros(n_corals * n_param_names, 1);
@@ -43,7 +44,7 @@ for c_id = 1:n_corals
         name(i, :) = strcat(coral_ids(c_id), '__', bp_name);
         tmp = coral_spec(coral_spec.coral_id == row_name, bp_name);
         defaults(i, :) = tmp{1, :};
-        p_bounds(i, :) = [defaults(i, :) * 0.8, defaults(i, :) * 1.2];
+        p_bounds(i, :) = [defaults(i, :) * 0.6, defaults(i, :) * 1.4];
         i = i + 1;
     end
 end
