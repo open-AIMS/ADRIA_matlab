@@ -15,15 +15,13 @@ tmp_dir = strcat(parent_dir, '/', right_now, '/');
 mkdir(tmp_dir)
 
 % Number of scenarios
-N = 2;
+N = 4;
 num_reps = 3;  % Number of replicate RCP scenarios
 
-% Collect details of available parameters
-inter_opts = interventionDetails();
-criteria_opts = criteriaDetails();
+ai = ADRIA();
+rd = ai.raw_defaults;
 
-% Create main table listing all available parameter options
-combined_opts = [inter_opts; criteria_opts];
+combined_opts = ai.parameterDetails();
 
 % Generate samples using simple monte carlo
 % Create selection table based on lower/upper parameter bounds
@@ -37,77 +35,26 @@ for p = 1:height(combined_opts)
     p_sel.(combined_opts.name{p}) = selection;
 end
 
-
-% Creating dummy permutations for core ADRIA parameters
-% (environmental and ecological parameter values etc)
-% This process will be replaced
-[params, ecol_params] = ADRIAparms();
-param_tbl = struct2table(params);
-ecol_tbl = struct2table(ecol_params);
-
-param_tbl = repmat(param_tbl, N, 1);
-ecol_tbl = repmat(ecol_tbl, N, 1);
-
-% Convert sampled values to ADRIA usable values
-% Necessary as samplers expect real-valued parameters (e.g., floats)
-% where as in practice ADRIA makes use of integer and categorical
-% parameters
-converted_tbl = convertScenarioSelection(p_sel, combined_opts);
-
-% Separate parameters into components
-% (to be replaced with a better way of separating these...)
-interv_scens = converted_tbl(:, 1:9);  % intervention scenarios
-criteria_weights = converted_tbl(:, 10:end);
-
-% use order-ranking for example
-alg_ind = 1;
-
-% Load site specific data
-[TP_data, site_ranks, strongpred] = siteConnectivity('Inputs/MooreTPmean.xlsx', params.con_cutoff);
-
-% Setup for the geographical setting including environmental input layers
-% Load wave/DHW scenario data
-% Generated with generateWaveDHWs.m
-% TODO: Replace these with wave/DHW projection scenarios instead
-fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(params.RCP), ".nc");
-wave_scens = ncread(fn, "wave");
-dhw_scens = ncread(fn, "DHW");
-
-% Select random subset of RCP conditions WITHOUT replacement
-n_rep_scens = length(wave_scens);
-rcp_scens = datasample(1:n_rep_scens, num_reps, 'Replace', false);
-w_scens = wave_scens(:, :, rcp_scens);
-d_scens = dhw_scens(:, :, rcp_scens);
+% Load site specific connectivity data
+ai.loadConnectivity('Inputs/MooreTPmean.xlsx');
 
 % Scenario runs
-% Currently running over unique interventions and criteria weights only for
-% a limited number of RCP scenarios.
-%
-% In actuality, this would be done for some combination of:
-% intervention * criteria * environment parameters * ecological parameter
-%     * wave_scen * dhw_scen * alg_ind * N_sims
-% where the unique combinations would be generated via some quasi-monte 
-% carlo sequence, or through some user-informed process.
 
 err = [];
 try
     % Run scenarios, keeping results in memory
-    Y_true = runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
-                      TP_data, site_ranks, strongpred, num_reps, ...
-                      w_scens, d_scens, alg_ind);
+    Y_true = ai.run(p_sel, sampled_values=true, nreps=num_reps);
 
     file_prefix = strcat(tmp_dir, 'test');
 
     % Run scenarios saving data to files
-    runADRIA(interv_scens, criteria_weights, param_tbl, ecol_tbl, ...
-                 TP_data, site_ranks, strongpred, num_reps, ...
-                 w_scens, d_scens, alg_ind, file_prefix, N);
+    ai.runToDisk(p_sel, sampled_values=true, nreps=num_reps, ...
+                    file_prefix=file_prefix, batch_size=2)
              
     assert(isfile(strcat(file_prefix, '_[[1-2]].nc')), "Partial result file not found!");
 
     % Collect all data
-    collated = collectDistributedResults('test', N, num_reps, ...
-                                         dir_name=tmp_dir, n_species=4);
+    Y_gathered = ai.gatherResults('./example_multirun', {@coralTaxaCover});
 
     assert(isequal(Y_true, collated), "Results are not equal!")
     assert(all(all(collated.TC(:, :, 1, 1) ~= 0)), "Results were zeros!")
