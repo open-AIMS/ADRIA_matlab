@@ -6,14 +6,15 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics)
 %   file_loc     : str, directory location and filename prefix
 %                   e.g., "./some_folder/file_prefix"
 %   coral_params : table, coral parameters used in all runs
-%   metrics      : cell, array of functions to apply
+%   metrics      : cell, array of functions to apply. If none provided, 
+%                    collates the raw results instead.
 %
 % Output:
 %    Y_collated : cell, of structs for each run, with fieldnames for each metric.
     arguments
         file_loc string
         coral_params table
-        metrics cell
+        metrics cell = {}
     end
 
     file_prefix = fullfile(file_loc);
@@ -32,12 +33,16 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics)
         [Ytable, md] = readDistributed(full_path);
         
         b_start = md.record_start;
-        b_len = md.n_sims;
-        
-        for j = 1:b_len
-            rec_id = (b_start - 1) + j;
-            data = collectMetrics(Ytable{j, :}, coral_params(rec_id, :), metrics);
-            Y_collated{rec_id} = data;
+        if isempty(metrics)
+            % Collate raw results if no metrics specified
+            b_end = md.record_end;
+            Y_collated(b_start:b_end) = Ytable{:, :};
+        else
+            b_len = md.n_sims;
+            for j = 1:b_len
+                rec_id = (b_start - 1) + j;
+                Y_collated{rec_id} = collectMetrics(Ytable{j, :}{:}, coral_params(rec_id, :), metrics);
+            end
         end
     end
 end
@@ -54,11 +59,15 @@ function [result, md] = readDistributed(filename)
     var_names = string({fileInfo.Variables.Name});
     
     n_vars = length(var_names);
-    
     result = table();
+    nsims = md.n_sims;
     for v = 1:n_vars
         var_n = var_names{v};
-        result.(var_n) = ncread(filename, var_n);  % func(tmp, md);
+        result.(var_n) = repmat({0}, nsims, 1);
+        tmp = ncread(filename, var_n);
+        for i = 1:nsims
+        	result(i, var_n) = {tmp(:, :, :, i, :)};
+        end
     end
 end
 
