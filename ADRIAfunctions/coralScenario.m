@@ -86,6 +86,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     % level of added natural coral adaptation
     natad = coral_params.natad + interv.Natad;
+    
+    % taxa-specific differences in natural bleaching resistance
+    bleach_resist = coral_params.bleach_resist;
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
@@ -222,7 +225,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
             neg_e_p2, assistadapt, ...
-            natad, dhw_step);
+            natad, bleach_resist, dhw_step);
 
         % proportional loss + proportional recruitment
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));

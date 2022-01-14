@@ -1,4 +1,4 @@
-function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
+function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, bleach_resist, dhw)
 % Gompertz cumulative mortality function 
 %
 % Partial calibration using data by Hughes et al [1] (see Fig. 2C)
@@ -25,10 +25,16 @@ function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, dhw)
 %        'Global warming transforms coral reef assemblages', 
 %        Nature, 556(7702), pp. 492–496. 
 %        doi:10.1038/s41586-018-0041-2.
+%
+%   2. Bozec, Y.-M. et. al. 2022 (in press). Cumulative impacts across 
+%           Australia’s Great Barrier Reef: A mechanistic evaluation. 
+%           Ecological Monographs.
 
-ad = a_adapt + tstep .* n_adapt;
+
+ad = a_adapt + bleach_resist + tstep .* n_adapt;
 
 % Model 1: %Based on delta covers observed by Hughes et al. 2018 (Fig 2A)
+% and calibrated by Bozec et al. 2021
 Y = exp(n_p1 * (exp(n_p2 * (dhw - ad) ))); 
 
 end
