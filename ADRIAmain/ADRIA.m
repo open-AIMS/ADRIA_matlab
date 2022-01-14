@@ -247,6 +247,11 @@ classdef ADRIA < handle
         end
         
         function Y = gatherResults(obj, file_loc, metrics)
+            arguments
+                obj
+                file_loc string
+                metrics cell = {}
+            end
             % Gather results from a given file.
             seps = split(file_loc, "_[[");
             prefix = seps(1);
