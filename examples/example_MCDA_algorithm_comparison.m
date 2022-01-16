@@ -44,7 +44,8 @@ else
         % a limited number of RCP scenarios.
         p_sel.Guided(:) = ones(length(p_sel.Guided(:)),1);
         p_sel.PrSites(:) = 3*ones(length(p_sel.PrSites(:)),1);
-        
+        p_sel.Seedyrs(:) = 5*ones(length(p_sel.Seedyrs(:)),1);
+        p_sel.Shadeyrs(:) = 12*ones(length(p_sel.Shadeyrs(:)),1);
    for al = 1:nalgs
          % for each algorithm
         alg_ind = al;

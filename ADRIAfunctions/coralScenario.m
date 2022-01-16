@@ -204,7 +204,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             %Factor 4: total coral cover state used as criterion in site selection;
             dMCDA_vars.sumcover = sum(Yout(p_step, :, :), 2);
             dMCDA_vars.prioritysites = prioritysites;
-            % DCMAvars.centr = centr
+            dMCDA_vars.centr = 1;%centr (needs to be non zero or this stuffs up normalisation in MCDA, I will later add a catch for this)
 
             [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, interv.alg_ind); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites

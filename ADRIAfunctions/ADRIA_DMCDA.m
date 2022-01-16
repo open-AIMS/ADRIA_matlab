@@ -106,6 +106,7 @@ switch alg_ind
         SE(:,5) = A(:,6)*wtlocover; %multiply by coral cover with its weight for high cover
         SE(:,6) = A(:,7)*wtpredecseed; %multiply priority predecessor indicator by weight
 
+        SE(:,all(isnan(SE),1))=0; 
         SEwt(:,1) = A(:,1);
         SEwt(:,2) = SE(:,2)+ SE(:,3) + SE(:,4) + SE(:,5); %for now, simply add indicators 
         SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
@@ -122,7 +123,7 @@ switch alg_ind
         SH(:,4) = A(:,4)*wtheat; %multiply complementary of heat risk with heat weight
         SH(:,5) = A(:,5)*wthicover; %multiply by coral cover with its weight for high cover
         SH(:,6) = A(:,7)*wtpredecshade; %multiply priority predecessor indicator by weight
-
+        SH(:,all(isnan(SH),1))=0; 
         SHwt(:,1) = A(:,1);
         SHwt(:,2) = SH(:,2)+ SH(:,3) + SH(:,4) + SH(:,5); %for now, simply add indicators 
         % if SHwt(:,2) == 0
@@ -151,6 +152,7 @@ switch alg_ind
        % normalisation
         SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
         SE = SE.* repmat(wse,size(SE,1),1);
+        SE(:,all(isnan(SE),1))=0; 
         % compute the set of positive ideal solutions for each criteria (max for
         % good crieteria, min for bad criteria). Max used as all crieteria
         % represent preferred attributes not costs or negative attributes
@@ -188,17 +190,18 @@ switch alg_ind
         % normalisation
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
         SH = SH.* repmat(wsh,size(SH,1),1);
+        SH(:,all(isnan(SH),1))=0; 
         % compute the set of positive ideal solutions for each criteria (max for
         % good crieteria, min for bad criteria). Max used as all crieteria
         % represent preferred attributes not costs or negative attributes
 
-        PIS = nanmax(SH(:,2:end));
+        PIS = max(SH(:,2:end));
 
         % compute the set of negative ideal solutions for each criteria (min for
         % good crieteria, max for bad criteria). Min used as all crieteria
         % represent preferred attributes not costs or negative attributes
 
-        NIS = nanmin(SH(:,2:end));
+        NIS = min(SH(:,2:end));
 
         % calculate separation distance from the ideal and non-ideal solns
 
@@ -234,7 +237,7 @@ switch alg_ind
         % normalisation
         SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
         SE = SE.* repmat(wse,size(SE,1),1);
-
+        SE(:,all(isnan(SE),1))=0; 
         F_s = max(SE(:,2:end));
         %F_h = min(SE(:,2:end));
 
@@ -273,7 +276,7 @@ switch alg_ind
         % normalisation
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
         SH = SH.* repmat(wsh,size(SH,1),1);
-
+        SH(:,all(isnan(SH),1))=0; 
         F_s = max(SH(:,2:end));
         %F_h = min(SH(:,2:end));
 
@@ -306,6 +309,7 @@ switch alg_ind
         SE(:,4) = (1-A(:,4))*wtheat;
         SE(:,5) = A(:,6)*wtlocover; %multiply by coral cover with its weight for high cover
         SE(:,6) = A(:,7)*wtpredecseed; %multiply priority predecessor indicator by weight
+        SE(:,all(isnan(SE),1))=0;
         
          % Shading - filtered set
         SH(:,1) = A(:,1); %sites column (remaining)
@@ -314,6 +318,7 @@ switch alg_ind
         SH(:,4) = A(:,4)*wtheat; %multiply complementary of heat risk with heat weight
         SH(:,5) = A(:,5)*wthicover; %multiply by coral cover with its weight for high cover
         SH(:,6) = A(:,7)*wtpredecshade; %multiply priority predecessor indicator by weight
+        SH(:,all(isnan(SH),1))=0;
         
         % set up optimisation problem
         % no inequality or equality constraints
