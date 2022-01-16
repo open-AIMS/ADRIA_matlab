@@ -86,6 +86,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     % level of added natural coral adaptation
     natad = coral_params.natad + interv.Natad;
+    
+    % taxa-specific differences in natural bleaching resistance
+    bleach_resist = coral_params.bleach_resist;
 
     %see ADRIAparms for list of sites in group
     if pgs == 1
@@ -206,7 +209,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             dMCDA_vars.prioritysites = prioritysites;
             dMCDA_vars.centr = 1;%centr (needs to be non zero or this stuffs up normalisation in MCDA, I will later add a catch for this)
 
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, interv.alg_ind); % site selection function for intervention deployment
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, alg_ind); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
         elseif strategy == 0 % unguided deployment
@@ -222,7 +225,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
             neg_e_p2, assistadapt, ...
-            natad, dhw_step);
+            natad, bleach_resist, dhw_step);
 
         % proportional loss + proportional recruitment
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
