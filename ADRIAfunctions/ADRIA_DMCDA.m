@@ -326,13 +326,14 @@ switch alg_ind
         % multi-objective function for seeding
         fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
         % solve multi-objective problem using genetic alg
-        x1 = gamultiobj(fun1,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
+        opts = optimoptions('gamultiobj', 'UseParallel', false, 'Display', 'off', 'MutationFcn', {@mutationadaptfeasible});
+        x1 = gamultiobj(fun1,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub, opts);
         x1 = x1(end,:);
         
         % multi-objective function for shading
         fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
         % solve multi-objective problem using genetic alg
-        x2 = gamultiobj(fun2,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
+        x2 = gamultiobj(fun2,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub, opts);
         x2 = x2(end,:);
         
         % order ga alg generated weightings from highest to lowest
