@@ -34,7 +34,11 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Set up connectivity
     nsites = width(TP_data);
-
+    % delay in seeding
+    delaySeed = 3;
+    %5;
+    delayShade = 3;
+    %5;
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
     dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', [], ...
@@ -218,7 +222,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
 
         % Warming and disturbance event going into the pulse function
-        if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
+        if (srm > 0) && (tstep <= delayShade + shadeyears) && (tstep>delayShade) && ~all(prefshadesites == 0)
             Yshade(tstep, :, prefshadesites) = srm;
         end
 
@@ -231,7 +235,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
         Yin1 = Y_pstep .* prop_loss;
 
-        if (tstep <= seedyears) && ~all(prefseedsites == 0)
+        if (tstep <= delaySeed+seedyears) && (tstep>delaySeed) && ~all(prefseedsites == 0)
             % Log seed values/sites
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed enhanced corals of group 2
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed enhanced corals of group 4
