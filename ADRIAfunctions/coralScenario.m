@@ -217,10 +217,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             prefshadesites = randi(nsites, [nsiteint, 1])'; % if unguided, then shade corals anywhere
         end
 
-%         % Warming and disturbance event going into the pulse function
-%         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
-%             Yshade(tstep, :, prefshadesites) = srm;
-%         end
+        % Warming and disturbance event going into the pulse function
+        if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
+            Yshade(tstep, :, prefshadesites) = srm;
+        end
 
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
