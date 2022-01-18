@@ -189,6 +189,10 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
             end
             
+            if isempty(obj.TP_data)
+                error("Site data not loaded! Preload with `loadConnectivity()`");
+            end
+            
             nreps = runargs.nreps;
 
             [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
