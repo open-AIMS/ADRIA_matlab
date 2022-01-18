@@ -42,6 +42,8 @@ name = [
     "Natad";
     "Seedyrs";
     "Shadeyrs";
+    "Seeddelay";
+    "Shadedelay";
 ];
 
 defaults = [
@@ -55,6 +57,8 @@ defaults = [
     0.025;  % Natad
     10;  % Seedyrs
     10;  % Shadeyrs
+    0;   % Seeddelay
+    0;   % Shadedelay
 ];
 
 % TODO: lower and upper bounds are dummy values and need to be replaced!
@@ -69,6 +73,8 @@ p_bounds = [
     [0.0, 0.1];  % Natad
     [10, 15];  % Seedyrs
     [10, 25];  % Shadeyrs
+    [0, 20]; % Sheeddelay
+    [0, 20];  % Shadedelay
 ];
 
 ptype = [
@@ -80,6 +86,8 @@ ptype = [
     "float";
     "float";
     "float";
+    "integer";
+    "integer";
     "integer";
     "integer";
 ];

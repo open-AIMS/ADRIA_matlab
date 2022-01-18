@@ -34,11 +34,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Set up connectivity
     nsites = width(TP_data);
-    % delay in seeding
-    delaySeed = 3;
-    %5;
-    delayShade = 3;
-    %5;
+    ;
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
     dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', [], ...
@@ -70,6 +66,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
+    delaySeed = interv.Seeddelay; % years to delay seeding
+    delayShade = interv.Shadedelay; % years to delay shading
 
     %% Define constant table location for seed values
     % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
