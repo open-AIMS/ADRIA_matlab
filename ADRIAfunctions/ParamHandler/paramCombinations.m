@@ -16,9 +16,5 @@ function result = paramCombinations(elements)
     combinations = cell(1, numel(elements)); %set up the varargout result
     [combinations{:}] = ndgrid(elements{:});
     combinations = cellfun(@(x) x(:), combinations,'uniformoutput',false); %there may be a better way to do this
-    tmp = [combinations{:}]; % NumberOfCombinations by N matrix. Each row is unique.
-    
-    % This has to be of cell type, as the resulting table could hold
-    % multiple ranges/combinations of varying lengths
-    result = num2cell(tmp, 2);
+    result = combinations{:}; % NumberOfCombinations by N matrix. Each row is unique.
 end
