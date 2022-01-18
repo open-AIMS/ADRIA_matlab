@@ -122,6 +122,7 @@ prop_change = linear_extension ./ diam_bin_widths;
 %Second, growth as transitions of cover to higher bins is estimated as
 r = prop_change .* (colony_area_m2_to./colony_area_m2_from);
 params.growth_rate = reshape(r', [], 1);
+
 %note that we use proportion of bin widths and linear extension to estimate
 % number of corals changing size class, but we use the bin means to estimate
 % the cover equivalent because we assume coral sizes shift from edges to mean

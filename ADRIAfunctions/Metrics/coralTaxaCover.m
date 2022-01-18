@@ -1,8 +1,12 @@
 function Y = coralTaxaCover(X, ~)
-% Converts outputs from coralScenario to relative cover of the four different coral taxa 
+% Converts outputs from coralScenario to relative cover of the four different coral taxa
+%
+%
 % Input: 
 %   X : array, of coralScenario results
 %       Dimensions: time, species, sites, interventions, sims
+% Output:
+%   Y : struct, of matrices
 
 %% Total coral cover (relative)
 TC = squeeze(sum(X,2)); %sum over all species and size classes

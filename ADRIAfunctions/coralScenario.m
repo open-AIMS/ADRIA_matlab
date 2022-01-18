@@ -15,57 +15,68 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    strongpred  : matrix, of strongest predecessor for each site
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
-%    alg_ind     : int, ranking algorithm choice
-%                    (Order: 1, TOPSIS: 2, Vikor: 3)
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
-       
-    %% Weights for connectivity , waves (ww), high cover (whc) and low
-    wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
-    wtheat = criteria.heat_stress; % weight of heat damage in MCDA
-    wtconshade = criteria.shade_connectivity; % weight of connectivity for shading in MCDA
-    wtconseed = criteria.seed_connectivity; % weight of connectivity for seeding in MCDA
-    wthicover = criteria.coral_cover_high; % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
-    wtlocover = criteria.coral_cover_low; % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
-    wtpredecseed = criteria.seed_priority; % weight for the importance of seeding sites that are predecessors of priority reefs
-    wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
-    risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
     %% Set up connectivity
     nsites = width(TP_data);
 
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
-    dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', [], ...
-        'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
-        'sumcover', 0, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
-        'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
-
-    %% Set up result structure
-    tf = sim_params.tf; % timeframe: total number of time steps
-    nspecies = height(coral_params);
     
-    alg_ind = interv.alg_ind;
-
-    % containers for seeding, shading and cooling
-    nprefseed = zeros(tf, 1);
-    nprefshade = zeros(tf, 1);
-    % nprefcool = zeros(params.tf, ninter);
-
+    % Set up result structure where necessary
     prefseedsites = []; % set the list of preferred seeding sites to empty
     prefshadesites = []; % set the list of preferred shading sites to empty
     prioritysites = []; % set the list of priority sites to empty
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
-
-    %% Extract intervention options
+    
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
-    pgs = interv.PrSites; % group of priority sites
+    if strategy > 0
+        %% Weights for connectivity , waves (ww), high cover (whc) and low
+        wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
+        wtheat = criteria.heat_stress; % weight of heat damage in MCDA
+        wtconshade = criteria.shade_connectivity; % weight of connectivity for shading in MCDA
+        wtconseed = criteria.seed_connectivity; % weight of connectivity for seeding in MCDA
+        wthicover = criteria.coral_cover_high; % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
+        wtlocover = criteria.coral_cover_low; % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
+        wtpredecseed = criteria.seed_priority; % weight for the importance of seeding sites that are predecessors of priority reefs
+        wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
+        risktol = criteria.deployed_coral_risk_tol; % risk tolerance
+
+        dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', [], ...
+            'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
+            'sumcover', 0, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+            'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+        
+        % Extract intervention options
+        pgs = interv.PrSites; % group of priority sites
+        
+        %see ADRIAparms for list of sites in group
+        if pgs == 1
+            prioritysites = sim_params.psgA;
+        elseif pgs == 2
+            prioritysites = sim_params.psgB;
+        elseif pgs == 3
+            prioritysites = sim_params.psgC;
+        end
+
+    end
+    
     seed1 = interv.Seed1*(pi*((2-1)/2)^2)/10^4/10^2; %tabular Acropora size class 2, converted to rel cover
     seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
     srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
+
+    %% Set up result structure
+    tf = sim_params.tf; % timeframe: total number of time steps
+    nspecies = height(coral_params);
+
+    % containers for seeding, shading and cooling
+    nprefseed = zeros(tf, 1);
+    nprefshade = zeros(tf, 1);
+    % nprefcool = zeros(params.tf, ninter);
 
     %% Define constant table location for seed values
     % Seed1 = Tabular Acropora Enhanced (taxa 1, size class 2)
@@ -89,15 +100,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     
     % taxa-specific differences in natural bleaching resistance
     bleach_resist = coral_params.bleach_resist;
-
-    %see ADRIAparms for list of sites in group
-    if pgs == 1
-        prioritysites = sim_params.psgA;
-    elseif pgs == 2
-        prioritysites = sim_params.psgB;
-    elseif pgs == 3
-        prioritysites = sim_params.psgC;
-    end
 
     %% Extract other parameters
     LPdhwcoeff = sim_params.LPdhwcoeff; % shape parameters relating dhw affecting cover to larval production
@@ -194,7 +196,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         dhw_step = dhw_ss(tstep, :); % subset of DHW for given timestep
 
         %% Select preferred intervention sites based on criteria (heuristics)
-        if strategy == 1 % guided
+        if strategy > 0 % guided
 
             % Update values for dMCDA
 
@@ -209,7 +211,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, alg_ind); % site selection function for intervention deployment
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
         elseif strategy == 0 % unguided deployment
@@ -241,8 +243,18 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
-        Y = Y(end, :);
-        Yout(tstep, :, :) = reshape(Y, nspecies, nsites);
+        Y = Y(end, :);  % get last step in ODE
+        
+        % If any sites are above their maximum possible value,
+        % proportionally adjust each entry so that their sum is < P
+        Y = reshape(Y, nspecies, nsites);
+        if any(sum(Y, 1) > e_P)
+            idx = find(sum(Y, 1) > e_P);
+            Ys = Y(:, idx);
+            Y(:, idx) = (Ys ./ sum(Ys)) * e_P;
+        end
+
+        Yout(tstep, :, :) = Y;
 
     end % tstep
     

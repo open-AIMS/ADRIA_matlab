@@ -70,7 +70,7 @@ for i = 1:length(int_names)
     n = int_names(i);
     vals = converted_tbl.(n{1});
     tmp = int_opts.options{i, 1};
-    assert(all(ismember(vals, cell2mat(tmp{1}))), ...
+    assert(all(ismember(vals, tmp)), ...
         'Invalid integer value sampled!');
 end
 
@@ -99,8 +99,8 @@ sample_val = mod_i_tbl{mod_i_tbl.name == "Seedyrs", "sample_defaults"};
 raw_val = mod_i_tbl{mod_i_tbl.name == "Seedyrs", "raw_defaults"};
 
 received = num2str(sample_val);
-assert(sample_val == 4, ...
-        strcat("Unexpected value: Sample Seedyrs, 4 == ", received));
+assert(sample_val == 13, ...
+        strcat("Unexpected value: Sample Seedyrs, 13 == ", received));
 
 received = num2str(raw_val);
 assert(raw_val == 13, ...
@@ -110,9 +110,18 @@ sample_val = mod_i_tbl{mod_i_tbl.name == "Guided", "sample_defaults"};
 raw_val = mod_i_tbl{mod_i_tbl.name == "Guided", "raw_defaults"};
 
 received = num2str(sample_val);
-assert(sample_val == 1, ...
-        strcat("Unexpected value: Sample Guided, 1 == ", received));
+assert(sample_val == 0, ...
+        strcat("Unexpected value: Sample Guided, 0 == ", received));
 
 received = num2str(raw_val);
 assert(raw_val == 0, ...
         strcat("Unexpected value: Raw Guided, 0 == ", received));
+
+%% Check MCDA approach choice is properly respected
+% ai = ADRIA();
+% 
+% X = ai.sample_defaults;
+% X.Guided = 4;
+% 
+% ai.run(X, sampled_values=true, nreps=3);
+

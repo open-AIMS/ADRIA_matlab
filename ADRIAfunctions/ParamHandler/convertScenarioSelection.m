@@ -39,32 +39,46 @@ function converted = convertScenarioSelection(sel_values, p_opts)
         pname = p_opts.name(p);
         ptype = p_opts.ptype(p);
         selection = sel_values.(pname);
-
-        converted.(pname) = NaN(length(selection), 1);
-        for sel = 1:length(selection)
-            % convert from cell array to matrix if needed
-            if ptype == "categorical" || ptype == "integer"
-                tmp = floor(selection(sel));
+        
+        % preassign column values
+        converted.(pname) = selection;
+        if ptype == "float"
+            % no further action needed if floats
+            continue
+        end
+        
+        % convert from cell array to matrix if needed
+        if ptype == "categorical" || ptype == "integer"
+            for sel = 1:length(selection)
+                tmp = selection(sel);
                 if tmp == p_opts.upper_bound(p)
                     % subtract a small constant to ensure flooring works
                     % as intended when the value is at upper limit
                     tmp = max(floor(tmp - 1e-6), 1);
+                else
+                    tmp = floor(selection(sel));
                 end
 
                 tmp_p = p_opts.options{p};
                 if iscell(tmp_p)
                     converted{sel, pname} = tmp_p{1}{tmp};
                 else
+                    % categoricals: values have to be exact match
                     % extract from container map
-                    converted{sel, pname} = tmp_p(tmp);
+                    try
+                        converted{sel, pname} = tmp_p(tmp);
+                    catch err
+                        if strcmp(err.identifier, "MATLAB:badsubscript")
+                            converted{sel, pname} = tmp;
+                        else
+                            rethrow(err)
+                        end
+                    end
+                    % converted{sel, pname} = tmp;
                 end
-            elseif ptype == "float"
-                % values should already be in expected range
-                % so no conversion necessary
-                converted{sel, pname} = selection(sel);
-            else
-                warning(strcat("Unknown parameter type", ptype, ". Skipping ", pname))
             end
+        else
+            warning(strcat("Unknown parameter type", ptype, ". Skipping ", pname))
         end
     end
 
