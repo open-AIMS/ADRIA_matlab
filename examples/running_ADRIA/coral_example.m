@@ -28,7 +28,7 @@ end
 
 % Set MCDA algorithm choice to `2` as we only want to use TOPSIS 
 % for this example
-sample_table.alg_ind(:) = 2;
+sample_table.Guided(:) = 2;
 
 %% Load site specific data
 ai.loadConnectivity('MooreTPmean.xlsx');
@@ -42,50 +42,91 @@ Y = ai.run(sample_table, sampled_values=true, nreps=n_reps);
 tmp = toc;
 
 % If saving results to disk
-% Y = collectDistributedResults('./test', N, n_reps);
+% Y = ai.gatherResults('./test', {@coralTaxaCover});
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
 
-%% post-processing
-% collate data across all scenario runs
+% Collect metrics
+[~, ~, coral_params] = ai.splitParameterTable(sample_table);
+metric_results = collectMetrics(Y, coral_params, ...
+                    {@coralTaxaCover, @coralSpeciesCover, ...
+                     @coralEvenness, @shelterVolume});
 
-% tf = params.tf;
-% nspecies = 4;
-% processed = struct('TC', zeros(tf, nsites, N, num_reps), ...
-%                    'C', zeros(tf, nspecies, nsites, N, num_reps), ...
-%                    'E', zeros(tf, nsites, N, num_reps), ...
-%                    'S', zeros(tf, nsites, N, num_reps));
-% for i = 1:N
-%     for j = 1:num_reps
-%         processed.TC(:, :, i, j) = Y.TC(i, j);
-%         processed.C(:, :, :, i, j) = Y.C(i, j);
-%         processed.E(:, :, i, j) = Y.E(i, j);
-%         processed.S(:, :, i, j) = Y.S(i, j);
-%     end
-% end
+covs = metric_results.coralSpeciesCover;
 
-%% analysis
-% Prompt for importance balancing
-MetricPrompt = {'Relative importance of coral evenness for cultural ES (proportion):', ...
-        'Relative importance of structural complexity for cultural ES (proportion):', ...
-        'Relative importance of coral evenness for provisioning ES (proportion):', ...
-        'Relative importance of structural complexity for provisioning ES (proportion):', ...
-        'Total coral cover at which scope to support Cultural ES is maximised:', ...
-        'Total coral cover at which scope to support Provisioning ES is maximised:', ...
-        'Row used as counterfactual:'};
-dlgtitle = 'Coral metrics and scope for ecosystem-services provision';
-dims = [1, 50];
-definput = {'0.5', '0.5', '0.2', '0.8', '0.5', '0.5', '1'};
-answer = inputdlg(MetricPrompt, dlgtitle, dims, definput, "off");
-evcult = str2double(answer{1});
-strcult = str2double(answer{2});
-evprov = str2double(answer{3});
-strprov = str2double(answer{4});
-TCsatCult = str2double(answer{5});
-TCsatProv = str2double(answer{6});
-cf = str2double(answer{7}); %counterfactual
+% Evenness
+E = metric_results.coralEvenness;
 
-ES_vars = [evcult, strcult, evprov, strprov, TCsatCult, TCsatProv, cf];
+%% Extract juvenile corals (< 5 cm diameter)
+BC = metric_results.coralTaxaCover.juveniles;
 
-ecosys_results = coralsToEcosysServices(Y, ES_vars);
-analyseADRIAresults1(ecosys_results);
+%% Calculate coral shelter volume per ha
+SV_per_ha = metric_results.shelterVolume;
+
+%% Plot coral covers over time and sites
+figure; 
+LO = tiledlayout(2,3, 'TileSpacing','Compact');
+
+% Tile 1
+nexttile
+plot(squeeze(covs(:,1,:)));
+title('Enhanced Tab Acr')
+
+% Tile 2
+nexttile
+plot(squeeze(covs(:,2,:)));
+title('Unenhanced Tab Acr')
+
+% Tile 3
+nexttile
+plot(squeeze(covs(:,3,:)))
+title('Enhanced Cor Acr')
+
+% Tile 4
+nexttile
+plot(squeeze(covs(:,4,:)))
+title('Unenhanced Cor Acr')
+
+% Tile 5
+nexttile
+plot(squeeze(covs(:,5,:)))
+title('Small massives')
+
+% Tile 6
+nexttile
+plot(squeeze(covs(:,6,:)))
+title('Large massives')
+
+xlabel(LO,'Years')
+ylabel(LO,'Cover (prop)')
+            
+%% Plot reef condition metrics over time and sites
+figure; 
+LO2 = tiledlayout(2,2, 'TileSpacing','Compact');
+
+% Tile 1
+nexttile
+plot(mean(metric_results.coralTaxaCover.total_cover, [3,4]));
+title('Total Coral Cover')
+ylabel('Cover, prop')
+
+% Tile 2
+nexttile
+plot(mean(E, [3,4]));
+title('Coral Evenness')
+ylabel('E, prop')
+
+% Tile 3
+nexttile
+plot(mean(BC, [3,4]))
+title('Juvenile Corals (<5 cm diam)')
+ylabel('Cover, prop')
+
+% Tile 4
+nexttile
+plot(mean(SV_per_ha, [3,4]))
+title('Shelter Volume per ha')
+ylabel('Volume, m3 / ha') 
+
+xlabel(LO2,'Years')
+%ylabel(LO,'Cover (prop)')

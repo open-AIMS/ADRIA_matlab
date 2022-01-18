@@ -16,7 +16,6 @@ sim_constants = ai.constants;
 
 % retrieve shell variables for interventions
 guided = getenv('Guided');
-algind = getenv('alg_ind');
 prsites = getenv('PrSites');
 seed1 = getenv('Seed1');
 seed2 = getenv('Seed2');
@@ -34,8 +33,7 @@ natad = getenv('Natad');
 % natad = 0.025;
 
 % assign to ADRIA class parameter table
-multirun_params(1,'Guided') = {guided};
-multirun_params(1,'alg_ind') = {algind};
+multirun_params(1,'Guided') = {algind};
 multirun_params(1,'Seed1') = {seed1};
 multirun_params(1,'Seed2') = {seed2};
 multirun_params(1,'SRM') = {srm};
