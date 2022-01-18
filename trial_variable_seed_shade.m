@@ -4,17 +4,17 @@
 
 ai = ADRIA();
 param_table = ai.raw_defaults;
-Nreps = 50;
+Nreps = 20;
 nyrs = 25;
 % See the "Parameter Interface" section in the documentation for
 % details on how these two differ.
 % sample_value_table = ai.sample_defaults;
 
 %% 3. Modify table as desired...
-param_table.alg_ind = 3;
+param_table.alg_ind = 1;
 param_table.Guided = 1;
-param_table.Seed1 = 200;
-param_table.Seed2 = 200;
+param_table.Seed1 = 500;
+param_table.Seed2 = 500;
 param_table.Aadpt = 4;
 param_table.Seeddelay = 5;
 param_table.Shadedelay = 5;
