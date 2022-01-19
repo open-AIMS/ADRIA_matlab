@@ -5,7 +5,9 @@ function Y = ReefConditionIndex(X, coralEvenness, shelterVolume, coralTaxaCover)
 % 1. Total relative coral cover across all groups
 % 2. Evenness across four coral groups
 % 3. Abundance of coral juveniles < 5 cm diam
-% 4. Shelter volume based coral sizes and abundances                  
+% 4. Shelter volume based coral sizes and abundances
+
+% Dimensions: ntimesteps, nsites, ninterventions, nsimulations 
 
 %% Total coral cover
 covers = coralTaxaCover(X);
@@ -38,6 +40,16 @@ rci_crit = [...
     0.15    0.25    0.30    0.25;
     0.05    0.15    0.18    0.15];
 
+%% Adding dimension for rci metrics 
+
+A_TC = TC > rci_crit(1,1);
+B_TC = TC > rci_crit(2,1);
+C_TC = TC > rci_crit(3,1);
+D_TC = TC > rci_crit(4,1);
+E_TC = TC > rci_crit(5,1);
+
+
+A = sum(M,4)metrics) > rci_crit(1, metrics), 'omitnan') / numel(metrics);
 reefcondition = zeros(NREEFS, NYEARS);
 %Start loop for crieria vs metric comparisons
 for reef = 1:NREEFS
@@ -55,7 +67,7 @@ for reef = 1:NREEFS
         C = sum(M(metrics) > rci_crit(3, metrics), 'omitnan') / numel(metrics);
         D = sum(M(metrics) > rci_crit(4, metrics), 'omitnan') / numel(metrics);
         E = sum(M(metrics) > rci_crit(5, metrics), 'omitnan') / numel(metrics);
-
+    
         if A > criteriaThreshold
             reefcondition(reef, t) = 0.9; %representative of very good
         elseif B > criteriaThreshold && A < criteriaThreshold
