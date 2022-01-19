@@ -301,15 +301,20 @@ switch alg_ind
         % no inequality or equality constraints
         Aeq = [];
         beq = [];
-        % integer weights must sum to number of preferred sites
-        Aineq = ones(1,length(SE(:,1)));
-        bineq = nsiteint;
- 
+        
+        sites = 1:nsites;
         % seeding rankings
         if isempty(SE)
             prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
             nprefseedsites = 0;
         else
+             % integer weights must sum to number of preferred sites
+            Aineq = ones(1,length(SE(:,1)));
+            bineq = nsiteint;
+
+             % integer variables
+            intcon = 1:length(SE(:,1));
+
             % normalisation
             SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
             SE = SE.* repmat(wse,size(SE,1),1);
@@ -319,18 +324,21 @@ switch alg_ind
             % solve multi-objective problem using genetic alg
             lb = zeros(1,length(SE(:,1))); % x (weightings) can be 0
             ub = ones(1,length(SE(:,1))); % to 1
-            x1 = gamultiobj(fun1,length(SE(:,1)),Aineq,bineq,Aeq,beq,lb,ub,options);
-            x1 = x1(end,:);
-
-
-            % order ga alg generated weightings from highest to lowest
-            orderseed = sortrows([SE(:,1) x1'],2,'descend');
-
-            prefseedsites = orderseed(1:nsiteint,1);
+            x1 = gamultiobj(fun1,length(SE(:,1)),Aineq,bineq,Aeq,beq,lb,ub,[],intcon);            
+            
+            % select optimal sites
+            prefseedsites = sites(logical(x1));
             nprefseedsites = numel(prefseedsites);
         end
         % shading rankings
         
+         % integer weights must sum to number of preferred sites
+         Aineq = ones(1,length(SE(:,1)));
+         bineq = nsiteint;
+            
+         % integer variables
+         intcon = 1:length(A(:,1));
+
         % normalisation
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
         SH = SH.* repmat(wsh,size(SH,1),1);
@@ -341,12 +349,10 @@ switch alg_ind
         % multi-objective function for shading
         fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
         % solve multi-objective problem using genetic alg
-        x2 = gamultiobj(fun2,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
-        x2 = x2(end,:);
-        % use to select sites      
-        ordershade = sortrows([SH(:,1) x2'],2,'descend');
+        x2 = gamultiobj(fun2,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub,[],intcon);
         
-        prefshadesites = ordershade(1:nsiteint,1);
+        % select optimal sites
+        prefshadesites = sites(logical(x2));
         nprefshadesites = numel(prefshadesites);
 
 end 
