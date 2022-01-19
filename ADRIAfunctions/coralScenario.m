@@ -18,6 +18,14 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
+%
+% References:
+%     1. Bozec, Y.-M., Rowell, D., Harrison, L., Gaskell, J., Hock, K., 
+%          Callaghan, D., Gorton, R., Kovacs, E. M., Lyons, M., Mumby, P., 
+%          & Roelfsema, C. (2021). 
+%        Baseline mapping to support reef restoration and resilience-based 
+%        management in the Whitsundays. 
+%        https://doi.org/10.13140/RG.2.2.26976.20482
 
     %% Set up connectivity
     nsites = width(TP_data);
@@ -47,18 +55,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
-        
-        % Extract intervention options
-%         pgs = interv.PrSites; % group of priority sites
-%         
-%         %see ADRIAparms for list of sites in group
-%         if pgs == 1
-%             prioritysites = sim_params.psgA;
-%         elseif pgs == 2
-%             prioritysites = sim_params.psgB;
-%         elseif pgs == 3
-%             prioritysites = sim_params.psgC;
-%         end
 
     end
     
