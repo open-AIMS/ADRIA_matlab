@@ -1,4 +1,4 @@
-% Example script illustrating running ADRIA scenarios
+% Example script illustrating running multiple ADRIA scenarios
 rng(101)
 
 %% Generate monte carlo samples
