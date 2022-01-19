@@ -1,22 +1,38 @@
 # Parameter Interface
 
-ADRIA contains functions to collate parameter values and details on a component-level basis.
+ADRIA contains functions to collate parameter values and details on a component-level basis. Parameter details are provided as tables (see [Table format](#table-format)) section below). The process of translating sampled values back to "raw" ADRIA values is also documented here under [Value transformation process](#value-transformation-process).
+
+The inner working of these are abstracted away by the [ADRIA Interface](ADRIA_interface.md) for users who only wish to interact with ADRIA, but is detailed here for developers.
 
 Parameters of interest are currently grouped over four components:
 
 1. Intervention Options
 2. Decision maker preferences (criteria weights)
-3. Core ADRIA parameters (under development)
-4. Ecological parameters (under development)
+3. Coral parameters (those relating to the coral ecosystem)
+4. Simulation constants (values that remain the same across all simulations)
 
-Functions for each group of parameters use the suffix `Details`:
+Parameter groups that are intended to be varied are generated with functions with the suffix `Details`, and `Constants` for those that are not.
 
-- `interventionDetails()`
-- `criteriaDetails()`
-- `coreParamDetails()`
-- `ecolParamDetails()`
+- `interventionDetails()`, which provides intervention parameters
+- `criteriaDetails()`, for criteria weights
+- `coralDetails()`, for coral parameters
+- `simConstants()`, for ecological values treated as constants
 
-Usage of these functions are identical.
+These functions have identical behaviour and their use can be seen within the [ADRIA Interface](ADRIA_interface.md). The ADRIA Interface itself exposes these as object properties and so the same data can be accessed with:
+
+```matlab
+ai = ADRIA();
+
+ai.interventions  % equivalent to interventionDetails()
+
+ai.criterias      % same as criteriaDetails()
+
+ai.corals         % same as coralDetails()
+
+ai.constants      % same as simConstants()
+```
+
+See the documentation for the [ADRIA Interface](ADRIA_interface.md) for more information.
 
 These functions produce a table of parameter names, and "raw" and "sample" values and bounds (see details in sections below) for use with usual optimization and/or sampling methods.
 
@@ -24,11 +40,14 @@ Values returned from sampling/optimization routines can be translated back to va
 
 ## Motivation
 
-These functions simplify the process of collecting input factors and their details such as their expected bounds and likely or "best guess" values. For development purposes, use of these functions addresses duplication of code and reduces maintenance overhead. Without these functions, parameter values would need to be (manually) specified at multiple locations throughout the codebase. Furthermore, each manually specified parameter list would require updates each time the number and order of parameters, their bounds, and their expected "default" values change. Leveraging the `*Details()` group of functions listed above then only requires those same changes to occur in a single location (i.e., within the functions themselves).
+These functions simplify the process of collecting input factors and their details such as their expected bounds and likely or "best guess" values, reducing maintenance overhead by simplifying the process by which parameter values and their details are updated. Leveraging the `*Details()` group of functions listed above then only requires those same changes to occur in a single location (i.e., within the functions themselves).
 
-Another motivation is to address conceptual mismatches between sampling methods and usual software/model implementations. Typical approaches to exploring model behavior require input factors to be varied ("perturbed") within an identified range. A wide number of software is available to sample from these bounds, using expected or known distributions. A more recent but still not widely considered aspect, are the correlations between parameters. Sampling these parameters is a common activity across all model exploration approaches.
+Another motivation is to address conceptual mismatches between sampling methods and usual software/model implementations. Typical variance-based approaches to exploring model behavior require input factors to be varied ("perturbed") within an identified range. A wide number of software is available to sample from these bounds, using expected or known distributions. Sampling these parameters is a common activity across all model exploration approaches[^1]. 
 
-One complication is that these sampling methods and tooling expect real values (i.e., xᵢ ∈ ℝ), represented in a single "flat" data structure (e.g., a table). Environmental models and decision support tools on the other hand can be designed to work with whole number (integers) or categorical values. These may indicate a specific simulation context (e.g., RCP scenario), environmental scenario (climate sequences, data held in raster format, etc), and such "scenario configuration" may be held in a nested data structure. It is therefore necessary to have a process that is able to pass parameter values from ADRIA into samplers for the purpose of sensitivity analysis, uncertainty propagation, optimization and other Monte Carlo or probabilistic processes, and to translate sampled values back to those expected by ADRIA.
+[^1]: As an aside, correlations between parameters are not a widely considered aspect.
+
+One complication is that these sampling methods (and associated tooling) expect real values (i.e., xᵢ ∈ ℝ), represented in a single "flat" data structure (e.g., a table). Environmental models and decision support tools on the other hand can be designed to work with whole number (integers) or categorical values, and their definitions may occur inside a nested data structure (hashmaps, dictionaries, etc). 
+In the context of ADRIA, these may indicate a specific simulation context (e.g., RCP scenario), environmental scenario (climate sequences, data held in raster format, etc). It is therefore necessary to have a process that is able to pass parameter values from ADRIA into samplers for the purpose of sensitivity analysis, uncertainty propagation, optimization and other Monte Carlo or probabilistic processes, and to translate sampled values back to those expected by ADRIA.
 
 ## Table format
 
@@ -45,7 +64,7 @@ The functions listed above produces a table of parameter details consisting of:
 
 > TODO: Include description of each entry in the table - could be useful if tooltips are to be incorporated into UIs
 > 
-> It may also be useful to be able to specify a distribution for parameters
+> It may also be useful to be able to specify known distributions for parameters
 
 
 ```matlab
@@ -99,10 +118,12 @@ For Monte Carlo approaches, the typical process is:
 
 1. Generate $N$ samples using the indicated bounds from `lower_bounds` and `upper_bounds`
 2. Pass sampled values into a wrapper/interface function
-3. A step within the interface function in Step 2 translates/maps the sampled values back to the values expected by ADRIA.
-4. Run ADRIA with those "translated" values
+3. A step within the interface function in Step 2 maps the sampled values back to the values expected by ADRIA
+4. Run ADRIA with these transformed values
 
-The translation of sampled values to the so-called "ADRIA values" for integer and categorical parameters relies on the "flooring trick".
+To reiterate, the process is automated and abstracted away for regular users who use the [ADRIA Interface]().
+
+Transformation of sampled values to the so-called "ADRIA values" for integer and categorical parameters relies on the "flooring trick" (as it is referred to here), and adopted from the "General Probabilistic Framework" described in [Baroni and Tarantola (2014)](https://doi.org/10.1016/j.envsoft.2013.09.022).
 
 To illustrate the approach, take a parameter $x_i$ that can take the form of discrete values between 1 and 3 (inclusive). In other words, there are 3 valid options to take: $x_i = \\{1, 2, 3\\}$.
 
@@ -112,8 +133,7 @@ To illustrate the approach, take a parameter $x_i$ that can take the form of dis
 
 For `categorical` parameters, an extra step is to extract the corresponding `Map Container` from the `options` column and use the floored value as the key to obtain the categorical value.
 
-As an example, $x_i$ may in fact represent "high", "medium", "low" (i.e., ADRIA expects a string input) and
-so the relationship between sampled and ADRIA values becomes:
+As an example, $x_i$ may in fact represent "high", "medium", "low" (i.e., ADRIA expects a string input) and so the relationship between sampled and ADRIA values becomes:
 
 - `1 => "high"`
 - `2 => "medium"`
@@ -137,13 +157,18 @@ The sample bounds for `integer` parameters are tied to the number of options rat
 This is so the conversion approach is generic and applicable to both cases outlined above.
 
 Following the $\text{max}(x_i) + \text{min}(x_i)$ approach, the sample range becomes $1 \leq v_i \lt 7$.
-In the first example above, `1 => 10` and $\text{floor}(6.999) = 6$, and resolves to `6 => 15`.
-
-If the "true" default value is 10, then this is mapped to the first entry in the array, thus the `sample_defaults` value is set to 1 (as shown in the table snippet above).
+In the first example above, `1 => 10` and $\text{floor}(6.999) = 6$, and resolves to `6 => 15`, thus the sample values between 1 and 7 are transformed to discrete whole number values between (and including) 10 and 15.
 
 The process described above is conducted by the `convertScenarioSelection()` function, which takes two inputs: (1) an array of sampled values, and (2) the parameter details table.
 
+The process above comes with a risk of biased samples being produced as unique combinations of sampled parameter values could be mapped to non-unique combinations.
+Care should be taken to determine the level of bias. To conform to some sampling design and reduce runtime, non-unique scenarios could be identified and results for a single simulation assigned to match indices of relevant rows. The functions listed here aid in doing so:
+
+- `mapDuplicateScenarios()`
+- `mapDuplicateResults()`
+
 **Note:** The only requirement is that the the number and order of items in the sample array has to match what is defined in the table. By satisficing this requirement, any subset of parameters can be used.
+
 
 ## Usage
 
@@ -186,6 +211,12 @@ objfunc = @(x) someObjectiveFunc(x, interv_opts);
 obj_opts = optimoptions('simulannealbnd', 'MaxTime', 30);
 x = simulannealbnd(objfunc, x0, lb, ub, obj_opts);
 ```
+
+
+# References
+
+1. Baroni, G., & Tarantola, S. (2014). A General Probabilistic Framework for uncertainty and global sensitivity analysis of deterministic models: A hydrological case study. Environmental Modelling & Software, 51, 26–34. https://doi.org/10.1016/j.envsoft.2013.09.022
+
 
 <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: {inlineMath: [['$', '$']]}, messageStyle: "none" });</script>

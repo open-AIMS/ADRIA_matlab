@@ -7,7 +7,9 @@ function [X_ss, u_r, g_idx] = mapDuplicateScenarios(X)
 %   X : table, of scenarios
 %
 % Outputs:
-%   X_ss : table, unique subset of scenarios
+%   X_ss  : table, unique subset of scenarios
+%   u_r   : array, index of unique scenarios (i.e., `X_ss = X(u_r, :)` )
+%   g_idx : array, index mapping duplicate rows (`X = X_ss(g_idx, :)`)
 %
 % Example:
 %   See usage in `examples/running_ADRIA/run_example.m`

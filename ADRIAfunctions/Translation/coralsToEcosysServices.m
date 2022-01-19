@@ -16,6 +16,10 @@ function ecosys_results = coralsToEcosysServices(F0, ES_vars)
     E = F0.E;
     S = F0.S;
 
+    if ~exist('ES_vars', 'var')
+        ES_vars = [0.5, 0.5, 0.2, 0.8, 0.5, 0.5, 1];
+    end
+
     evcult = ES_vars(1);
     strcult = ES_vars(2);
     evprov = ES_vars(3);

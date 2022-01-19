@@ -1,4 +1,4 @@
-function Y = runADRIA(intervs, crit_weights, params, ecol_params, ...
+function Y = runADRIA(intervs, crit_weights, coral_params, sim_params, ...
                           TP_data, site_ranks, strongpred, ...
                           n_reps, wave_scen, dhw_scen, alg_ind, ...
                           file_prefix)
@@ -8,13 +8,13 @@ function Y = runADRIA(intervs, crit_weights, params, ecol_params, ...
 % Run all simulations.
 %
 % Inputs:
-%    interv      : table, of intervention scenarios
-%    criteria    : table, of criteria weights for each scenario
-%    params      : table, of environment parameter permutations
-%    ecol_params : table, of ecological parameter permutations
-%    wave_scen   : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
-%    dhw_scen    : matrix[timesteps, nsites, N], degree heating weeek scenario
-%    alg_ind     : int, MCDA ranking algorithm flag
+%    interv       : table, of intervention scenarios
+%    criteria     : table, of criteria weights for each scenario
+%    coral_params : table, of ecological parameter permutations
+%    sim_params   : struct, of simulation constants
+%    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
+%    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
+%    alg_ind      : int, MCDA ranking algorithm flag
 %                  - 1, Order ranking
 %                  - 2, TOPSIS
 %                  - 3, VIKOR
@@ -72,7 +72,7 @@ N = height(intervs);
 [timesteps, nsites, ~] = size(wave_scen);
 
 % Create output matrices
-n_species = params.nspecies(1);  % total number of species considered
+n_species = height(coral_params);  % total number of species considered
 
 if ~exist('file_prefix', 'var')
     file_prefix = false;
@@ -92,8 +92,8 @@ end
 parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
-    scen_params = params(i, :);
-    scen_ecol = ecol_params(i, :);
+    % scen_params = params(i, :);
+    % scen_ecol = ecol_params(i, :);
     
     % temp reassignment
     TC = zeros(timesteps, nsites, 1, n_reps);
@@ -103,7 +103,7 @@ parfor i = 1:N
 
     for j = 1:n_reps
         tmp = runADRIAScenario(scen_it, scen_crit, ...
-                               scen_params, scen_ecol, ...
+                               coral_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), alg_ind);
 

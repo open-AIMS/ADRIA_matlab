@@ -17,20 +17,21 @@ N = 50;
 % Collect details of available parameters
 inter_opts = interventionDetails();
 criteria_opts = criteriaDetails();
+coral_opts = coralDetails();
 
 % Create main table listing all available parameter options
-combined_opts = [inter_opts; criteria_opts];
+combined_opts = [inter_opts; criteria_opts; coral_opts];
 
 % Generate samples using simple monte carlo
 % Create selection table based on lower/upper parameter bounds
 p_sel = table;
 for p = 1:height(combined_opts)
-    a = combined_opts.lower_bound{p};
-    b = combined_opts.upper_bound{p};
+    a = combined_opts.lower_bound(p);
+    b = combined_opts.upper_bound(p);
     
     selection = (b - a).*rand(N, 1) + a;
     
-    p_sel.(combined_opts.name{p}) = selection;
+    p_sel.(combined_opts.name(p)) = selection;
 end
 
 % Convert sampled values to ADRIA usable values
@@ -49,7 +50,7 @@ assert_ub = @(p_name, bnd) ...
                     all(~(converted_tbl.(p_name) > bnd)), ...
                     'Sample above expected bound!');
 
-tmp = cell2mat(combined_opts.raw_bounds);
+tmp = combined_opts.raw_bounds;
 lb_vals = tmp(:, 1);
 ub_vals = tmp(:, 2);
 
@@ -69,7 +70,7 @@ for i = 1:length(int_names)
     n = int_names(i);
     vals = converted_tbl.(n{1});
     tmp = int_opts.options{i, 1};
-    assert(all(ismember(vals, cell2mat(tmp{1}))), ...
+    assert(all(ismember(vals, tmp)), ...
         'Invalid integer value sampled!');
 end
 
@@ -86,7 +87,7 @@ for i = 1:length(cat_names)
     n = cat_names(i);
     vals = converted_tbl.(n{1});
     tmp = cats.options{i, 1};
-    assert(all(ismember(vals, cell2mat(values(tmp{1})))), ...
+    assert(all(ismember(vals, cell2mat(values(tmp)))), ...
         'Invalid categorical value sampled!');
 end
 
@@ -97,21 +98,30 @@ mod_i_tbl = interventionDetails(Guided=0, Seedyrs=13);
 sample_val = mod_i_tbl{mod_i_tbl.name == "Seedyrs", "sample_defaults"};
 raw_val = mod_i_tbl{mod_i_tbl.name == "Seedyrs", "raw_defaults"};
 
-received = num2str(sample_val{1});
-assert(sample_val{1} == 4, ...
-        strcat("Unexpected value: Sample Seedyrs, 4 == ", received));
+received = num2str(sample_val);
+assert(sample_val == 13, ...
+        strcat("Unexpected value: Sample Seedyrs, 13 == ", received));
 
-received = num2str(raw_val{1});
-assert(raw_val{1} == 13, ...
+received = num2str(raw_val);
+assert(raw_val == 13, ...
         strcat("Unexpected value: Raw Seedyrs, 13 == ", received));
 
 sample_val = mod_i_tbl{mod_i_tbl.name == "Guided", "sample_defaults"};
 raw_val = mod_i_tbl{mod_i_tbl.name == "Guided", "raw_defaults"};
 
-received = num2str(sample_val{1});
-assert(sample_val{1} == 1, ...
-        strcat("Unexpected value: Sample Guided, 1 == ", received));
+received = num2str(sample_val);
+assert(sample_val == 0, ...
+        strcat("Unexpected value: Sample Guided, 0 == ", received));
 
-received = num2str(raw_val{1});
-assert(raw_val{1} == 0, ...
+received = num2str(raw_val);
+assert(raw_val == 0, ...
         strcat("Unexpected value: Raw Guided, 0 == ", received));
+
+%% Check MCDA approach choice is properly respected
+% ai = ADRIA();
+% 
+% X = ai.sample_defaults;
+% X.Guided = 4;
+% 
+% ai.run(X, sampled_values=true, nreps=3);
+

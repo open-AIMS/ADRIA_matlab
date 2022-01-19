@@ -26,7 +26,7 @@ function criteria_weights = criteriaDetails(varargin)
 %           - float: values can range between lower/upper
 %       - `sample_defaults` indicates the default values modified for use
 %           with samplers
-%       - lower/upper bounds indicate the range of mapped ids 
+%       - lower/upper bounds indicate the range of mapped ids
 %       - `options` maps option ids to their values
 %       - `raw_defaults` indicates the raw unmodified "best guess" value
 %       - `raw_bounds` indicates the original value ranges
@@ -43,19 +43,19 @@ name = [
     "deployed_coral_risk_tol"
 ];
 
-defaults = {
+defaults = [
     1; % "wave_stress";
-    0; % "heat_stress";
+    1; % "heat_stress";
     0; % "shade_connectivity";
-    0; % "seed_connectivity";
+    1; % "seed_connectivity";
     0; % "coral_cover_high";
-    0; % "coral_cover_low";
+    1; % "coral_cover_low";
     1; % "seed_priority";
     0; % "shade_priority";
     1 % "deployed_coral_risk_tol"
-};
+];
 
-p_bounds = {
+p_bounds = [
     [0, 1]; % "wave_stress";
     [0, 1]; % "heat_stress";
     [0, 1]; % "shade_connectivity";
@@ -65,7 +65,7 @@ p_bounds = {
     [0, 1]; % "seed_priority";
     [0, 1]; % "shade_priority";
     [0, 1] % "deployed_coral_risk_tol"
-};
+];
 
 ptype = [
     "float";

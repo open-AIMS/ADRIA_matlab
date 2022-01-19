@@ -10,8 +10,8 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 % 
 %         - nsites : total number of sites
 %         - nsiteint : number of sites to select for priority interventions
-%         - strongpred : strongest predecessor sites (calculated in ADRIA_TP())
-%         - centr : site centrality (calculated in ADRIA_TP())
+%         - strongpred : strongest predecessor sites (calculated in siteConnectivity())
+%         - centr : site centrality (calculated in siteConnectivity())
 %         - damprob : probability of coral wave damage for each site
 %         - heatstressprob : probability of heat stress for each site
 %         - prioritysites : list of sites in group (i.e. prsites: 1,2,3)
@@ -76,7 +76,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     % exceeding the risk tolerance 
     A(A(:, 3) > risktol, 3) = nan;
     rule = (A(:, 3) <= risktol) & (A(:, 4) > risktol);
-
+    
     A(rule, 4) = nan;
     
     A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
@@ -88,6 +88,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
         return
     end
 
+    
     %number of sites left after risk filtration
     %nsitesrem = length(A(:,1));
     if nsiteint > length(A(:,1))
@@ -104,15 +105,21 @@ switch alg_ind
         SE(:,4) = (1-A(:,4))*wtheat;
         SE(:,5) = A(:,6)*wtlocover; %multiply by coral cover with its weight for high cover
         SE(:,6) = A(:,7)*wtpredecseed; %multiply priority predecessor indicator by weight
+        % find sites where coral cover is max and remove for seeding 
+        SE(find(A(:,5)>=1),:) = [];
+        if isempty(SE)
+            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+            nprefseedsites = 0;
+        else
+            SEwt(:,1) = SE(:,1);
+            SEwt(:,2) = SE(:,2)+ SE(:,3) + SE(:,4) + SE(:,5); %for now, simply add indicators 
+            SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
 
-        SEwt(:,1) = A(:,1);
-        SEwt(:,2) = SE(:,2)+ SE(:,3) + SE(:,4) + SE(:,5); %for now, simply add indicators 
-        SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
-
-        %highest indicator picks the seed site
-        prefseedsites = SEwt2(1:nsiteint,1);
-        nprefseedsites = numel(prefseedsites);
-
+            end_idx = min(height(SEwt2), nsiteint);
+            %highest indicator picks the seed site
+            prefseedsites = SEwt2(1:end_idx,1);
+            nprefseedsites = numel(prefseedsites);
+        end
 
         %% Shading - filtered set
         SH(:,1) = A(:,1); %sites column (remaining)
@@ -146,34 +153,39 @@ switch alg_ind
         SE(:,4) = (1-A(:,4));
         SE(:,5) = A(:,6); %multiply by coral cover with its weight for high cover
         SE(:,6) = A(:,7); %multiply priority predecessor indicator by weight
+        SE(find(A(:,5)>=1),:) = [];
+        if isempty(SE)
+            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+            nprefseedsites = 0;
+        else
+           % normalisation
+            SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+            SE = SE.* repmat(wse,size(SE,1),1);
+            % compute the set of positive ideal solutions for each criteria (max for
+            % good crieteria, min for bad criteria). Max used as all crieteria
+            % represent preferred attributes not costs or negative attributes
 
-       % normalisation
-        SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
-        SE = SE.* repmat(wse,size(SE,1),1);
-        % compute the set of positive ideal solutions for each criteria (max for
-        % good crieteria, min for bad criteria). Max used as all crieteria
-        % represent preferred attributes not costs or negative attributes
+            PIS = nanmax(SE(:,2:end));
 
-        PIS = nanmax(SE(:,2:end));
+            % compute the set of negative ideal solutions for each criteria 
+            % (min for good criteria, max for bad criteria). 
+            % Min used as all criteria represent preferred attributes not 
+            % costs or negative attributes
 
-        % compute the set of negative ideal solutions for each criteria 
-        % (min for good criteria, max for bad criteria). 
-        % Min used as all criteria represent preferred attributes not 
-        % costs or negative attributes
+            NIS = nanmin(SE(:,2:end));
 
-        NIS = nanmin(SE(:,2:end));
+            % calculate separation distance from the ideal and non-ideal solns
+            S_p = sqrt(sum((SE(:,2:end)-PIS).^2,2));
+            S_n = sqrt(sum((SE(:,2:end)-NIS).^2,2));
 
-        % calculate separation distance from the ideal and non-ideal solns
-        S_p = sqrt(sum((SE(:,2:end)-PIS).^2,2));
-        S_n = sqrt(sum((SE(:,2:end)-NIS).^2,2));
+            % final ranking measure of relative closeness C
+            C = S_n./(S_p + S_n);
+            SEwt = [SE(:,1), C];
+            order = sortrows(SEwt,2,'descend');
 
-        % final ranking measure of relative closeness C
-        C = S_n./(S_p + S_n);
-        SEwt = [A(:,1), C];
-        order = sortrows(SEwt,2,'descend');
-
-        prefseedsites = order(1:nsiteint,1);
-        nprefseedsites = numel(prefseedsites); 
+            prefseedsites = order(1:nsiteint,1);
+            nprefseedsites = numel(prefseedsites); 
+        end
 
         wsh = [1, wtconshade, wtwaves, wtheat, wthicover, wtpredecshade];
         wsh = wsh./sum(wsh);
@@ -229,39 +241,46 @@ switch alg_ind
         SE(:,4) = (1-A(:,4));
         SE(:,5) = A(:,6); %multiply by coral cover with its weight for high cover
         SE(:,6) = A(:,7); %multiply priority predecessor indicator by weight
+        % is coral cover >=1 don't seed there
+        full_sites = A(:,5)>=1;
+        SE(full_sites,:) = [];
+        if isempty(SE)
+            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+            nprefseedsites = 0;
+        else
+            % normalisation
+            SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+            SE = SE.* repmat(wse,size(SE,1),1);
 
-        % normalisation
-        SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
-        SE = SE.* repmat(wse,size(SE,1),1);
+            F_s = max(SE(:,2:end));
+            %F_h = min(SE(:,2:end));
 
-        F_s = max(SE(:,2:end));
-        %F_h = min(SE(:,2:end));
+            % Compute utility of the majority S (Manhatten Distance)
+            % Compute individual regret R (Chebyshev distance)
+            sr_arg =((F_s-SE(:,2:end)));
+            S = sum(sr_arg,2);
+            S = [SE(:,1), S];
+            R = max(sr_arg,[],2);
+            R = [SE(:,1),R];
 
-        % Compute utility of the majority S (Manhatten Distance)
-        % Compute individual regret R (Chebyshev distance)
-        sr_arg =((F_s-SE(:,2:end)));
-        S = sum(sr_arg,2);
-        S = [A(:,1), S];
-        R = max(sr_arg,[],2);
-        R = [A(:,1),R];
+            % Compute the VIKOR compromise Q
+            S_s = max(S(:,2));
+            S_h = min(S(:,2));
+            R_s = max(R(:,2));
+            R_h = min(R(:,2));
+            Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
+            Q = [A(~full_sites,1),Q];  % ignore the sites that are full
 
-        % Compute the VIKOR compromise Q
-        S_s = max(S(:,2));
-        S_h = min(S(:,2));
-        R_s = max(R(:,2));
-        R_h = min(R(:,2));
-        Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-        Q = [A(:,1),Q];
-
-        % sort Q in ascending order rows
-        orderQ = sortrows(Q,2,'ascend');
-        prefseedsites = orderQ(1:nsiteint,1);
-        nprefseedsites = numel(prefseedsites); 
+            % sort Q in ascending order rows
+            orderQ = sortrows(Q,2,'ascend');
+            prefseedsites = orderQ(1:nsiteint,1);
+            nprefseedsites = numel(prefseedsites); 
+        end
 
         %% Shading - Filtered set 
         wsh = [1, wtconshade, wtwaves, wtheat, wthicover, wtpredecshade];
-        wsh = sum(wsh);
-
+        wsh = wsh./sum(wsh);
+        
         SH(:,1) = A(:,1); %sites column (remaining)
         SH(:,2) = A(:,2); %multiply centrality with connectivity weight
         SH(:,3) = (1-A(:,3)); %multiply complementary of damage risk with disturbance weight
@@ -289,7 +308,7 @@ switch alg_ind
         S_h = min(S(:,2));
         R_s = max(R(:,2));
         R_h = min(R(:,2));
-        Q = v*(S-S_s)/(S_s-S_h) + (1-v)*(R-R_s)/(R_s-R_h);
+        Q = v*(S(:,2)-S_s)/(S_s-S_h) + (1-v)*(R(:,2)-R_s)/(R_s-R_h);
         Q = [A(:,1),Q];
 
         % sort R, S and Q in ascending order rows
@@ -322,28 +341,37 @@ switch alg_ind
         bineq = [];
         lb = zeros(1,length(A(:,1))); % x (weightings) can be 0
         ub = ones(1,length(A(:,1))); % to 1
-     
-        % multi-objective function for seeding
-        fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
-        % solve multi-objective problem using genetic alg
-        x1 = gamultiobj(fun1,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
-        x1 = x1(end,:);
         
-        % multi-objective function for shading
+        SE(find(A(:,5)>=1),:) = [];
+        if isempty(SE)
+            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+            nprefseedsites = 0;
+        else
+            % multi-objective function for seeding
+            fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
+            % solve multi-objective problem using genetic alg
+            x1 = gamultiobj(fun1,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
+            x1 = x1(end,:);
+
+
+            % order ga alg generated weightings from highest to lowest
+            orderseed = sortrows([SE(:,1) x1'],2,'descend');
+
+            prefseedsites = orderseed(1:nsiteint,1);
+            nprefseedsites = numel(prefseedsites);
+        end
+        
+         % multi-objective function for shading
         fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
         % solve multi-objective problem using genetic alg
         x2 = gamultiobj(fun2,length(A(:,1)),Aineq,bineq,Aeq,beq,lb,ub);
         x2 = x2(end,:);
-        
-        % order ga alg generated weightings from highest to lowest
-        orderseed = sortrows([SE(:,1) x1'],2,'descend');
+        % use to select sites      
         ordershade = sortrows([SH(:,1) x2'],2,'descend');
         
-        % use to select sites
-        prefseedsites = orderseed(1:nsiteint,1);
         prefshadesites = ordershade(1:nsiteint,1);
         nprefshadesites = numel(prefshadesites);
-        nprefseedsites = numel(prefseedsites);
+
 end 
 end
 

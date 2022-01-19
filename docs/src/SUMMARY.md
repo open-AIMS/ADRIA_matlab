@@ -10,6 +10,7 @@
     - [Sensitivity Analysis](dev_guide/sensitivity_analysis.md)
     - [Optimization](dev_guide/optimization.md)
     - [Scenario Discovery](dev_guide/scenario_discovery.md)
+    - [Documentation Build Process](dev_guide/documentation_build.md)
     - [Concise API](dev_guide/concise_API.md)
 
 ---------
