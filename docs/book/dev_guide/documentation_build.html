@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Sensitivity Analysis</title>
+        <title>Documentation Build Process</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro_to_ADRIA.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="../dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../dev_guide/dev_setup.html"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="../dev_guide/parameter_interface.html"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="../dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../dev_guide/sensitivity_analysis.html" class="active"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="../dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="../dev_guide/documentation_build.html"><strong aria-hidden="true">3.8.</strong> Documentation Build Process</a></li><li class="chapter-item expanded "><a href="../dev_guide/concise_API.html"><strong aria-hidden="true">3.9.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro_to_ADRIA.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="../dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../dev_guide/dev_setup.html"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="../dev_guide/parameter_interface.html"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="../dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../dev_guide/sensitivity_analysis.html"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="../dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="../dev_guide/documentation_build.html" class="active"><strong aria-hidden="true">3.8.</strong> Documentation Build Process</a></li><li class="chapter-item expanded "><a href="../dev_guide/concise_API.html"><strong aria-hidden="true">3.9.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -134,16 +134,24 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="conducting-sensitivity-analysis"><a class="header" href="#conducting-sensitivity-analysis">Conducting sensitivity analysis</a></h1>
+                        <h1 id="documentation-build-process"><a class="header" href="#documentation-build-process">Documentation Build Process</a></h1>
+<p>The ADRIA documentation (this document/website) is generated from a collection of files in <a href="https://www.markdownguide.org/">markdown format</a>.
+These files live inside the <code>docs</code> folder in the project repository.</p>
+<p>The documentation website is generated with <a href="https://github.com/rust-lang/mdBook">mdBook</a>, a standalone application written in the rust programming language. <code>mdBook</code> is configured to run via <a href="https://github.com/features/actions">GitHub Actions</a> on any commit that changes the <code>docs</code> folder on the <code>main</code> branch. The file which specifies the build action resides in <code>.github/workflows/build-docs.yaml</code>.</p>
+<h2 id="why-were-not-building-documentation-from-docstrings"><a class="header" href="#why-were-not-building-documentation-from-docstrings">(Why we're not building) Documentation from docstrings</a></h2>
+<p>Currently relevant portions of docstrings are manually copy/pasted into the <code>concise API</code> section.
+Although there are tools available to generate documentation directly from docstrings, these typically require an additional platform or language to be configured</p>
+<p>Although there are tools available to generate documentation directly from docstrings, these typically require an additional platform or language to be installed and set up.
+The most relevant MATLAB-specific tool is <a href="https://au.mathworks.com/matlabcentral/fileexchange/96289-m2docgen?requestedDomain=">m2docgen</a>, which looks promising. It does, however, require substantial rewrite of existing docstrings to conform with the expected style.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../dev_guide/metrics.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../dev_guide/scenario_discovery.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../dev_guide/optimization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../dev_guide/concise_API.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -152,10 +160,10 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../dev_guide/metrics.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../dev_guide/scenario_discovery.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../dev_guide/optimization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../dev_guide/concise_API.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
