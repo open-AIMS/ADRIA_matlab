@@ -28,7 +28,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Set up result structure where necessary
     prefseedsites = []; % set the list of preferred seeding sites to empty
     prefshadesites = []; % set the list of preferred shading sites to empty
-    prioritysites = []; % set the list of priority sites to empty
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
@@ -44,22 +43,22 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
         risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
-        dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', [], ...
+        dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', 1:nsites, ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
         
         % Extract intervention options
-        pgs = interv.PrSites; % group of priority sites
-        
-        %see ADRIAparms for list of sites in group
-        if pgs == 1
-            prioritysites = sim_params.psgA;
-        elseif pgs == 2
-            prioritysites = sim_params.psgB;
-        elseif pgs == 3
-            prioritysites = sim_params.psgC;
-        end
+%         pgs = interv.PrSites; % group of priority sites
+%         
+%         %see ADRIAparms for list of sites in group
+%         if pgs == 1
+%             prioritysites = sim_params.psgA;
+%         elseif pgs == 2
+%             prioritysites = sim_params.psgB;
+%         elseif pgs == 3
+%             prioritysites = sim_params.psgC;
+%         end
 
     end
     
@@ -172,13 +171,10 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         
         Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
         
-        fecundity_scope = fecundityScope2(Y_pstep, coral_params); %calculates scope 
-        % for coral fedundity for each size class and at each site
-               
-        % Note: Matrix format is nspecies * nsites, but the values repeat.
-        %       Only the first entry for each taxa is intended to be used.
-        %       Shape of this matrix is simply for convenience.
-        %rec = (Y_pstep * TP_data) .* LPs;  %old version
+        % calculates scope for coral fedundity for each size class and at 
+        % each site
+        fecundity_scope = fecundityScope(Y_pstep, coral_params); 
+        
         
         max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
         density_ratio_of_larvae_to_settlers = 3000; %Bozec et al. 2021
@@ -208,7 +204,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
             %Factor 4: total coral cover state used as criterion in site selection;
             dMCDA_vars.sumcover = sum(Yout(p_step, :, :), 2);
-            dMCDA_vars.prioritysites = prioritysites;
+            % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
             [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment

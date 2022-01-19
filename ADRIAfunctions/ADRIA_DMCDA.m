@@ -115,8 +115,9 @@ switch alg_ind
             SEwt(:,2) = SE(:,2)+ SE(:,3) + SE(:,4) + SE(:,5); %for now, simply add indicators 
             SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
 
+            end_idx = min(height(SEwt2), nsiteint);
             %highest indicator picks the seed site
-            prefseedsites = SEwt2(1:nsiteint,1);
+            prefseedsites = SEwt2(1:end_idx,1);
             nprefseedsites = numel(prefseedsites);
         end
 
@@ -241,7 +242,8 @@ switch alg_ind
         SE(:,5) = A(:,6); %multiply by coral cover with its weight for high cover
         SE(:,6) = A(:,7); %multiply priority predecessor indicator by weight
         % is coral cover >=1 don't seed there
-        SE(find(A(:,5)>=1),:) = [];
+        full_sites = A(:,5)>=1;
+        SE(full_sites,:) = [];
         if isempty(SE)
             prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
             nprefseedsites = 0;
@@ -267,7 +269,7 @@ switch alg_ind
             R_s = max(R(:,2));
             R_h = min(R(:,2));
             Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-            Q = [A(:,1),Q];
+            Q = [A(~full_sites,1),Q];  % ignore the sites that are full
 
             % sort Q in ascending order rows
             orderQ = sortrows(Q,2,'ascend');

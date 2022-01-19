@@ -12,9 +12,6 @@ function params = simConstants()
 %% Base scenario parameters
 params.tf = 25; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
 params.nsiteint = 5; % max number of sites we intervene on in a given year. May be updated in the intervention table
-params.psgA = 1:10; % prioritysite group A
-params.psgB = 11:20; % prioritysite group B
-params.psgC = 1:26; % prioritysite group C
 
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 % params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
@@ -45,9 +42,3 @@ params.LPDprm2 = 5; % parameter offsetting LPD curve
 % competition: probability that large tabular Acropora overtop small massives
 params.comp = 0.3;
 %params.max_settler_density = 20; %per m2, more optimistic than Bozec et al 2021
-
-%% Ecosystem service parameters
-params.evcult = 0.5; % assumes that evenness counts half for cultural ES
-params.strcult = 0.5; % assumes that structural complexity counts half for cultural ES
-params.evprov = 0.2; % 0.2 for provisioning evenness ES
-params.strprov = 0.8; % 0.8 for provisioning structural ES

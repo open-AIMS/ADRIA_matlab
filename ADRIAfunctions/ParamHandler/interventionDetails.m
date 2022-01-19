@@ -7,7 +7,6 @@ function interventions = interventionDetails(varargin)
 %    Argument list of parameters to override.
 %    Possible arguments (with default values/ranges):
 %      - Guided   : [0, 1, 2, 3, 4], where 0 is unguided
-%      - PrSites  : [1, 2, 3], 3
 %      - Seed1    : [100, 10000], 1000
 %      - Seed2    : [100, 10000], 1000
 %      - SRM      : [0, 12], 0
@@ -32,7 +31,6 @@ function interventions = interventionDetails(varargin)
 %       - `raw_bounds` indicates the original value ranges
 name = [
     "Guided";
-    "PrSites";
     "Seed1";
     "Seed2";
     "SRM";
@@ -44,7 +42,6 @@ name = [
 
 defaults = [
     0;  % Guided
-    3;  % PrSites
     1000;  % Seed1
     1000;  % Seed2
     0;  % SRM
@@ -57,7 +54,6 @@ defaults = [
 
 p_bounds = [
     [0, 4];  % Guided
-    [1, 3];  % PrSites
     [100, 10000];  % Seed1
     [100, 10000];  % Seed2
     [0, 12];  % SRM
@@ -75,7 +71,6 @@ p_bounds = [
 
 
 ptype = [
-    "integer";
     "integer";
     "integer";
     "integer";
