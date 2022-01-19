@@ -21,7 +21,12 @@ These can be run directly in the command window by script name:
 >> single_scenario
 ```
 
-### Tests
+## Documentation
+
+ADRIA documentation can be found under `docs/book` as a web-based manual.
+Open `index.html` with any web browser.
+
+## Tests
 
 Tests can be run with the following in the command window:
 
