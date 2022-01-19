@@ -4,18 +4,15 @@
 % use simplest MDCA algorithm for now
 alg = 1;
 rcp = 60;
-Nreps = 10;
+Nreps = 50;
 
 filename = 'MooreTPMean.xlsx';
 % optimisation specification - want to optimise TC and CES
 
-func_vec = {@coralTaxaCover, @coralSpeciesCover, ...
-                     @coralEvenness, @shelterVolume};
-
+func_vec = {@coralTaxaCover, @coralSpeciesCover, @coralEvenness,@shelterVolume};
+tic
 % perform optimisation 
 [x,fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_vec);
-
+toc
 % print results 
-sprintf('Optimal intervention values were found to be Seed1: %1.4f, Seed2: %1.4f, SRM: %2.0f, AsAdt: %2.0f, NatAdt: %1.2f, with av_TC = %1.4f',...
-    x(1),x(2),x(3),x(4),x(5),fval);
 

@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro_to_ADRIA.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="../dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../dev_guide/dev_setup.html" class="active"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="../dev_guide/parameter_interface.html"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="../dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../dev_guide/sensitivity_analysis.html"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="../dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="../dev_guide/concise_API.html"><strong aria-hidden="true">3.8.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro_to_ADRIA.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="../dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../dev_guide/dev_setup.html" class="active"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="../dev_guide/parameter_interface.html"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="../dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../dev_guide/sensitivity_analysis.html"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="../dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="../dev_guide/documentation_build.html"><strong aria-hidden="true">3.8.</strong> Documentation Build Process</a></li><li class="chapter-item expanded "><a href="../dev_guide/concise_API.html"><strong aria-hidden="true">3.9.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -139,12 +139,16 @@
 <ol>
 <li>Clone the repository</li>
 <li>Open the MATLAB IDE and navigate to the repository location</li>
-<li>Run the <code>setupADRIAProject.m</code> script. This should only need to be done once.
+<li>Run the <code>setupADRIAProject.m</code> script. This should only need to be done once (see note below).
 If reopening the project (after closing MATLAB for example), simply 
 double click the &quot;ADRIA.prj&quot; file to reload the project.</li>
 </ol>
 <p>Step 3 above informs MATLAB of the locations of the project folders,
 removing the need to <code>cd</code> into specific directories to run ADRIA functions.</p>
+<p><strong>Note:</strong></p>
+<p>ADRIA is under constant and rapid development. Some changes will require the project to be rebuilt.</p>
+<p>In such cases, delete the <code>ADRIA.prj</code> file and the <code>resources</code> directory,
+and rerun <code>setupADRIAProject.m</code></p>
 <h2 id="install-toolboxes"><a class="header" href="#install-toolboxes">Install Toolboxes</a></h2>
 <p>The following toolboxes are required:</p>
 <ul>
@@ -153,20 +157,26 @@ removing the need to <code>cd</code> into specific directories to run ADRIA func
 <li>Global Optimization Toolbox</li>
 </ul>
 <p>An example run script (<code>examples/run_example.m</code>) can be run by calling </p>
-<pre><code class="language-matlab">&gt;&gt; run_example
+<pre><code class="language-matlab">&gt;&gt; single_scenario
 </code></pre>
 <p>in the command window. </p>
-<p>The example will produce results in the specified outputs directory.</p>
-<p>An ADRIA app can also be started by running <code>ADRIAv1.mlapp</code></p>
+<p>The example will produce a plot of example results.</p>
 <h3 id="tests"><a class="header" href="#tests">Tests</a></h3>
 <p>Tests can be run with the following in the command window:</p>
 <pre><code class="language-matlab">&gt;&gt; runtests('tests')
 </code></pre>
-<p><strong>Note:</strong></p>
-<p>Some changes will require the project to be rebuilt.</p>
-<p>In such cases, delete the <code>ADRIA.prj</code> file and the <code>resources</code> directory,
-and rerun <code>setupADRIAProject.m</code></p>
 <p>ADRIA has been confirmed to run on MATLAB R2021a and R2019b.</p>
+<h1 id="project-structure"><a class="header" href="#project-structure">Project structure</a></h1>
+<p>ADRIA consists of the following directories:</p>
+<ul>
+<li>ADRIAfunctions : files defining ADRIA functions</li>
+<li>ADRIAmain : main program files for ADRIA</li>
+<li>docs : documentation files (this document)</li>
+<li>examples : Set of examples showcasing programmatic use of ADRIA</li>
+<li>Inputs : set of input files (mostly for example purposes)</li>
+<li>Outputs : example results are stored here</li>
+<li>tests : software tests for ADRIA (see <a href="#tests">Tests</a> section above)</li>
+</ul>
 
                     </main>
 

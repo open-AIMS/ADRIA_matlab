@@ -26,7 +26,7 @@ for c_idx = 1:num_taxa
     
     % find and assign parameter values related to this coral taxa
     param_spec{idx, col_names} = ...
-        reshape(samples{:, contains(varnames, coral_name)}, num_params, [])';
+        reshape(samples{:, contains(varnames, coral_name)}, num_params, num_taxa)';
 end
 
 end
