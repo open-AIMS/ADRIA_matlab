@@ -28,8 +28,7 @@ function [x, fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_names)
       
      % define parameters which will not be perturbed during optimisation
      modified_params = ai.raw_defaults;
-     modified_params(1,'alg_ind') = {alg};
-     modified_params(1,'Guided') = {1};
+     modified_params(1,'Guided') = {alg};
      modified_params(1,'PrSites') = {3};
      ai.constants.RCP = rcp;
 

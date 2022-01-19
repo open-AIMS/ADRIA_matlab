@@ -12,8 +12,10 @@ function param_spec = extractCoralSamples(samples, param_spec)
 % p_delimiter = '__';  % parameter delimiter to search for
 
 varnames = string(samples.Properties.VariableNames);
-col_names = ["basecov", "growth_rate", "fec", ...
-             "wavemort90", "mb_rate", "natad", "colony_area_cm2"];
+
+% NOTE: Order of column names have to line up with order of values
+%       in updating the values in the loop below.
+col_names = string(param_spec.Properties.VariableNames(6:end));
 
 unique_coral_names = unique(replace(lower(param_spec.name), " ", "_"));
 num_taxa = length(unique_coral_names);

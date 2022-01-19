@@ -1,11 +1,11 @@
 
-criteria = criteriaDetails();
-eg_vals = convertScenarioSelection(cell2mat(criteria.defaults)', criteria);
+ai = ADRIA();
+rd = ai.sample_defaults;
+eg_vals = ai.convertSamples(rd);
 eg_vals = table2array(eg_vals);
 
 [TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', 0.1);
 
-%% Testing randomised sites
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = eg_vals(:, 1); % weight of wave damage in MCDA
 wtheat = eg_vals(:, 2); % weight of heat damage in MCDA
@@ -17,8 +17,10 @@ wtpredecseed = eg_vals(:, 7); % weight for the importance of seeding sites that 
 wtpredecshade = eg_vals(:, 8); % weight for the importance of shading sites that are predecessors of priority reefs
 risktol = eg_vals(1, 9); % risk tolerance
 
-% rand_sites = randi([1, 50], 10, 1);
 nsites = length(strongpred);
+risktol = eg_vals(1, 9); % risk tolerance
+
+%% Testing randomised sites
 
 % do 10 trials...
 for ns = 1:10
@@ -74,6 +76,7 @@ assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
 %% Testing one site
 % Intervene on zero sites - this should give zeros for the output 
+nsites = length(strongpred);
 nsiteint = 1;
 p_sites = randi([1,9], 1):randi([10,25], 1);
 

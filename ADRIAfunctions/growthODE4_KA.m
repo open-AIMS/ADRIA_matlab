@@ -24,7 +24,9 @@ function Y = growthODE4_KA(X, r, P, mb, rec, comp)
 % as size classes (6) across all sites (total of 36 by 26), recruitment is
 % a 6 by 26 array. 
 
-X = reshape(X, [36, 26]); %reshape(X, size(rec));  %why are we reshaping X here?
+% Reshape flattened input from ODE back to expected matrix shape
+% Dims: (coral species, sites)
+X = reshape(X, [length(r), length(X) / length(r)]);
 
 %% Density dependent growth and recruitment
 % P - sum over coral covers within each site
@@ -60,7 +62,7 @@ Y(12, :) = P_x(12, :) .* X(11, :) .* (r(11) + comp .* X_sm) + P_x(12, :) .* X(12
 
 %Corymbose Acropora Enhanced
 Y(13, :) = P_x(13, :) .* rec(3, :) - P_x(14, :) .* X(13, :) .* r(13) - X(13,:) .* mb(13);
-Y(14, :) = P_x(14, :) .* X(13, :) .* r(13) - P_x(15, :) .* X(14, :) .* r(14) - X(14, :) .*mb(14);
+Y(14, :) = P_x(14, :) .* X(13, :) .* r(13) - P_x(15, :) .* X(14, :) .* r(14) - X(14, :) .* mb(14);
 Y(15, :) = P_x(15, :) .* X(14, :) .* r(14) - P_x(16, :) .* X(15, :) .* r(15) - X(15, :) .* mb(15);
 Y(16, :) = P_x(16, :) .* X(15, :) .* r(15) - P_x(17, :) .* X(16, :) .* r(16) - X(16, :) .* mb(16);
 Y(17, :) = P_x(17, :) .* X(16, :) .* r(16) - P_x(18, :) .* X(17, :) .* r(17) - X(17, :) .* mb(17);
@@ -90,9 +92,8 @@ Y(34, :) = P_x(34, :) .* X(33, :) .* r(33) - P_x(35, :) .* X(34, :) .* r(34) - X
 Y(35, :) = P_x(35, :) .* X(34, :) .* r(34) - P_x(36, :) .* X(35, :) .* r(35) - X(35, :) .* mb(35);
 Y(36, :) = P_x(36, :) .* X(35, :) .* r(35) + P_x(36, :) .* X(36, :) .* r(36) - X(36, :) .* mb(36);
 
-% constrain between 0 and max cover
+% Ensure no non-negative values
 Y = max(Y, 0);
-Y = min(Y, P);
 
 Y = Y(:); % convert to column vector (necessary for ODE to work)
 end

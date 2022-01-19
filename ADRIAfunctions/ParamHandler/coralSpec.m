@@ -108,7 +108,7 @@ linear_extension = ...
     1, 3, 3, 4.4, 4.4, 4.4; ...  % Tabular Acropora Unenhanced
     1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Enhanced
     1, 3, 3, 3, 3, 3; ...        % Corymbose Acropora Unenhanced
-    1, 1, 1, 1, 1, 1; ...    % small massives
+    1, 1, 1, 1, 0.8, 0.8; ...    % small massives
     1, 1, 1, 1, 1.2, 1.2];       % large massives
 
 % Convert linear extensions to delta coral in two steps.
@@ -122,6 +122,7 @@ prop_change = linear_extension ./ diam_bin_widths;
 %Second, growth as transitions of cover to higher bins is estimated as
 r = prop_change .* (colony_area_m2_to./colony_area_m2_from);
 params.growth_rate = reshape(r', [], 1);
+
 %note that we use proportion of bin widths and linear extension to estimate
 % number of corals changing size class, but we use the bin means to estimate
 % the cover equivalent because we assume coral sizes shift from edges to mean
@@ -140,9 +141,9 @@ params.fec = reshape(fec_m2_rel', [], 1);
 
 % Wave mortality risk : wave damage for the 90 percentile of routine wave stress
 wavemort90 = ...
-   [0, 0, 0.00, 0.02, 0.05, 0.10; ... % Tabular Acropora Enhanced
-    0, 0, 0.00, 0.02, 0.05, 0.10; ...  % Tabular Acropora Unenhanced
-    0, 0, 0.00, 0.02, 0.03, 0.05; ...  % Corymbose Acropora Enhanced
+   [0, 0, 0.00, 0.02, 0.05, 0.05; ... % Tabular Acropora Enhanced
+    0, 0, 0.00, 0.02, 0.05, 0.05; ...  % Tabular Acropora Unenhanced
+    0, 0, 0.00, 0.02, 0.04, 0.05; ...  % Corymbose Acropora Enhanced
     0, 0, 0.00, 0.02, 0.04, 0.05; ...  % Corymbose Acropora Unenhanced
     0, 0, 0.00, 0.02, 0.02, 0.02; ...  % Small massives
     0, 0, 0.00, 0.02, 0.01, 0.01];     % Large massives
@@ -150,24 +151,30 @@ wavemort90 = ...
 params.wavemort90 = reshape(wavemort90', [], 1);
 
 % Background mortality taken from Bozec et al. 2021 (Table S2)
-mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ... % Tabular Acropora Enhanced
-      0.2, 0.15, 0.10, 0.05, 0.05, 0.03; ...   % Tabular Acropora Unenhanced
+mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.05; ... % Tabular Acropora Enhanced
+      0.2, 0.15, 0.10, 0.05, 0.05, 0.05; ...   % Tabular Acropora Unenhanced
       0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
       0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
-      0.2, 0.04, 0.02, 0.02, 0.02, 0.02; ...   % small massives and encrusting
-      0.2, 0.04, 0.02, 0.01, 0.01, 0.01];      % large massives
+      0.2, 0.04, 0.04, 0.02, 0.02, 0.02; ...   % small massives and encrusting
+      0.2, 0.04, 0.04, 0.02, 0.02, 0.02];      % large massives
 
 params.mb_rate = reshape(mb', [], 1);
 
 % Background rates of natural adaptation. User-defined natad rates will be 
 % added to these
-natad = [...
-    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
-    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
-    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
-    0.025, 0.025, 0.025, 0.025, 0.025, 0.025; ...
-    0.10, 0.10, 0.10, 0.10, 0.10, 0.10; ...
-    0.10, 0.10, 0.10, 0.10, 0.10, 0.10];
 
-params.natad = reshape(natad', [], 1);
+natad = repmat(0.025, 36, 1);
+params.natad = natad;
+
+% Estimated bleaching resistance (as DHW) relative to the assemblage 
+% response for 2016 bleaching on the GBR (based on Hughes et al. 2018). 
+bleach_resist = [...  
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0;    
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+    1.5, 1.5, 1.5, 1.5, 1.5, 1.5;
+    1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+
+params.bleach_resist = reshape(bleach_resist', [], 1);
 

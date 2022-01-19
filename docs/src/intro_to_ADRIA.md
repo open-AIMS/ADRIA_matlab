@@ -21,4 +21,4 @@ The guiding principles for decision support in ADRIA are currently a set of dyna
 
 ADRIA is currently set up for the Moore Reef cluster: 26 sites in a cluster of four reefs off Cairns in North Queensland.  
 
-Note: Environmental input files (as netCDFs) from the RECOM model runs are not included. Instead, transition-probability tables for connectivity are created and forward projections for DHW based on simple, linear heating rates for RCPs and based on observed spatial patterns of DHW for the study area between three bleaching years.
+Note: Environmental input files from the RECOM model runs are currently not included. Instead, transition-probability tables for connectivity are created (and stored as netCDFs) and forward projections for DHW based on simple, linear heating rates for RCPs and based on observed spatial patterns of DHW for the study area between three bleaching years.
