@@ -40,7 +40,95 @@ ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
     file_prefix='./example_multirun', batch_size=4);
 
 % Gather results, applying a metric to each result set.
-Y = ai.gatherResults('./example_multirun', {@coralTaxaCover});
+Y = ai.gatherResults('./example_multirun', {@coralTaxaCover, ...
+                                            @coralEvenness, ...
+                                            @coralSpeciesCover, ...
+                                            @shelterVolume});
 
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+
+%% Extract metric values from batched result set
+
+% Total coral cover
+TC = concatMetrics(Y, "coralTaxaCover.total_cover");
+
+% Coral cover per species
+covs = concatMetrics(Y, "coralSpeciesCover");
+
+% Evenness
+E = concatMetrics(Y, "coralEvenness");
+
+% Extract juvenile corals (< 5 cm diameter)
+BC = concatMetrics(Y, "coralTaxaCover.juveniles");
+
+% Calculate coral shelter volume per ha
+SV_per_ha = concatMetrics(Y, "shelterVolume");
+
+%% Plot coral covers over time and sites
+figure; 
+LO = tiledlayout(2,3, 'TileSpacing','Compact');
+
+% Tile 1
+nexttile
+plot(mean(squeeze(covs(:,1,:,:,:)), [3,4]));
+title('Enhanced Tab Acr')
+
+% Tile 2
+nexttile
+plot(mean(squeeze(covs(:,2,:,:,:)), [3,4]));
+title('Unenhanced Tab Acr')
+
+% Tile 3
+nexttile
+plot(mean(squeeze(covs(:,3,:,:,:)), [3,4]));
+title('Enhanced Cor Acr')
+
+% Tile 4
+nexttile
+plot(mean(squeeze(covs(:,4,:,:,:)), [3,4]));
+title('Unenhanced Cor Acr')
+
+% Tile 5
+nexttile
+plot(mean(squeeze(covs(:,5,:,:,:)), [3,4]));
+title('Small massives')
+
+% Tile 6
+nexttile
+plot(mean(squeeze(covs(:,6,:,:,:)), [3,4]));
+title('Large massives')
+
+xlabel(LO,'Years')
+ylabel(LO,'Cover (prop)')
+            
+%% Plot reef condition metrics over time and sites
+figure; 
+LO2 = tiledlayout(2,2, 'TileSpacing','Compact');
+
+% Tile 1
+nexttile
+plot(mean(TC, [3,4]));
+title('Total Coral Cover')
+ylabel('Cover, prop')
+
+% Tile 2
+nexttile
+plot(mean(E, [3,4]));
+title('Coral Evenness')
+ylabel('E, prop')
+
+% Tile 3
+nexttile
+plot(mean(BC, [3,4]))
+title('Juvenile Corals (<5 cm diam)')
+ylabel('Cover, prop')
+
+% Tile 4
+nexttile
+plot(mean(SV_per_ha, [3,4]))
+title('Shelter Volume per ha')
+ylabel('Volume, m3 / ha') 
+
+xlabel(LO2,'Years')
+%ylabel(LO,'Cover (prop)')
