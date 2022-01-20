@@ -18,7 +18,7 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics)
     end
 
     file_prefix = fullfile(file_loc);
-    pat = strcat(file_prefix, '_*.nc');
+    pat = strcat(file_prefix, '_*]].nc');
     target_files = dir(pat);
 
     num_files = length(target_files);

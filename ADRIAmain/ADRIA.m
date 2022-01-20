@@ -228,19 +228,24 @@ classdef ADRIA < handle
                 X = obj.convertSamples(X);
             end
 
-            % Quick fix - save as mat file as apparently saving structs in 
-            % an open format is too hard for matlab :(
-            sim_inputs = struct();
-            sim_inputs.parameters = table2array(X);
-            sim_inputs.constants = obj.constants;
-            sim_inputs.n_reps = nreps;
-            sim_inputs.n_timesteps = obj.constants.tf;
-            sim_inputs.n_sites = n_sites;
-            sim_inputs.n_species = length(obj.coral_spec.coral_id);
-
             fprefix = runargs.file_prefix;
-            tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.mat');
-            save(tmp_fn, 'sim_inputs')
+            tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
+            
+            tmp = struct('input_parameters', table2array(X));
+            saveData(tmp, tmp_fn, compression=4);
+            nccreate(tmp_fn, "constants");
+            nccreate(tmp_fn, "metadata");
+            
+            all_fields = string(fieldnames(obj.constants));
+            for i = 1:length(all_fields)
+                af = all_fields(i);
+                ncwriteatt(tmp_fn, "constants", af, obj.constants.(af));
+            end
+
+            ncwriteatt(tmp_fn, "metadata", "n_reps", nreps);
+            ncwriteatt(tmp_fn, "metadata", "n_timesteps", obj.constants.tf);
+            ncwriteatt(tmp_fn, "metadata", "n_sites", n_sites);
+            ncwriteatt(tmp_fn, "metadata", "n_species", length(obj.coral_spec.coral_id));
 
             % Run ADRIA
             [interv, crit, coral] = obj.splitParameterTable(X);
@@ -260,10 +265,20 @@ classdef ADRIA < handle
             seps = split(file_loc, "_[[");
             prefix = seps(1);
             
-            input_file = dir(fullfile(strcat(prefix, "*_inputs.mat")));
-            samples = load(fullfile(input_file.folder, input_file.name));
-            params = samples.sim_inputs.parameters;
-            [~, ~, coral] = obj.splitParameterTable(params);
+            input_file = dir(fullfile(strcat(prefix, "*_inputs.nc")));
+            fn = fullfile(input_file.folder, input_file.name);
+            % samples = load(fullfile(input_file.folder, input_file.name));
+            samples = ncread(fn, "input_parameters");
+            
+            param_details = obj.parameterDetails();
+            var_types = replace(param_details.ptype', "float", "double");
+            var_types = replace(var_types, "integer", "int64");
+            var_names = param_details.name';
+            input_table = table('Size', size(samples), ...
+                                'VariableTypes', var_types, ...
+                                'VariableNames', var_names);
+
+            [~, ~, coral] = obj.splitParameterTable(input_table);
 
             Y = gatherResults(file_loc, coral, metrics);
         end

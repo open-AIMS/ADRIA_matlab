@@ -50,7 +50,7 @@ function saveData(data, filename, nc_settings)
         filename string
         nc_settings.var_name string
         nc_settings.dim_spec cell
-        nc_settings.attributes struct
+        nc_settings.attributes struct = struct()
         nc_settings.compression {mustBeNumeric} = 4
     end
         
