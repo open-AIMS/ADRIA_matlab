@@ -5,10 +5,9 @@ nalgs = 3;
 nmetrics = 1;
 
 % Number of scenarios
-N = 1;
+N = 8;
 example_file = 'Inputs/MCDA_example.nc';
 metric = {@coralSpeciesCover};
-%{@coralTaxaCover};
 
 if isfile(example_file)
     % Load example data from file if pre-prepared
@@ -17,34 +16,34 @@ else
    
         %% Generate monte carlo samples
 
-        num_reps = 50;  % Number of replicate RCP scenarios
+        num_reps = 20;  % Number of replicate RCP scenarios
         % timesteps, n_algs, n_scenarios, n_metrics
         results = zeros(25, nalgs, N, nmetrics);
         ai = ADRIA();
         
-        param_table = ai.raw_defaults;
-        param_table.Guided = 1;
-        param_table.Seed1 = 15000;
-        param_table.Seed2 = 50000;
+%         param_table = ai.raw_defaults;
+%         param_table.Guided = 1;
+%         param_table.Seed1 = 15000;
+%         param_table.Seed2 = 50000;
         % Collect details of available parameters
-        %combined_opts = ai.parameterDetails();
+        combined_opts = ai.parameterDetails();
         % Get default parameters
         
         sim_constants = ai.constants;
-        ai.constants.RCP = 60;
+  %      ai.constants.RCP = 60;
         % Generate samples using simple monte carlo
         % Create selection table based on lower/upper parameter bounds
-%         p_sel = table;
-%         for p = 1:height(combined_opts)
-%             a = combined_opts.lower_bound(p);
-%             b = combined_opts.upper_bound(p);
+         p_sel = table;
+         for p = 1:height(combined_opts)
+             a = combined_opts.lower_bound(p);
+             b = combined_opts.upper_bound(p);
 % 
-%             selection = (b - a).*rand(N, 1) + a;
+             selection = (b - a).*rand(N, 1) + a;
 % 
-%             p_sel.(combined_opts.name(p)) = selection;
-%         end
+             p_sel.(combined_opts.name(p)) = selection;
+         end
 %     
-%         [~, ~, coral_params] = ai.splitParameterTable(ai.raw_defaults);
+         [~, ~, coral_params] = ai.splitParameterTable(ai.raw_defaults);
         %% Parameter prep
 
         % Load site specific data
@@ -53,24 +52,21 @@ else
         %% Scenario runs
         % Currently running over unique interventions and criteria weights only for
         % a limited number of RCP scenarios.
-%         p_sel.Guided(:) = 1*ones(length(p_sel.Guided(:)),1);
-%         p_sel.PrSites(:) = 3*ones(length(p_sel.PrSites(:)),1);
-%         p_sel.Seedyrs(:) = 5*ones(length(p_sel.Seedyrs(:)),1);
-%         p_sel.Shadeyrs(:) = 12*ones(length(p_sel.Shadeyrs(:)),1);
+         p_sel.Seedyrs(:) = ones(length(p_sel.Seedyrs(:)),1);
+         p_sel.Shadeyrs(:) = ones(length(p_sel.Shadeyrs(:)),1);
    for al = 1:nalgs
-         % for each algorithm
-        %alg_ind = al;
-        param_table.alg_ind = al;
-        %p_sel.alg_ind(:) = al*ones(length(p_sel.alg_ind(:)),1);
+       % for each algorithm
+       % param_table.alg_ind = al;
+        p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1)+1;
         tic
-        Y = ai.run(param_table,sampled_values = false, nreps = num_reps);
+        Y = ai.run(p_sel,sampled_values = true, nreps = num_reps);
         tmp = toc;
         disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
         out = collectMetrics(squeeze(Y),coral_params,metric);
         % store total coral cover for each scenario averaged over sites and
          % simulations
          TC = out.coralSpeciesCover;
-         results(:, al, :) = squeeze(mean(TC(:,1,:),3));
+    %     results(:, al, :) = squeeze(mean(TC(:,1,:),3));
          %mean(mean(TC(:,:,:,:),4),2);
   %       results2(:, al, :) = mean(mean(TC(:,:,:,:),4),2);
    end
