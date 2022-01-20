@@ -156,7 +156,7 @@ switch alg_ind
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
         SH = SH.* repmat(wsh,size(SH,1),1);
         
-        SHwt(:,1) = A(:,1);
+        SHwt(:,1) = SH(:,1);
         SHwt(:,2) = sum(SH(:,2:end),2); %for now, simply add indicators 
 
         SHwt2 = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
@@ -288,7 +288,7 @@ switch alg_ind
         % Compute individual regret R (Chebyshev distance)
         sr_arg =((F_s-SH(:,2:end)));
         S = sum(sr_arg,2);
-        S = [A(:,1), S];
+        S = [SH(:,1), S];
         R = max(sr_arg,[],2);
         R = [SH(:,1),R];
 
