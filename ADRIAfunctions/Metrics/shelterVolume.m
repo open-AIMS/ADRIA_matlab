@@ -1,5 +1,5 @@
 function Y = shelterVolume(X, coral_params)
-% Calculates evenness across functional coral groups in ADRIA
+% Indicator of shelter capacity
 
 % Inputs: 
 %   X            : matrix, raw ADRIA results for a single simulation

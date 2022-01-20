@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro_to_ADRIA.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="../dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../dev_guide/dev_setup.html"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="../dev_guide/parameter_interface.html"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="../dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../dev_guide/sensitivity_analysis.html"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="../dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="../dev_guide/concise_API.html" class="active"><strong aria-hidden="true">3.8.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro_to_ADRIA.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="../dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../dev_guide/dev_setup.html"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="../dev_guide/parameter_interface.html"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="../dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../dev_guide/sensitivity_analysis.html"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="../dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="../dev_guide/documentation_build.html"><strong aria-hidden="true">3.8.</strong> Documentation Build Process</a></li><li class="chapter-item expanded "><a href="../dev_guide/concise_API.html" class="active"><strong aria-hidden="true">3.9.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -227,7 +227,7 @@ this function maps this back to <code>A</code> or <code>B</code> for use with AD
 </ul>
 <p>See also:
 <a href="#interventiondetails"><code>interventionDetails()</code></a>, <a href="#criteriadetails"><code>criteriaDetails()</code></a></p>
-<h2 id="adria_tp"><a class="header" href="#adria_tp">ADRIA_TP()</a></h2>
+<h2 id="siteconnectivity"><a class="header" href="#siteconnectivity">siteConnectivity()</a></h2>
 <p>Create transitional probability matrix indicating connectivity between
 sites, level of centrality, and the strongest predecessor for each site.</p>
 <p><strong>Inputs:</strong></p>
@@ -315,7 +315,7 @@ environmental and ecological parameter values etc
 
 %Load site data
 [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
-[TP_data, site_ranks, strongpred] = ADRIA_TP('MooreTPmean.xlsx', params.con_cutoff);
+[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
 
 ninter = height(X, 1);
 alg_ind = 1;
@@ -514,7 +514,7 @@ est : float, estimated runtime (in seconds)</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../dev_guide/scenario_discovery.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../dev_guide/documentation_build.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                             <a rel="next" href="../contributors.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
@@ -526,7 +526,7 @@ est : float, estimated runtime (in seconds)</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../dev_guide/scenario_discovery.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../dev_guide/documentation_build.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                     <a rel="next" href="../contributors.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">

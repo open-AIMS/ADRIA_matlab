@@ -9,7 +9,7 @@ ai = ADRIA();
 %% 2. Build a parameter table using default values
 
 % Resulting table consists of N rows and D columns, where N is the
-% number of scenarios (here, a single simulation with default values), and 
+% number of scenarios (here, N=1 of default values), and
 % D is the number of parameters.
 param_table = ai.raw_defaults;
 
@@ -18,10 +18,9 @@ param_table = ai.raw_defaults;
 % sample_value_table = ai.sample_defaults;
 
 %% 3. Modify table as desired...
-param_table.alg_ind = 3;
-param_table.Guided = 1;
-param_table.Seed1 = 15000;
-param_table.Seed2 = 50000;
+param_table.Guided = 4;
+param_table.Seed1 = 9000;
+param_table.Seed2 = 5000;
 
 %% Run ADRIA
 

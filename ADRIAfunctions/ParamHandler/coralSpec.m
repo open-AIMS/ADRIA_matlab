@@ -16,7 +16,12 @@ function params = coralSpec()
 %        Scientific Reports, 8(1), p. 6079.
 %        doi: 10.1038/s41598-018-24530-9.
 %
-% 2. (Bozec et al 2021 Table S2) ...
+% 2. Bozec, Y.-M., Rowell, D., Harrison, L., Gaskell, J., Hock, K., 
+%      Callaghan, D., Gorton, R., Kovacs, E. M., Lyons, M., Mumby, P., 
+%      & Roelfsema, C. (2021). 
+%        Baseline mapping to support reef restoration and resilience-based 
+%        management in the Whitsundays. 
+%      https://doi.org/10.13140/RG.2.2.26976.20482
 
 % Below parameters pertaining to species are new. We now add size classes
 % to each coral species, but treat each coral size class as a 'species'.
@@ -122,6 +127,7 @@ prop_change = linear_extension ./ diam_bin_widths;
 %Second, growth as transitions of cover to higher bins is estimated as
 r = prop_change .* (colony_area_m2_to./colony_area_m2_from);
 params.growth_rate = reshape(r', [], 1);
+
 %note that we use proportion of bin widths and linear extension to estimate
 % number of corals changing size class, but we use the bin means to estimate
 % the cover equivalent because we assume coral sizes shift from edges to mean
