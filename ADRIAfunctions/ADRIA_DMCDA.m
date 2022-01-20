@@ -307,11 +307,13 @@ switch alg_ind
     case 4
         %% Multi-objective GA algorithm weighting
         % set up optimisation problem
-        % no inequality or equality constraints
+        % no inequality constraints
         Aeq = [];
         beq = [];
         
         sites = 1:nsites;
+
+        opts = optimoptions('gamultiobj', 'UseParallel', false, 'Display', 'off');
         % seeding rankings
         if isempty(SE)
             prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
@@ -335,7 +337,7 @@ switch alg_ind
             % solve multi-objective problem using genetic alg
             lb = zeros(1,length(SE(:,1))); % x (weightings) can be 0
             ub = ones(1,length(SE(:,1))); % to 1
-            x1 = gamultiobj(fun1,length(SE(:,1)),Aeq,beq,A,b,lb,ub,[],intcon);            
+            x1 = gamultiobj(fun1,length(SE(:,1)),Aeq,beq,A,b,lb,ub,[],intcon,opts);            
             
             % randomly select solution from pareto front
             ind = randi([1 size(x1,1)]);
@@ -360,10 +362,11 @@ switch alg_ind
         lb = zeros(1,length(SH(:,1))); % x (weightings) can be 0
         ub = ones(1,length(SH(:,1))); % to 1
 
+        
         % multi-objective function for shading
         fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
         % solve multi-objective problem using genetic alg
-        x2 = gamultiobj(fun2,length(SH(:,1)),Aeq,beq,A,b,lb,ub,[],intcon);
+        x2 = gamultiobj(fun2,length(SH(:,1)),Aeq,beq,A,b,lb,ub,[],intcon,opts);
         
         % randomly select solution from pareto front
         ind = randi([1 size(x2,1)]);
