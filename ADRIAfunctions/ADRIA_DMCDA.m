@@ -77,8 +77,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     % Filter out sites that have high risk of wave damage, specifically 
     % exceeding the risk tolerance 
     A(A(:, 3) > risktol, 3) = nan;
-    rule = (A(:, 3) <= risktol) & (A(:, 4) > risktol);
-    
+    rule = (A(:, 3) <= risktol) & (A(:, 4) > risktol);   
     A(rule, 4) = nan;
     
     A(any(isnan(A),2),:) = []; %if a row has a nan, delete it
@@ -90,7 +89,6 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
         nprefshadesites = 0;
         return
     end
-
    
     %number of sites left after risk filtration
     if nsiteint > length(A(:,1))
@@ -132,8 +130,8 @@ switch alg_ind
             prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
             nprefseedsites = 0;
         else
-            wse(all(SE==0,1))=[];
-            SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
+            wse(all(SE == 0,1)) = [];
+            SE(:,all(SE == 0,1)) = []; %if a column is all zeros, delete
 
              % normalisation
             SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
@@ -150,13 +148,13 @@ switch alg_ind
         end
         
         % shading rankings
-        wsh(all(SH==0,1))=[];
-        SH(:,all(SH==0,1)) = []; %if a column is all zeros, delete
+        wsh(all(SH == 0,1)) = [];
+        SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
         % normalisation
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
         SH = SH.* repmat(wsh,size(SH,1),1);
         
-        SHwt(:,1) = A(:,1);
+        SHwt(:,1) = SH(:,1);
         SHwt(:,2) = sum(SH(:,2:end),2); %for now, simply add indicators 
 
         SHwt2 = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
@@ -172,7 +170,7 @@ switch alg_ind
             prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
             nprefseedsites = 0;
         else
-            wse(all(SE==0,1))=[];
+            wse(all(SE==0,1)) = [];
             SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
            % normalisation
             SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
@@ -188,7 +186,7 @@ switch alg_ind
             % Min used as all criteria represent preferred attributes not 
             % costs or negative attributes
 
-            NIS = nanmin(SE(:,2:end));
+            NIS = min(SE(:,2:end));
 
             % calculate separation distance from the ideal and non-ideal solns
             S_p = sqrt(sum((SE(:,2:end)-PIS).^2,2));
@@ -204,7 +202,7 @@ switch alg_ind
         end
         
         % shading rankings
-        wsh(all(SH==0,1))=[];
+        wsh(all(SH==0,1)) = [];
         SH(:,all(SH==0,1)) = []; %if a column is all zeros, delete
         % normalisation
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
@@ -230,7 +228,7 @@ switch alg_ind
         % final ranking measue of relative closeness C
 
         C = S_n./(S_p + S_n);
-        SHwt = [A(:,1), C];
+        SHwt = [SH(:,1), C];
         order = sortrows(SHwt,2,'descend');
         %highest indicators picks the cool sites
         prefshadesites = order(1:nsiteint,1);
@@ -247,7 +245,7 @@ switch alg_ind
             prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
             nprefseedsites = 0;
         else
-            wse(all(SE==0,1))=[];
+            wse(all(SE==0,1)) = [];
             SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
             % normalisation
             SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
@@ -276,8 +274,8 @@ switch alg_ind
             prefseedsites = orderQ(1:nsiteint,1);
             nprefseedsites = numel(prefseedsites); 
         end
-        wsh(all(SH==0,1))=[];
-        SH(:,all(SH==0,1)) = []; %if a column is all zeros, delete
+        wsh(all(SH == 0,1)) = [];
+        SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
         % shading rankings
         % normalisation
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
@@ -320,8 +318,8 @@ switch alg_ind
             prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
             nprefseedsites = 0;
         else
-            wse(all(SE==0,1))=[];
-            SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
+            wse(all(SE == 0,1)) = [];
+            SE(:,all(SE == 0,1)) = []; %if a column is all zeros, delete
              % integer weights must sum to number of preferred sites
             A = ones(1,length(SE(:,1)));
             b = nsiteint;
@@ -347,8 +345,8 @@ switch alg_ind
             nprefseedsites = numel(prefseedsites);
         end
          % shading rankings
-         wsh(all(SH==0,1))=[];
-         SH(:,all(SH==0,1)) = []; %if a column is all zeros, delete
+         wsh(all(SH == 0,1)) = [];
+         SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
          % integer weights must sum to number of preferred sites
          A = ones(1,length(SH(:,1)));
          b = nsiteint;
