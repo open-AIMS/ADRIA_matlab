@@ -270,6 +270,7 @@ classdef ADRIA < handle
             % samples = load(fullfile(input_file.folder, input_file.name));
             samples = ncread(fn, "input_parameters");
             
+            % Reconstruct input table
             param_details = obj.parameterDetails();
             var_types = replace(param_details.ptype', "float", "double");
             var_types = replace(var_types, "integer", "int64");
@@ -277,6 +278,8 @@ classdef ADRIA < handle
             input_table = table('Size', size(samples), ...
                                 'VariableTypes', var_types, ...
                                 'VariableNames', var_names);
+            input_table{:, :} = samples;
+            clear samples;  % remove from memory
 
             [~, ~, coral] = obj.splitParameterTable(input_table);
 
