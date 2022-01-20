@@ -248,7 +248,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yout(tstep, :, :) = Y;
 
     end % tstep
-    save(sprintf('Alg%1.0f_sites.mat',alg_ind),'prefseedsites','prefshadesites')
+   % save(sprintf('Alg%1.0f_sites.mat',alg_ind),'prefseedsites','prefshadesites')
     % Assign to output variable
     Y = Yout;
 end

@@ -269,7 +269,7 @@ switch alg_ind
             R_s = max(R(:,2));
             R_h = min(R(:,2));
             Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-            Q = [A(:,1),Q];
+            Q = [SE(:,1),Q];
 
             % sort Q in ascending order rows
             orderQ = sortrows(Q,2,'descend');
@@ -289,9 +289,9 @@ switch alg_ind
         % Compute individual regret R (Chebyshev distance)
         sr_arg =((F_s-SH(:,2:end)));
         S = sum(sr_arg,2);
-        S = [A(:,1), S];
+        S = [SH(:,1), S];
         R = max(sr_arg,[],2);
-        R = [A(:,1),R];
+        R = [SH(:,1),R];
 
         % Compute the VIKOR compromise Q
         S_s = max(S(:,2));
@@ -299,7 +299,7 @@ switch alg_ind
         R_s = max(R(:,2));
         R_h = min(R(:,2));
         Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-        Q = [A(:,1),Q];
+        Q = [SH(:,1),Q];
 
         % sort R, S and Q in ascending order rows
         orderQ = sortrows(Q,2,'descend');

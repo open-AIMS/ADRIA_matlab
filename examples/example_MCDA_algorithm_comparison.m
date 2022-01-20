@@ -1,11 +1,11 @@
 % Example script illustrating differences in algorithm performance for the
 % total coral cover metric (shows how algorithm choice could be optimised
 % for a given intervention scenario)
-nalgs = 3;
+nalgs = 4;
 nmetrics = 1;
 
 % Number of scenarios
-N = 8;
+N = 50;
 example_file = 'Inputs/MCDA_example.nc';
 metric = {@coralSpeciesCover};
 
@@ -18,7 +18,8 @@ else
 
         num_reps = 20;  % Number of replicate RCP scenarios
         % timesteps, n_algs, n_scenarios, n_metrics
-        results = zeros(25, nalgs, N, nmetrics);
+        results = zeros(25, nalgs, N, num_reps);
+        results2 = zeros(25, nalgs, N);
         ai = ADRIA();
         
 %         param_table = ai.raw_defaults;
@@ -62,17 +63,23 @@ else
         Y = ai.run(p_sel,sampled_values = true, nreps = num_reps);
         tmp = toc;
         disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
-        out = collectMetrics(squeeze(Y),coral_params,metric);
+        for m = 1:N
+            for l = 1:num_reps
+                out = collectMetrics(squeeze(Y(:,:,:,m,l)),coral_params,metric);
+                TC = out.coralSpeciesCover;
+                results(:, al, m,l) = squeeze(mean(mean(TC,3),2));
+                
+            end
+            results2(:, al, m) = mean(results(:, al, m,:),4)
+            
+        end
         % store total coral cover for each scenario averaged over sites and
          % simulations
-         TC = out.coralSpeciesCover;
-    %     results(:, al, :) = squeeze(mean(TC(:,1,:),3));
-         %mean(mean(TC(:,:,:,:),4),2);
-  %       results2(:, al, :) = mean(mean(TC(:,:,:,:),4),2);
+        
    end
     filename='Inputs/MCDA_example.nc';
     nccreate(filename,'TC','Dimensions',{'time',25,'algs',nalgs,'pars',N});
-    ncwrite(filename,'TC',results);
+    ncwrite(filename,'TC',results2);
 end
 
 %% plotting comparisons
