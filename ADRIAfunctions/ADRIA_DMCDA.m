@@ -188,7 +188,7 @@ switch alg_ind
             % Min used as all criteria represent preferred attributes not 
             % costs or negative attributes
 
-            NIS = nanmin(SE(:,2:end));
+            NIS = min(SE(:,2:end));
 
             % calculate separation distance from the ideal and non-ideal solns
             S_p = sqrt(sum((SE(:,2:end)-PIS).^2,2));
@@ -229,7 +229,7 @@ switch alg_ind
         % final ranking measue of relative closeness C
 
         C = S_n./(S_p + S_n);
-        SHwt = [A(:,1), C];
+        SHwt = [SH(:,1), C];
         order = sortrows(SHwt,2,'descend');
         %highest indicators picks the cool sites
         prefshadesites = order(1:nsiteint,1);
@@ -268,7 +268,7 @@ switch alg_ind
             R_s = max(R(:,2));
             R_h = min(R(:,2));
             Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-            Q = [A(:,1),Q];
+            Q = [SE(:,1),Q];
 
             % sort Q in ascending order rows
             orderQ = sortrows(Q,2,'descend');
@@ -290,7 +290,7 @@ switch alg_ind
         S = sum(sr_arg,2);
         S = [A(:,1), S];
         R = max(sr_arg,[],2);
-        R = [A(:,1),R];
+        R = [SH(:,1),R];
 
         % Compute the VIKOR compromise Q
         S_s = max(S(:,2));
@@ -298,7 +298,7 @@ switch alg_ind
         R_s = max(R(:,2));
         R_h = min(R(:,2));
         Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-        Q = [A(:,1),Q];
+        Q = [SH(:,1),Q];
 
         % sort R, S and Q in ascending order rows
         orderQ = sortrows(Q,2,'descend');
