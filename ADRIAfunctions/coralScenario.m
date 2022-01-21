@@ -135,8 +135,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     neg_e_p1 = -sim_params.gompertz_p1;
     neg_e_p2 = -sim_params.gompertz_p2;
 
-    dhw_ss = max(dhw_scen-srm, 0.0); % avoid negative values
-
     %% States at time = 1
     % Set base cover for all species, and initial population sizes
     % matrix in which to store the output: first branching corals, then
@@ -185,7 +183,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
               %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
-        dhw_step = dhw_ss(tstep, :); % subset of DHW for given timestep
+        dhw_step = dhw_scen(tstep, :); % subset of DHW for given timestep
 
         %% Select preferred intervention sites based on criteria (heuristics)
         if strategy > 0 % guided
@@ -214,12 +212,18 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
             Yshade(tstep, :, prefshadesites) = srm;
+            
+            % Use average effect across all species 
+            % (species level effect is currently not considered anyway)
+            adjusted_dhw = max(0.0, dhw_step - mean(squeeze(Yshade(tstep, :, :)), 1));
+        else
+            adjusted_dhw = dhw_step;
         end
 
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
             neg_e_p2, assistadapt, ...
-            natad, bleach_resist, dhw_step);
+            natad, bleach_resist, adjusted_dhw);
 
         % proportional loss + proportional recruitment
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
