@@ -37,7 +37,7 @@ ai.loadConnectivity('MooreTPmean.xlsx');
 
 tic
 ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
-    file_prefix='./example_multirun', batch_size=4);
+    file_prefix='./Outputs/example_multirun', batch_size=4);
 
 % Gather results, applying a metric to each result set.
 % The last entry is an example of how one might create a custom aggregator
@@ -46,7 +46,7 @@ desired_metrics = {@coralTaxaCover, ...
                    @coralSpeciesCover, ...
                    @shelterVolume, ...
                    @(x, p) mean(coralTaxaCover(x, p).total_cover, 4)};
-Y = ai.gatherResults('./example_multirun', desired_metrics);
+Y = ai.gatherResults('./Outputs/example_multirun', desired_metrics);
 
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
