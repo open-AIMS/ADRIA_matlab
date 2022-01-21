@@ -1,4 +1,4 @@
-function Y = ReefConditionIndex(X, coralEvenness, shelterVolume, coralTaxaCover)
+function Y = ReefConditionIndex(X, coralEvenness, shelterVolume, coralTaxaCover, coral_params)
 
 %% Translates coral metrics in ADRIA to a Reef Condition Metrics
 % Inputs:
@@ -7,7 +7,8 @@ function Y = ReefConditionIndex(X, coralEvenness, shelterVolume, coralTaxaCover)
 % 3. Abundance of coral juveniles < 5 cm diam
 % 4. Shelter volume based coral sizes and abundances
 
-% Dimensions: ntimesteps, nsites, ninterventions, nsimulations 
+% Input dimensions: ntimesteps, nspecies, nsites
+% Output dimensions: ntimesteps, nsites
 
 %% Total coral cover
 covers = coralTaxaCover(X);
@@ -17,10 +18,10 @@ TC = covers.total_cover;
 E = coralEvenness(X);
 
 %% Shelter volume
-SV = shelterVolume(X, @coral_params);
+SV = shelterVolume(X, coral_params);
 
 %% Coral juveniles
-juveniles = covers.juveniles; 
+juv = covers.juveniles; 
 
 %% Compare outputs against reef condition criteria provided by experts 
 
@@ -42,44 +43,57 @@ rci_crit = [...
 
 
 %% Adding dimension for rci metrics 
+A_TC = TC > rci_crit(1,1);
+B_TC = TC > rci_crit(2,1);
+C_TC = TC > rci_crit(3,1);
+D_TC = TC > rci_crit(4,1);
+E_TC = TC > rci_crit(5,1);
 
-criteria_threshold = 0.75; %threshold for how many criteria need to be met for category to be satisfied.
+A_E = E > rci_crit(1,2);
+B_E = E > rci_crit(2,2);
+C_E = E > rci_crit(3,2);
+D_E = E > rci_crit(4,2);
+E_E = E > rci_crit(5,2);
 
-ntsteps = size(X,1);
-nsites = size(X,2);
-ninterventions = size(X,3);
-nsims = size(X,4);
+A_SV = SV > rci_crit(1,3);
+B_SV = SV > rci_crit(2,3);
+C_SV = SV > rci_crit(3,3);
+D_SV = SV > rci_crit(4,3);
+E_SV = SV > rci_crit(5,3);
 
-reefcondition = zeros(ntsteps, nsites, ninterventions, nsims);
-%Start loop for crieria vs metric comparisons
-for tstep = 1:ntsteps
-    for site = 1:nsites
-        for int = 1:ninterventions
-            for sim = 1:nsims
-        M = [TC(tstep, site, int, sim), ...
-            E(tstep, site, int, sim), ...
-            SV(tstep, site, int, sim), ...
-            juveniles(tstep, site, int, sim)];
+A_juv = juv > rci_crit(1,4);
+B_juv = juv > rci_crit(2,4);
+C_juv = juv > rci_crit(3,4);
+D_juv = juv > rci_crit(4,4);
+E_juv = juv > rci_crit(5,4);
+
+crit_thr = 0.75; %threshold for the proportion of criteria needed to be 
+% met for category to be satisfied.
+
+ntsteps = 25;
+nsites = 26;
+
+reefcondition = zeros(ntsteps, nsites);
         
-        A = sum(M > rci_crit(1, :), 'omitnan') / size(M,2);
-        B = sum(M > rci_crit(2, :), 'omitnan') / size(M,2);
-        C = sum(M > rci_crit(3, :), 'omitnan') / size(M,2);
-        D = sum(M > rci_crit(4, :), 'omitnan') / size(M,2);
-        E = sum(M > rci_crit(5, :), 'omitnan') / size(M,2);
-    
-        if A > criteria_threshold
-            reefcondition(tstep, site, int, sim) = 0.9; %representative of very good
-        elseif B > criteria_threshold && A < criteriaThreshold
-            reefcondition(tstep, site, int, sim) = 0.7; %representative of good
-        elseif C > criteria_threshold && A < criteriaThreshold && B < criteriaThreshold
-            reefcondition(tstep, site, int, sim) = 0.5; %representative of fair
-        elseif D > criteria_threshold && C < criteriaThreshold && A < criteriaThreshold && B < criteriaThreshold
-            reefcondition(tstep, site, int, sim) = 0.3; %representative of poor
+A = (A_TC + A_E + A_SV + A_juv)/4;
+B = (B_TC + B_E + B_SV + B_juv)/4;
+C = (C_TC + C_E + C_SV + C_juv)/4;
+D = (D_TC + D_E + D_SV + D_juv)/4;
+E = (E_TC + E_E + E_SV + E_juv)/4;
+
+for tstep = 1:ntsteps
+     for site = 1:nsites
+        if A(tstep,site) > crit_thr
+            reefcondition(tstep, site) = 0.9; %representative of very good
+        elseif B(tstep,site) > crit_thr && A(tstep,site) < crit_thr
+            reefcondition(tstep, site) = 0.7; %representative of good
+        elseif C(tstep,site) > crit_thr && A(tstep,site) < crit_thr && B(tstep,site) < crit_thr
+            reefcondition(tstep, site) = 0.5; %representative of fair
+        elseif D(tstep,site) > crit_thr && C(tstep,site) < crit_thr && A(tstep,site) < crit_thr && B(tstep,site) < crit_thr
+            reefcondition(tstep, site) = 0.3; %representative of poor
         else
-            reefcondition(tstep, site, int, sim) = 0.1; %
+            reefcondition(tstep, site) = 0.1; %
         end %if
-            end %sim
-        end %int
     end %site
 end %tstep
 
