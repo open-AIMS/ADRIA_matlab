@@ -5,7 +5,7 @@ nalgs = 4;
 nmetrics = 1;
 
 % Number of scenarios
-N = 50;
+N = 1;
 example_file = 'Inputs/MCDA_example.nc';
 metric = {@coralSpeciesCover};
 
@@ -16,7 +16,7 @@ else
    
         %% Generate monte carlo samples
 
-        num_reps = 50;  % Number of replicate RCP scenarios
+        num_reps = 1;  % Number of replicate RCP scenarios
         % timesteps, n_algs, n_scenarios, n_metrics
         results = zeros(25, nalgs+1, N, num_reps);
         results2 = zeros(25, nalgs+1, N);
@@ -77,10 +77,10 @@ else
             for l = 1:num_reps
                 out = collectMetrics(squeeze(Y(:,:,:,m,l)),coral_params,metric);
                 TC = out.coralSpeciesCover;
-                results(:, al+1, m,l) = squeeze(mean(mean(TC,3),2));
+                results(:, al+1, m,l) = squeeze(mean(mean(TC,2),3));
                 
             end
-           % results2(:, al+1, m) = mean(results(:, al+1, m,:);
+            results2(:, al+1, m) = mean(results(:, al+1, m,:),4);
             
         end
         % store total coral cover for each scenario averaged over sites and
@@ -89,7 +89,7 @@ else
    end
     filename='Inputs/MCDA_example.nc';
     nccreate(filename,'TC','Dimensions',{'time',25,'algs',nalgs+1,'pars',N,'num_reps',num_reps});
-    ncwrite(filename,'TC',results);
+    ncwrite(filename,'TC',results2);
 end
 
 %% plotting comparisons
@@ -103,26 +103,44 @@ figure(1)
 title('TC comparison')
 
 for count = 1:N
-     for k =1:nalgs+1
+     %for k =1:nalgs+1
         hold on
         subplot(5,10,count)
-        plot(1:25,alg_cont_TC(:,k,count))
+        plot(1:25,alg_cont_TC(:,2,count))
+        plot(1:25,alg_cont_TC(:,3,count))
+        plot(1:25,alg_cont_TC(:,4,count))
+        plot(1:25,alg_cont_TC(:,5,count))
        % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
         hold off
-     end
+    % end
 end
 
-figure(2)
-for count = 1:N
-        hold on
-        subplot(5,10,count)
-        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,2,count,:)-alg_cont_TC(:,1,count,:))',Color=[255/255,51/255,51/255])
-        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,3,count,:)-alg_cont_TC(:,1,count,:))',Color=[255/255,255/255,51/255])
-        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,4,count,:)-alg_cont_TC(:,1,count,:))',Color=[51/255,153/255,255/255])
-        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,5,count,:)-alg_cont_TC(:,1,count,:))',Color=[51/255,255/255,153/255])
-        %plot(1:25,alg_cont_TC(:,4,count)-alg_cont_TC(:,1,count))
-        %title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
-       % ylim([0,0.3])
-        hold off
-end
+%figure(2)
+% for count = 1:N
+%         hold on
+%         subplot(5,10,count)
+%         plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,2,count,:)-alg_cont_TC(:,1,count,:))',Color=[255/255,51/255,51/255]) % Red
+%         plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,3,count,:)-alg_cont_TC(:,1,count,:))',Color=[255/255,255/255,51/255]) % Yellow
+%         plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,4,count,:)-alg_cont_TC(:,1,count,:))',Color=[51/255,153/255,255/255]) % Bule
+%         plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,5,count,:)-alg_cont_TC(:,1,count,:))',Color=[51/255,255/255,153/255]) % Green
+%         %plot(1:25,alg_cont_TC(:,4,count)-alg_cont_TC(:,1,count))
+%         %title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
+%        % ylim([0,0.3])
+%         hold off
+% end
 
+
+% figure(3)
+% for count = 1:N
+%         hold on
+%         subplot(5,10,count)
+%         ax = gca;
+%         al_goodplot(squeeze(alg_cont_TC(:,2,count,:)-alg_cont_TC(:,1,count,:))',1:25,ax)%,0.5,[255/255,51/255,51/255]); % Red
+%         al_goodplot(squeeze(alg_cont_TC(:,3,count,:)-alg_cont_TC(:,1,count,:))',1:25,ax,0.5,[255/255,255/255,51/255]); % Yellow
+%         al_goodplot(squeeze(alg_cont_TC(:,4,count,:)-alg_cont_TC(:,1,count,:))',1:25,ax,0.5,[51/255,153/255,255/255]); % Bule
+%         al_goodplot(squeeze(alg_cont_TC(:,5,count,:)-alg_cont_TC(:,1,count,:)),1:25,ax,0.5,[51/255,255/255,153/255]); % Green
+%         %plot(1:25,alg_cont_TC(:,4,count)-alg_cont_TC(:,1,count))
+%         %title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
+%        % ylim([0,0.3])
+%         hold off
+% end
