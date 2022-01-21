@@ -18,7 +18,7 @@ param_table = ai.raw_defaults;
 % sample_value_table = ai.sample_defaults;
 
 %% 3. Modify table as desired...
-param_table.Guided = 3;
+param_table.Guided = 4;
 param_table.Seed1 = 9000;
 param_table.Seed2 = 5000;
 

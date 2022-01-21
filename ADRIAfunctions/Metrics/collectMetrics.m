@@ -1,4 +1,5 @@
 function result_set = collectMetrics(Y, coral_params, metrics)
+% Apply a set of metrics (collection of functions) to a result set.
     arguments
         Y double
         coral_params table

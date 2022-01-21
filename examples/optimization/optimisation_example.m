@@ -3,7 +3,7 @@
 
 % use simplest MDCA algorithm for now
 alg = 1;
-rcp = 60;
+rcp = 26;
 Nreps = 50;
 
 filename = 'MooreTPMean.xlsx';
@@ -14,5 +14,7 @@ tic
 % perform optimisation 
 [x,fval] = multiObjOptimization(alg, rcp, Nreps, filename, func_vec);
 toc
-% print results 
+% save results 
+filename = sprintf('Opti_results_ADRA_RCP%2.0f_Alg%1.0f_Nreps%2.0f_TaxaCov_SpecCov_Ev_SV.mat',rcp,alg,Nreps);
+save(strcat('Outputs/',filename),'fval','x');
 
