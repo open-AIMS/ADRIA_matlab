@@ -16,10 +16,10 @@ else
    
         %% Generate monte carlo samples
 
-        num_reps = 20;  % Number of replicate RCP scenarios
+        num_reps = 50;  % Number of replicate RCP scenarios
         % timesteps, n_algs, n_scenarios, n_metrics
-        results = zeros(25, nalgs, N, num_reps);
-        results2 = zeros(25, nalgs, N);
+        results = zeros(25, nalgs+1, N, num_reps);
+        results2 = zeros(25, nalgs+1, N);
         ai = ADRIA();
         
 %         param_table = ai.raw_defaults;
@@ -31,19 +31,19 @@ else
         % Get default parameters
         
         sim_constants = ai.constants;
-  %      ai.constants.RCP = 60;
+        ai.constants.RCP = 60;
         % Generate samples using simple monte carlo
         % Create selection table based on lower/upper parameter bounds
          p_sel = table;
          for p = 1:height(combined_opts)
              a = combined_opts.lower_bound(p);
              b = combined_opts.upper_bound(p);
-% 
+ 
              selection = (b - a).*rand(N, 1) + a;
-% 
+ 
              p_sel.(combined_opts.name(p)) = selection;
          end
-%     
+     
          [~, ~, coral_params] = ai.splitParameterTable(ai.raw_defaults);
         %% Parameter prep
 
@@ -51,13 +51,23 @@ else
         ai.loadConnectivity('MooreTPmean.xlsx');
  
         %% Scenario runs
-        % Currently running over unique interventions and criteria weights only for
-        % a limited number of RCP scenarios.
+        % set all criteria weights and seed yrs/ shade yrs to be the same
          p_sel.Seedyrs(:) = ones(length(p_sel.Seedyrs(:)),1);
          p_sel.Shadeyrs(:) = ones(length(p_sel.Shadeyrs(:)),1);
-   for al = 1:nalgs
+% 
+%         p_sel.coral_cover_high(:) = ones(length(p_sel.coral_cover_high(:)),1);
+%         p_sel.coral_cover_low(:) = ones(length(p_sel.coral_cover_low(:)),1);
+%         p_sel.wave_stress(:) = ones(length(p_sel.wave_stress(:)),1);
+%         p_sel.heat_stress(:) = ones(length(p_sel.heat_stress(:)),1);
+%         p_sel.shade_connectivity(:) = ones(length(p_sel.shade_connectivity(:)),1);
+%         p_sel.seed_connectivity(:) = ones(length(p_sel.seed_connectivity(:)),1);
+%         p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
+%         p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
+
+        p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
+
+   for al = 0:nalgs
        % for each algorithm
-       % param_table.alg_ind = al;
         p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1)+1;
         tic
         Y = ai.run(p_sel,sampled_values = true, nreps = num_reps);
@@ -67,10 +77,10 @@ else
             for l = 1:num_reps
                 out = collectMetrics(squeeze(Y(:,:,:,m,l)),coral_params,metric);
                 TC = out.coralSpeciesCover;
-                results(:, al, m,l) = squeeze(mean(mean(TC,3),2));
+                results(:, al+1, m,l) = squeeze(mean(mean(TC,3),2));
                 
             end
-            results2(:, al, m) = mean(results(:, al, m,:),4)
+           % results2(:, al+1, m) = mean(results(:, al+1, m,:);
             
         end
         % store total coral cover for each scenario averaged over sites and
@@ -78,8 +88,8 @@ else
         
    end
     filename='Inputs/MCDA_example.nc';
-    nccreate(filename,'TC','Dimensions',{'time',25,'algs',nalgs,'pars',N});
-    ncwrite(filename,'TC',results2);
+    nccreate(filename,'TC','Dimensions',{'time',25,'algs',nalgs+1,'pars',N,'num_reps',num_reps});
+    ncwrite(filename,'TC',results);
 end
 
 %% plotting comparisons
@@ -93,7 +103,7 @@ figure(1)
 title('TC comparison')
 
 for count = 1:N
-     for k =1:nalgs
+     for k =1:nalgs+1
         hold on
         subplot(5,10,count)
         plot(1:25,alg_cont_TC(:,k,count))
@@ -106,7 +116,11 @@ figure(2)
 for count = 1:N
         hold on
         subplot(5,10,count)
-        plot(1:25,alg_cont_TC(:,3,count)-alg_cont_TC(:,1,count))
+        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,2,count,:)-alg_cont_TC(:,1,count,:))',Color=[255/255,51/255,51/255])
+        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,3,count,:)-alg_cont_TC(:,1,count,:))',Color=[255/255,255/255,51/255])
+        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,4,count,:)-alg_cont_TC(:,1,count,:))',Color=[51/255,153/255,255/255])
+        plot_distribution_prctile(1:25,squeeze(alg_cont_TC(:,5,count,:)-alg_cont_TC(:,1,count,:))',Color=[51/255,255/255,153/255])
+        %plot(1:25,alg_cont_TC(:,4,count)-alg_cont_TC(:,1,count))
         %title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
        % ylim([0,0.3])
         hold off
