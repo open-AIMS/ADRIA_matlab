@@ -231,6 +231,10 @@ classdef ADRIA < handle
             fprefix = runargs.file_prefix;
             tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
             
+            if exist(tmp_fn, "file")
+                error("Input file already exists. Aborting runs.")
+            end
+            
             tmp = struct('input_parameters', table2array(X));
             saveData(tmp, tmp_fn, compression=4);
             nccreate(tmp_fn, "constants");
