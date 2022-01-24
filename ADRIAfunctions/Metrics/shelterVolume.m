@@ -1,5 +1,5 @@
 function Y = shelterVolume(X, coral_params)
-% Calculates evenness across functional coral groups in ADRIA
+% Indicator of shelter capacity
 
 % Inputs: 
 %   X            : matrix, raw ADRIA results for a single simulation
@@ -32,7 +32,7 @@ sheltervolume_parameters = repelem(sheltervolume_parameters, n_corals, 1);
 
 % Estimate log colony volume (litres) based on relationship 
 % established by Urbina-Barretto 2021
-logcolony_sheltervolume = sum(sheltervolume_parameters, 2) .* log10(colony_area_cm2);
+logcolony_sheltervolume = sheltervolume_parameters(:,1) + sheltervolume_parameters(:,2) .* log10(colony_area_cm2);
 
 %shelter_volume_colony_litres_per_cm2 = (exp(logcolony_sheltervolume));
 shelter_volume_colony_litres_per_cm2 = (10.^(logcolony_sheltervolume));

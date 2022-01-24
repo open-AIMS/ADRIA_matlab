@@ -27,8 +27,8 @@ combined_opts = ai.parameterDetails();
 % Create selection table based on lower/upper parameter bounds
 p_sel = table;
 for p = 1:height(combined_opts)
-    a = combined_opts.lower_bound{p};
-    b = combined_opts.upper_bound{p};
+    a = combined_opts.lower_bound(p);
+    b = combined_opts.upper_bound(p);
     
     selection = (b - a).*rand(N, 1) + a;
     
@@ -54,7 +54,7 @@ try
     assert(isfile(strcat(file_prefix, '_[[1-2]].nc')), "Partial result file not found!");
 
     % Collect all data
-    Y_gathered = ai.gatherResults('./example_multirun', {@coralTaxaCover});
+    collated = ai.gatherResults(file_prefix, {@coralTaxaCover});
 
     assert(isequal(Y_true, collated), "Results are not equal!")
     assert(all(all(collated.TC(:, :, 1, 1) ~= 0)), "Results were zeros!")

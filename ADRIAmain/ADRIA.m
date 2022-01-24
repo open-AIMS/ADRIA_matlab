@@ -189,6 +189,10 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
             end
             
+            if isempty(obj.TP_data)
+                error("Site data not loaded! Preload with `loadConnectivity()`");
+            end
+            
             nreps = runargs.nreps;
 
             [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
@@ -205,6 +209,7 @@ classdef ADRIA < handle
         end
         
         function runToDisk(obj, X, runargs)
+            % Run ADRIA, storing results to file.
             arguments
                obj
                X table
@@ -217,16 +222,65 @@ classdef ADRIA < handle
             nreps = runargs.nreps;
 
             [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            [~, n_sites, ~] = size(w_scens);
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
             end
 
+            fprefix = runargs.file_prefix;
+            tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
+            
+            tmp = struct('input_parameters', table2array(X));
+            saveData(tmp, tmp_fn, compression=4);
+            nccreate(tmp_fn, "constants");
+            nccreate(tmp_fn, "metadata");
+            
+            all_fields = string(fieldnames(obj.constants));
+            for i = 1:length(all_fields)
+                af = all_fields(i);
+                ncwriteatt(tmp_fn, "constants", af, obj.constants.(af));
+            end
+
+            ncwriteatt(tmp_fn, "metadata", "n_reps", nreps);
+            ncwriteatt(tmp_fn, "metadata", "n_timesteps", obj.constants.tf);
+            ncwriteatt(tmp_fn, "metadata", "n_sites", n_sites);
+            ncwriteatt(tmp_fn, "metadata", "n_species", length(obj.coral_spec.coral_id));
+
+            % Run ADRIA
             [interv, crit, coral] = obj.splitParameterTable(X);
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, runargs.file_prefix, runargs.batch_size);
+                     w_scens, d_scens, fprefix, runargs.batch_size);
+        end
+        
+        function Y = gatherResults(obj, file_loc, metrics)
+            arguments
+                obj
+                file_loc string
+                metrics cell = {}
+            end
+            % Gather results from a given file.
+            seps = split(file_loc, "_[[");
+            prefix = seps(1);
+            
+            input_file = dir(fullfile(strcat(prefix, "*_inputs.nc")));
+            fn = fullfile(input_file.folder, input_file.name);
+            % samples = load(fullfile(input_file.folder, input_file.name));
+            samples = ncread(fn, "input_parameters");
+            
+            param_details = obj.parameterDetails();
+            var_types = replace(param_details.ptype', "float", "double");
+            var_types = replace(var_types, "integer", "int64");
+            var_names = param_details.name';
+            input_table = table('Size', size(samples), ...
+                                'VariableTypes', var_types, ...
+                                'VariableNames', var_names);
+
+            [~, ~, coral] = obj.splitParameterTable(input_table);
+
+            Y = gatherResults(file_loc, coral, metrics);
         end
     end
 end

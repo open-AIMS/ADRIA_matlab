@@ -59,6 +59,7 @@ if ~isfolder(target_dir)
     mkdir(target_dir);
 end
 
+
 n_batches = ceil(N / batch_size);
 b_starts = 1:batch_size:N;
 b_ends = [batch_size:batch_size:N, N];
@@ -66,36 +67,39 @@ b_ends = [batch_size:batch_size:N, N];
 % pre-assign scenario specs for each batch
 b_intervs = cell(n_batches,1);
 b_cws = cell(n_batches,1);
+b_coralp = cell(n_batches,1);
 for b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
     b_intervs{b_i} = intervs(b_start:b_end, :);
     b_cws{b_i} = crit_weights(b_start:b_end, :);
+    
+    b_coralp{b_i} = coral_params(b_start:b_end, :);
 end
 
 % Remove vars to save memory
 clear('intervs')
 clear('crit_weights')
 
-for b_i = 1:n_batches
+parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
     
     tmp_fn = strcat(file_prefix, '_[[', num2str(b_start), '-', num2str(b_end), ']].nc');
     if isfile(tmp_fn)
         % sims already run, skip...
+        msg = strcat("Result file ", tmp_fn, " found. Skipping...");
+        warning(msg);
         continue
     end
     
     b_len = (b_end - b_start) + 1;
     b_interv = b_intervs{b_i};
     b_cw = b_cws{b_i};
+    b_cp = b_coralp{b_i};
     
     % Create batch cache
-    % TC = zeros(timesteps, nsites, b_len, n_reps);
     raw = zeros(timesteps, nspecies, nsites, b_len, n_reps);
-    % E = zeros(timesteps, nsites, b_len, n_reps);
-    % S = zeros(timesteps, nsites, b_len, n_reps);
     
     for i = 1:b_len
         scen_it = b_interv(i, :);
@@ -103,21 +107,19 @@ for b_i = 1:n_batches
         
         % Note: This slows things down considerably
         % Could rejig everything to use (subset of) the table directly...
-        scen_coral_params = extractCoralSamples(coral_params(i, :), coral_spec);
+        scen_coral_params = extractCoralSamples(b_cp(i, :), coral_spec);
 
         for j = 1:n_reps
-            tmp = coralScenario(scen_it, scen_crit, ...
+            raw(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
                                    wave_scen(:, :, j), dhw_scen(:, :, j));
-
-            raw(:, :, :, i, j) = tmp.all;
         end
     end
     
     % save results
     tmp_d = struct();
-    tmp_d.raw = raw;
+    tmp_d.all = raw;
     
     % include metadata
     nc_md = struct();
@@ -133,7 +135,6 @@ for b_i = 1:n_batches
     
     % Clear vars to save memory
     tmp_d = [];
-    raw = [];
 end
 
 end

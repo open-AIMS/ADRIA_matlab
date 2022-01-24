@@ -45,11 +45,11 @@ name = [
 
 defaults = [
     1; % "wave_stress";
-    0; % "heat_stress";
+    1; % "heat_stress";
     0; % "shade_connectivity";
-    0; % "seed_connectivity";
+    1; % "seed_connectivity";
     0; % "coral_cover_high";
-    0; % "coral_cover_low";
+    1; % "coral_cover_low";
     1; % "seed_priority";
     0; % "shade_priority";
     1 % "deployed_coral_risk_tol"

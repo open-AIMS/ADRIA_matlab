@@ -16,11 +16,13 @@ function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps,
     %                   time/sites/corals
 
     %% Convert sampled values back to ADRIA expected values
-     modified_params(1,'Seed1' )= {(1)};
+     modified_params(1,'Seed1' )= {x(1)};
      modified_params(1,'Seed2') = {x(2)};
      modified_params(1,'SRM') = {x(3)};
      modified_params(1,'Natad') = {x(4)};
      modified_params(1,'Aadapt') = {x(5)};
+     modified_params(1,'Seedyrs') = {x(6)};
+     modified_params(1,'Shadeyrs') = {x(7)};
      
      Y = ai.run(modified_params, sampled_values = false, nreps = Nreps);
      [~, ~, coral_params] = ai.splitParameterTable(modified_params);
@@ -32,7 +34,7 @@ function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps,
      for m = 1:length(func_names)
          switch func2str(func_names{m})
              case 'coralTaxaCover'
-                   out_metrics(m)= mean(metric_results.(func2str(func_names{m})).total_cover,'all');
+                  out_metrics(m)= mean(metric_results.(func2str(func_names{m})).total_cover,'all');
              otherwise
                  out_metrics(m)= mean(metric_results.(func2str(func_names{m})),'all');
          end
