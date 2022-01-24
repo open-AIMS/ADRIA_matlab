@@ -5,7 +5,7 @@ function [resdhwsites,dhw_surf,z] = ADRIA_dhwMoore_new(~)
 
 %% Load Moore sites
 F0 = readtable('MooreSpatialSimple.xlsx', 'PreserveVariableNames',true);
-F0 = table2array(F0); %site IDs, grid addresses, longituded and latitudes for reef sites
+F0 = table2array(F0); %site IDs, site area, longituded and latitudes, k and, depth for reef sites
 site_area = F0(:,1);
 nsites = size(F0,1);
 LON_sites = F0(:,3); %longitude
@@ -41,21 +41,14 @@ LON_RECOM_vector = reshape(LON_RECOM,[],1); %year 3
 LAT_RECOM_vector = reshape(LAT_RECOM,[],1); %year 3
 
 %% Find sites and their DHWs (VERY PRELIMINARY APPROACH)
-aa = ismembertol(LON_RECOM_vector,LON_sites, 3.18*10^-6); %empirical tolerance 
-bb = ismembertol(LAT_RECOM_vector,LAT_sites, 3.18*10^-6); %empirical tolerance 
-sites_on_grid = find(aa + bb == 2);
-size(sites_on_grid);  % cc needs to be goal seek such that n sites = size(F0)
-
-dhw16_sites = dhw16_surf_vector(sites_on_grid); 
-dhw17_sites = dhw17_surf_vector(sites_on_grid); 
-dhw20_sites = dhw20_surf_vector(sites_on_grid); 
-
-lon_lat_dhw(:,1) = LON_sites;
-lon_lat_dhw(:,2) = LAT_sites;
-lon_lat_dhw(:,3) = dhw16_sites;
-lon_lat_dhw(:,4) = dhw17_sites;
-lon_lat_dhw(:,5) = dhw20_sites;
-
+tol = 0.01; %tolerance for the width of the search window for coordinates
+for s = 1:nsites
+    row = find(abs(LON_RECOM_vector-LON_sites(s))<tol & abs(LAT_RECOM_vector - LAT_sites(s))<tol);
+    dhw16_sites(s) = mean(dhw16_surf_vector(row));
+    dhw17_sites(s) = mean(dhw17_surf_vector(row));
+    dhw20_sites(s) = mean(dhw20_surf_vector(row));
+end
+ 
 %Calculate residual dhws across sites to understand spatial dhw texture for sites and use in forecasts  
 resdhwsites = zeros(nsites,9); %initialise matrix for residual dhws for sites
 resdhwsites(:,1) = 1:nsites; %site ID
@@ -66,31 +59,36 @@ resdhwsites(:,9) = dhw20_sites - mean(dhw20_surf_vector,'all'); %spatial residua
 % Important, need to check that this first column is consistent with what the IPMF team uses
 resdhwsites = sortrows(resdhwsites,1); %organise residuals according to site IDs (column 1)
 
-% %% PLot results (turn off when using this function in work flow)
+save MooreDHWnew resdhwsites dhw_surf z;
+% 
+% 
+% %% Plot results (turn off when using this function in work flow)
+% cmin_axis = 5;
+% cmax_axis = 16;
+% 
 % figure;
 % contour(LON_RECOM, LAT_RECOM, -z, [0, 6, 20]);
 % hold on
 % colormap jet;
-% scatter(LON_sites, LAT_sites, site_area/10000, dhw16_sites, 'filled');
+% scatter(LON_sites, LAT_sites, site_area/5000, dhw16_sites, 'filled');
 % colorbar
-% caxis([5,16]);
+% caxis([cmin_axis,cmax_axis]);
 % 
 % figure; 
 % colormap jet;
 % pcolor(LON_RECOM, LAT_RECOM, dhw16_surf);
 % shading flat;
-% caxis([5,16]);
+% caxis([cmin_axis,cmax_axis]);
 % 
 % figure; 
 % colormap jet;
 % surf(LON_RECOM, LAT_RECOM, dhw16_surf);
-% caxis([5,16]);
+% caxis([cmin_axis,cmax_axis]);
 % colorbar
 % 
 % hold on
 % contour(LON_RECOM, LAT_RECOM, -z, [0, 6, 20]);
 % hold on
-% caxis([5,16]);
+% caxis([cmin_axis,cmax_axis]);
 
-save MooreDHWnew resdhwsites dhw_surf z;
 end
