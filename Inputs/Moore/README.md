@@ -14,7 +14,7 @@ It holds:
 - habitat
 - area (in m^2 ???)
 - rubble (true or false)
-- k, maximum carrying capacity for the associated site
+- k, maximum carrying capacity for the associated site (in percentage values, gets divided by 100 in ADRIA)
 - Reef
 - reef_siteid
 - long
