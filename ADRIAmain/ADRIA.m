@@ -231,6 +231,10 @@ classdef ADRIA < handle
             fprefix = runargs.file_prefix;
             tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
             
+            if exist(tmp_fn, "file")
+                error("Input file already exists. Aborting runs.")
+            end
+            
             tmp = struct('input_parameters', table2array(X));
             saveData(tmp, tmp_fn, compression=4);
             nccreate(tmp_fn, "constants");
@@ -270,6 +274,7 @@ classdef ADRIA < handle
             % samples = load(fullfile(input_file.folder, input_file.name));
             samples = ncread(fn, "input_parameters");
             
+            % Reconstruct input table
             param_details = obj.parameterDetails();
             var_types = replace(param_details.ptype', "float", "double");
             var_types = replace(var_types, "integer", "int64");
@@ -277,6 +282,8 @@ classdef ADRIA < handle
             input_table = table('Size', size(samples), ...
                                 'VariableTypes', var_types, ...
                                 'VariableNames', var_names);
+            input_table{:, :} = samples;
+            clear samples;  % remove from memory
 
             [~, ~, coral] = obj.splitParameterTable(input_table);
 

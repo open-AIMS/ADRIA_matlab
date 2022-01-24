@@ -1,6 +1,6 @@
 % Example script running a single scenario.
 
-%rng(101) % set seed for reproducibility
+rng(101) % set seed for reproducibility
 
 % Create ADRIA Interface object
 ai = ADRIA();
@@ -128,39 +128,55 @@ SV_per_ha = metric_results.shelterVolume;
 %% Plot coral covers over time and sites
 figure; 
 LO = tiledlayout(2,3, 'TileSpacing','Compact');
+font_size = 12;
 
 % Tile 1
 nexttile
 plot(squeeze(covs(:,1,:)));
 title('Enhanced Tab Acr')
+aa = gca;
+aa.FontSize = font_size;
 
 % Tile 2
 nexttile
 plot(squeeze(covs(:,2,:)));
 title('Unenhanced Tab Acr')
+aa = gca;
+aa.FontSize = font_size;
+
 
 % Tile 3
 nexttile
 plot(squeeze(covs(:,3,:)))
 title('Enhanced Cor Acr')
+aa = gca;
+aa.FontSize = font_size;
 
 % Tile 4
 nexttile
 plot(squeeze(covs(:,4,:)))
 title('Unenhanced Cor Acr')
+aa = gca;
+aa.FontSize = font_size;
 
 % Tile 5
 nexttile
 plot(squeeze(covs(:,5,:)))
 title('Small massives')
+aa = gca;
+aa.FontSize = font_size;
 
 % Tile 6
 nexttile
 plot(squeeze(covs(:,6,:)))
 title('Large massives')
+aa = gca;
+aa.FontSize = font_size;
 
-xlabel(LO,'Years')
-ylabel(LO,'Cover (prop)')
+xlabel(LO,'Years', 'FontSize', 14)
+ylabel(LO,'Cover (prop)', 'FontSize', 14)
+aa = gca;
+aa.FontSize = font_size;
             
 %% Plot reef condition metrics over time and sites
 figure; 
@@ -171,24 +187,35 @@ nexttile
 plot(metric_results.coralTaxaCover.total_cover);
 title('Total Coral Cover')
 ylabel('Cover, prop')
+aa = gca;
+aa.FontSize = font_size;
 
 % Tile 2
 nexttile
 plot(E);
 title('Coral Evenness')
 ylabel('E, prop')
+aa = gca;
+aa.FontSize = font_size;
 
 % Tile 3
 nexttile
 plot(BC)
 title('Juvenile Corals (<5 cm diam)')
 ylabel('Cover, prop')
+aa = gca;
+aa.FontSize = font_size;
 
 % Tile 4
 nexttile
 plot(SV_per_ha)
 title('Shelter Volume per ha')
 ylabel('Volume, m3 / ha') 
+aa = gca;
+aa.FontSize = font_size;
 
-xlabel(LO2,'Years')
+xlabel(LO2,'Years', 'FontSize', 14)
 %ylabel(LO,'Cover (prop)')
+aa = gca;
+aa.FontSize = font_size;
+

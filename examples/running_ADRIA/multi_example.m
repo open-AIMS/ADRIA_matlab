@@ -46,21 +46,22 @@ tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
 
-% Collect metrics
+%% Collect metrics
 [~, ~, coral_params] = ai.splitParameterTable(sample_table);
 metric_results = collectMetrics(Y, coral_params, ...
                     {@coralTaxaCover, @coralSpeciesCover, ...
                      @coralEvenness, @shelterVolume});
 
+% Coral cover per species
 covs = metric_results.coralSpeciesCover;
 
 % Evenness
 E = metric_results.coralEvenness;
 
-%% Extract juvenile corals (< 5 cm diameter)
+% Extract juvenile corals (< 5 cm diameter)
 BC = metric_results.coralTaxaCover.juveniles;
 
-%% Calculate coral shelter volume per ha
+% Calculate coral shelter volume per ha
 SV_per_ha = metric_results.shelterVolume;
 
 %% Plot coral covers over time and sites
@@ -69,32 +70,32 @@ LO = tiledlayout(2,3, 'TileSpacing','Compact');
 
 % Tile 1
 nexttile
-plot(squeeze(covs(:,1,:)));
+plot(mean(squeeze(covs(:,1,:,:,:)), [3,4]));
 title('Enhanced Tab Acr')
 
 % Tile 2
 nexttile
-plot(squeeze(covs(:,2,:)));
+plot(mean(squeeze(covs(:,2,:,:,:)), [3,4]));
 title('Unenhanced Tab Acr')
 
 % Tile 3
 nexttile
-plot(squeeze(covs(:,3,:)))
+plot(mean(squeeze(covs(:,3,:,:,:)), [3,4]));
 title('Enhanced Cor Acr')
 
 % Tile 4
 nexttile
-plot(squeeze(covs(:,4,:)))
+plot(mean(squeeze(covs(:,4,:,:,:)), [3,4]));
 title('Unenhanced Cor Acr')
 
 % Tile 5
 nexttile
-plot(squeeze(covs(:,5,:)))
+plot(mean(squeeze(covs(:,5,:,:,:)), [3,4]));
 title('Small massives')
 
 % Tile 6
 nexttile
-plot(squeeze(covs(:,6,:)))
+plot(mean(squeeze(covs(:,6,:,:,:)), [3,4]));
 title('Large massives')
 
 xlabel(LO,'Years')

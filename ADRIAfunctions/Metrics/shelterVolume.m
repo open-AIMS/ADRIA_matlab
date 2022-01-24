@@ -28,7 +28,7 @@ sheltervolume_parameters = ...
 % Extend to array for all groups and sizes 
 sheltervolume_parameters = repelem(sheltervolume_parameters, n_corals, 1);
 
-[ntsteps, nspecies, nsites] = size(X);
+[ntsteps, nspecies, nsites, nint, nreps] = size(X);
 
 % Estimate log colony volume (litres) based on relationship 
 % established by Urbina-Barretto 2021
@@ -42,13 +42,13 @@ shelter_volume_colony_m3_per_ha = shelter_volume_colony_litres_per_cm2 * ...
                 (10^-3) * 10^4 *10^4; 
 
 % calculate shelter volume of groups and size classes and multiply with covers
-sv = zeros(ntsteps, nspecies, nsites);
+sv = zeros(ntsteps, nspecies, nsites, nint, nreps);
 for sp = 1:36
-    sv(:,sp,:) = shelter_volume_colony_m3_per_ha(sp).*X(:,sp,:);
+    sv(:,sp,:,:,:) = shelter_volume_colony_m3_per_ha(sp).*X(:,sp,:,:,:);
 end
 
 % sum over groups and size classes to estimate total shelter volume per ha
-Y = squeeze(sum(sv,2));
+Y = squeeze(sum(sv, 2));
 end
 
 
