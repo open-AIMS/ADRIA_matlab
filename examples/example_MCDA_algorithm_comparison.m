@@ -5,7 +5,7 @@ nalgs = 4;
 nmetrics = 1;
 
 % Number of scenarios
-N = 1;
+N = 8;
 example_file = 'Inputs/MCDA_example.nc';
 metric = {@coralSpeciesCover};
 
@@ -16,7 +16,7 @@ else
    
         %% Generate monte carlo samples
 
-        num_reps = 1;  % Number of replicate RCP scenarios
+        num_reps = 50;  % Number of replicate RCP scenarios
         % timesteps, n_algs, n_scenarios, n_metrics
         results = zeros(25, nalgs+1, N, num_reps);
         results2 = zeros(25, nalgs+1, N);
@@ -31,7 +31,7 @@ else
         % Get default parameters
         
         sim_constants = ai.constants;
-        ai.constants.RCP = 60;
+        ai.constants.RCP = 45;
         % Generate samples using simple monte carlo
         % Create selection table based on lower/upper parameter bounds
          p_sel = table;
@@ -55,14 +55,14 @@ else
          p_sel.Seedyrs(:) = ones(length(p_sel.Seedyrs(:)),1);
          p_sel.Shadeyrs(:) = ones(length(p_sel.Shadeyrs(:)),1);
 % 
-%         p_sel.coral_cover_high(:) = ones(length(p_sel.coral_cover_high(:)),1);
-%         p_sel.coral_cover_low(:) = ones(length(p_sel.coral_cover_low(:)),1);
-%         p_sel.wave_stress(:) = ones(length(p_sel.wave_stress(:)),1);
-%         p_sel.heat_stress(:) = ones(length(p_sel.heat_stress(:)),1);
-%         p_sel.shade_connectivity(:) = ones(length(p_sel.shade_connectivity(:)),1);
-%         p_sel.seed_connectivity(:) = ones(length(p_sel.seed_connectivity(:)),1);
-%         p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
-%         p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
+         p_sel.coral_cover_high(:) = ones(length(p_sel.coral_cover_high(:)),1);
+         p_sel.coral_cover_low(:) = ones(length(p_sel.coral_cover_low(:)),1);
+         p_sel.wave_stress(:) = ones(length(p_sel.wave_stress(:)),1);
+         p_sel.heat_stress(:) = ones(length(p_sel.heat_stress(:)),1);
+         p_sel.shade_connectivity(:) = ones(length(p_sel.shade_connectivity(:)),1);
+         p_sel.seed_connectivity(:) = ones(length(p_sel.seed_connectivity(:)),1);
+         p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
+         p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
 
         p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
 
@@ -104,8 +104,10 @@ title('TC comparison')
 
 for count = 1:N
      %for k =1:nalgs+1
+        
+        subplot(2,4,count)
         hold on
-        subplot(5,10,count)
+        plot(1:25,alg_cont_TC(:,1,count))
         plot(1:25,alg_cont_TC(:,2,count))
         plot(1:25,alg_cont_TC(:,3,count))
         plot(1:25,alg_cont_TC(:,4,count))
