@@ -1,6 +1,6 @@
 function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, ...
-    wave_scen, dhw_scen)
+    wave_scen, dhw_scen, site_data)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -15,6 +15,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    strongpred  : matrix, of strongest predecessor for each site
 %    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
+%    site_data   : table, of site data. Should be pre-sorted by the
+%                         `recom_connectivity` column
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
@@ -51,9 +53,14 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
         risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
-       dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', [], ...
+        max_depth = criteria.depth_min + criteria.depth_offset;
+        depth_criteria = (site_data.sitedepth > max_depth) & (site_data.sitedepth < criteria.depth_min);
+        depth_priority = site_data{depth_criteria, "recom_connectivity"};
+        max_cover = site_data.k/100.0;
+
+        dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', depth_priority, ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
-            'sumcover', 0,'maxcover',sim_params.max_coral_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+            'sumcover', 0,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
 
     end
@@ -101,16 +108,18 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     DHWmaxtot = sim_params.DHWmaxtot; % max assumed DHW for all scenarios.  Will be obsolete when we move to new, shared inputs for DHW projections
     LPDprm2 = sim_params.LPDprm2; % parameter offsetting LPD curve
 
-    wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
-
     %% project wave mortality
     mwaves = zeros(tf, nspecies, nsites);
-    for sp = 1:nspecies
-        mwaves(:, sp, :) = wavemort90(sp) .* wave_scen;
-    end
+    
+    % Disable wave mortality for now: Agreed on action for Feb deliverable
+    % See email: Mon 24/01/2022 15:17 - RE: IPMF and ADRIA workflow for BC
+    % wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
+    % for sp = 1:nspecies
+    %     mwaves(:, sp, :) = wavemort90(sp) .* wave_scen;
+    % end
 
-    mwaves(mwaves < 0) = 0;
-    mwaves(mwaves > 1) = 1;
+    % mwaves(mwaves < 0) = 0;
+    % mwaves(mwaves > 1) = 1;
 
     % Pre-calculate proportional survivors from wave damage
     Sw_t = 1 - mwaves;
@@ -180,9 +189,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
                                 * density_ratio_of_larvae_to_settlers;
         
         rec = potential_settler_cover * (fecundity_scope * TP_data).* LPs;
-        
-                
-              %% Setup MCDA before bleaching season
+
+        %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
         dhw_step = dhw_ss(tstep, :); % subset of DHW for given timestep

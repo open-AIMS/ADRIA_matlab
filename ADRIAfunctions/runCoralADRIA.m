@@ -1,6 +1,6 @@
 function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
                            TP_data, site_ranks, strongpred, ...
-                           n_reps, wave_scen, dhw_scen)
+                           n_reps, wave_scen, dhw_scen, site_data)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,6 +13,7 @@ function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
 %    sim_params   : struct, of simulation constants
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
+%    site_data    : table, of site data
 %
 % Output:
 %    Y : struct,
@@ -83,7 +84,7 @@ for i = 1:N
         Y(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
-                               wave_scen(:, :, j), dhw_scen(:, :, j));
+                               wave_scen(:, :, j), dhw_scen(:, :, j), site_data);
     end
 end
 
