@@ -67,7 +67,12 @@ addFolderIncludingChildFiles(proj, './examples');
 addFolderIncludingChildFiles(proj, './examples/running_ADRIA');
 addFolderIncludingChildFiles(proj, './examples/running_ADRIA_HPC');
 addFolderIncludingChildFiles(proj, './examples/optimization');
+
 addFolderIncludingChildFiles(proj, './Inputs');
+addFolderIncludingChildFiles(proj, './Inputs/Moore');
+addFolderIncludingChildFiles(proj, './Inputs/Moore/connectivity');
+addFolderIncludingChildFiles(proj, './Inputs/Moore/DHW');
+addFolderIncludingChildFiles(proj, './Inputs/Moore/site_data');
 
 % Add to MATLAB path
 addPath(proj, './ADRIAfunctions/SystemInfo');
@@ -84,6 +89,11 @@ addPath(proj, './examples/running_ADRIA');
 addPath(proj, './examples/running_ADRIA_HPC');
 addPath(proj, './examples/optimization');
 addPath(proj, './Inputs');
+
+addPath(proj, './Inputs/Moore');
+addPath(proj, './Inputs/Moore/connectivity');
+addPath(proj, './Inputs/Moore/DHW');
+addPath(proj, './Inputs/Moore/site_data');
 
 
 % Programmatically install toolbox:
