@@ -19,30 +19,34 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics)
 
     file_prefix = fullfile(file_loc);
     pat = strcat(file_prefix, '_*]].nc');
-    target_files = dir(pat);
-
+    target_files = string(ls(pat));
+    folder = dir(pat).folder;
+    
+    % ds = datastore(target_files, "FileExtensions", ".nc", "Type", "file", "ReadFcn", @readDistributed);
     num_files = length(target_files);
 
     % Store results in a cell array of structs
     Y_collated = repmat({0}, height(coral_params), 1);
     for i = 1:num_files
-        f_dir = target_files(i).folder;
-        fn = target_files(i).name;
+        fn = target_files(i);
         
-        full_path = fullfile(f_dir, fn);
+        full_path = fullfile(folder, fn);
         [Ytable, md] = readDistributed(full_path);
         
         b_start = md.record_start;
         if isempty(metrics)
             % Collate raw results if no metrics specified
             b_end = md.record_end;
-            Y_collated(b_start:b_end) = Ytable{:, :};
+            Y_collated{b_start:b_end} = Ytable{:, :};
         else
             b_len = md.n_sims;
-            for j = 1:b_len
+            Ytmp = repmat({0}, height(b_len), 1);
+            parfor j = 1:b_len
                 rec_id = (b_start - 1) + j;
-                Y_collated{rec_id} = collectMetrics(Ytable{j, :}{:}, coral_params(rec_id, :), metrics);
+                Ytmp{j} = collectMetrics(Ytable{j, :}{:}, coral_params(rec_id, :), metrics);
             end
+            
+            Y_collated(b_start:(b_start+b_len)-1) = Ytmp;
         end
     end
 end
