@@ -173,8 +173,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         
         
         max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
-        density_ratio_of_larvae_to_settlers = 3000; %Bozec et al. 2021
-        basal_area_per_settler = pi*((1/100)^2); % in m2 assuming 2 cm diameter
+        density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+        basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
         
         potential_settler_cover = max_settler_density * basal_area_per_settler ...
                                 * density_ratio_of_larvae_to_settlers;
