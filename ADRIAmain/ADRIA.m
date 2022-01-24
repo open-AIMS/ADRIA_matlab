@@ -9,9 +9,10 @@ classdef ADRIA < handle
     end
 
     properties (Access = private)
-        TP_data  % site connectivity data
+        TP_data     % site connectivity data
         site_ranks  % site rank
         strongpred  % strongest predecessor
+        site_data   % table of site data (dpeth, carrying capacity, etc)
     end
 
     properties (Dependent)
@@ -180,6 +181,16 @@ classdef ADRIA < handle
             obj.site_ranks = sr;
             obj.strongpred = sp;
         end
+        
+        function loadSiteData(obj, filename)
+            % Load data on site carrying capacity, depth and connectivity
+            % from indicated CSV file.
+            
+            % readtable("Inputs/Moore/site_data/MooreReefCluster_Spatial.csv")
+            sdata = readtable(filename);
+            obj.site_data = sdata(:, ["site_id"; "k"; "sitedepth"; "recom_connectivity"]);
+            obj.site_data = sortrows(obj.site_data, "recom_connectivity");
+        end
 
         function Y = run(obj, X, runargs)
             arguments
@@ -189,8 +200,12 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
             end
             
+            if isempty(obj.site_data)
+                error("Site data not loaded! Preload with `loadSiteData()`");
+            end
+            
             if isempty(obj.TP_data)
-                error("Site data not loaded! Preload with `loadConnectivity()`");
+                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
             end
             
             nreps = runargs.nreps;
@@ -205,7 +220,7 @@ classdef ADRIA < handle
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens);
+                     w_scens, d_scens, obj.site_data);
         end
         
         function runToDisk(obj, X, runargs)
