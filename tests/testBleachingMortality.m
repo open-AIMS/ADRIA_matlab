@@ -1,19 +1,3 @@
-% ai = ADRIA();
-% rd = ai.sample_defaults;
-
-
-% % Ensure SRM and Aadpt have similar values
-% rd.Guided = 1;
-% rd.SRM = 6;
-% rd.Aadpt = 6;
-% rd.shade_connectivity = 1;
-% rd.shade_priority = 1;
-% 
-% eg_vals = ai.convertSamples(rd);
-% eg_vals = table2array(eg_vals);
-% 
-% [TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', 0.1);
-
 tstep = 2;
 neg_e_p1 = -6;
 neg_e_p2 = -0.4;
