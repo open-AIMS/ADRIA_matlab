@@ -53,6 +53,8 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     wtlocover  = DCMAvars.wtlocover;
     wtpredecseed  = DCMAvars.wtpredecseed;
     wtpredecshade  = DCMAvars.wtpredecshade;
+    
+    % Filter out sites
 
     %% Identify and assign key larval source sites for priority sites
     sites = 1:nsites;
