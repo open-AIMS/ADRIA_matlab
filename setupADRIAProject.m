@@ -71,7 +71,7 @@ addFolderIncludingChildFiles(proj, './examples/optimization');
 addFolderIncludingChildFiles(proj, './Inputs');
 addFolderIncludingChildFiles(proj, './Inputs/Moore');
 addFolderIncludingChildFiles(proj, './Inputs/Moore/connectivity');
-addFolderIncludingChildFiles(proj, './Inputs/Moore/DHW');
+addFolderIncludingChildFiles(proj, './Inputs/Moore/DHWs');
 addFolderIncludingChildFiles(proj, './Inputs/Moore/site_data');
 
 % Add to MATLAB path
@@ -92,7 +92,7 @@ addPath(proj, './Inputs');
 
 addPath(proj, './Inputs/Moore');
 addPath(proj, './Inputs/Moore/connectivity');
-addPath(proj, './Inputs/Moore/DHW');
+addPath(proj, './Inputs/Moore/DHWs');
 addPath(proj, './Inputs/Moore/site_data');
 
 
