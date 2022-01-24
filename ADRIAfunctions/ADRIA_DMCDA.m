@@ -68,11 +68,11 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     A(:,3) = damprob/max(damprob); %damage probability from wave exposure
     A(:,4) = heatstressprob/max(heatstressprob); %risk from heat exposure
     
-    prop_cover = sumcover/max(sumcover);  %proportional coral cover
-    A(:,5) = prop_cover; 
-    A(:,6) = 1 - prop_cover;
-    A(:,7) = predec(:,3); % priority predecessors
-    A(:,8) = (maxcover - sumcover)/maxcover; % proportion of cover compared to max possible cover
+%     prop_cover = sumcover/max(sumcover);  %proportional coral cover
+%     A(:,5) = prop_cover; 
+%     A(:,6) = 1 - prop_cover;
+    A(:,5) = predec(:,3); % priority predecessors
+    A(:,6) = (maxcover - sumcover)/maxcover; % proportion of cover compared to max possible cover
     
     % Filter out sites that have high risk of wave damage, specifically 
     % exceeding the risk tolerance 
@@ -96,31 +96,30 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     end
     %% Seeding - Filtered set 
     % define seeding weights
-    wse = [1, wtconseed, wtwaves, wtheat, wtlocover, wtpredecseed, wtlocover];
+    wse = [1, wtconseed, wtwaves, wtheat, wtpredecseed, wtlocover];
     wse(2:end) = wse(2:end)./sum(wse(2:end));
     % define seeding decision matrix
     SE(:,1) = A(:,1); % sites column (remaining)
     SE(:,2) = A(:,2); % multiply centrality with connectivity weight
     SE(:,3) = (1-A(:,3)); % multiply complementary of damage risk with disturbance weight
     SE(:,4) = (1-A(:,4)); % complimetary of wave risk
-    SE(:,5) = A(:,6);  %multiply by coral cover with its weight for high cover
-    SE(:,6) = A(:,7); % multiply priority predecessor indicator by weight
+   % SE(:,5) = A(:,6);  %multiply by coral cover with its weight for high cover
+    SE(:,5) = A(:,5); % multiply priority predecessor indicator by weight
     %SE(find(A(:,5)>=1),:) = [];
-    SE(:,7) = A(:,8); % proportion of max cover which is not covered
-    SE(find(A(:,8)<=0),:) = []; % remove sites at maximum carrying capacity
+    SE(:,6) = A(:,6); % proportion of max cover which is not covered
+    SE(find(A(:,6)<=0),:) = []; % remove sites at maximum carrying capacity
    
     
     %% Shading filtered set
     % define shading weights
-    wsh = [1, wtconshade, wtwaves, wtheat, wthicover, wtpredecshade,wthicover];
+    wsh = [1, wtconshade, wtwaves, wtheat, wtpredecshade,wthicover];
     wsh(2:end) = wsh(2:end)./sum(wsh(2:end));
     SH(:,1) = A(:,1); % sites column (remaining)
     SH(:,2) = A(:,2); % multiply centrality with connectivity weight
     SH(:,3) = (1-A(:,3)); % multiply complementary of damage risk with disturbance weight
     SH(:,4) = A(:,4); % multiply complementary of heat risk with heat weight
-    SH(:,5) = A(:,5); % multiply by coral cover with its weight for high cover
-    SH(:,6) = A(:,7); % multiply priority predecessor indicator by weight
-    SH(:,7) = (1-A(:,8)); % proportion of max carrying capacity which is covered
+    SH(:,5) = A(:,5); % multiply priority predecessor indicator by weight
+    SH(:,6) = (1-A(:,6)); % proportion of max carrying capacity which is covered
 switch alg_ind 
     case 1
         %% Order ranking   

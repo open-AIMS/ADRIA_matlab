@@ -26,6 +26,7 @@ param_table.Seed2 = 5000;
 
 % Specify connectivity data
 ai.loadConnectivity('MooreTPmean.xlsx');
-
+tic
 % Run a single simulation with 1 replicate
 Y = ai.run(param_table, sampled_values=false, nreps=1);
+toc
