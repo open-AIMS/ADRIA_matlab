@@ -6,8 +6,6 @@ function [resdhwsites,dhw_surf,z] = ADRIA_dhwMoore_new(~)
 %% Load Moore sites
 F0 = readtable('MooreSpatialSimple.xlsx', 'PreserveVariableNames',true);
 F0 = table2array(F0); %site IDs, grid addresses, longituded and latitudes for reef sites
-% SiteID = F0(:,1);  % running reef site ID for internal reference 
-% SiteAddress = F0(:,2);  %grid-cell location of sites in the grid defined by the RECOM and the netcdf files
 site_area = F0(:,1);
 nsites = size(F0,1);
 LON_sites = F0(:,3); %longitude
@@ -45,7 +43,7 @@ LAT_RECOM_vector = reshape(LAT_RECOM,[],1); %year 3
 %% Find sites and their DHWs (VERY PRELIMINARY APPROACH)
 aa = ismembertol(LON_RECOM_vector,LON_sites, 3.18*10^-6); %empirical tolerance 
 bb = ismembertol(LAT_RECOM_vector,LAT_sites, 3.18*10^-6); %empirical tolerance 
-sites_on_grid = find(aa + bb == 2)
+sites_on_grid = find(aa + bb == 2);
 size(sites_on_grid);  % cc needs to be goal seek such that n sites = size(F0)
 
 dhw16_sites = dhw16_surf_vector(sites_on_grid); 
@@ -59,39 +57,40 @@ lon_lat_dhw(:,4) = dhw17_sites;
 lon_lat_dhw(:,5) = dhw20_sites;
 
 %Calculate residual dhws across sites to understand spatial dhw texture for sites and use in forecasts  
-resdhwsites = zeros(nsites,8); %initialise matrix for residual dhws for sites
-resdhwsites(:,1:5) = F0; %site IDS, addresses, lons and lats in columns 1 to 4
-resdhwsites(:,6) = dhw16_sites - mean(dhw16_surf_vector,'all'); %spatial residuals for year 1
-resdhwsites(:,7) = dhw17_sites - mean(dhw17_surf_vector,'all'); %spatial residuals for year 2
-resdhwsites(:,8) = dhw20_sites - mean(dhw20_surf_vector,'all'); %spatial residuals for year 3
+resdhwsites = zeros(nsites,9); %initialise matrix for residual dhws for sites
+resdhwsites(:,1) = 1:nsites; %site ID
+resdhwsites(:,2:6) = F0; %site IDS, addresses, lons and lats in columns 1 to 4
+resdhwsites(:,7) = dhw16_sites - mean(dhw16_surf_vector,'all'); %spatial residuals for year 1
+resdhwsites(:,8) = dhw17_sites - mean(dhw17_surf_vector,'all'); %spatial residuals for year 2
+resdhwsites(:,9) = dhw20_sites - mean(dhw20_surf_vector,'all'); %spatial residuals for year 3
+% Important, need to check that this first column is consistent with what the IPMF team uses
 resdhwsites = sortrows(resdhwsites,1); %organise residuals according to site IDs (column 1)
 
-%% PLot results (turn off when using this function in work flow)
+% %% PLot results (turn off when using this function in work flow)
+% figure;
+% contour(LON_RECOM, LAT_RECOM, -z, [0, 6, 20]);
+% hold on
+% colormap jet;
+% scatter(LON_sites, LAT_sites, site_area/10000, dhw16_sites, 'filled');
+% colorbar
+% caxis([5,16]);
+% 
+% figure; 
+% colormap jet;
+% pcolor(LON_RECOM, LAT_RECOM, dhw16_surf);
+% shading flat;
+% caxis([5,16]);
+% 
+% figure; 
+% colormap jet;
+% surf(LON_RECOM, LAT_RECOM, dhw16_surf);
+% caxis([5,16]);
+% colorbar
+% 
+% hold on
+% contour(LON_RECOM, LAT_RECOM, -z, [0, 6, 20]);
+% hold on
+% caxis([5,16]);
 
-figure;
-contour(LON_RECOM, LAT_RECOM, -z, [0, 6, 20]);
-hold on
-colormap jet;
-scatter(LON_sites, LAT_sites, site_area/10000, dhw16_sites, 'filled');
-colorbar
-caxis([5,16]);
-
-figure; 
-colormap jet;
-pcolor(LON_RECOM, LAT_RECOM, dhw16_surf);
-shading flat;
-caxis([5,16]);
-
-figure; 
-colormap jet;
-surf(LON_RECOM, LAT_RECOM, dhw16_surf);
-caxis([5,16]);
-colorbar
-
-hold on
-contour(LON_RECOM, LAT_RECOM, -z, [0, 6, 20]);
-hold on
-caxis([5,16]);
-
-save MooreDHWnew resdhwsites dhw_surf z
+save MooreDHWnew resdhwsites dhw_surf z;
 end
