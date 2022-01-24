@@ -64,6 +64,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
+    delayShade = interv.Shadedelay; %years to shade are in column 8
+    delaySeed = interv.Seeddelay; %years to shade are in column 9
+
     %% Set up result structure
     tf = sim_params.tf; % timeframe: total number of time steps
     nspecies = height(coral_params);
@@ -206,6 +209,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
+            
         elseif strategy == 0 % unguided deployment
             prefseedsites = randi(nsites, [nsiteint, 1])'; % if unguided, then seed corals anywhere
             prefshadesites = randi(nsites, [nsiteint, 1])'; % if unguided, then shade corals anywhere
