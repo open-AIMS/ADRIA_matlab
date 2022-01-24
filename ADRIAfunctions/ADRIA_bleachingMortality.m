@@ -32,9 +32,12 @@ function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, bleac
 %          https://doi.org/10.1101/2020.12.01.406413
 ad = a_adapt + bleach_resist + tstep .* n_adapt;
 
+% Incorporate adaptation effect but maximum reduction is to 0
+capped_dhw = max(0.0, dhw - ad);
+
 % Model 1: %Based on delta covers observed by Hughes et al. 2018 (Fig 2A)
 % and calibrated by Bozec et al. 2022
-Y = exp(n_p1 * (exp(n_p2 * (dhw - ad) ))); 
+Y = exp(n_p1 * (exp(n_p2 * capped_dhw)));
 
 end
 
