@@ -36,7 +36,8 @@ for p = 1:height(combined_opts)
 end
 
 % Load site specific connectivity data
-ai.loadConnectivity('Inputs/MooreTPmean.xlsx');
+ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
+ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial.csv')
 
 % Scenario runs
 
