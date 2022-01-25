@@ -68,7 +68,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     A(:,1) = site_ids; %site IDs
     A(:,2) = centr/max(centr); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
     
-    % account for cases where no chance of damage or heat stress
+    % Account for cases where no chance of damage or heat stress
     if max(damprob) ~= 0
         % damage probability from wave exposure
         A(:,3) = damprob/max(damprob);
