@@ -202,11 +202,11 @@ classdef ADRIA < handle
             arguments
                 obj
                 filename
-                max_coral_col = 'k'
+                max_coral_col = "k"
             end
             
             sdata = readtable(filename);
-            obj.site_data = sdata(:, ["site_id"; "k"; "sitedepth"; "recom_connectivity"]);
+            obj.site_data = sdata(:, ["site_id"; max_coral_col; "sitedepth"; "recom_connectivity"]);
             obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
