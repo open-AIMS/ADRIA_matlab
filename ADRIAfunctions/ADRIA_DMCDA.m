@@ -156,8 +156,10 @@ switch alg_ind
             SEwt(:,2) = sum(SE(:,2:end),2);
             SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
 
+            last_idx = min(nsiteint, height(SEwt2));
+
             %highest indicator picks the seed site
-            prefseedsites = SEwt2(1:nsiteint,1);
+            prefseedsites = SEwt2(1:last_idx, 1);
             nprefseedsites = numel(prefseedsites);
         end
         
@@ -167,14 +169,16 @@ switch alg_ind
         % normalisation
         SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
         SH = SH.* repmat(wsh,size(SH,1),1);
-        
+
         SHwt(:,1) = SH(:,1);
         SHwt(:,2) = sum(SH(:,2:end),2); %for now, simply add indicators 
 
         SHwt2 = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
 
+        last_idx = min(nsiteint, height(SHwt2));
+
         %highest indicators picks the cool sites
-        prefshadesites = SHwt2(1:nsiteint,1);
+        prefshadesites = SHwt2(1:last_idx,1);
         nprefshadesites = numel(prefshadesites);
     case 2
         %% TOPSIS
@@ -211,7 +215,9 @@ switch alg_ind
             SEwt = [SE(:,1), C];
             order = sortrows(SEwt,2,'descend');
 
-            prefseedsites = order(1:nsiteint,1);
+            last_idx = min(nsiteint, height(order));
+
+            prefseedsites = order(1:last_idx,1);
             nprefseedsites = numel(prefseedsites); 
         end
         
@@ -244,7 +250,10 @@ switch alg_ind
         SHwt = [SH(:,1), C];
         order = sortrows(SHwt,2,'descend');
         %highest indicators picks the cool sites
-        prefshadesites = order(1:nsiteint,1);
+
+        last_idx = min(nsiteint, height(order));
+
+        prefshadesites = order(1:last_idx,1);
         nprefshadesites = numel(prefshadesites); 
     
     case 3
@@ -284,7 +293,10 @@ switch alg_ind
 
             % sort Q in ascending order rows
             orderQ = sortrows(Q,2,'descend');
-            prefseedsites = orderQ(1:nsiteint,1);
+
+            last_idx = min(nsiteint, height(orderQ));
+
+            prefseedsites = orderQ(1:last_idx,1);
             nprefseedsites = numel(prefseedsites); 
         end
         wsh(all(SH == 0,1)) = [];
@@ -314,7 +326,9 @@ switch alg_ind
 
         % sort R, S and Q in ascending order rows
         orderQ = sortrows(Q,2,'descend');
-        prefshadesites = orderQ(1:nsiteint,1);
+        last_idx = min(nsiteint, height(orderQ));
+
+        prefshadesites = orderQ(1:last_idx,1);
         nprefshadesites = numel(prefshadesites); 
     case 4
         %% Multi-objective GA algorithm weighting
