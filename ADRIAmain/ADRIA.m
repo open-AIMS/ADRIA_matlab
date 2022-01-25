@@ -262,9 +262,19 @@ classdef ADRIA < handle
             end
             
             nreps = runargs.nreps;
+            
+            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
+            % NEEDS TO BE CLEANED UP.
+            % Load DHW time series for each site
+            % Wave data is all zeros (ignore mortality due to wave damage
+            % and cyclones).
+            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            % [~, n_sites, ~] = size(w_scens);
 
-            [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
-            [~, n_sites, ~] = size(w_scens);
+            tf = obj.constants.tf;
+            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            [~, n_sites, ~] = size(d_scens);
+            w_scens = zeros(tf, n_sites, nreps);
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
@@ -298,7 +308,7 @@ classdef ADRIA < handle
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, fprefix, runargs.batch_size);
+                     w_scens, d_scens, obj.site_data, fprefix, runargs.batch_size);
         end
         
         function Y = gatherResults(obj, file_loc, metrics)

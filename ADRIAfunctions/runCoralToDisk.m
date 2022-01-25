@@ -1,6 +1,6 @@
 function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               TP_data, site_ranks, strongpred, ...
-                              n_reps, wave_scen, dhw_scen, ...
+                              n_reps, wave_scen, dhw_scen, site_data, ...
                               file_prefix, batch_size)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
@@ -14,6 +14,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %    sim_params   : struct, of simulation constants
 %    wave_scen    : matrix[timesteps, nsites, n_reps], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, n_reps], degree heating weeek scenario
+%    site_data    : table, holding max coral cover, recom site ids, etc.
 %    file_prefix : str, write results to netcdf instead of 
 %                    storing in memory.
 %                    If provided, output `Y` will be a struct of zeros.
@@ -36,7 +37,8 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 
 N = height(intervs);
 
-[timesteps, nsites, ~] = size(wave_scen);
+nsites = height(site_data);
+timesteps = sim_params.tf;
 
 % Create output matrices
 coral_spec = coralSpec();
@@ -113,7 +115,7 @@ parfor b_i = 1:n_batches
             raw(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
-                                   wave_scen(:, :, j), dhw_scen(:, :, j));
+                                   wave_scen(:, :, j), dhw_scen(:, :, j), site_data);
         end
     end
     
