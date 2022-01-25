@@ -108,7 +108,10 @@ param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
 %% Run ADRIA
 % Run a single simulation
-Y = ai.run(param_table, sampled_values=false, nreps=1);
+Y = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=true);
+seed_log = Y.seed_log;
+shade_log = Y.shade_log;
+Y = Y.Y;  % get raw results, ignoring seed/shade logs
 
 % Collect metrics
 metric_results = collectMetrics(Y, coral_params, ...
@@ -220,3 +223,4 @@ xlabel(LO2,'Years', 'FontSize', 14)
 aa = gca;
 aa.FontSize = font_size;
 
+all(all(all(shade_log == 0)))

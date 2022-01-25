@@ -29,4 +29,5 @@ ai.loadConnectivity('MooreTPmean.xlsx');
 tic
 % Run a single simulation with 1 replicate
 Y = ai.run(param_table, sampled_values=false, nreps=1);
+Y = Y.Y;  % get raw results, ignoring seed/shade logs
 toc

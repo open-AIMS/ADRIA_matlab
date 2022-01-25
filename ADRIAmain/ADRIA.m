@@ -220,6 +220,7 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
+               runargs.collect_logs logical
             end
             
             if isempty(obj.site_data)
@@ -251,7 +252,7 @@ classdef ADRIA < handle
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, obj.site_data);
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
         end
         
         function runToDisk(obj, X, runargs)

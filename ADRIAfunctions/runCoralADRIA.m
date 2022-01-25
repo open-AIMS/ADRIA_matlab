@@ -1,6 +1,6 @@
-function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
+function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
                            TP_data, site_ranks, strongpred, ...
-                           n_reps, wave_scen, dhw_scen, site_data)
+                           n_reps, wave_scen, dhw_scen, site_data, collect_logs)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -16,11 +16,10 @@ function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
 %    site_data    : table, of site data
 %
 % Output:
-%    Y : struct,
-%          - TC [n_timesteps, n_sites, N, n_reps]
-%          - C  [n_timesteps, n_sites, N, n_species, n_reps]
-%          - E  [n_timesteps, n_sites, N, n_reps]
-%          - S  [n_timesteps, n_sites, N, n_reps]
+%    results : struct,
+%          - Y, [n_timesteps, n_sites, N, n_reps]
+%          - seed_log, [n_timesteps, n_sites, N, n_species, n_reps]
+%          - shade_log, [n_timesteps, n_sites, N, n_reps]
 %
 % Model guides the selection of
 % (1) reef sites for the deployment of restoration and adaptation interventions, and
@@ -70,7 +69,13 @@ coral_spec = coralSpec();
 % Create output matrices
 n_species = height(coral_spec);  % total number of species considered
 
+if ~exist('collect_logs', 'var')
+    collect_logs = false;
+end
+
 Y = zeros(timesteps, n_species, nsites, N, n_reps);
+seed = zeros(timesteps, n_species, nsites, N, n_reps);
+shade = zeros(timesteps, n_species, nsites, N, n_reps);
 
 for i = 1:N
     scen_it = intervs(i, :);
@@ -81,11 +86,22 @@ for i = 1:N
     c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
     for j = 1:n_reps
-        Y(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
+        res = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), site_data);
+        Y(:, :, :, i, j) = res.Y;
+        
+        if collect_logs
+            seed(:, :, :, i, j) = res.seed_log;
+            shade(:, :, :, i, j) = res.shade_log;
+        end
     end
 end
+
+results = struct();
+results.Y = Y;
+results.seed_log = seed;
+results.shade_log = shade;
 
 end

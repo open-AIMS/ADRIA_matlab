@@ -6,6 +6,7 @@ X = ai.sample_defaults;
 X.Guided = 2;
 
 Y = ai.run(X, sampled_values=true, nreps=3);
+Y = Y.Y;  % get raw results, ignoring seed/shade logs
 
 [~, ~, coral_params] = ai.splitParameterTable(X);
 

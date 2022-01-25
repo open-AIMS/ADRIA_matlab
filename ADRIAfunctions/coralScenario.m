@@ -1,4 +1,4 @@
-function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
+function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, ...
     wave_scen, dhw_scen, site_data)
 % Run a single intervention scenario with given criteria and parameters
@@ -17,6 +17,12 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
 %    site_data   : table, of site data. Should be pre-sorted by the
 %                         `recom_connectivity` column
+%
+% Outputs:
+%    results     : struct, of 
+%                  Y         - simulation results
+%                  seed_log  - Sites seeded over time
+%                  shade_log - Sites shaded over time
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
@@ -275,5 +281,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
     
     % Assign to output variable
-    Y = Yout;
+    results = struct();
+    results.Y = Yout;
+    results.seed_log = Yseed;
+    results.shade_log = Yshade;
 end
