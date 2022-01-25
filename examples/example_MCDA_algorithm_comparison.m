@@ -5,7 +5,7 @@ nalgs = 4;
 nmetrics = 1;
 
 % Number of scenarios
-N = 8;
+N = 1;
 example_file = 'Inputs/MCDA_example.nc';
 metric = {@coralSpeciesCover};
 
@@ -63,7 +63,8 @@ else
          p_sel.seed_connectivity(:) = ones(length(p_sel.seed_connectivity(:)),1);
          p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
          p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
-
+         p_sel.SRM(:) = zeros(length(p_sel.SRM(:)),1);
+         %p_sel.Aadpt(:) = zeros(length(p_sel.Aadpt(:)),1);
         p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
 
    for al = 0:nalgs
@@ -105,13 +106,13 @@ title('TC comparison')
 for count = 1:N
      %for k =1:nalgs+1
         
-        subplot(2,4,count)
+        subplot(5,5,count)
         hold on
         plot(1:25,alg_cont_TC(:,1,count))
         plot(1:25,alg_cont_TC(:,2,count))
-        plot(1:25,alg_cont_TC(:,3,count))
+        plot(1:25,alg_cont_TC(:,3,count),'--')
         plot(1:25,alg_cont_TC(:,4,count))
-        plot(1:25,alg_cont_TC(:,5,count))
+        plot(1:25,alg_cont_TC(:,5,count),'--')
        % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
         hold off
     % end
