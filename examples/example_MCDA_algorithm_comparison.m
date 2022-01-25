@@ -1,17 +1,34 @@
 % Example script illustrating differences in algorithm performance for the
 % total coral cover metric (shows how algorithm choice could be optimised
 % for a given intervention scenario)
-nalgs = 4;
+nalgs = 3;
 nmetrics = 1;
 
 % Number of scenarios
-N = 1;
+N = 25;
 example_file = 'Inputs/MCDA_example.nc';
 metric = {@coralSpeciesCover};
 
 if isfile(example_file)
     % Load example data from file if pre-prepared
     alg_cont_TC = ncread(example_file, 'TC');
+    figure(1)
+   title('TC comparison')
+
+    for count = 1:N
+         %for k =1:nalgs+1
+            
+            subplot(5,5,count)
+            hold on
+            plot(1:25,alg_cont_TC(:,1,count),'r')
+            plot(1:25,alg_cont_TC(:,2,count),'b')
+            plot(1:25,alg_cont_TC(:,3,count),'g--')
+            plot(1:25,alg_cont_TC(:,4,count),'m')
+            %plot(1:25,alg_cont_TC(:,5,count),'--')
+           % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
+            hold off
+        % end
+    end
 else
    
         %% Generate monte carlo samples
@@ -54,7 +71,8 @@ else
         % set all criteria weights and seed yrs/ shade yrs to be the same
          p_sel.Seedyrs(:) = ones(length(p_sel.Seedyrs(:)),1);
          p_sel.Shadeyrs(:) = ones(length(p_sel.Shadeyrs(:)),1);
-% 
+         p_sel.Seed1(:) = linspace(100,1000,25);
+         p_sel.Seed2(:) = linspace(100,1000,25);
          p_sel.coral_cover_high(:) = ones(length(p_sel.coral_cover_high(:)),1);
          p_sel.coral_cover_low(:) = ones(length(p_sel.coral_cover_low(:)),1);
          p_sel.wave_stress(:) = ones(length(p_sel.wave_stress(:)),1);
@@ -64,7 +82,7 @@ else
          p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
          p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
          p_sel.SRM(:) = zeros(length(p_sel.SRM(:)),1);
-         %p_sel.Aadpt(:) = zeros(length(p_sel.Aadpt(:)),1);
+         p_sel.Aadpt(:) = [7*ones(20,1); zeros(5,1)];
         p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
 
    for al = 0:nalgs
@@ -76,7 +94,7 @@ else
          end
 
         tic
-        Y = ai.run(p_sel,sampled_values = true, nreps = num_reps);
+        Y = ai.run(p_sel,sampled_values = false, nreps = num_reps);
         tmp = toc;
         disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
         for m = 1:N
@@ -105,23 +123,7 @@ end
 % the algorithm achieving the average highest coral cover for an individual
 % scenario varies significantly, and hence should be probably be optimised
 % for
-figure(1)
-title('TC comparison')
 
-for count = 1:N
-     %for k =1:nalgs+1
-        
-        subplot(5,5,count)
-        hold on
-        plot(1:25,alg_cont_TC(:,1,count))
-        plot(1:25,alg_cont_TC(:,2,count))
-        plot(1:25,alg_cont_TC(:,3,count),'--')
-        plot(1:25,alg_cont_TC(:,4,count))
-        plot(1:25,alg_cont_TC(:,5,count),'--')
-       % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
-        hold off
-    % end
-end
 
 %figure(2)
 % for count = 1:N
