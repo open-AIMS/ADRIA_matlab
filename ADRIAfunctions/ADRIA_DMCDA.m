@@ -58,7 +58,6 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     % Filter out sites
 
     %% Identify and assign key larval source sites for priority sites
-    sites = 1:nsites;
     predec = zeros(nsites,3);
     predec(:,1:2) = strongpred;
     predprior = predec(prioritysites,2);
@@ -66,16 +65,29 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 
     %% prefseedsites
     % Combine data into matrix
-    A(:,1) = sites; %site IDs
-    A(:,2) = centr/max(centr); %node connectivity centrality, need to instead work out strongest predecessors to priority sites  
-    A(:,3) = damprob/max(damprob); %damage probability from wave exposure
-    A(:,4) = heatstressprob/max(heatstressprob); %risk from heat exposure
+    A(:,1) = site_ids; %site IDs
+    A(:,2) = centr/max(centr); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
+    
+    % account for cases where no chance of damage or heat stress
+    if max(damprob) ~= 0
+        % damage probability from wave exposure
+        A(:,3) = damprob/max(damprob);
+    else
+        A(:,3) = damprob / 1;
+    end
+    
+    if max(heatstressprob) ~= 0
+        % risk from heat exposure
+        A(:,4) = heatstressprob/max(heatstressprob); 
+    else
+        A(:,4) = heatstressprob / 1;
+    end
     
 %     prop_cover = sumcover/max(sumcover);  %proportional coral cover
 %     A(:,5) = prop_cover; 
 %     A(:,6) = 1 - prop_cover;
     A(:,5) = predec(:,3); % priority predecessors
-    A(:,6) = (maxcover - sumcover)/maxcover; % proportion of cover compared to max possible cover
+    A(:,6) = (maxcover - sumcover) ./ maxcover; % proportion of cover compared to max possible cover
     
     % Filter out sites that have high risk of wave damage, specifically 
     % exceeding the risk tolerance 
@@ -110,7 +122,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     SE(:,5) = A(:,5); % multiply priority predecessor indicator by weight
     %SE(find(A(:,5)>=1),:) = [];
     SE(:,6) = A(:,6); % proportion of max cover which is not covered
-    SE(find(A(:,6)<=0),:) = []; % remove sites at maximum carrying capacity
+    SE(A(:,6)<=0,:) = []; % remove sites at maximum carrying capacity
    
     
     %% Shading filtered set
@@ -310,8 +322,6 @@ switch alg_ind
         % no inequality constraints
         Aeq = [];
         beq = [];
-        
-        sites = 1:nsites;
 
         opts = optimoptions('gamultiobj', 'UseParallel', false, 'Display', 'off');
         % seeding rankings
@@ -342,7 +352,7 @@ switch alg_ind
             % randomly select solution from pareto front
             ind = randi([1 size(x1,1)]);
             % select optimal sites
-            prefseedsites = sites(logical(x1(ind,:)));            
+            prefseedsites = site_ids(logical(x1(ind,:)));            
             nprefseedsites = numel(prefseedsites);
         end
          % shading rankings
@@ -372,7 +382,7 @@ switch alg_ind
         ind = randi([1 size(x2,1)]);
 
         % select optimal sites
-        prefshadesites = sites(logical(x2(ind,:)));
+        prefshadesites = site_ids(logical(x2(ind,:)));
         nprefshadesites = numel(prefshadesites);
 
 end 
