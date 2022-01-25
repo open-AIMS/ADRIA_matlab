@@ -33,7 +33,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 %               prefseedsites : site IDs to seed at
 %               prefshadesites : sites IDs to shade at
 %               nprefseedsites : number of preferred seeding sites
-%               nprefshadesites : number of preferredf shading sites
+%               nprefshadesites : number of preferred shading sites
 
     site_ids = DMCDA_vars.site_ids;
     nsites = length(site_ids);
