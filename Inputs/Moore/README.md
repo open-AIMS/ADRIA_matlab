@@ -35,8 +35,28 @@ The maximum DHWs were manually extracted alongside the site_ids to create the Mo
 
 **DHWs**
 
-Degree Heating Weeks
+Degree Heating Weeks datasets.
 
+- MooreDHWs.csv : 
+      DHWs for 2016, 2017 and 2020 (extreme bleaching event years)
+      extracted from `MooreReefCluster_Spatial_with_DHW.csv`.
+      Dataset derived from Robson files.
+- StochasticDHW.csv :
+- MooreCluster_maxDHW_MIROC5_2021_2099.csv :
+- dhwRCP45.mat : file generated with `makeDhwProjection(tf,resdhwsites,dhwmax25,RCP,wb1,wb2, sims)`
+
+where:
+
+tf = 50;  length of runs
+wb1 = 0.55;  parameter 1 in Weibull dist
+wb2 = 2.24; parameter 2 in Weibull dist
+RCP = 45;  the scenario we’re using for the business case
+dhwmax25 = 3  (DHW intercept at year 2025)
+sims = 50;  
+resdhwsites (these are the DHW residuals produced in ‘ADRIA_dhwMoore_new()’).
+
+The last needs to be cleaned up.
+The last will also be replaced with a more robust approach.
 
 **connectivity**
 
