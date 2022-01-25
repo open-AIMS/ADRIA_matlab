@@ -43,8 +43,16 @@ ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial.csv')
 
 err = [];
 try
+    % define final collation function
+    mean_TC = @(x,p) mean(coralTaxaCover(x, p).total_cover, 4);
+
     % Run scenarios, keeping results in memory
     Y_true = ai.run(p_sel, sampled_values=true, nreps=num_reps);
+    
+    [~, ~, coral_params] = ai.splitParameterTable(p_sel);
+    Yt_TC = collectMetrics(Y_true, coral_params, {mean_TC});
+    Ytt = Yt_TC.mean_coralTaxaCover_x_p_total_cover_4;
+    Ytt = squeeze(mean(Ytt(end, :, :, :), 4));
 
     file_prefix = strcat(tmp_dir, 'test');
 
@@ -52,12 +60,14 @@ try
     ai.runToDisk(p_sel, sampled_values=true, nreps=num_reps, ...
                     file_prefix=file_prefix, batch_size=2)
              
-    assert(isfile(strcat(file_prefix, '_[[1-2]].nc')), "Partial result file not found!");
+    % assert(isfile(strcat(file_prefix, '_[[1-2]].nc')), "Partial result file not found!");
 
     % Collect all data
-    collated = ai.gatherResults(file_prefix, {@coralTaxaCover});
+    collated = ai.gatherResults(file_prefix, {mean_TC});
+    scattered = concatMetrics(collated, "mean_coralTaxaCover_x_p_total_cover_4");
+    scattered_TC = squeeze(mean(scattered(end, :, :, :), 4));
 
-    assert(isequal(Y_true, collated), "Results are not equal!")
+    assert(isequal(Ytt, scattered_TC), "Results are not equal!")
     assert(all(all(collated.TC(:, :, 1, 1) ~= 0)), "Results were zeros!")
 
 catch err
