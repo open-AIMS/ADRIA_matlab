@@ -194,7 +194,7 @@ classdef ADRIA < handle
             obj.strongpred = sp;
         end
         
-        function loadSiteData(obj, filename, max_coral_col)
+        function loadSiteData(obj, filename, init_coral_cov_col, max_coral_col)
             % Load data on site carrying capacity, depth and connectivity
             % from indicated CSV file.
             
@@ -202,8 +202,12 @@ classdef ADRIA < handle
             arguments
                 obj
                 filename
-                max_coral_col = "k"
+                init_coral_cov_col = ""
+                max_coral_col = "k"  % column to load max coral cover from
             end
+            
+            % if strlength(init_coral_cov_col) > 0
+                
             
             sdata = readtable(filename);
             obj.site_data = sdata(:, ["site_id"; max_coral_col; "sitedepth"; "recom_connectivity"]);

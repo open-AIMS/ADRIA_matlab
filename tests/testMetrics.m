@@ -1,6 +1,6 @@
 ai = ADRIA();
 ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
-ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial.csv')
+ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv')
 
 X = ai.sample_defaults;
 X.Guided = 2;
