@@ -69,7 +69,12 @@ else
 
    for al = 0:nalgs
        % for each algorithm
-        p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1)+1;
+
+         p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1)+1;
+         if al == 4
+            p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1)+1.1;
+         end
+
         tic
         Y = ai.run(p_sel,sampled_values = true, nreps = num_reps);
         tmp = toc;
