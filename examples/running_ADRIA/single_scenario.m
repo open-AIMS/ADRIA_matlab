@@ -97,7 +97,8 @@ new_criteria_opts = array2table(user_criteria_opts', 'VariableNames', criteria_o
 
 
 %% Load site data
-ai.loadConnectivity('MooreTPmean.xlsx');
+ai.loadConnectivity('./Inputs/Moore/connectivity/2015');
+ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial.csv');
 
 %% Update ADRIA Interface with user specified constants
 ai.constants = new_sim_opts;

@@ -31,7 +31,8 @@ end
 sample_table.Guided(:) = 2;
 
 %% Load site specific data
-ai.loadConnectivity('MooreTPmean.xlsx');
+ai.loadConnectivity('Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
+ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial.csv')
 
 %% Scenario runs
 

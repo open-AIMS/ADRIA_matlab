@@ -9,9 +9,10 @@ classdef ADRIA < handle
     end
 
     properties (Access = private)
-        TP_data  % site connectivity data
+        TP_data     % site connectivity data
         site_ranks  % site rank
         strongpred  % strongest predecessor
+        site_data   % table of site data (dpeth, carrying capacity, etc)
     end
 
     properties (Dependent)
@@ -42,12 +43,12 @@ classdef ADRIA < handle
             % Load wave/DHW scenario data
             % Generated with generateWaveDHWs.m
             % TODO: Replace these with wave/DHW projection scenarios instead
-            fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(obj.constants.RCP), ".nc");
+            fn = strcat("Inputs/example_wave_DHWs_RCP_expanded_", num2str(obj.constants.RCP), ".nc");
             wave_scens = ncread(fn, "wave");
             dhw_scens = ncread(fn, "DHW");
 
             % Select random subset of RCP conditions WITHOUT replacement
-            n_rep_scens = length(wave_scens);
+            [~, ~, n_rep_scens] = size(wave_scens);
             rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
             w_scens = wave_scens(:, :, rcp_scens);
             d_scens = dhw_scens(:, :, rcp_scens);
@@ -159,11 +160,24 @@ classdef ADRIA < handle
             coral_r = coral_s:coral_e;
         end
 
-        function obj = loadConnectivity(obj, filename, conargs)
-            % Load site connectivity data from a given file.
+        function obj = loadConnectivity(obj, fileset, conargs)
+            % Load site connectivity data from a given file or set of files.
+            %
+            % If `fileset` is a path to file, loads the file directly. 
+            % If it is a path to a folder, then loads the all files found
+            % within and aggregates with the function specified with
+            % `agg_func`
+            %
+            % Example:
+            %     % load single dataset
+            %     ai.loadConnectivity("./example/x.csv")
+            %
+            %     % load and aggregate multiple datasets using their mean
+            %     ai.loadConnectivity("./example", agg_func=@mean)
             arguments
                obj
-               filename string
+               fileset string
+               conargs.agg_func function_handle
                conargs.cutoff {mustBeFloat} = NaN
             end
 
@@ -173,12 +187,27 @@ classdef ADRIA < handle
                cutoff = conargs.cutoff;
             end
 
-            [tp, sr, sp] = ...
-               siteConnectivity(filename, cutoff);
+            [tp, sr, sp] = siteConnectivity(fileset, cutoff);
 
             obj.TP_data = tp;
             obj.site_ranks = sr;
             obj.strongpred = sp;
+        end
+        
+        function loadSiteData(obj, filename, max_coral_col)
+            % Load data on site carrying capacity, depth and connectivity
+            % from indicated CSV file.
+            
+            % readtable("Inputs/Moore/site_data/MooreReefCluster_Spatial.csv")
+            arguments
+                obj
+                filename
+                max_coral_col = 'k'
+            end
+            
+            sdata = readtable(filename);
+            obj.site_data = sdata(:, ["site_id"; "k"; "sitedepth"; "recom_connectivity"]);
+            obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
         function Y = run(obj, X, runargs)
@@ -189,13 +218,26 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
             end
             
+            if isempty(obj.site_data)
+                error("Site data not loaded! Preload with `loadSiteData()`");
+            end
+            
             if isempty(obj.TP_data)
-                error("Site data not loaded! Preload with `loadConnectivity()`");
+                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
             end
             
             nreps = runargs.nreps;
 
-            [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
+            % NEEDS TO BE CLEANED UP.
+            % Load DHW time series for each site
+            % Wave data is all zeros (ignore mortality due to wave damage
+            % and cyclones).
+            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            tf = obj.constants.tf;
+            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            [~, nsites, ~] = size(d_scens);
+            w_scens = zeros(tf, nsites, nreps);
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
@@ -205,7 +247,7 @@ classdef ADRIA < handle
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens);
+                     w_scens, d_scens, obj.site_data);
         end
         
         function runToDisk(obj, X, runargs)
