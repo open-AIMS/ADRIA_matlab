@@ -345,11 +345,12 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
             else
                 wse(all(SE == 0,1)) = [];
                 SE(:,all(SE == 0,1)) = []; %if a column is all zeros, delete
-                 % integer weights must sum to number of preferred sites
+                
+                % integer weights must sum to number of preferred sites
                 A = ones(1,length(SE(:,1)));
                 b = nsiteint;
 
-                 % integer variables
+                % integer variables
                 intcon = 1:length(SE(:,1));
 
                 % normalisation
@@ -358,6 +359,7 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 
                 % multi-objective function for seeding
                 fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
+
                 % solve multi-objective problem using genetic alg
                 lb = zeros(1,length(SE(:,1))); % x (weightings) can be 0
                 ub = ones(1,length(SE(:,1))); % to 1
@@ -365,19 +367,21 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 
                 % randomly select solution from pareto front
                 ind = randi([1 size(x1,1)]);
+
                 % select optimal sites
                 prefseedsites = site_ids(logical(x1(ind,:)));            
                 nprefseedsites = numel(prefseedsites);
             end
-             % shading rankings
-             wsh(all(SH == 0,1)) = [];
-             SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
-             % integer weights must sum to number of preferred sites
-             A = ones(1,length(SH(:,1)));
-             b = nsiteint;
 
-             % integer variables
-             intcon = 1:length(SH(:,1));
+            % shading rankings
+            wsh(all(SH == 0,1)) = [];
+            SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
+            % integer weights must sum to number of preferred sites
+            A = ones(1,length(SH(:,1)));
+            b = nsiteint;
+
+            % integer variables
+            intcon = 1:length(SH(:,1));
 
             % normalisation
             SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
@@ -385,7 +389,6 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 
             lb = zeros(1,length(SH(:,1))); % x (weightings) can be 0
             ub = ones(1,length(SH(:,1))); % to 1
-
 
             % multi-objective function for shading
             fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
