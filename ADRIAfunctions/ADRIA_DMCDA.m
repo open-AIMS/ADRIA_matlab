@@ -1,4 +1,4 @@
-function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DCMAvars,alg_ind)
+function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_DMCDA(DMCDA_vars,alg_ind)
 
 %    Utility function that uses a dynamic MCDA to work out what sites to pick, 
 %    if any before going into the bleaching or cyclone season. It uses
@@ -35,24 +35,25 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
 %               nprefseedsites : number of preferred seeding sites
 %               nprefshadesites : number of preferredf shading sites
 
-    nsites = DCMAvars.nsites;
-    nsiteint = DCMAvars.nsiteint;
-    prioritysites = DCMAvars.prioritysites;
-    strongpred  = DCMAvars.strongpred;
-    centr  = DCMAvars.centr;
-    damprob  = DCMAvars.damprob;
-    heatstressprob  = DCMAvars.heatstressprob;
-    sumcover  = DCMAvars.sumcover;
-    maxcover = DCMAvars.maxcover;
-    risktol  = DCMAvars.risktol;
-    wtconseed  = DCMAvars.wtconseed;
-    wtconshade  = DCMAvars.wtconshade;
-    wtwaves  = DCMAvars.wtwaves;
-    wtheat  = DCMAvars.wtheat;
-    wthicover  = DCMAvars.wthicover;
-    wtlocover  = DCMAvars.wtlocover;
-    wtpredecseed  = DCMAvars.wtpredecseed;
-    wtpredecshade  = DCMAvars.wtpredecshade;
+    site_ids = DMCDA_vars.site_ids;
+    nsites = length(site_ids);
+    nsiteint = DMCDA_vars.nsiteint;
+    prioritysites = DMCDA_vars.prioritysites;
+    strongpred  = DMCDA_vars.strongpred(site_ids, :);
+    centr  = DMCDA_vars.centr(site_ids);
+    damprob  = DMCDA_vars.damprob(site_ids);
+    heatstressprob  = DMCDA_vars.heatstressprob(site_ids);
+    sumcover  = DMCDA_vars.sumcover(site_ids);
+    maxcover = DMCDA_vars.maxcover(site_ids);
+    risktol  = DMCDA_vars.risktol;
+    wtconseed  = DMCDA_vars.wtconseed;
+    wtconshade  = DMCDA_vars.wtconshade;
+    wtwaves  = DMCDA_vars.wtwaves;
+    wtheat  = DMCDA_vars.wtheat;
+    wthicover  = DMCDA_vars.wthicover;
+    wtlocover  = DMCDA_vars.wtlocover;
+    wtpredecseed  = DMCDA_vars.wtpredecseed;
+    wtpredecshade  = DMCDA_vars.wtpredecshade;
     
     % Filter out sites
 
