@@ -160,11 +160,24 @@ classdef ADRIA < handle
             coral_r = coral_s:coral_e;
         end
 
-        function obj = loadConnectivity(obj, filename, conargs)
-            % Load site connectivity data from a given file.
+        function obj = loadConnectivity(obj, fileset, conargs)
+            % Load site connectivity data from a given file or set of files.
+            %
+            % If `fileset` is a path to file, loads the file directly. 
+            % If it is a path to a folder, then loads the all files found
+            % within and aggregates with the function specified with
+            % `agg_func`
+            %
+            % Example:
+            %     % load single dataset
+            %     ai.loadConnectivity("./example/x.csv")
+            %
+            %     % load and aggregate multiple datasets using their mean
+            %     ai.loadConnectivity("./example", agg_func=@mean)
             arguments
                obj
-               filename string
+               fileset string
+               conargs.agg_func function_handle
                conargs.cutoff {mustBeFloat} = NaN
             end
 
@@ -174,19 +187,24 @@ classdef ADRIA < handle
                cutoff = conargs.cutoff;
             end
 
-            [tp, sr, sp] = ...
-               siteConnectivity(filename, cutoff);
+            [tp, sr, sp] = siteConnectivity(fileset, cutoff);
 
             obj.TP_data = tp;
             obj.site_ranks = sr;
             obj.strongpred = sp;
         end
         
-        function loadSiteData(obj, filename)
+        function loadSiteData(obj, filename, max_coral_col)
             % Load data on site carrying capacity, depth and connectivity
             % from indicated CSV file.
             
             % readtable("Inputs/Moore/site_data/MooreReefCluster_Spatial.csv")
+            arguments
+                obj
+                filename
+                max_coral_col = 'k'
+            end
+            
             sdata = readtable(filename);
             obj.site_data = sdata(:, ["site_id"; "k"; "sitedepth"; "recom_connectivity"]);
             obj.site_data = sortrows(obj.site_data, "recom_connectivity");
@@ -210,7 +228,16 @@ classdef ADRIA < handle
             
             nreps = runargs.nreps;
 
-            [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
+            % NEEDS TO BE CLEANED UP.
+            % Load DHW time series for each site
+            % Wave data is all zeros (ignore mortality due to wave damage
+            % and cyclones).
+            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            tf = obj.constants.tf;
+            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            [~, nsites, ~] = size(d_scens);
+            w_scens = zeros(tf, nsites, nreps);
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
