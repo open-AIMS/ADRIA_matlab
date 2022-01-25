@@ -30,7 +30,14 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 %        https://doi.org/10.13140/RG.2.2.26976.20482
 
     %% Set up connectivity
-    nsites = width(TP_data);
+    nsites = height(site_data);
+    [~, ~, g_id] = unique(site_data.recom_connectivity);
+    
+    % Some sites are within the same grid cell for connectivity
+    % Here, we find those sites and map the connectivity data
+    % (e.g., repeat the relevant row/columns)
+    [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+    TP_data = TP_data(g_idx, g_idx);
 
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
@@ -53,12 +60,14 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
         risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
+        % Filter out sites outside of desired depth range
         max_depth = criteria.depth_min + criteria.depth_offset;
-        depth_criteria = (site_data.sitedepth > max_depth) & (site_data.sitedepth < criteria.depth_min);
+        depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
         depth_priority = site_data{depth_criteria, "recom_connectivity"};
-        max_cover = site_data.k/100.0;
 
-        dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, 'prioritysites', depth_priority, ...
+        max_cover = site_data.k/100.0; % Max coral cover at each site
+
+        dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
@@ -113,6 +122,8 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     
     % Disable wave mortality for now: Agreed on action for Feb deliverable
     % See email: Mon 24/01/2022 15:17 - RE: IPMF and ADRIA workflow for BC
+    % NOTE: site selection in MCDA based on damage probability also disabled
+    
     % wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
     % for sp = 1:nspecies
     %     mwaves(:, sp, :) = wavemort90(sp) .* wave_scen;
@@ -203,11 +214,13 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             % Factor 2
             % probability of coral damage from waves used as criterion in
             % site selection
-            dMCDA_vars.damprob = wave_scen(tstep, :)';
+            
+            % NOTE: Wave Damage is turned off as these are all zeros!
+            dMCDA_vars.damprob = squeeze(mwaves(tstep, :, :))'; % wave_scen(tstep, :)';
             dMCDA_vars.heatstressprob = dhw_step'; % heat stress
 
             %Factor 4: total coral cover state used as criterion in site selection;
-            dMCDA_vars.sumcover = sum(Yout(p_step, :, :), 2);
+            dMCDA_vars.sumcover = squeeze(sum(Yout(p_step, :, :), 2));
             % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
@@ -246,7 +259,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Y = Y(end, :);  % get last step in ODE
         
         % If any sites are above their maximum possible value,
-        % proportionally adjust each entry so that their sum is < P
+        % proportionally adjust each entry so that their sum is <= P
         Y = reshape(Y, nspecies, nsites);
         if any(sum(Y, 1) > e_P)
             idx = find(sum(Y, 1) > e_P);
