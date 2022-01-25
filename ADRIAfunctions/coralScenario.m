@@ -31,7 +31,6 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Set up connectivity
     nsites = height(site_data);
-    [~, ~, g_id] = unique(site_data.recom_connectivity);
     
     % Some sites are within the same grid cell for connectivity
     % Here, we find those sites and map the connectivity data

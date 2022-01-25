@@ -34,6 +34,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
 %               nprefseedsites : number of preferred seeding sites
 %               nprefshadesites : number of preferred shading sites
 
+    % Filter out sites that are not to be considered, based on site_id
+    % NOTE: Assumes everything lines up! (which they should)
     site_ids = DMCDA_vars.site_ids;
     nsites = length(site_ids);
     nsiteint = DMCDA_vars.nsiteint;
