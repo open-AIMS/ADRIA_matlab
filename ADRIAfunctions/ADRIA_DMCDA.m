@@ -225,35 +225,32 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
             % shading rankings
             wsh(all(SH == 0, 1)) = [];
             SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
+            
             % normalisation
             SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
             SH = SH .* repmat(wsh, size(SH, 1), 1);
+
             % compute the set of positive ideal solutions for each criteria (max for
             % good crieteria, min for bad criteria). Max used as all crieteria
             % represent preferred attributes not costs or negative attributes
-
             PIS = max(SH(:, 2:end));
 
             % compute the set of negative ideal solutions for each criteria (min for
             % good crieteria, max for bad criteria). Min used as all crieteria
             % represent preferred attributes not costs or negative attributes
-
             NIS = min(SH(:, 2:end));
 
             % calculate separation distance from the ideal and non-ideal solns
-
             S_p = sqrt(sum((SH(:, 2:end) - PIS).^2, 2));
             S_n = sqrt(sum((SH(:, 2:end) - NIS).^2, 2));
 
             % final ranking measue of relative closeness C
-
             C = S_n ./ (S_p + S_n);
             SHwt = [SH(:, 1), C];
             order = sortrows(SHwt, 2, 'descend');
+            
             %highest indicators picks the cool sites
-
             last_idx = min(nsiteint, height(order));
-
             prefshadesites = order(1:last_idx, 1);
             nprefshadesites = numel(prefshadesites);
 
