@@ -135,153 +135,186 @@ function [prefseedsites,prefshadesites,nprefseedsites,nprefshadesites] = ADRIA_D
     SH(:,4) = A(:,4); % multiply complementary of heat risk with heat weight
     SH(:,5) = A(:,5); % multiply priority predecessor indicator by weight
     SH(:,6) = (1-A(:,6)); % proportion of max carrying capacity which is covered
-switch alg_ind 
-    case 1
-        %% Order ranking   
-        
-        % seeding rankings
-        if isempty(SE)
-            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-            nprefseedsites = 0;
-        else
-            wse(all(SE == 0,1)) = [];
-            SE(:,all(SE == 0,1)) = []; %if a column is all zeros, delete
+    switch alg_ind
+        case 1
+            %% Order ranking   
 
-             % normalisation
-            SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
-            SE = SE.* repmat(wse,size(SE,1),1);
-            
-            % simple ranking - add criteria weighted values for each sites
-            SEwt(:,1) = SE(:,1);
-            SEwt(:,2) = sum(SE(:,2:end),2);
-            SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
+            % seeding rankings
+            if isempty(SE)
+                prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+                nprefseedsites = 0;
+            else
+                wse(all(SE == 0,1)) = [];
+                SE(:,all(SE == 0,1)) = []; %if a column is all zeros, delete
 
-            last_idx = min(nsiteint, height(SEwt2));
+                 % normalisation
+                SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+                SE = SE.* repmat(wse,size(SE,1),1);
 
-            %highest indicator picks the seed site
-            prefseedsites = SEwt2(1:last_idx, 1);
-            nprefseedsites = numel(prefseedsites);
-        end
-        
-        % shading rankings
-        wsh(all(SH == 0,1)) = [];
-        SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
-        % normalisation
-        SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
-        SH = SH.* repmat(wsh,size(SH,1),1);
+                % simple ranking - add criteria weighted values for each sites
+                SEwt(:,1) = SE(:,1);
+                SEwt(:,2) = sum(SE(:,2:end),2);
+                SEwt2 = sortrows(SEwt,2,'descend'); %sort from highest to lowest indicator
 
-        SHwt(:,1) = SH(:,1);
-        SHwt(:,2) = sum(SH(:,2:end),2); %for now, simply add indicators 
+                last_idx = min(nsiteint, height(SEwt2));
 
-        SHwt2 = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
+                %highest indicator picks the seed site
+                prefseedsites = SEwt2(1:last_idx, 1);
+                nprefseedsites = numel(prefseedsites);
+            end
 
-        last_idx = min(nsiteint, height(SHwt2));
+            % shading rankings
+            wsh(all(SH == 0,1)) = [];
+            SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
+            % normalisation
+            SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
+            SH = SH.* repmat(wsh,size(SH,1),1);
 
-        %highest indicators picks the cool sites
-        prefshadesites = SHwt2(1:last_idx,1);
-        nprefshadesites = numel(prefshadesites);
-    case 2
-        %% TOPSIS
+            SHwt(:,1) = SH(:,1);
+            SHwt(:,2) = sum(SH(:,2:end),2); %for now, simply add indicators 
 
-        % seeding rankings
-        if isempty(SE)
-            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-            nprefseedsites = 0;
-        else
-            wse(all(SE==0,1)) = [];
-            SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
-           % normalisation
-            SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
-            SE = SE.* repmat(wse,size(SE,1),1);
+            SHwt2 = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
+
+            last_idx = min(nsiteint, height(SHwt2));
+
+            %highest indicators picks the cool sites
+            prefshadesites = SHwt2(1:last_idx,1);
+            nprefshadesites = numel(prefshadesites);
+        case 2
+            %% TOPSIS
+
+            % seeding rankings
+            if isempty(SE)
+                prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+                nprefseedsites = 0;
+            else
+                wse(all(SE==0,1)) = [];
+                SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
+               % normalisation
+                SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+                SE = SE.* repmat(wse,size(SE,1),1);
+                % compute the set of positive ideal solutions for each criteria (max for
+                % good crieteria, min for bad criteria). Max used as all crieteria
+                % represent preferred attributes not costs or negative attributes
+
+                PIS = max(SE(:,2:end));
+
+                % compute the set of negative ideal solutions for each criteria 
+                % (min for good criteria, max for bad criteria). 
+                % Min used as all criteria represent preferred attributes not 
+                % costs or negative attributes
+
+                NIS = min(SE(:,2:end));
+
+                % calculate separation distance from the ideal and non-ideal solns
+                S_p = sqrt(sum((SE(:,2:end)-PIS).^2,2));
+                S_n = sqrt(sum((SE(:,2:end)-NIS).^2,2));
+
+                % final ranking measure of relative closeness C
+                C = S_n./(S_p + S_n);
+                SEwt = [SE(:,1), C];
+                order = sortrows(SEwt,2,'descend');
+
+                last_idx = min(nsiteint, height(order));
+
+                prefseedsites = order(1:last_idx,1);
+                nprefseedsites = numel(prefseedsites); 
+            end
+
+            % shading rankings
+            wsh(all(SH==0,1)) = [];
+            SH(:,all(SH==0,1)) = []; %if a column is all zeros, delete
+            % normalisation
+            SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
+            SH = SH.* repmat(wsh,size(SH,1),1);
             % compute the set of positive ideal solutions for each criteria (max for
             % good crieteria, min for bad criteria). Max used as all crieteria
             % represent preferred attributes not costs or negative attributes
 
-            PIS = max(SE(:,2:end));
+            PIS = max(SH(:,2:end));
 
-            % compute the set of negative ideal solutions for each criteria 
-            % (min for good criteria, max for bad criteria). 
-            % Min used as all criteria represent preferred attributes not 
-            % costs or negative attributes
+            % compute the set of negative ideal solutions for each criteria (min for
+            % good crieteria, max for bad criteria). Min used as all crieteria
+            % represent preferred attributes not costs or negative attributes
 
-            NIS = min(SE(:,2:end));
+            NIS = min(SH(:,2:end));
 
             % calculate separation distance from the ideal and non-ideal solns
-            S_p = sqrt(sum((SE(:,2:end)-PIS).^2,2));
-            S_n = sqrt(sum((SE(:,2:end)-NIS).^2,2));
 
-            % final ranking measure of relative closeness C
+            S_p = sqrt(sum((SH(:,2:end)-PIS).^2,2));
+            S_n = sqrt(sum((SH(:,2:end)-NIS).^2,2));
+
+            % final ranking measue of relative closeness C
+
             C = S_n./(S_p + S_n);
-            SEwt = [SE(:,1), C];
-            order = sortrows(SEwt,2,'descend');
+            SHwt = [SH(:,1), C];
+            order = sortrows(SHwt,2,'descend');
+            %highest indicators picks the cool sites
 
             last_idx = min(nsiteint, height(order));
 
-            prefseedsites = order(1:last_idx,1);
-            nprefseedsites = numel(prefseedsites); 
-        end
-        
-        % shading rankings
-        wsh(all(SH==0,1)) = [];
-        SH(:,all(SH==0,1)) = []; %if a column is all zeros, delete
-        % normalisation
-        SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
-        SH = SH.* repmat(wsh,size(SH,1),1);
-        % compute the set of positive ideal solutions for each criteria (max for
-        % good crieteria, min for bad criteria). Max used as all crieteria
-        % represent preferred attributes not costs or negative attributes
+            prefshadesites = order(1:last_idx,1);
+            nprefshadesites = numel(prefshadesites); 
 
-        PIS = max(SH(:,2:end));
+        case 3
+            %% VIKOR
+            % level of compromise (utility vs. regret). v = 0.5 is consensus, v<0.5
+            % is minimal regret, v>0.5 is max group utility (majority rules)
+            v = 0.5;    
 
-        % compute the set of negative ideal solutions for each criteria (min for
-        % good crieteria, max for bad criteria). Min used as all crieteria
-        % represent preferred attributes not costs or negative attributes
+            % seeding rankings
+            if isempty(SE)
+                prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+                nprefseedsites = 0;
+            else
+                wse(all(SE==0,1)) = [];
+                SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
+                % normalisation
+                SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+                SE = SE.* repmat(wse,size(SE,1),1);
 
-        NIS = min(SH(:,2:end));
+                F_s = max(SE(:,2:end));
 
-        % calculate separation distance from the ideal and non-ideal solns
+                % Compute utility of the majority S (Manhatten Distance)
+                % Compute individual regret R (Chebyshev distance)
+                sr_arg =((F_s-SE(:,2:end)));
+                S = sum(sr_arg,2);
+                S = [SE(:,1), S];
+                R = max(sr_arg,[],2);
+                R = [SE(:,1),R];
 
-        S_p = sqrt(sum((SH(:,2:end)-PIS).^2,2));
-        S_n = sqrt(sum((SH(:,2:end)-NIS).^2,2));
+                % Compute the VIKOR compromise Q
+                S_s = max(S(:,2));
+                S_h = min(S(:,2));
+                R_s = max(R(:,2));
+                R_h = min(R(:,2));
+                Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
+                Q = [SE(:,1),Q];
 
-        % final ranking measue of relative closeness C
+                % sort Q in ascending order rows
+                orderQ = sortrows(Q,2,'descend');
 
-        C = S_n./(S_p + S_n);
-        SHwt = [SH(:,1), C];
-        order = sortrows(SHwt,2,'descend');
-        %highest indicators picks the cool sites
+                last_idx = min(nsiteint, height(orderQ));
 
-        last_idx = min(nsiteint, height(order));
-
-        prefshadesites = order(1:last_idx,1);
-        nprefshadesites = numel(prefshadesites); 
-    
-    case 3
-        %% VIKOR
-        % level of compromise (utility vs. regret). v = 0.5 is consensus, v<0.5
-        % is minimal regret, v>0.5 is max group utility (majority rules)
-        v = 0.5;    
-
-        % seeding rankings
-        if isempty(SE)
-            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-            nprefseedsites = 0;
-        else
-            wse(all(SE==0,1)) = [];
-            SE(:,all(SE==0,1)) = []; %if a column is all zeros, delete
+                prefseedsites = orderQ(1:last_idx,1);
+                nprefseedsites = numel(prefseedsites); 
+            end
+            wsh(all(SH == 0,1)) = [];
+            SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
+            % shading rankings
             % normalisation
-            SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
-            SE = SE.* repmat(wse,size(SE,1),1);
+            SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
+            SH = SH.* repmat(wsh,size(SH,1),1);
 
-            F_s = max(SE(:,2:end));
+            F_s = max(SH(:,2:end));
 
             % Compute utility of the majority S (Manhatten Distance)
             % Compute individual regret R (Chebyshev distance)
-            sr_arg =((F_s-SE(:,2:end)));
+            sr_arg =((F_s-SH(:,2:end)));
             S = sum(sr_arg,2);
-            S = [SE(:,1), S];
+            S = [SH(:,1), S];
             R = max(sr_arg,[],2);
-            R = [SE(:,1),R];
+            R = [SH(:,1),R];
 
             % Compute the VIKOR compromise Q
             S_s = max(S(:,2));
@@ -289,117 +322,85 @@ switch alg_ind
             R_s = max(R(:,2));
             R_h = min(R(:,2));
             Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-            Q = [SE(:,1),Q];
+            Q = [SH(:,1),Q];
 
-            % sort Q in ascending order rows
+            % sort R, S and Q in ascending order rows
             orderQ = sortrows(Q,2,'descend');
-
             last_idx = min(nsiteint, height(orderQ));
 
-            prefseedsites = orderQ(1:last_idx,1);
-            nprefseedsites = numel(prefseedsites); 
-        end
-        wsh(all(SH == 0,1)) = [];
-        SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
-        % shading rankings
-        % normalisation
-        SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
-        SH = SH.* repmat(wsh,size(SH,1),1);
+            prefshadesites = orderQ(1:last_idx,1);
+            nprefshadesites = numel(prefshadesites); 
+        case 4
+            %% Multi-objective GA algorithm weighting
+            % set up optimisation problem
+            % no inequality constraints
+            Aeq = [];
+            beq = [];
 
-        F_s = max(SH(:,2:end));
+            opts = optimoptions('gamultiobj', 'UseParallel', false, 'Display', 'off');
+            % seeding rankings
+            if isempty(SE)
+                prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
+                nprefseedsites = 0;
+            else
+                wse(all(SE == 0,1)) = [];
+                SE(:,all(SE == 0,1)) = []; %if a column is all zeros, delete
+                 % integer weights must sum to number of preferred sites
+                A = ones(1,length(SE(:,1)));
+                b = nsiteint;
 
-        % Compute utility of the majority S (Manhatten Distance)
-        % Compute individual regret R (Chebyshev distance)
-        sr_arg =((F_s-SH(:,2:end)));
-        S = sum(sr_arg,2);
-        S = [SH(:,1), S];
-        R = max(sr_arg,[],2);
-        R = [SH(:,1),R];
+                 % integer variables
+                intcon = 1:length(SE(:,1));
 
-        % Compute the VIKOR compromise Q
-        S_s = max(S(:,2));
-        S_h = min(S(:,2));
-        R_s = max(R(:,2));
-        R_h = min(R(:,2));
-        Q = v*(S(:,2)-S_h)/(S_s-S_h) + (1-v)*(R(:,2)-R_h)/(R_s-R_h);
-        Q = [SH(:,1),Q];
+                % normalisation
+                SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
+                SE = SE.* repmat(wse,size(SE,1),1);
 
-        % sort R, S and Q in ascending order rows
-        orderQ = sortrows(Q,2,'descend');
-        last_idx = min(nsiteint, height(orderQ));
+                % multi-objective function for seeding
+                fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
+                % solve multi-objective problem using genetic alg
+                lb = zeros(1,length(SE(:,1))); % x (weightings) can be 0
+                ub = ones(1,length(SE(:,1))); % to 1
+                x1 = gamultiobj(fun1,length(SE(:,1)),Aeq,beq,A,b,lb,ub,[],intcon,opts);            
 
-        prefshadesites = orderQ(1:last_idx,1);
-        nprefshadesites = numel(prefshadesites); 
-    case 4
-        %% Multi-objective GA algorithm weighting
-        % set up optimisation problem
-        % no inequality constraints
-        Aeq = [];
-        beq = [];
-
-        opts = optimoptions('gamultiobj', 'UseParallel', false, 'Display', 'off');
-        % seeding rankings
-        if isempty(SE)
-            prefseedsites = 0;  %if all rows have nans and A is empty, abort mission
-            nprefseedsites = 0;
-        else
-            wse(all(SE == 0,1)) = [];
-            SE(:,all(SE == 0,1)) = []; %if a column is all zeros, delete
+                % randomly select solution from pareto front
+                ind = randi([1 size(x1,1)]);
+                % select optimal sites
+                prefseedsites = site_ids(logical(x1(ind,:)));            
+                nprefseedsites = numel(prefseedsites);
+            end
+             % shading rankings
+             wsh(all(SH == 0,1)) = [];
+             SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
              % integer weights must sum to number of preferred sites
-            A = ones(1,length(SE(:,1)));
-            b = nsiteint;
+             A = ones(1,length(SH(:,1)));
+             b = nsiteint;
 
              % integer variables
-            intcon = 1:length(SE(:,1));
-            
+             intcon = 1:length(SH(:,1));
+
             % normalisation
-            SE(:,2:end) = SE(:,2:end)./sum(SE(:,2:end).^2);
-            SE = SE.* repmat(wse,size(SE,1),1);
+            SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
+            SH = SH.* repmat(wsh,size(SH,1),1);
 
-            % multi-objective function for seeding
-            fun1 = @(x) -1* ADRIA_siteobj(x,SE(:,2:end));
+            lb = zeros(1,length(SH(:,1))); % x (weightings) can be 0
+            ub = ones(1,length(SH(:,1))); % to 1
+
+
+            % multi-objective function for shading
+            fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
             % solve multi-objective problem using genetic alg
-            lb = zeros(1,length(SE(:,1))); % x (weightings) can be 0
-            ub = ones(1,length(SE(:,1))); % to 1
-            x1 = gamultiobj(fun1,length(SE(:,1)),Aeq,beq,A,b,lb,ub,[],intcon,opts);            
-            
+            x2 = gamultiobj(fun2,length(SH(:,1)),Aeq,beq,A,b,lb,ub,[],intcon,opts);
+
             % randomly select solution from pareto front
-            ind = randi([1 size(x1,1)]);
+            ind = randi([1 size(x2,1)]);
+
             % select optimal sites
-            prefseedsites = site_ids(logical(x1(ind,:)));            
-            nprefseedsites = numel(prefseedsites);
-        end
-         % shading rankings
-         wsh(all(SH == 0,1)) = [];
-         SH(:,all(SH == 0,1)) = []; %if a column is all zeros, delete
-         % integer weights must sum to number of preferred sites
-         A = ones(1,length(SH(:,1)));
-         b = nsiteint;
-            
-         % integer variables
-         intcon = 1:length(SH(:,1));
-
-        % normalisation
-        SH(:,2:end) = SH(:,2:end)./sum(SH(:,2:end).^2);
-        SH = SH.* repmat(wsh,size(SH,1),1);
-        
-        lb = zeros(1,length(SH(:,1))); % x (weightings) can be 0
-        ub = ones(1,length(SH(:,1))); % to 1
-
-        
-        % multi-objective function for shading
-        fun2 = @(x) -1* ADRIA_siteobj(x,SH(:,2:end));
-        % solve multi-objective problem using genetic alg
-        x2 = gamultiobj(fun2,length(SH(:,1)),Aeq,beq,A,b,lb,ub,[],intcon,opts);
-        
-        % randomly select solution from pareto front
-        ind = randi([1 size(x2,1)]);
-
-        % select optimal sites
-        prefshadesites = site_ids(logical(x2(ind,:)));
-        nprefshadesites = numel(prefshadesites);
-
-end 
+            prefshadesites = site_ids(logical(x2(ind,:)));
+            nprefshadesites = numel(prefshadesites);
+        otherwise
+            error("Unknown MCDA algorithm choice.")
+    end
 end
 
 
