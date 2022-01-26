@@ -423,14 +423,17 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     % nprefseedsites = numel(prefseedsites);
     
     % Add ranking column
-    seed_order(:, 3) = 1:length(seed_order(:, 1));
-    shade_order(:, 3) = 1:length(shade_order(:, 1));
+    if exist('seed_order', 'var')
+        seed_order(:, 3) = 1:length(seed_order(:, 1));
+        
+        % Match by site_id and assign rankings to log
+        [~,ii] = ismember(rankings(:,1), seed_order(:,1));
+        align = ii(ii ~= 0);
+        rankings(align, 2) = seed_order(align, 3);
+    end
 
-    % Match by site_id and assign rankings to log
-    [~,ii] = ismember(rankings(:,1), seed_order(:,1));
-    align = ii(ii ~= 0);
-    rankings(align, 2) = seed_order(align, 3);
-    
+    % Same as above, for shade
+    shade_order(:, 3) = 1:length(shade_order(:, 1));
     [~,ii] = ismember(rankings(:,1), shade_order(:,1));
     align = ii(ii ~= 0);
     rankings(align, 3) = shade_order(align, 3);
