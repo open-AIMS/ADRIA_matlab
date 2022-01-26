@@ -1,4 +1,4 @@
-function [conversion_vector, base_covers]  = baseCoralNumbersFromCovers(target_covers)
+function [conversion_vector, base_numbers]  = baseCoralNumbersFromCovers(target_covers)
 
 % Produce conversion vectors from coral covers to initial coral size 
 % distribution in ADRIA for corymbose Acropora and small massives.
@@ -33,5 +33,5 @@ cov2n_SmlMas = totcoverIPMF_SmlMas_2026 ./ nIPMF_SmlMas_2026;
 conversion_vector(:,1) = cov2n_CorAcr;
 conversion_vector(:,2) = cov2n_SmlMas;
 
-base_covers = target_covers./ conversion_vector;
+base_numbers = target_covers./ conversion_vector;
 end
