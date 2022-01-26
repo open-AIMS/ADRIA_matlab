@@ -30,6 +30,8 @@ function mean_r = siteRanking(rankings, orient, func)
             elseif orient == "shade"
                 mean_r = func(squeeze(func(squeeze(rankings(:, :, 2, :, :)), 1)), [2,3]);
             end
+        otherwise
+            error("Unknown number of ranking log dimensions.")
     end
         
      
