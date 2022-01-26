@@ -220,7 +220,7 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
-               runargs.collect_logs logical
+               runargs.collect_logs logical = true
             end
             
             if isempty(obj.site_data)
@@ -264,6 +264,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
+               runargs.collect_logs logical = true
             end
             
             nreps = runargs.nreps;
@@ -313,7 +314,8 @@ classdef ADRIA < handle
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, obj.site_data, fprefix, runargs.batch_size);
+                     w_scens, d_scens, obj.site_data, obj.collect_logs, ...
+                     fprefix, runargs.batch_size);
         end
         
         function Y = gatherResults(obj, file_loc, metrics)
