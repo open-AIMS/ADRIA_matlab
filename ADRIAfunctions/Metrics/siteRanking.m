@@ -26,9 +26,9 @@ function mean_r = siteRanking(rankings, orient, func)
             end
         case 5
             if orient == "seed"
-                mean_r = func(squeeze(rankings(:, :, 1, :, :)), [1, 4, 5])';
+                mean_r = func(squeeze(func(squeeze(rankings(:, :, 1, :, :)), 1)), [2,3]);
             elseif orient == "shade"
-                mean_r = func(squeeze(rankings(:, :, 2, :, :)), [1, 4, 5])';
+                mean_r = func(squeeze(func(squeeze(rankings(:, :, 2, :, :)), 1)), [2,3]);
             end
     end
         
