@@ -67,6 +67,10 @@ BC = metric_results.coralTaxaCover.juveniles;
 % Calculate coral shelter volume per ha
 SV_per_ha = metric_results.shelterVolume;
 
+%% Site rankings
+figure;
+barh(siteRanking(res.MCDA_rankings, "shade"));
+
 %% Plot coral covers over time and sites
 figure; 
 LO = tiledlayout(2,3, 'TileSpacing','Compact');
