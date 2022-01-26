@@ -67,10 +67,27 @@ function [result, md] = readDistributed(filename)
     nsims = md.n_sims;
     for v = 1:n_vars
         var_n = var_names{v};
+        if var_n ~= "all"
+            % skip logs for now...
+            % we'd need to restructure the return type to be a struct
+            % or add a flag indicating what result set (raw or logs) is 
+            % desired...
+            continue
+        end
         result.(var_n) = repmat({0}, nsims, 1);
         tmp = ncread(filename, var_n);
-        for i = 1:nsims
-        	result(i, var_n) = {tmp(:, :, :, i, :)};
+        dim_len = ndims(tmp);
+        switch dim_len
+            case 5
+                for i = 1:nsims
+                    result(i, var_n) = {tmp(:, :, :, i, :)};
+                end
+            case 4
+                for i = 1:nsims
+                    result(i, var_n) = {tmp(:, :, i, :)};
+                end
+            otherwise
+                error("Unexpected number of dims in result file");
         end
     end
 end
