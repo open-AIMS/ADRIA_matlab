@@ -13,6 +13,7 @@ classdef ADRIA < handle
         site_ranks  % site rank
         strongpred  % strongest predecessor
         site_data   % table of site data (dpeth, carrying capacity, etc)
+        init_coral_cov_col  % column name to derive initial coral cover from
     end
 
     properties (Dependent)
@@ -21,6 +22,8 @@ classdef ADRIA < handle
 
         sample_defaults
         sample_bounds
+        
+        init_coral_cover
     end
 
     methods (Access = private)
@@ -82,6 +85,20 @@ classdef ADRIA < handle
             % Returns table of name, lower_bound, upper_bound
             details = obj.parameterDetails();
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
+        end
+        
+        function init_cover = get.init_coral_cover(obj)
+            if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
+                % If empty, default base covers will be used
+                init_cover = [];
+                return
+            end
+            
+            % Create initial coral cover by size class based on input data
+            % ...
+            % obj.
+            
+            % init_coral_cover
         end
 
         %% object methods
@@ -206,8 +223,9 @@ classdef ADRIA < handle
                 max_coral_col = "k"  % column to load max coral cover from
             end
             
-            % if strlength(init_coral_cov_col) > 0
-                
+            if strlength(init_coral_cov_col) > 0
+                obj.init_coral_cov_col = init_coral_cov_col;
+            end 
             
             sdata = readtable(filename);
             obj.site_data = sdata(:, ["site_id"; max_coral_col; "sitedepth"; "recom_connectivity"]);
@@ -251,7 +269,8 @@ classdef ADRIA < handle
             [interv, crit, coral] = obj.splitParameterTable(X);
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
-                     obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
+                     obj.TP_data, obj.site_ranks, obj.strongpred, ...
+                     obj.init_coral_cover, nreps, ...
                      w_scens, d_scens, obj.site_data, runargs.collect_logs);
         end
         

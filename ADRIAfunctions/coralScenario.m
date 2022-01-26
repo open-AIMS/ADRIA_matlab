@@ -1,5 +1,5 @@
 function results = coralScenario(interv, criteria, coral_params, sim_params, ...
-    TP_data, site_ranks, strongpred, ...
+    TP_data, site_ranks, strongpred, init_cov, ...
     wave_scen, dhw_scen, site_data, collect_logs)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
@@ -13,6 +13,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    TP_data      : matrix, transitional probability matrix
 %    site_ranks   : matrix, of site centrality
 %    strongpred   : matrix, of strongest predecessor for each site
+%    init_cov     : matrix, of initial coral cover at time = 1
 %    wave_scen    : matrix[timesteps, nsites], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
 %    site_data    : table, of site data. Should be pre-sorted by the
@@ -167,7 +168,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     Yout = zeros(tf, nspecies, nsites);
 
     % Set initial population sizes at tstep = 1
-    Yout(1, :, :) = repmat(coral_params.basecov, 1, nsites);
+    Yout(1, :, :) = init_cov;
 
     if collect_logs
         % Seed/shade log

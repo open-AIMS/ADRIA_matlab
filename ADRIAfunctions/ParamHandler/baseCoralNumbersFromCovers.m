@@ -30,6 +30,9 @@ totcoverIPMF_SmlMas_2026 = sum(coverIPMF_SmlMas_2026);
 cov2n_CorAcr = totcoverIPMF_CorAcr_2026 ./ nIPMF_CorAcr_2026;
 cov2n_SmlMas = totcoverIPMF_SmlMas_2026 ./ nIPMF_SmlMas_2026;
 
+% Initial values for Corymbose Acropora and Small Massives
+% all other coral types should be set to 0.
+% (needs to be repeated for all sites)
 conversion_vector(:,1) = cov2n_CorAcr;
 conversion_vector(:,2) = cov2n_SmlMas;
 
