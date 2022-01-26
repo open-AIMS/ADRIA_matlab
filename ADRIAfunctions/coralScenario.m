@@ -1,22 +1,23 @@
 function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, ...
-    wave_scen, dhw_scen, site_data)
+    wave_scen, dhw_scen, site_data, collect_logs)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
 %
 % Inputs:
-%    interv      : table, row of intervention table
-%    criteria    : table, row of criteria weights table
-%    coral_params: table, row of coral parameters
-%    sim_params  : struct, of simulation constants
-%    TP_data     : matrix, transitional probability matrix
-%    site_ranks  : matrix, of site centrality
-%    strongpred  : matrix, of strongest predecessor for each site
-%    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
-%    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
-%    site_data   : table, of site data. Should be pre-sorted by the
+%    interv       : table, row of intervention table
+%    criteria     : table, row of criteria weights table
+%    coral_params : table, row of coral parameters
+%    sim_params   : struct, of simulation constants
+%    TP_data      : matrix, transitional probability matrix
+%    site_ranks   : matrix, of site centrality
+%    strongpred   : matrix, of strongest predecessor for each site
+%    wave_scen    : matrix[timesteps, nsites], spatio-temporal wave damage scenario
+%    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
+%    site_data    : table, of site data. Should be pre-sorted by the
 %                         `recom_connectivity` column
+%    collect_logs : bool, collect shade/seeding logs
 %
 % Outputs:
 %    results     : struct, of 

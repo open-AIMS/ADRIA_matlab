@@ -14,6 +14,7 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
 %    site_data    : table, of site data
+%    collect_logs : bool, collect shade/seeding logs
 %
 % Output:
 %    results : struct,

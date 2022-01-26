@@ -26,7 +26,6 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %          - Y, [n_timesteps, n_sites, N, n_reps]
 %          - seed_log, [n_timesteps, n_sites, N, n_species, n_reps]
 %          - shade_log, [n_timesteps, n_sites, N, n_reps]
-%          - S  [n_timesteps, n_sites, N, n_reps]
 %
 % Example:
 %     >> runCoralToDisk(interv_scens, criteria_weights, coral_params, ...
