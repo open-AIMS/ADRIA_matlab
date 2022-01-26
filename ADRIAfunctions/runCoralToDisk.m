@@ -128,6 +128,7 @@ parfor b_i = 1:n_batches
             if collect_logs
                 seed_log(:, :, :, i, j) = res.seed_log;
                 shade_log(:, :, i, j) = res.shade_log;
+                rankings(:, :, :, i, j) = res.MCDA_rankings;
             end
         end
     end
@@ -139,6 +140,7 @@ parfor b_i = 1:n_batches
     if collect_logs
         tmp_d.seed_log = seed_log;
         tmp_d.shade_log = shade_log;
+        tmp_d.MCDA_rankings = rankings;
     end
     
     % include metadata

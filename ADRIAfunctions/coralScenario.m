@@ -173,6 +173,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Seed/shade log
         Yseed = zeros(tf, nspecies, nsites);
         Yshade = zeros(tf, nsites);
+        site_rankings = zeros(tf, nsites, 2);  % log seeding/shading ranks
         % total_cover = zeros(tf, nsites);
     end
 
@@ -227,9 +228,13 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
+            
+            if collect_logs
+                site_rankings(tstep, rankings(:, 1), :) = rankings(:, 2:end);
+            end
         else
             % Unguided deployment, seed/shade corals anywhere
             prefseedsites = randi(nsites, [nsiteint, 1])';
@@ -291,4 +296,5 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     results.Y = Yout;
     results.seed_log = Yseed;
     results.shade_log = Yshade;
+    results.MCDA_rankings = site_rankings;
 end

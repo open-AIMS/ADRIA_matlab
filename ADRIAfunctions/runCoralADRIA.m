@@ -62,7 +62,8 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 % Relative cover of all deployed corals = 3000m2/100,000m2 = 3 percent
 N = height(intervs);
 
-[timesteps, nsites, ~] = size(wave_scen);
+timesteps = sim_params.tf;
+nsites = height(site_data);
 
 % generate template struct for coral parameters
 coral_spec = coralSpec();
@@ -77,6 +78,7 @@ end
 Y = zeros(timesteps, n_species, nsites, N, n_reps);
 seed = zeros(timesteps, n_species, nsites, N, n_reps);
 shade = zeros(timesteps, nsites, N, n_reps);
+rankings = zeros(timesteps, nsites, 2, N, n_reps);
 
 for i = 1:N
     scen_it = intervs(i, :);
@@ -95,8 +97,11 @@ for i = 1:N
         Y(:, :, :, i, j) = res.Y;
         
         if collect_logs
+            % TODO: Generalize so we're not manually adding logs
+            %       as we add them...
             seed(:, :, :, i, j) = res.seed_log;
             shade(:, :, i, j) = res.shade_log;
+            rankings(:, :, :, i, j) = res.MCDA_rankings;
         end
     end
 end
@@ -105,5 +110,6 @@ results = struct();
 results.Y = Y;
 results.seed_log = seed;
 results.shade_log = shade;
+results.MCDA_rankings = rankings;
 
 end

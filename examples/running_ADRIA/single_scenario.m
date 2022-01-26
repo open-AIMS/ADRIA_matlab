@@ -108,10 +108,11 @@ param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
 %% Run ADRIA
 % Run a single simulation
-Y = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=true);
-seed_log = Y.seed_log;
-shade_log = Y.shade_log;
-Y = Y.Y;  % get raw results, ignoring seed/shade logs
+res = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=true);
+seed_log = res.seed_log;
+shade_log = res.shade_log;
+rankings = res.MCDA_rankings;
+Y = res.Y;  % get raw results, ignoring seed/shade logs
 
 % Collect metrics
 metric_results = collectMetrics(Y, coral_params, ...

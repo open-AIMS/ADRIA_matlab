@@ -28,7 +28,8 @@ end
 
 % Set MCDA algorithm choice to `2` as we only want to use TOPSIS 
 % for this example
-sample_table.Guided(:) = 2;
+% sample_table.Guided(:) = 2;
+sample_table.Guided(:) = randi([1, 3], N, 1);
 
 %% Load site specific data
 ai.loadConnectivity('Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
