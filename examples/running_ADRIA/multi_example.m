@@ -28,16 +28,18 @@ end
 
 % Set MCDA algorithm choice to `2` as we only want to use TOPSIS 
 % for this example
-sample_table.Guided(:) = 2;
+% sample_table.Guided(:) = 2;
+sample_table.Guided(:) = randi([1, 3], N, 1);
 
 %% Load site specific data
 ai.loadConnectivity('Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
-ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial.csv')
+ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv')
 
 %% Scenario runs
 
 tic
-Y = ai.run(sample_table, sampled_values=true, nreps=n_reps);
+res = ai.run(sample_table, sampled_values=true, nreps=n_reps);
+Y = res.Y;  % get raw results, ignoring seed/shade logs
 % ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
 %     file_prefix='./test', batch_size=4);
 tmp = toc;
@@ -64,6 +66,10 @@ BC = metric_results.coralTaxaCover.juveniles;
 
 % Calculate coral shelter volume per ha
 SV_per_ha = metric_results.shelterVolume;
+
+%% Site rankings
+figure;
+barh(siteRanking(res.MCDA_rankings, "shade"));
 
 %% Plot coral covers over time and sites
 figure; 

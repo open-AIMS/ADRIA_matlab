@@ -58,6 +58,7 @@ Nreps = 50;
 
 % run ADRIA
 Y = ai.run(multirun_params,sampled_values = false,nreps = Nreps);
+Y = Y.Y;  % get raw results, ignoring seed/shade logs
 Y = squeeze(Y);
 
 % create filenames for saving outputs and corresponding intervention

@@ -1,7 +1,7 @@
 function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               TP_data, site_ranks, strongpred, ...
                               n_reps, wave_scen, dhw_scen, site_data, ...
-                              file_prefix, batch_size)
+                              collect_logs, file_prefix, batch_size)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,18 +15,17 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %    wave_scen    : matrix[timesteps, nsites, n_reps], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, n_reps], degree heating weeek scenario
 %    site_data    : table, holding max coral cover, recom site ids, etc.
-%    file_prefix : str, write results to netcdf instead of 
+%    collect_logs : bool, collect shade/seeding logs
+%    file_prefix : str, write results to batches of netCDFs instead of
 %                    storing in memory.
-%                    If provided, output `Y` will be a struct of zeros.
 %    batch_size : int, size of simulation batches to run/save when writing
 %                    to disk.
 %
 % Output:
-%    Y : struct,
-%          - TC [n_timesteps, n_sites, N, n_reps]
-%          - C  [n_timesteps, n_sites, N, n_species, n_reps]
-%          - E  [n_timesteps, n_sites, N, n_reps]
-%          - S  [n_timesteps, n_sites, N, n_reps]
+%    results : struct,
+%          - Y, [n_timesteps, n_sites, N, n_reps]
+%          - seed_log, [n_timesteps, n_sites, N, n_species, n_reps]
+%          - shade_log, [n_timesteps, n_sites, N, n_reps]
 %
 % Example:
 %     >> runCoralToDisk(interv_scens, criteria_weights, coral_params, ...
@@ -103,6 +102,11 @@ parfor b_i = 1:n_batches
     % Create batch cache
     raw = zeros(timesteps, nspecies, nsites, b_len, n_reps);
     
+    if collect_logs
+        seed_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
+        shade_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
+    end
+    
     for i = 1:b_len
         scen_it = b_interv(i, :);
         scen_crit = b_cw(i, :);
@@ -112,16 +116,32 @@ parfor b_i = 1:n_batches
         scen_coral_params = extractCoralSamples(b_cp(i, :), coral_spec);
 
         for j = 1:n_reps
-            raw(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
+            w_scen = wave_scen(:, :, j);
+            d_scen = dhw_scen(:, :, j);
+            res = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
-                                   wave_scen(:, :, j), dhw_scen(:, :, j), site_data);
+                                   w_scen, d_scen, ...
+                                   site_data, collect_logs);
+            raw(:, :, :, i, j) = res.Y;
+            
+            if collect_logs
+                seed_log(:, :, :, i, j) = res.seed_log;
+                shade_log(:, :, i, j) = res.shade_log;
+                rankings(:, :, :, i, j) = res.MCDA_rankings;
+            end
         end
     end
     
     % save results
     tmp_d = struct();
     tmp_d.all = raw;
+    
+    if collect_logs
+        tmp_d.seed_log = seed_log;
+        tmp_d.shade_log = shade_log;
+        tmp_d.MCDA_rankings = rankings;
+    end
     
     % include metadata
     nc_md = struct();
@@ -136,6 +156,7 @@ parfor b_i = 1:n_batches
     saveData(tmp_d, tmp_fn, attributes=nc_md);
     
     % Clear vars to save memory
+    % (can't use `clear` here due to `parfor`)
     tmp_d = [];
 end
 

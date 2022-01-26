@@ -194,7 +194,7 @@ classdef ADRIA < handle
             obj.strongpred = sp;
         end
         
-        function loadSiteData(obj, filename, max_coral_col)
+        function loadSiteData(obj, filename, init_coral_cov_col, max_coral_col)
             % Load data on site carrying capacity, depth and connectivity
             % from indicated CSV file.
             
@@ -202,8 +202,12 @@ classdef ADRIA < handle
             arguments
                 obj
                 filename
-                max_coral_col = "k"
+                init_coral_cov_col = ""
+                max_coral_col = "k"  % column to load max coral cover from
             end
+            
+            % if strlength(init_coral_cov_col) > 0
+                
             
             sdata = readtable(filename);
             obj.site_data = sdata(:, ["site_id"; max_coral_col; "sitedepth"; "recom_connectivity"]);
@@ -216,6 +220,7 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
+               runargs.collect_logs logical = true
             end
             
             if isempty(obj.site_data)
@@ -247,7 +252,7 @@ classdef ADRIA < handle
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, obj.site_data);
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
         end
         
         function runToDisk(obj, X, runargs)
@@ -259,6 +264,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
+               runargs.collect_logs logical = true
             end
             
             nreps = runargs.nreps;
@@ -308,7 +314,8 @@ classdef ADRIA < handle
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, obj.site_data, fprefix, runargs.batch_size);
+                     w_scens, d_scens, obj.site_data, obj.collect_logs, ...
+                     fprefix, runargs.batch_size);
         end
         
         function Y = gatherResults(obj, file_loc, metrics)
