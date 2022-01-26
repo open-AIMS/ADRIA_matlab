@@ -2,11 +2,13 @@
 ai = ADRIA();
 % site_vec = 
 % cover_init = (sum over species to leave sitewise)
-% heat_stress_p =  load from DHW files
+fn = strcat("Inputs/example_wave_DHWs_RCP_expanded_", num2str(obj.constants.RCP), ".nc");
+dhw_scens = ncread(fn, "DHW");
+% heat_stress_p = dhw_scens() - need to select correct year- look at data
 % site_centr
 % 
 % replace with correct file for IPMF
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', 0.1);
+[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean_ExpandedExample.xlsx', 0.1);
 
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = 0; % weight of wave damage in MCDA
@@ -18,6 +20,11 @@ wtlocover = 1; % weight of low coral cover in MCDA (low cover gives preference f
 wtpredecseed = 0; % weight for the importance of seeding sites that are predecessors of priority reefs
 wtpredecshade = 0; % weight for the importance of shading sites that are predecessors of priority reefs
 risktol = 1; % risk tolerance
+
+% Filter out sites outside of desired depth range
+max_depth = criteria.depth_min + criteria.depth_offset;
+depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
+depth_priority = site_data{depth_criteria, "recom_connectivity"};
 
 nsites = length(site_vec);
 p_sites = zeros(nsites); % so column will be removed for priority sites
