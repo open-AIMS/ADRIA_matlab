@@ -1,4 +1,4 @@
-function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(DMCDA_vars, alg_ind)
+function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(DMCDA_vars, alg_ind)
 %    Utility function that uses a dynamic MCDA to work out what sites to pick,
 %    if any before going into the bleaching or cyclone season. It uses
 %    disturbance probabilities for the season (distprobyr, a vector)) and
@@ -55,6 +55,9 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
     wtlocover = DMCDA_vars.wtlocover;
     wtpredecseed = DMCDA_vars.wtpredecseed;
     wtpredecshade = DMCDA_vars.wtpredecshade;
+    
+    % site_id, seeding rank, shading rank
+    rankings = [site_ids, zeros(nsites, 1), zeros(nsites, 1)];
 
     % Filter out sites
 
@@ -154,14 +157,17 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
                 SE = SE .* repmat(wse, size(SE, 1), 1);
 
                 % simple ranking - add criteria weighted values for each sites
-                SEwt(:, 1) = SE(:, 1);
-                SEwt(:, 2) = sum(SE(:, 2:end), 2);
-                SEwt2 = sortrows(SEwt, 2, 'descend'); %sort from highest to lowest indicator
+                seed_order(:, 1) = SE(:, 1);
+                seed_order(:, 2) = sum(SE(:, 2:end), 2);
+                seed_order = sortrows(seed_order, 2, 'descend'); %sort from highest to lowest indicator
+                
+                % Add ranking column
+                seed_order(:, 3) = 1:length(seed_order(:, 1));
 
-                last_idx = min(nsiteint, height(SEwt2));
+                last_idx = min(nsiteint, height(seed_order));
 
                 %highest indicator picks the seed site
-                prefseedsites = SEwt2(1:last_idx, 1);
+                prefseedsites = seed_order(1:last_idx, 1);
                 nprefseedsites = numel(prefseedsites);
             end
 
@@ -175,12 +181,12 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
             SHwt(:, 1) = SH(:, 1);
             SHwt(:, 2) = sum(SH(:, 2:end), 2); %for now, simply add indicators
 
-            SHwt2 = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
+            shade_order = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
 
-            last_idx = min(nsiteint, height(SHwt2));
+            last_idx = min(nsiteint, height(shade_order));
 
             %highest indicators picks the cool sites
-            prefshadesites = SHwt2(1:last_idx, 1);
+            prefshadesites = shade_order(1:last_idx, 1);
             nprefshadesites = numel(prefshadesites);
         case 2
 
@@ -216,11 +222,11 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
                 % final ranking measure of relative closeness C
                 C = S_n ./ (S_p + S_n);
                 SEwt = [SE(:, 1), C];
-                order = sortrows(SEwt, 2, 'descend');
+                seed_order = sortrows(SEwt, 2, 'descend');
 
-                last_idx = min(nsiteint, height(order));
+                last_idx = min(nsiteint, height(seed_order));
 
-                prefseedsites = order(1:last_idx, 1);
+                prefseedsites = seed_order(1:last_idx, 1);
                 nprefseedsites = numel(prefseedsites);
             end
 
@@ -249,11 +255,11 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
             % final ranking measue of relative closeness C
             C = S_n ./ (S_p + S_n);
             SHwt = [SH(:, 1), C];
-            order = sortrows(SHwt, 2, 'descend');
+            shade_order = sortrows(SHwt, 2, 'descend');
             
             %highest indicators picks the cool sites
-            last_idx = min(nsiteint, height(order));
-            prefshadesites = order(1:last_idx, 1);
+            last_idx = min(nsiteint, height(shade_order));
+            prefshadesites = shade_order(1:last_idx, 1);
             nprefshadesites = numel(prefshadesites);
 
         case 3
@@ -293,11 +299,11 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
                 Q = [SE(:, 1), Q];
 
                 % sort Q in ascending order rows
-                orderQ = sortrows(Q, 2, 'descend');
+                seed_order = sortrows(Q, 2, 'descend');
 
-                last_idx = min(nsiteint, height(orderQ));
+                last_idx = min(nsiteint, height(seed_order));
 
-                prefseedsites = orderQ(1:last_idx, 1);
+                prefseedsites = seed_order(1:last_idx, 1);
                 nprefseedsites = numel(prefseedsites);
             end
             wsh(all(SH == 0, 1)) = [];
@@ -326,10 +332,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
             Q = [SH(:, 1), Q];
 
             % sort R, S and Q in ascending order rows
-            orderQ = sortrows(Q, 2, 'descend');
-            last_idx = min(nsiteint, height(orderQ));
+            shade_order = sortrows(Q, 2, 'descend');
 
-            prefshadesites = orderQ(1:last_idx, 1);
+            last_idx = min(nsiteint, height(shade_order));
+            prefshadesites = shade_order(1:last_idx, 1);
             nprefshadesites = numel(prefshadesites);
         case 4
 
@@ -373,6 +379,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
                 % select optimal sites
                 prefseedsites = site_ids(logical(x1(ind, :)));
                 nprefseedsites = numel(prefseedsites);
+                
+                seed_order = repmat(prefseedsites, 1, 2);
             end
 
             % shading rankings
@@ -403,7 +411,27 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRI
             % select optimal sites
             prefshadesites = site_ids(logical(x2(ind, :)));
             nprefshadesites = numel(prefshadesites);
+            
+            shade_order = repmat(prefshadesites, 1, 2);
         otherwise
             error("Unknown MCDA algorithm choice.")
     end
+    
+    %highest indicator picks the seed site
+    % last_idx = min(nsiteint, height(seed_weight));
+    % prefseedsites = seed_weight(1:last_idx, 1);
+    % nprefseedsites = numel(prefseedsites);
+    
+    % Add ranking column
+    seed_order(:, 3) = 1:length(seed_order(:, 1));
+    shade_order(:, 3) = 1:length(shade_order(:, 1));
+
+    % Match by site_id and assign rankings to log
+    [~,ii] = ismember(rankings(:,1), seed_order(:,1));
+    align = ii(ii ~= 0);
+    rankings(align, 2) = seed_order(align, 3);
+    
+    [~,ii] = ismember(rankings(:,1), shade_order(:,1));
+    align = ii(ii ~= 0);
+    rankings(align, 3) = shade_order(align, 3);
 end
