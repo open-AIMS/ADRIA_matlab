@@ -37,8 +37,8 @@ ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv'
 %% Scenario runs
 
 tic
-Y = ai.run(sample_table, sampled_values=true, nreps=n_reps);
-Y = Y.Y;  % get raw results, ignoring seed/shade logs
+res = ai.run(sample_table, sampled_values=true, nreps=n_reps);
+Y = res.Y;  % get raw results, ignoring seed/shade logs
 % ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
 %     file_prefix='./test', batch_size=4);
 tmp = toc;

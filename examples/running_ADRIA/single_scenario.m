@@ -223,4 +223,5 @@ xlabel(LO2,'Years', 'FontSize', 14)
 aa = gca;
 aa.FontSize = font_size;
 
+disp("Shade log all zero?")
 all(all(all(shade_log == 0)))
