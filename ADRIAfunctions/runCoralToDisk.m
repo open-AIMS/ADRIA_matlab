@@ -106,7 +106,8 @@ parfor b_i = 1:n_batches
     
     if collect_logs
         seed_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
-        shade_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
+        shade_log = zeros(timesteps, nsites, b_len, n_reps);
+        rankings = zeros(timesteps, nsites, 2, b_len, n_reps);
     end
     
     for i = 1:b_len
