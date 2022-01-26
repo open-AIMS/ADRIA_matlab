@@ -13,6 +13,7 @@ classdef ADRIA < handle
         site_ranks  % site rank
         strongpred  % strongest predecessor
         site_data   % table of site data (dpeth, carrying capacity, etc)
+        init_coral_cov_col  % column name to derive initial coral cover from
     end
 
     properties (Dependent)
@@ -21,6 +22,8 @@ classdef ADRIA < handle
 
         sample_defaults
         sample_bounds
+        
+        init_coral_cover
     end
 
     methods (Access = private)
@@ -82,6 +85,35 @@ classdef ADRIA < handle
             % Returns table of name, lower_bound, upper_bound
             details = obj.parameterDetails();
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
+        end
+        
+        function init_cover = get.init_coral_cover(obj)
+            if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
+                % If empty, default base covers will be used
+                init_cover = [];
+                return
+            end
+            
+            % Create initial coral cover by size class based on input data
+            prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
+            nsites = height(obj.site_data);
+            
+            base_coral_numbers = ...
+                [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
+                 0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
+                 0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
+                 200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
+                 200, 100, 200, 30, 0, 0; ...   % small massives
+                 0, 0, 0, 0, 0, 0];             % large massives
+            
+            % target shape is nspecies * nsites
+            init_cover = zeros(numel(base_coral_numbers), nsites);
+            for row = 1:nsites
+                x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
+                base_coral_numbers(4:5, :) = x;
+                
+                init_cover(:, row) = base_coral_numbers(:);
+            end
         end
 
         %% object methods
@@ -194,7 +226,7 @@ classdef ADRIA < handle
             obj.strongpred = sp;
         end
         
-        function loadSiteData(obj, filename, max_coral_col)
+        function loadSiteData(obj, filename, init_coral_cov_col)
             % Load data on site carrying capacity, depth and connectivity
             % from indicated CSV file.
             
@@ -202,11 +234,17 @@ classdef ADRIA < handle
             arguments
                 obj
                 filename
-                max_coral_col = "k"
+                % TODO: Fix hardcoded column selection! (note `k` column is hard set below too)
+                init_coral_cov_col = ["Acropora2026", "Goniastrea2026"]
+                % max_coral_col = "k"  % column to load max coral cover from
             end
             
+            if strlength(init_coral_cov_col) > 0
+                obj.init_coral_cov_col = init_coral_cov_col;
+            end 
+            
             sdata = readtable(filename);
-            obj.site_data = sdata(:, ["site_id"; max_coral_col; "sitedepth"; "recom_connectivity"]);
+            obj.site_data = sdata(:, [["site_id", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
             obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
@@ -216,6 +254,7 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
+               runargs.collect_logs logical = true
             end
             
             if isempty(obj.site_data)
@@ -246,8 +285,9 @@ classdef ADRIA < handle
             [interv, crit, coral] = obj.splitParameterTable(X);
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
-                     obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, obj.site_data);
+                     obj.TP_data, obj.site_ranks, obj.strongpred, ...
+                     obj.init_coral_cover, nreps, ...
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
         end
         
         function runToDisk(obj, X, runargs)
@@ -259,6 +299,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
+               runargs.collect_logs logical = true
             end
             
             nreps = runargs.nreps;
@@ -307,8 +348,10 @@ classdef ADRIA < handle
             [interv, crit, coral] = obj.splitParameterTable(X);
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
-                     obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, obj.site_data, fprefix, runargs.batch_size);
+                     obj.TP_data, obj.site_ranks, obj.strongpred, ...
+                     obj.init_coral_cover, nreps, w_scens, d_scens, ...
+                     obj.site_data, runargs.collect_logs, ...
+                     fprefix, runargs.batch_size);
         end
         
         function Y = gatherResults(obj, file_loc, metrics)

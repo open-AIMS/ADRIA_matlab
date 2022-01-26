@@ -1,22 +1,30 @@
-function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
-    TP_data, site_ranks, strongpred, ...
-    wave_scen, dhw_scen, site_data)
+function results = coralScenario(interv, criteria, coral_params, sim_params, ...
+    TP_data, site_ranks, strongpred, init_cov, ...
+    wave_scen, dhw_scen, site_data, collect_logs)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
 %
 % Inputs:
-%    interv      : table, row of intervention table
-%    criteria    : table, row of criteria weights table
-%    coral_params: table, row of coral parameters
-%    sim_params  : struct, of simulation constants
-%    TP_data     : matrix, transitional probability matrix
-%    site_ranks  : matrix, of site centrality
-%    strongpred  : matrix, of strongest predecessor for each site
-%    wave_scen   : matrix[timesteps, nsites], spatio-temporal wave damage scenario
-%    dhw_scen    : matrix[timesteps, nsites], degree heating weeek scenario
-%    site_data   : table, of site data. Should be pre-sorted by the
+%    interv       : table, row of intervention table
+%    criteria     : table, row of criteria weights table
+%    coral_params : table, row of coral parameters
+%    sim_params   : struct, of simulation constants
+%    TP_data      : matrix, transitional probability matrix
+%    site_ranks   : matrix, of site centrality
+%    strongpred   : matrix, of strongest predecessor for each site
+%    init_cov     : matrix, of initial coral cover at time = 1
+%    wave_scen    : matrix[timesteps, nsites], spatio-temporal wave damage scenario
+%    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
+%    site_data    : table, of site data. Should be pre-sorted by the
 %                         `recom_connectivity` column
+%    collect_logs : bool, collect shade/seeding logs
+%
+% Outputs:
+%    results     : struct, of 
+%                  Y         - simulation results
+%                  seed_log  - Sites seeded over time
+%                  shade_log - Sites shaded over time
 %
 % Example:
 %    See `single_scenario_example.m` in the `examples` directory.
@@ -42,12 +50,11 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     nsiteint = sim_params.nsiteint;
     
     % Set up result structure where necessary
-    prefseedsites = []; % set the list of preferred seeding sites to empty
-    prefshadesites = []; % set the list of preferred shading sites to empty
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
-    if strategy > 0
+    is_guided = strategy > 0;
+    if is_guided
         %% Weights for connectivity , waves (ww), high cover (whc) and low
         wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
         wtheat = criteria.heat_stress; % weight of heat damage in MCDA
@@ -161,12 +168,15 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     Yout = zeros(tf, nspecies, nsites);
 
     % Set initial population sizes at tstep = 1
-    Yout(1, :, :) = repmat(coral_params.basecov, 1, nsites);
+    Yout(1, :, :) = init_cov;
 
-    % Seed/shade log
-    Yseed = zeros(tf, nspecies, nsites);
-    Yshade = zeros(tf, nspecies, nsites);
-    % total_cover = zeros(tf, nsites);
+    if collect_logs
+        % Seed/shade log
+        Yseed = zeros(tf, nspecies, nsites);
+        Yshade = zeros(tf, nsites);
+        site_rankings = zeros(tf, nsites, 2);  % log seeding/shading ranks
+        % total_cover = zeros(tf, nsites);
+    end
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
@@ -187,8 +197,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         % calculates scope for coral fedundity for each size class and at 
         % each site
         fecundity_scope = fecundityScope(Y_pstep, coral_params); 
-        
-        
+
         max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
         density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
         basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
@@ -204,8 +213,7 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         dhw_step = dhw_scen(tstep, :); % subset of DHW for given timestep
 
         %% Select preferred intervention sites based on criteria (heuristics)
-        if strategy > 0 % guided
-
+        if is_guided
             % Update values for dMCDA
 
             % Factor 2
@@ -221,21 +229,27 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
             % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
-        elseif strategy == 0 % unguided deployment
-            prefseedsites = randi(nsites, [nsiteint, 1])'; % if unguided, then seed corals anywhere
-            prefshadesites = randi(nsites, [nsiteint, 1])'; % if unguided, then shade corals anywhere
+            
+            if collect_logs
+                site_rankings(tstep, rankings(:, 1), :) = rankings(:, 2:end);
+            end
+        else
+            % Unguided deployment, seed/shade corals anywhere
+            prefseedsites = randi(nsites, [nsiteint, 1])';
+            prefshadesites = randi(nsites, [nsiteint, 1])';
         end
 
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
-            Yshade(tstep, :, prefshadesites) = srm;
+            if collect_logs
+                Yshade(tstep, prefshadesites) = srm;
+            end
             
-            % Use average effect across all species 
-            % (species level effect is currently not considered anyway)
-            adjusted_dhw = max(0.0, dhw_step - mean(squeeze(Yshade(tstep, :, :)), 1));
+            % Apply reduction in DHW due to shading
+            adjusted_dhw = max(0.0, dhw_step - Yshade(tstep, :));
         else
             adjusted_dhw = dhw_step;
         end
@@ -250,11 +264,15 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yin1 = Y_pstep .* prop_loss;
 
         if (tstep <= seedyears) && ~all(prefseedsites == 0)
-            % Log seed values/sites
-            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed enhanced corals of group 2
-            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed enhanced corals of group 4
-            Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with gr2
-            Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with gr4
+            % Seed each site with the value indicated with seed1/seed2
+            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
+            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
+            
+            if collect_logs
+                % Log seed values/sites
+                Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
+                Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+            end
         end
 
         % Run ODE for all species and sites
@@ -275,5 +293,9 @@ function Y = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
     
     % Assign to output variable
-    Y = Yout;
+    results = struct();
+    results.Y = Yout;
+    results.seed_log = Yseed;
+    results.shade_log = Yshade;
+    results.MCDA_rankings = site_rankings;
 end

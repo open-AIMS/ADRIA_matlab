@@ -98,7 +98,7 @@ new_criteria_opts = array2table(user_criteria_opts', 'VariableNames', criteria_o
 
 %% Load site data
 ai.loadConnectivity('./Inputs/Moore/connectivity/2015');
-ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial.csv');
+ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
 %% Update ADRIA Interface with user specified constants
 ai.constants = new_sim_opts;
@@ -108,7 +108,11 @@ param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
 %% Run ADRIA
 % Run a single simulation
-Y = ai.run(param_table, sampled_values=false, nreps=1);
+res = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=true);
+seed_log = res.seed_log;
+shade_log = res.shade_log;
+rankings = res.MCDA_rankings;
+Y = res.Y;  % get raw results, ignoring seed/shade logs
 
 % Collect metrics
 metric_results = collectMetrics(Y, coral_params, ...
@@ -220,3 +224,5 @@ xlabel(LO2,'Years', 'FontSize', 14)
 aa = gca;
 aa.FontSize = font_size;
 
+disp("Shade log all zero?")
+all(all(all(shade_log == 0)))
