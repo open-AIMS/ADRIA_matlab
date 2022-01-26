@@ -87,11 +87,11 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
         A(:, 4) = heatstressprob / 1;
     end
 
-    %     prop_cover = sumcover/max(sumcover);  %proportional coral cover
+    prop_cover = sumcover/max(sumcover);  %proportional coral cover
     %     A(:,5) = prop_cover;
     %     A(:,6) = 1 - prop_cover;
     A(:, 5) = predec(:, 3); % priority predecessors
-    A(:, 6) = (maxcover - sumcover) ./ maxcover; % proportion of cover compared to max possible cover
+    A(:, 6) = (maxcover - prop_cover) ./ maxcover; % proportion of cover compared to max possible cover
 
     % Filter out sites that have high risk of wave damage, specifically
     % exceeding the risk tolerance

@@ -1,14 +1,13 @@
+%% Load site data;
+% Connectivity
+[TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
 
-ai = ADRIA();
-% site_vec = 
-% cover_init = (sum over species to leave sitewise)
-fn = strcat("Inputs/example_wave_DHWs_RCP_expanded_", num2str(obj.constants.RCP), ".nc");
-dhw_scens = ncread(fn, "DHW");
-% heat_stress_p = dhw_scens() - need to select correct year- look at data
-% site_centr
-% 
-% replace with correct file for IPMF
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean_ExpandedExample.xlsx', 0.1);
+% Site Data
+sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
+site_data = sdata(:,[["site_id", "k", ["Acropora2026", "Goniastrea2026"], "sitedepth", "recom_connectivity"]]);
+site_data = sortrows(site_data, "recom_connectivity");
+[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+TP_data = TP_data(g_idx, g_idx);
 
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = 0; % weight of wave damage in MCDA
@@ -20,30 +19,33 @@ wtlocover = 1; % weight of low coral cover in MCDA (low cover gives preference f
 wtpredecseed = 0; % weight for the importance of seeding sites that are predecessors of priority reefs
 wtpredecshade = 0; % weight for the importance of shading sites that are predecessors of priority reefs
 risktol = 1; % risk tolerance
+depth_min = 5; % minimum site depth
+depth_offset =5; % depth range from min depth
 
 % Filter out sites outside of desired depth range
-max_depth = criteria.depth_min + criteria.depth_offset;
-depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
+max_depth = depth_min + depth_offset;
+depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min);
 depth_priority = site_data{depth_criteria, "recom_connectivity"};
 
-nsites = length(site_vec);
-p_sites = zeros(nsites); % so column will be removed for priority sites
-% do 20 runs to plot distributions
-for ns = 1:10
-    
-    
-    dMCDA_vars = struct('nsites', nsites, 'nsiteint', nsiteint, ...
-        'prioritysites', p_sites, ...
-        'strongpred', strongpred, 'centr', site_centr, 'damprob', 0, ...
-        'heatstressprob', heat_stress_p, 'sumcover', cover_init, 'risktol', risktol, ...
-        'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
-        'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, ...
-        'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, ...
-        'wtpredecshade', wtpredecshade);
+max_cover = site_data.k/100.0; % Max coral cover at each site
 
-    % None of these should error and cause test failure
-    [prefseedsites_alg1, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 1);
-    [prefseedsites_alg2, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 2);
-    [prefseedsites_alg3, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 3);
-end
+nsites = length(depth_priority);
+p_sites = zeros(nsites); % so column will be removed for priority sites
+
+% do 20 runs to plot distributions
+%for ns = 1:10
+    
+sumcover =    site_data.Acropora2026 + site_data.Goniastrea2026;
+
+dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
+            'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
+            'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+            'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
+            'wtpredecshade', wtpredecshade);
+
+% None of these should error and cause test failure
+[prefseedsites_alg1, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 1);
+[prefseedsites_alg2, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 2);
+[prefseedsites_alg3, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 3);
+%end
 
