@@ -76,7 +76,7 @@ end
 
 Y = zeros(timesteps, n_species, nsites, N, n_reps);
 seed = zeros(timesteps, n_species, nsites, N, n_reps);
-shade = zeros(timesteps, n_species, nsites, N, n_reps);
+shade = zeros(timesteps, nsites, N, n_reps);
 
 for i = 1:N
     scen_it = intervs(i, :);
@@ -90,12 +90,13 @@ for i = 1:N
         res = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
-                               wave_scen(:, :, j), dhw_scen(:, :, j), site_data);
+                               wave_scen(:, :, j), dhw_scen(:, :, j), ...
+                               site_data, collect_logs);
         Y(:, :, :, i, j) = res.Y;
         
         if collect_logs
             seed(:, :, :, i, j) = res.seed_log;
-            shade(:, :, :, i, j) = res.shade_log;
+            shade(:, :, i, j) = res.shade_log;
         end
     end
 end
