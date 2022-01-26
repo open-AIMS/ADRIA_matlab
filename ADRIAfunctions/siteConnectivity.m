@@ -25,8 +25,6 @@ end
 
 if isfolder(file_loc)
     % Get list of files to combine
-    
-    % x(~[x.isdir])
     files = dir(file_loc);
     
     t_dirs = [files.isdir];
@@ -39,13 +37,13 @@ if isfolder(file_loc)
         t_dirs = [files.isdir];
     end
     
-    % Get list of files
+    % Get list of files from list (removes folders)
     t_files = files(~t_dirs);
 
     locs = string({t_files.folder});
     fns = string({t_files.name});
     
-    % Create full file list
+    % Create list of full, absolute, paths
     num_files = length(locs);
     full_paths = string(zeros(num_files, 1));
     for i = 1:length(locs)
@@ -66,14 +64,12 @@ if isfolder(file_loc)
         x(:, 1) = [];  % remove row ID column
         
         % Store data
-        try
-            data(fn_i, :, :) = table2array(x); % Transition probability matrix for all sites
-        catch
-            x = 0;
-        end
+        % Transition probability matrix for all sites
+        % Data set is flipped from what ADRIA expects, so transpose.
+        data(fn_i, :, :) = transpose(table2array(x));
     end
     
-    % aggregate data with indicated function
+    % aggregate data with indicated aggregation method (default: mean)
     TPbase = squeeze(agg_func(data, 1));
 else
     %% Load transitional probability matrix (connectivity between sites)
@@ -87,7 +83,7 @@ else
     % F1(1, :) = [];
     x(:, 1) = [];
     
-    TPbase = table2array(x); % Transition probability matrix for all sites
+    TPbase = transpose(table2array(x)); % Transition probability matrix for all sites
 end
 
 maxTP1cut = max(TPbase,[],'all')*con_cutoff;
