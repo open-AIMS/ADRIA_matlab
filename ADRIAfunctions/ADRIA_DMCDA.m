@@ -7,7 +7,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
 %     Inputs:
 %         DMCDAvars : a structure of the form struct('nsites', [], 'nsiteint', [], ... 'strongpred', [], 'centr', [], 'damprob', [], 'heatstressprob', [], ... 'prioritysites', [], 'sumcover', [], 'risktol', [], 'wtconseed', [], ... 'wtconshade', [],'wtwaves', [], 'wtheat', [], 'wthicover', [], ... 'wtlocover', [], 'wtpredecseed', [], 'wtpredecshade', []); where []'s are dynamically updated in runADRIA.m
 %
-%         - nsites : total number of sites
+%         - site_ids : IDs of sites to consider
 %         - nsiteint : number of sites to select for priority interventions
 %         - strongpred : strongest predecessor sites (calculated in siteConnectivity())
 %         - centr : site centrality (calculated in siteConnectivity())
@@ -421,20 +421,21 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     % last_idx = min(nsiteint, height(seed_weight));
     % prefseedsites = seed_weight(1:last_idx, 1);
     % nprefseedsites = numel(prefseedsites);
-    
+
     % Add ranking column
     if exist('seed_order', 'var')
         seed_order(:, 3) = 1:length(seed_order(:, 1));
-        
+
         % Match by site_id and assign rankings to log
-        [~,ii] = ismember(rankings(:,1), seed_order(:,1));
+        [~,ii] = ismember(seed_order(:,1), rankings(:,1), "rows");
         align = ii(ii ~= 0);
-        rankings(align, 2) = seed_order(align, 3);
+
+        rankings(align, 2) = seed_order(:, 3);
     end
 
     % Same as above, for shade
     shade_order(:, 3) = 1:length(shade_order(:, 1));
-    [~,ii] = ismember(rankings(:,1), shade_order(:,1));
+    [~,ii] = ismember(shade_order(:,1), rankings(:,1), "rows");
     align = ii(ii ~= 0);
-    rankings(align, 3) = shade_order(align, 3);
+    rankings(align, 3) = shade_order(:, 3);
 end
