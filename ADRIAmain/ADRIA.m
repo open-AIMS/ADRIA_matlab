@@ -112,7 +112,8 @@ classdef ADRIA < handle
                 x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
                 base_coral_numbers(4:5, :) = x;
                 
-                init_cover(:, row) = base_coral_numbers(:);
+                tmp = base_coral_numbers';
+                init_cover(:, row) = tmp(:);
             end
             
             assert(all(any(isnan(init_cover)) == 0), "NaNs found in coral cover data")
