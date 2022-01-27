@@ -100,7 +100,7 @@ DGbase = digraph(TPbase);
 %Edgeweights
 EW_base = DGbase.Edges.Weight;
 
-C1 = centrality(DGbase, 'indegree', 'Importance', EW_base);
+C1 = centrality(DGbase, 'outdegree', 'Importance', EW_base);
 
 %% Find strongest predecessors
 nsites = length(C1);

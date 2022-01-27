@@ -1,6 +1,8 @@
-%% Load site data;
+%% Load site data for 2026;
 % Connectivity
 [TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
+RCP = 4.5;
+Year = 2026;
 
 % Site Data
 sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
@@ -8,6 +10,12 @@ site_data = sdata(:,[["site_id", "k", ["Acropora2026", "Goniastrea2026"], "sited
 site_data = sortrows(site_data, "recom_connectivity");
 [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
 TP_data = TP_data(g_idx, g_idx);
+% DHW data
+tf = 25;
+nreps = 50;
+dhw_scen = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+% time step corresponding to 2026
+tstep = 25;
 
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = 0; % weight of wave damage in MCDA
@@ -30,22 +38,35 @@ depth_priority = site_data{depth_criteria, "recom_connectivity"};
 max_cover = site_data.k/100.0; % Max coral cover at each site
 
 nsites = length(depth_priority);
-p_sites = zeros(nsites); % so column will be removed for priority sites
-
-% do 20 runs to plot distributions
-%for ns = 1:10
+damprob = zeros(length(site_data.recom_connectivity),1);
+nsiteint = nsites;
     
-sumcover =    site_data.Acropora2026 + site_data.Goniastrea2026;
+sumcover = (site_data.Acropora2026 + site_data.Goniastrea2026)/100.0;
 
-dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
-            'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
-            'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
-            'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
-            'wtpredecshade', wtpredecshade);
+store_seed_rankings_alg1 = zeros(1,nsites,nreps);
+store_seed_rankings_alg2 = zeros(1,nsites,nreps);
+store_seed_rankings_alg3 = zeros(1,nsites,nreps);
 
-% None of these should error and cause test failure
-[prefseedsites_alg1, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 1);
-[prefseedsites_alg2, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 2);
-[prefseedsites_alg3, ~, ~, ~] = ADRIA_DMCDA(dMCDA_vars, 3);
-%end
+for l = 1:nreps
+    dhw_step = dhw_scen(tstep,:,l);
+    heatstressprob = dhw_step';
+    dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
+                'strongpred', strong_pred, 'centr', site_ranks.C1, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
+                'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+                'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
+                'wtpredecshade', wtpredecshade);
+    
+    [~, ~, ~, ~, rankingsalg1] = ADRIA_DMCDA(dMCDA_vars, 1);
+    [~, ~, ~, ~, rankingsalg2] = ADRIA_DMCDA(dMCDA_vars, 2);
+    [~, ~, ~, ~, rankingsalg3] = ADRIA_DMCDA(dMCDA_vars, 3);
+    store_seed_rankings_alg1(:,:,l) = rankingsalg1(:,2);
+    store_seed_rankings_alg2(:,:,l) = rankingsalg2(:,2);
+    store_seed_rankings_alg3(:,:,l) = rankingsalg3(:,2);
+end
 
+siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
+siteranks_alg2 = siteRanking(store_seed_rankings_alg2,"seed");
+siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
+sites_after_filtering = depth_priority;
+T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3)
+writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f.xlsx',RCP,Year))
