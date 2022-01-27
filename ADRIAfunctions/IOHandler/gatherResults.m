@@ -1,4 +1,4 @@
-function Y_collated = gatherResults(file_loc, coral_params, metrics)
+function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
 % Gather results for a given set of metrics from ADRIA runs spread across 
 % many NetCDF files.
 %
@@ -14,7 +14,8 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics)
     arguments
         file_loc string
         coral_params table
-        metrics cell = {}
+        metrics cell = {}  % Collate results with no transformation if nothing specified.
+        target_var string = "all"  % collate raw results if nothing specified.
     end
 
     file_prefix = fullfile(file_loc);
@@ -31,29 +32,38 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics)
         fn = target_files(i);
         
         full_path = fullfile(folder, fn);
-        [Ytable, md] = readDistributed(full_path);
+        [Ytable, md] = readDistributed(full_path, target_var);
         
         b_start = md.record_start;
+        b_len = md.n_sims;
+        Ytmp = repmat({0}, height(b_len), 1);
         if isempty(metrics)
             % Collate raw results if no metrics specified
-            b_end = md.record_end;
-            Y_collated{b_start:b_end} = Ytable{:, :};
-        else
-            b_len = md.n_sims;
-            Ytmp = repmat({0}, height(b_len), 1);
-            parfor j = 1:b_len
-                rec_id = (b_start - 1) + j;
-                Ytmp{j} = collectMetrics(Ytable{j, :}{:}, coral_params(rec_id, :), metrics);
+            for j = 1:b_len
+                t = struct();
+                t.(target_var) = Ytable{j, :}{1};  % Extract from individual cell values
+                Ytmp{j, :} = t;
             end
+        else
             
-            Y_collated(b_start:(b_start+b_len)-1) = Ytmp;
+            cp_subset = coral_params(b_start:b_start+(b_len-1), :);
+            parfor j = 1:b_len
+                % rec_id = (b_start - 1) + j;
+                Ytmp{j} = collectMetrics(Ytable{j, :}{:}, cp_subset(j, :), metrics);
+            end
         end
+        
+        Y_collated(b_start:(b_start+b_len)-1) = Ytmp;
     end
 end
 
 
-function [result, md] = readDistributed(filename)
+function [result, md] = readDistributed(filename, target_var)
 % Helper to read ADRIA reef condition data chunked into separate files.
+    arguments
+        filename string
+        target_var string
+    end
 
     % Get information about NetCDF data source
     fileInfo = ncinfo(filename);
@@ -67,7 +77,7 @@ function [result, md] = readDistributed(filename)
     nsims = md.n_sims;
     for v = 1:n_vars
         var_n = var_names{v};
-        if var_n ~= "all"
+        if var_n ~= target_var
             % skip logs for now...
             % we'd need to restructure the return type to be a struct
             % or add a flag indicating what result set (raw or logs) is 
