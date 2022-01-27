@@ -114,6 +114,8 @@ classdef ADRIA < handle
                 
                 init_cover(:, row) = base_coral_numbers(:);
             end
+            
+            assert(all(any(isnan(init_cover)) == 0), "NaNs found in coral cover data")
         end
 
         %% object methods
@@ -244,7 +246,12 @@ classdef ADRIA < handle
             end 
             
             sdata = readtable(filename);
-            obj.site_data = sdata(:, [["site_id", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
+            tmp_s = sdata(:, [["site_id", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
+            
+            % Set any missing coral cover data to 0
+            tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
+            
+            obj.site_data = tmp_s;
             obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
