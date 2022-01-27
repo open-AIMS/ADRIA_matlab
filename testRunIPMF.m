@@ -1,7 +1,7 @@
 %% Load site data for 2026;
 % Connectivity
 [TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
-RCP = 4.5;
+RCP = 45;
 Year = 2026;
 
 % Site Data
@@ -28,7 +28,7 @@ wtpredecseed = 0; % weight for the importance of seeding sites that are predeces
 wtpredecshade = 0; % weight for the importance of shading sites that are predecessors of priority reefs
 risktol = 1; % risk tolerance
 depth_min = 5; % minimum site depth
-depth_offset =5; % depth range from min depth
+depth_offset = 5; % depth range from min depth
 
 % Filter out sites outside of desired depth range
 max_depth = depth_min + depth_offset;
@@ -39,7 +39,7 @@ max_cover = site_data.k/100.0; % Max coral cover at each site
 
 nsites = length(depth_priority);
 damprob = zeros(length(site_data.recom_connectivity),1);
-nsiteint = nsites;
+nsiteint = 5; %nsites;
     
 sumcover = (site_data.Acropora2026 + site_data.Goniastrea2026)/100.0;
 
@@ -68,5 +68,5 @@ siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
 siteranks_alg2 = siteRanking(store_seed_rankings_alg2,"seed");
 siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
 sites_after_filtering = depth_priority;
-T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3)
+T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3);
 writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f.xlsx',RCP,Year))
