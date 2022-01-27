@@ -4,7 +4,7 @@ function concated = concatMetrics(Y_all, attr)
     
     if isstruct(Y_all)
         % Extract indicated field if not a collection of gathered results
-        concated = getfield(Y_all, nested{:});
+        concated = squeeze(getfield(Y_all, nested{:}));
         return
     end
     
@@ -19,5 +19,5 @@ function concated = concatMetrics(Y_all, attr)
     end
     
     % Reorder into expected dimensions
-    concated = permute(a, [1:(run_dim-2), run_dim, run_dim-1]);
+    concated = squeeze(permute(a, [1:(run_dim-2), run_dim, run_dim-1]));
 end
