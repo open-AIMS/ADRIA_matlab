@@ -108,6 +108,12 @@ parfor b_i = 1:n_batches
         seed_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
         shade_log = zeros(timesteps, nsites, b_len, n_reps);
         rankings = zeros(timesteps, nsites, 2, b_len, n_reps);
+    else
+        % Have to set empty log variables otherwise matlab
+        % complains about uninitialized temporary variables.
+        seed_log = [];
+        shade_log = [];
+        rankings = [];
     end
     
     for i = 1:b_len

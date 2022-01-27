@@ -205,7 +205,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         potential_settler_cover = max_settler_density * basal_area_per_settler ...
                                 * density_ratio_of_larvae_to_settlers;
         
-        rec = potential_settler_cover * (fecundity_scope * TP_data).* LPs;
+        rec = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
 
         %% Setup MCDA before bleaching season
 
