@@ -2,11 +2,11 @@
 % Connectivity
 [TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
 RCP = 45;
-Year = 2026;
-
+Year = 2034;
+yrstr = num2str(Year);
 % Site Data
 sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
-site_data = sdata(:,[["site_id", "k", ["Acropora2026", "Goniastrea2026"], "sitedepth", "recom_connectivity"]]);
+site_data = sdata(:,[["site_id", "k", [strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity"]]);
 site_data = sortrows(site_data, "recom_connectivity");
 [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
 TP_data = TP_data(g_idx, g_idx);
@@ -17,7 +17,7 @@ nreps = 50;
 dhw_scen = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
 
 % time step corresponding to initial data
-tstep = 1;
+tstep = Year-2025;
 
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = 0; % weight of wave damage in MCDA
@@ -43,7 +43,7 @@ nsites = length(depth_priority);
 damprob = zeros(length(site_data.recom_connectivity),1);
 nsiteint = 5; %nsites;
     
-sumcover = (site_data.Acropora2026 + site_data.Goniastrea2026)/100.0;
+sumcover = (site_data.(strcat('Acropora',yrstr)) + site_data.(strcat('Goniastrea',yrstr)))/100.0;
 
 store_seed_rankings_alg1 = zeros(1,nsites,nreps);
 store_seed_rankings_alg2 = zeros(1,nsites,nreps);
