@@ -31,7 +31,7 @@ end
 sample_table.Guided(:) = 2;
 
 %% Load site specific data
-ai.loadConnectivity('Inputs/Moore/connectivity/2015');
+ai.loadConnectivity('./Inputs/Moore/connectivity/2015');
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
 %% Scenario runs
@@ -49,10 +49,15 @@ desired_metrics = {@coralTaxaCover, ...
                    @(x, p) mean(coralTaxaCover(x, p).total_cover, 4)};
 Y = ai.gatherResults('./Outputs/example_multirun', desired_metrics);
 
+Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "MCDA_rankings");
+
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
 %% Extract metric values from batched result set
+
+rankings = concatMetrics(Y_rankings, "MCDA_rankings");
+barh(siteRanking(rankings, "shade"));
 
 % Total coral cover
 TC = concatMetrics(Y, "coralTaxaCover.total_cover");

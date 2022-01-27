@@ -361,11 +361,12 @@ classdef ADRIA < handle
                      fprefix, runargs.batch_size);
         end
         
-        function Y = gatherResults(obj, file_loc, metrics)
+        function Y = gatherResults(obj, file_loc, metrics, target_var)
             arguments
                 obj
                 file_loc string
-                metrics cell = {}
+                metrics cell = {}  % collect raw results with no transformations if nothing specified
+                target_var string = "all"  % apply metrics to raw results if nothing specified
             end
             % Gather results from a given file.
             seps = split(file_loc, "_[[");
@@ -389,7 +390,7 @@ classdef ADRIA < handle
 
             [~, ~, coral] = obj.splitParameterTable(input_table);
 
-            Y = gatherResults(file_loc, coral, metrics);
+            Y = gatherResults(file_loc, coral, metrics, target_var);
         end
     end
 end
