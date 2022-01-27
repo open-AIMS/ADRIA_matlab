@@ -58,24 +58,31 @@ function converted = convertScenarioSelection(sel_values, p_opts)
                 else
                     tmp = floor(selection(sel));
                 end
+                
+                converted{sel, pname} = tmp;
 
-                tmp_p = p_opts.options{p};
-                if iscell(tmp_p)
-                    converted{sel, pname} = tmp_p{1}{tmp};
-                else
-                    % categoricals: values have to be exact match
-                    % extract from container map
-                    try
-                        converted{sel, pname} = tmp_p(tmp);
-                    catch err
-                        if strcmp(err.identifier, "MATLAB:badsubscript")
-                            converted{sel, pname} = tmp;
-                        else
-                            rethrow(err)
-                        end
-                    end
-                    % converted{sel, pname} = tmp;
-                end
+                % Older code to support cases where a categorical
+                % maps to an array (e.g., "Hot" => [100, 1000, 78, 98]).
+                % There is a bug here where the selected ID 
+                % (e.g., 3 for '78'), gets downshifted to select 2 (1000).
+                %
+                % tmp_p = p_opts.options{p};
+                % if iscell(tmp_p)
+                %     converted{sel, pname} = tmp_p{1}{tmp};
+                % else
+                %     % categoricals: values have to be exact match
+                %     % extract from container map
+                %     try
+                %         converted{sel, pname} = tmp_p(tmp);
+                %     catch err
+                %         if strcmp(err.identifier, "MATLAB:badsubscript")
+                %             converted{sel, pname} = tmp;
+                %         else
+                %             rethrow(err)
+                %         end
+                %     end
+                %     % converted{sel, pname} = tmp;
+                % end
             end
         else
             warning(strcat("Unknown parameter type", ptype, ". Skipping ", pname))
