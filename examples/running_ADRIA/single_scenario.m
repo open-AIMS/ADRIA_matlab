@@ -103,6 +103,7 @@ ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.cs
 %% Update ADRIA Interface with user specified constants
 ai.constants = new_sim_opts;
 
+new_interv_opts.Guided = 1;
 %% Create input table of user-defined values
 param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
