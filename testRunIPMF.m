@@ -10,12 +10,14 @@ site_data = sdata(:,[["site_id", "k", ["Acropora2026", "Goniastrea2026"], "sited
 site_data = sortrows(site_data, "recom_connectivity");
 [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
 TP_data = TP_data(g_idx, g_idx);
+
 % DHW data
 tf = 25;
 nreps = 50;
 dhw_scen = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
-% time step corresponding to 2026
-tstep = 25;
+
+% time step corresponding to initial data
+tstep = 1;
 
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = 0; % weight of wave damage in MCDA
@@ -70,3 +72,5 @@ siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
 sites_after_filtering = depth_priority;
 T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3);
 writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f.xlsx',RCP,Year))
+
+
