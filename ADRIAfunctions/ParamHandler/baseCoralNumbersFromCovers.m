@@ -39,4 +39,7 @@ conversion_vector(:,1) = cov2n_CorAcr;
 conversion_vector(:,2) = cov2n_SmlMas;
 
 base_cover = (((target_covers / 100) ./ conversion_vector) .* cover_factor)';
+
+assert(all(any(isnan(base_cover))) == 0, "NaN found during conversion of coral numbers");
+
 end
