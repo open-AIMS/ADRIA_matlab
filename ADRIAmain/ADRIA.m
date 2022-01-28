@@ -440,11 +440,11 @@ classdef ADRIA < handle
                 if ~opts.partial
                     [~, idx] = ismember(p_names, opts.ignore);
                 else
-                    to_ignore = contains(p_names, opts.ignore);
-                    idx = find(to_ignore > 0);
+                    idx = contains(p_names, opts.ignore);
                 end
 
                 p_table{:, ~idx} = values;
+                
             else
                 p_table{:, :} = values;
             end
