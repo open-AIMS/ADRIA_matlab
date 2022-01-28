@@ -1,6 +1,7 @@
 % Example script illustrating running ADRIA scenarios in batches
 rng(101)
 
+
 %% Generate monte carlo samples
 
 % Number of scenarios
@@ -38,7 +39,7 @@ ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.cs
 
 tic
 ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
-    file_prefix='./Outputs/example_multirun', batch_size=4);
+    file_prefix='./Outputs/example_multirun', batch_size=4, collect_logs=["site_rankings"]);
 
 % Gather results, applying a metric to each result set.
 % The last entry is an example of how one might create a custom aggregator

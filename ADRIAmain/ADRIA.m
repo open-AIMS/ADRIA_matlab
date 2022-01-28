@@ -307,7 +307,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
-               runargs.collect_logs logical = true
+               runargs.collect_logs string = [""]
             end
             
             nreps = runargs.nreps;
