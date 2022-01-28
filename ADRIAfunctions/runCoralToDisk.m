@@ -83,7 +83,7 @@ end
 clear('intervs')
 clear('crit_weights')
 
-for b_i = 1:n_batches
+parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
     initial_cover = init_cov;
