@@ -393,5 +393,63 @@ classdef ADRIA < handle
 
             Y = gatherResults(file_loc, coral, metrics, target_var);
         end
+        
+        function updated = setParameterValues(obj, values, opts)
+            % Update a parameter table with new values.
+            % Number of new values has to be >= number of rows in target
+            % table.
+            %
+            % If the target table has less rows than updated value matrix
+            % then the target table will be replaced with repeating
+            % the first row N times to match size of new values.
+            %
+            % Columns can be ignored by providing a string (or string
+            % array) of column names to ignore.
+            %
+            % NOTE: This method assumes column orders match after ignored
+            %       columns are removed
+            arguments
+                obj
+                values  % matrix of updated parameter values
+                opts.p_table table = table() % table to update (uses raw defaults if not provided)
+                opts.ignore string = "" % string, or string array, of columns to ignore
+                opts.partial logical = false  % partial match on list of columns to ignore (e.g., "natad" will match "coral_1_natad")
+            end
+            
+            if istable(values)
+                % Convert to matrix
+                values = values{:, :};
+            end
+
+            if isempty(opts.p_table)
+                p_table = obj.raw_defaults;
+            else
+                p_table = opts.p_table;
+            end
+
+            % Match lengths
+            n = height(values);
+            if n ~= height(p_table)
+                p_table = repelem(p_table(1, :), n, 1);
+            end
+
+            % Fill target table with updated values
+            if strlength(opts.ignore) > 0
+                p_names = p_table.Properties.VariableNames;
+                
+                if ~opts.partial
+                    [~, idx] = ismember(p_names, opts.ignore);
+                else
+                    to_ignore = contains(p_names, opts.ignore);
+                    idx = find(to_ignore > 0);
+                end
+
+                p_table{:, ~idx} = values;
+            else
+                p_table{:, :} = values;
+            end
+
+            updated = p_table;
+        end
     end
 end
