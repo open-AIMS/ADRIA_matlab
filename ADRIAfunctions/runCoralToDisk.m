@@ -112,22 +112,16 @@ parfor b_i = 1:n_batches
     
     if strlength(collect_logs) > 0
         if ismember("seed", collect_logs)
-            seed_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
+            seed_log = ndSparse(zeros(timesteps, nspecies, nsites, b_len, n_reps));
         end
 
         if ismember("shade", collect_logs)
-            shade_log = zeros(timesteps, nsites, b_len, n_reps);
+            shade_log = ndSparse(zeros(timesteps, nsites, b_len, n_reps));
         end
 
         if ismember("site_rankings", collect_logs)
-            rankings = zeros(timesteps, nsites, 2, b_len, n_reps);
+            rankings = ndSparse(zeros(timesteps, nsites, 2, b_len, n_reps));
         end
-    else
-        % Have to set empty log variables otherwise matlab
-        % complains about uninitialized temporary variables.
-        seed_log = [];
-        shade_log = [];
-        rankings = [];
     end
     
     for i = 1:b_len
@@ -175,15 +169,15 @@ parfor b_i = 1:n_batches
     
     if strlength(collect_logs) > 0
         if ismember("seed", collect_logs)
-            tmp_d.seed_log = seed_log;
+            tmp_d.seed_log = full(seed_log);
         end
 
         if ismember("shade", collect_logs)
-            tmp_d.shade_log = shade_log;
+            tmp_d.shade_log = full(shade_log);
         end
 
         if ismember("site_rankings", collect_logs)
-            tmp_d.MCDA_rankings = rankings;
+            tmp_d.MCDA_rankings = full(rankings);
         end
     end
     
