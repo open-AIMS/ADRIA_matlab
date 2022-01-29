@@ -162,8 +162,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% States at time = 1
     % Set base cover for all species, and initial population sizes
-    % matrix in which to store the output: first branching corals, then
-    % foliose corals, then macroalgae
+    % matrix in which to store the output
     Yout = zeros(tf, nspecies, nsites);
 
     % Set initial population sizes at tstep = 1
@@ -223,12 +222,12 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             % probability of coral damage from waves used as criterion in
             % site selection
             
-            % NOTE: Wave Damage is turned off as these are all zeros!
+            % NOTE: Wave Damage is turned off for Feb deliv. These are all zeros!
             dMCDA_vars.damprob = squeeze(mwaves(tstep, :, :))'; % wave_scen(tstep, :)';
             dMCDA_vars.heatstressprob = dhw_step'; % heat stress
 
             %Factor 4: total coral cover state used as criterion in site selection;
-            dMCDA_vars.sumcover = squeeze(sum(Yout(p_step, :, :), 2));
+            dMCDA_vars.sumcover = squeeze(sum(Y_pstep, 2));
             % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
@@ -237,6 +236,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
             
             if strlength(collect_logs) > 0 && ismember("site_rankings", collect_logs)
+                % skip first col as it only holds site ids
                 site_rankings(tstep, rankings(:, 1), :) = rankings(:, 2:end);
             end
         else
