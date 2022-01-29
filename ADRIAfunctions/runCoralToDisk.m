@@ -104,6 +104,12 @@ parfor b_i = 1:n_batches
     % Create batch cache
     raw = zeros(timesteps, nspecies, nsites, b_len, n_reps);
     
+    % Create empty log cache, otherwise matlab complains about
+    % uninitialized temporary variables
+    seed_log = [];
+    shade_log = [];
+    rankings = [];
+    
     if strlength(collect_logs) > 0
         if ismember("seed", collect_logs)
             seed_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
