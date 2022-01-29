@@ -42,6 +42,9 @@ function mean_r = siteRanking(rankings, orient, func)
         otherwise
             error("Unknown number of ranking log dimensions.")
     end
+    
+    % Assign sites that are never considered a 0
+    mean_r(mean_r == nsites+1) = 0;
         
      
 end
