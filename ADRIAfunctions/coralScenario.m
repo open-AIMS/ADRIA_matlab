@@ -169,13 +169,13 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     Yout(1, :, :) = init_cov;
     
     % These logs need to be collected as part of the run
-    Yshade = zeros(tf, nsites);
-    Yseed = zeros(tf, nspecies, nsites);
+    Yshade = ndSparse(zeros(tf, nsites));
+    Yseed = ndSparse(zeros(tf, nspecies, nsites));
 
     if strlength(collect_logs) > 0
         % Optional logs
         if ismember("site_rankings", collect_logs)
-            site_rankings = zeros(tf, nsites, 2);  % log seeding/shading ranks
+            site_rankings = ndSparse(zeros(tf, nsites, 2));  % log seeding/shading ranks
         end
         % total_cover = zeros(tf, nsites);
     end
@@ -297,15 +297,15 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     
     if strlength(collect_logs) > 0
         if ismember("seed", collect_logs)
-            results.seed_log = Yseed;
+            results.seed_log = full(Yseed);
         end
         
         if ismember("shade", collect_logs)
-            results.shade_log = Yshade;
+            results.shade_log = full(Yshade);
         end
         
         if ismember("site_rankings", collect_logs)
-            results.MCDA_rankings = site_rankings;
+            results.MCDA_rankings = full(site_rankings);
         end
     end
 end
