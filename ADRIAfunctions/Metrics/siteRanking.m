@@ -16,6 +16,15 @@ function mean_r = siteRanking(rankings, orient, func)
         func = @mean
     end
     
+    % Make non-selected sites affect stats negatively
+    % Explanation: Lower values are of higher rank
+    % but we use 0 to mean not considered. Taking the average
+    % will affect rankings in the positive direction, whereas we want them
+    % to be ranked lower
+    nsites = size(rankings);
+    nsites = nsites(2);
+    rankings(rankings == 0) = nsites + 1;
+    
     res_type = ndims(rankings);
     switch res_type
         case 3
