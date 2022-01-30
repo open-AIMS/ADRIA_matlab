@@ -66,11 +66,20 @@ for l = 1:nreps
     store_seed_rankings_alg3(:,:,l) = rankingsalg3(:,2);
 end
 
-siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
-siteranks_alg2 = siteRanking(store_seed_rankings_alg2,"seed");
-siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
+% siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
+% siteranks_alg2 = siteRanking(store_seed_rankings_alg2,"seed");
+% siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
+siteranks_alg1 = mean(squeeze(store_seed_rankings_alg1),2);
+siteranks_alg2 = mean(squeeze(store_seed_rankings_alg2),2);
+siteranks_alg3 = mean(squeeze(store_seed_rankings_alg3),2);
+
+siteranks_alg1_round = round(siteranks_alg1);
+siteranks_alg2_round = round(siteranks_alg2);
+siteranks_alg3_round = round(siteranks_alg3);
+
 sites_after_filtering = depth_priority;
-T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3);
-writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f.xlsx',RCP,Year))
+T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3,...
+    siteranks_alg1_round,siteranks_alg2_round,siteranks_alg3_round);
+writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f_revised.xlsx',RCP,Year))
 
 
