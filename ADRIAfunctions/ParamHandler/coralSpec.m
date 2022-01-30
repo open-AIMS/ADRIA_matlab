@@ -79,11 +79,11 @@ params.coral_id = join([tn(:), params.taxa_id, params.class_id], "_");
 %First express as number of colonies per size class per 100m2 of reef
 base_coral_numbers = ...
     [0, 0, 0, 0, 0, 0; ...              % Tabular Acropora Enhanced
-     200, 100, 100, 50, 30, 10; ... % Tabular Acropora Unenhanced
+     0, 0, 0, 0, 0, 0; ... % Tabular Acropora Unenhanced
      0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
      200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-     200, 100, 200, 200, 100, 0; ... % small massives
-     200, 100, 20, 20, 20, 10];      % large massives
+     200, 100, 200, 30, 0, 0; ... % small massives
+     0, 0, 0, 0, 0, 0];      % large massives
 
 % To convert to covers we need to first calculate the area of colonies,
 % multiply by how many corals in each bin, and divide by reef area
