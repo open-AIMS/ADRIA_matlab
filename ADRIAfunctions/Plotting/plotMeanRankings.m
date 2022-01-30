@@ -1,4 +1,5 @@
 function plotMeanRankings(rankings, opts)
+% Plot average site rankings obtained with `siteRankings()`.
     arguments
         rankings double
         opts.p_title string = ""

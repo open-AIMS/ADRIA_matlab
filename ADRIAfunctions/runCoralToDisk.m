@@ -16,7 +16,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %    wave_scen    : matrix[timesteps, nsites, n_reps], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, n_reps], degree heating weeek scenario
 %    site_data    : table, holding max coral cover, recom site ids, etc.
-%    collect_logs : bool, collect shade/seeding logs
+%    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
 %    file_prefix : str, write results to batches of netCDFs instead of
 %                    storing in memory.
 %    batch_size : int, size of simulation batches to run/save when writing
@@ -104,16 +104,24 @@ parfor b_i = 1:n_batches
     % Create batch cache
     raw = zeros(timesteps, nspecies, nsites, b_len, n_reps);
     
-    if collect_logs
-        seed_log = zeros(timesteps, nspecies, nsites, b_len, n_reps);
-        shade_log = zeros(timesteps, nsites, b_len, n_reps);
-        rankings = zeros(timesteps, nsites, 2, b_len, n_reps);
-    else
-        % Have to set empty log variables otherwise matlab
-        % complains about uninitialized temporary variables.
-        seed_log = [];
-        shade_log = [];
-        rankings = [];
+    % Create empty log cache, otherwise matlab complains about
+    % uninitialized temporary variables
+    seed_log = [];
+    shade_log = [];
+    rankings = [];
+    
+    if strlength(collect_logs) > 0
+        if ismember("seed", collect_logs)
+            seed_log = ndSparse(zeros(timesteps, nspecies, nsites, b_len, n_reps));
+        end
+
+        if ismember("shade", collect_logs)
+            shade_log = ndSparse(zeros(timesteps, nsites, b_len, n_reps));
+        end
+
+        if ismember("site_rankings", collect_logs)
+            rankings = ndSparse(zeros(timesteps, nsites, 2, b_len, n_reps));
+        end
     end
     
     for i = 1:b_len
@@ -139,10 +147,18 @@ parfor b_i = 1:n_batches
                                    site_data, collect_logs);
             raw(:, :, :, i, j) = res.Y;
             
-            if collect_logs
-                seed_log(:, :, :, i, j) = res.seed_log;
-                shade_log(:, :, i, j) = res.shade_log;
-                rankings(:, :, :, i, j) = res.MCDA_rankings;
+            if strlength(collect_logs) > 0
+                if ismember("seed", collect_logs)
+                    seed_log(:, :, :, i, j) = res.seed_log;
+                end
+                
+                if ismember("shade", collect_logs)
+                    shade_log(:, :, i, j) = res.shade_log;
+                end
+                
+                if ismember("site_rankings", collect_logs)
+                    rankings(:, :, :, i, j) = res.MCDA_rankings;
+                end
             end
         end
     end
@@ -151,10 +167,18 @@ parfor b_i = 1:n_batches
     tmp_d = struct();
     tmp_d.all = raw;
     
-    if collect_logs
-        tmp_d.seed_log = seed_log;
-        tmp_d.shade_log = shade_log;
-        tmp_d.MCDA_rankings = rankings;
+    if strlength(collect_logs) > 0
+        if ismember("seed", collect_logs)
+            tmp_d.seed_log = full(seed_log);
+        end
+
+        if ismember("shade", collect_logs)
+            tmp_d.shade_log = full(shade_log);
+        end
+
+        if ismember("site_rankings", collect_logs)
+            tmp_d.MCDA_rankings = full(rankings);
+        end
     end
     
     % include metadata

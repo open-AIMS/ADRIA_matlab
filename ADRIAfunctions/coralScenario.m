@@ -18,7 +18,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
 %    site_data    : table, of site data. Should be pre-sorted by the
 %                         `recom_connectivity` column
-%    collect_logs : bool, collect shade/seeding logs
+%    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
 %
 % Outputs:
 %    results     : struct, of 
@@ -162,18 +162,21 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% States at time = 1
     % Set base cover for all species, and initial population sizes
-    % matrix in which to store the output: first branching corals, then
-    % foliose corals, then macroalgae
+    % matrix in which to store the output
     Yout = zeros(tf, nspecies, nsites);
 
     % Set initial population sizes at tstep = 1
     Yout(1, :, :) = init_cov;
+    
+    % These logs need to be collected as part of the run
+    Yshade = ndSparse(zeros(tf, nsites));
+    Yseed = ndSparse(zeros(tf, nspecies, nsites));
 
-    if collect_logs
-        % Seed/shade log
-        Yseed = zeros(tf, nspecies, nsites);
-        Yshade = zeros(tf, nsites);
-        site_rankings = zeros(tf, nsites, 2);  % log seeding/shading ranks
+    if strlength(collect_logs) > 0
+        % Optional logs
+        if ismember("site_rankings", collect_logs)
+            site_rankings = ndSparse(zeros(tf, nsites, 2));  % log seeding/shading ranks
+        end
         % total_cover = zeros(tf, nsites);
     end
 
@@ -219,12 +222,12 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             % probability of coral damage from waves used as criterion in
             % site selection
             
-            % NOTE: Wave Damage is turned off as these are all zeros!
+            % NOTE: Wave Damage is turned off for Feb deliv. These are all zeros!
             dMCDA_vars.damprob = squeeze(mwaves(tstep, :, :))'; % wave_scen(tstep, :)';
             dMCDA_vars.heatstressprob = dhw_step'; % heat stress
 
             %Factor 4: total coral cover state used as criterion in site selection;
-            dMCDA_vars.sumcover = squeeze(sum(Yout(p_step, :, :), 2));
+            dMCDA_vars.sumcover = squeeze(sum(Y_pstep, 1))';  % Dims: nsites * 1
             % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
 
@@ -232,7 +235,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
             
-            if collect_logs
+            if strlength(collect_logs) > 0 && ismember("site_rankings", collect_logs)
+                % skip first col as it only holds site ids
                 site_rankings(tstep, rankings(:, 1), :) = rankings(:, 2:end);
             end
         else
@@ -243,9 +247,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
-            if collect_logs
-                Yshade(tstep, prefshadesites) = srm;
-            end
+            Yshade(tstep, prefshadesites) = srm;
             
             % Apply reduction in DHW due to shading
             adjusted_dhw = max(0.0, dhw_step - Yshade(tstep, :));
@@ -267,11 +269,9 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
             
-            if collect_logs
-                % Log seed values/sites
-                Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
-                Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
-            end
+            % Log seed values/sites
+            Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
+            Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
         end
 
         % Run ODE for all species and sites
@@ -294,7 +294,18 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Assign to output variable
     results = struct();
     results.Y = Yout;
-    results.seed_log = Yseed;
-    results.shade_log = Yshade;
-    results.MCDA_rankings = site_rankings;
+    
+    if strlength(collect_logs) > 0
+        if ismember("seed", collect_logs)
+            results.seed_log = full(Yseed);
+        end
+        
+        if ismember("shade", collect_logs)
+            results.shade_log = full(Yshade);
+        end
+        
+        if ismember("site_rankings", collect_logs)
+            results.MCDA_rankings = full(site_rankings);
+        end
+    end
 end

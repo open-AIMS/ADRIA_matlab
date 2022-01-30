@@ -76,11 +76,19 @@ if ~exist('collect_logs', 'var')
 end
 
 Y = zeros(timesteps, n_species, nsites, N, n_reps);
-seed = zeros(timesteps, n_species, nsites, N, n_reps);
-shade = zeros(timesteps, nsites, N, n_reps);
-rankings = zeros(timesteps, nsites, 2, N, n_reps);
+if ismember("seed", collect_logs)
+    seed = zeros(timesteps, n_species, nsites, N, n_reps);
+end
 
-for i = 1:N
+if ismember("shade", collect_logs)
+    shade = zeros(timesteps, nsites, N, n_reps);
+end
+
+if ismember("site_rankings", collect_logs)
+    rankings = zeros(timesteps, nsites, 2, N, n_reps);
+end
+
+parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     initial_cover = init_cov;
@@ -102,20 +110,37 @@ for i = 1:N
                                site_data, collect_logs);
         Y(:, :, :, i, j) = res.Y;
         
-        if collect_logs
+        if strlength(collect_logs) > 0
             % TODO: Generalize so we're not manually adding logs
             %       as we add them...
-            seed(:, :, :, i, j) = res.seed_log;
-            shade(:, :, i, j) = res.shade_log;
-            rankings(:, :, :, i, j) = res.MCDA_rankings;
+            if ismember("seed", collect_logs)
+                seed(:, :, :, i, j) = res.seed_log;
+            end
+
+            if ismember("shade", collect_logs)
+                shade(:, :, i, j) = res.shade_log;
+            end
+
+            if ismember("site_rankings", collect_logs)
+                rankings(:, :, :, i, j) = res.MCDA_rankings;
+            end
         end
     end
 end
 
 results = struct();
 results.Y = Y;
-results.seed_log = seed;
-results.shade_log = shade;
-results.MCDA_rankings = rankings;
+
+if ismember("seed", collect_logs)
+    results.seed_log = seed;
+end
+
+if ismember("shade", collect_logs)
+    results.shade_log = shade;
+end
+
+if ismember("site_rankings", collect_logs)
+    results.MCDA_rankings = rankings;
+end
 
 end

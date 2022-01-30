@@ -59,6 +59,7 @@ addFolderIncludingChildFiles(proj, './ADRIAfunctions/IOHandler');
 addFolderIncludingChildFiles(proj, './ADRIAfunctions/Metrics');
 addFolderIncludingChildFiles(proj, './ADRIAfunctions/Plotting');
 addFolderIncludingChildFiles(proj, './ADRIAfunctions/Translation');
+addFolderIncludingChildFiles(proj, './ADRIAfunctions/third_party/ndSparse');
 
 % Add main directories and files to project spec
 addFolderIncludingChildFiles(proj, './ADRIAfunctions');
@@ -74,6 +75,7 @@ addFolderIncludingChildFiles(proj, './Inputs/Moore/connectivity');
 addFolderIncludingChildFiles(proj, './Inputs/Moore/DHWs');
 addFolderIncludingChildFiles(proj, './Inputs/Moore/site_data');
 
+
 % Add to MATLAB path
 addPath(proj, './ADRIAfunctions/SystemInfo');
 addPath(proj, './ADRIAfunctions/ParamHandler');
@@ -81,6 +83,8 @@ addPath(proj, './ADRIAfunctions/IOHandler');
 addPath(proj, './ADRIAfunctions/Metrics');
 addPath(proj, './ADRIAfunctions/Plotting');
 addPath(proj, './ADRIAfunctions/Translation');
+
+addPath(proj, './ADRIAfunctions/third_party/ndSparse');
 
 addPath(proj, './ADRIAfunctions');
 addPath(proj, './ADRIAmain');
