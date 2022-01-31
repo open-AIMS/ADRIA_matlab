@@ -1,6 +1,6 @@
-function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
-                           TP_data, site_ranks, strongpred, ...
-                           n_reps, wave_scen, dhw_scen)
+function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
+                           TP_data, site_ranks, strongpred, init_cov, ...
+                           n_reps, wave_scen, dhw_scen, site_data, collect_logs)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,13 +13,14 @@ function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
 %    sim_params   : struct, of simulation constants
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
+%    site_data    : table, of site data
+%    collect_logs : bool, collect shade/seeding logs
 %
 % Output:
-%    Y : struct,
-%          - TC [n_timesteps, n_sites, N, n_reps]
-%          - C  [n_timesteps, n_sites, N, n_species, n_reps]
-%          - E  [n_timesteps, n_sites, N, n_reps]
-%          - S  [n_timesteps, n_sites, N, n_reps]
+%    results : struct,
+%          - Y, [n_timesteps, n_sites, N, n_reps]
+%          - seed_log, [n_timesteps, n_sites, N, n_species, n_reps]
+%          - shade_log, [n_timesteps, n_sites, N, n_reps]
 %
 % Model guides the selection of
 % (1) reef sites for the deployment of restoration and adaptation interventions, and
@@ -61,7 +62,8 @@ function Y = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
 % Relative cover of all deployed corals = 3000m2/100,000m2 = 3 percent
 N = height(intervs);
 
-[timesteps, nsites, ~] = size(wave_scen);
+timesteps = sim_params.tf;
+nsites = height(site_data);
 
 % generate template struct for coral parameters
 coral_spec = coralSpec();
@@ -69,22 +71,76 @@ coral_spec = coralSpec();
 % Create output matrices
 n_species = height(coral_spec);  % total number of species considered
 
-Y = zeros(timesteps, n_species, nsites, N, n_reps);
+if ~exist('collect_logs', 'var')
+    collect_logs = false;
+end
 
-for i = 1:N
+Y = zeros(timesteps, n_species, nsites, N, n_reps);
+if ismember("seed", collect_logs)
+    seed = zeros(timesteps, n_species, nsites, N, n_reps);
+end
+
+if ismember("shade", collect_logs)
+    shade = zeros(timesteps, nsites, N, n_reps);
+end
+
+if ismember("site_rankings", collect_logs)
+    rankings = zeros(timesteps, nsites, 2, N, n_reps);
+end
+
+parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
+    initial_cover = init_cov;
     
     % Note: This slows things down considerably
     % Could rejig everything to use (subset of) the table directly...
     c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
+    if isempty(initial_cover)
+        initial_cover = repmat(c_params.basecov, 1, nsites);
+    end
+
     for j = 1:n_reps
-        Y(:, :, :, i, j) = coralScenario(scen_it, scen_crit, ...
+        res = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
-                               wave_scen(:, :, j), dhw_scen(:, :, j));
+                               initial_cover, ...
+                               wave_scen(:, :, j), dhw_scen(:, :, j), ...
+                               site_data, collect_logs);
+        Y(:, :, :, i, j) = res.Y;
+        
+        if strlength(collect_logs) > 0
+            % TODO: Generalize so we're not manually adding logs
+            %       as we add them...
+            if ismember("seed", collect_logs)
+                seed(:, :, :, i, j) = res.seed_log;
+            end
+
+            if ismember("shade", collect_logs)
+                shade(:, :, i, j) = res.shade_log;
+            end
+
+            if ismember("site_rankings", collect_logs)
+                rankings(:, :, :, i, j) = res.MCDA_rankings;
+            end
+        end
     end
+end
+
+results = struct();
+results.Y = Y;
+
+if ismember("seed", collect_logs)
+    results.seed_log = seed;
+end
+
+if ismember("shade", collect_logs)
+    results.shade_log = shade;
+end
+
+if ismember("site_rankings", collect_logs)
+    results.MCDA_rankings = rankings;
 end
 
 end

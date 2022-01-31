@@ -1,4 +1,4 @@
-function Y_collated = gatherResults(file_loc, coral_params, metrics)
+function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
 % Gather results for a given set of metrics from ADRIA runs spread across 
 % many NetCDF files.
 %
@@ -14,42 +14,56 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics)
     arguments
         file_loc string
         coral_params table
-        metrics cell = {}
+        metrics cell = {}  % Collate results with no transformation if nothing specified.
+        target_var string = "all"  % collate raw results if nothing specified.
     end
 
     file_prefix = fullfile(file_loc);
-    pat = strcat(file_prefix, '_*.nc');
-    target_files = dir(pat);
-
+    pat = strcat(file_prefix, '_*]].nc');
+    target_files = string(ls(pat));
+    folder = dir(pat).folder;
+    
+    % ds = datastore(target_files, "FileExtensions", ".nc", "Type", "file", "ReadFcn", @readDistributed);
     num_files = length(target_files);
 
     % Store results in a cell array of structs
     Y_collated = repmat({0}, height(coral_params), 1);
     for i = 1:num_files
-        f_dir = target_files(i).folder;
-        fn = target_files(i).name;
+        fn = target_files(i);
         
-        full_path = fullfile(f_dir, fn);
-        [Ytable, md] = readDistributed(full_path);
+        full_path = fullfile(folder, fn);
+        [Ytable, md] = readDistributed(full_path, target_var);
         
         b_start = md.record_start;
+        b_len = md.n_sims;
+        Ytmp = repmat({0}, height(b_len), 1);
         if isempty(metrics)
             % Collate raw results if no metrics specified
-            b_end = md.record_end;
-            Y_collated(b_start:b_end) = Ytable{:, :};
-        else
-            b_len = md.n_sims;
             for j = 1:b_len
-                rec_id = (b_start - 1) + j;
-                Y_collated{rec_id} = collectMetrics(Ytable{j, :}{:}, coral_params(rec_id, :), metrics);
+                t = struct();
+                t.(target_var) = Ytable{j, :}{1};  % Extract from individual cell values
+                Ytmp{j, :} = t;
+            end
+        else
+            
+            cp_subset = coral_params(b_start:b_start+(b_len-1), :);
+            parfor j = 1:b_len
+                % rec_id = (b_start - 1) + j;
+                Ytmp{j} = collectMetrics(Ytable{j, :}{:}, cp_subset(j, :), metrics);
             end
         end
+        
+        Y_collated(b_start:(b_start+b_len)-1) = Ytmp;
     end
 end
 
 
-function [result, md] = readDistributed(filename)
+function [result, md] = readDistributed(filename, target_var)
 % Helper to read ADRIA reef condition data chunked into separate files.
+    arguments
+        filename string
+        target_var string
+    end
 
     % Get information about NetCDF data source
     fileInfo = ncinfo(filename);
@@ -63,10 +77,27 @@ function [result, md] = readDistributed(filename)
     nsims = md.n_sims;
     for v = 1:n_vars
         var_n = var_names{v};
+        if var_n ~= target_var
+            % skip logs for now...
+            % we'd need to restructure the return type to be a struct
+            % or add a flag indicating what result set (raw or logs) is 
+            % desired...
+            continue
+        end
         result.(var_n) = repmat({0}, nsims, 1);
         tmp = ncread(filename, var_n);
-        for i = 1:nsims
-        	result(i, var_n) = {tmp(:, :, :, i, :)};
+        dim_len = ndims(tmp);
+        switch dim_len
+            case 5
+                for i = 1:nsims
+                    result(i, var_n) = {tmp(:, :, :, i, :)};
+                end
+            case 4
+                for i = 1:nsims
+                    result(i, var_n) = {tmp(:, :, i, :)};
+                end
+            otherwise
+                error("Unexpected number of dims in result file");
         end
     end
 end

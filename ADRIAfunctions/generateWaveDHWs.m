@@ -6,10 +6,10 @@ function generateWaveDHWs(num_sims, params, num_sites, filename)
 % WARNING: This function produces preliminary datasets only.
 %          
 % Example:
-%     [params, ecol_params] = ADRIAparms();
+%     const_params = simConstants();
 %
-%     % Generate 50 sims for 26 sites
-%     generateWaveDHWs(50, params, 26, 'Inputs/example_wave_DHWs_RCP60.nc')
+%     % Generate 50 sims for 26 sites using default simulation constants
+%     generateWaveDHWs(50, const_params, 26, 'Inputs/example_wave_DHWs_RCP60.nc')
 
     %% setup for the geographical setting including environmental input layers
     [wave_scen, dhw_scen] = setupADRIAsims(num_sims, params, num_sites);

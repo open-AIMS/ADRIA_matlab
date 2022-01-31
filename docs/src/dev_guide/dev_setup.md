@@ -25,6 +25,7 @@ The following toolboxes are required:
 - Statistics and Machine Learning Toolbox
 - Parallel Computing Toolbox
 - Global Optimization Toolbox
+- Optimization Toolbox
 
 An example run script (`examples/single_scenario.m`) can be run by calling 
 
