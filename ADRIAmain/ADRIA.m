@@ -247,7 +247,7 @@ classdef ADRIA < handle
             end 
             
             sdata = readtable(filename);
-            tmp_s = sdata(:, [["site_id", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
+            tmp_s = sdata(:, [["site_id", "area", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
             
             % Set any missing coral cover data to 0
             tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
