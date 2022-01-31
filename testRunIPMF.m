@@ -45,9 +45,9 @@ nsiteint = 5; %nsites;
     
 sumcover = (site_data.(strcat('Acropora',yrstr)) + site_data.(strcat('Goniastrea',yrstr)))/100.0;
 
-store_seed_rankings_alg1 = zeros(1,nsites,nreps);
-store_seed_rankings_alg2 = zeros(1,nsites,nreps);
-store_seed_rankings_alg3 = zeros(1,nsites,nreps);
+store_seed_rankings_alg1 = zeros(nreps,nsites,2);
+store_seed_rankings_alg2 = zeros(nreps,nsites,2);
+store_seed_rankings_alg3 = zeros(nreps,nsites,2);
 
 for l = 1:nreps
     dhw_step = dhw_scen(tstep,:,l);
@@ -61,9 +61,9 @@ for l = 1:nreps
     [~, ~, ~, ~, rankingsalg1] = ADRIA_DMCDA(dMCDA_vars, 1);
     [~, ~, ~, ~, rankingsalg2] = ADRIA_DMCDA(dMCDA_vars, 2);
     [~, ~, ~, ~, rankingsalg3] = ADRIA_DMCDA(dMCDA_vars, 3);
-    store_seed_rankings_alg1(:,:,l) = rankingsalg1(:,2);
-    store_seed_rankings_alg2(:,:,l) = rankingsalg2(:,2);
-    store_seed_rankings_alg3(:,:,l) = rankingsalg3(:,2);
+    store_seed_rankings_alg1(l,:,:) = rankingsalg1(:,2:end);
+    store_seed_rankings_alg2(l,:,:) = rankingsalg2(:,2:end);
+    store_seed_rankings_alg3(l,:,:) = rankingsalg3(:,2:end);
 end
 
 siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
