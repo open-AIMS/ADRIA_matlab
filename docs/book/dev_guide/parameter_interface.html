@@ -1,0 +1,359 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>ADRIA Parameter Interface</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro_to_ADRIA.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="../dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../dev_guide/dev_setup.html"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="../dev_guide/parameter_interface.html" class="active"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="../dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../dev_guide/sensitivity_analysis.html"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="../dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="../dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="../dev_guide/documentation_build.html"><strong aria-hidden="true">3.8.</strong> Documentation Build Process</a></li><li class="chapter-item expanded "><a href="../dev_guide/concise_API.html"><strong aria-hidden="true">3.9.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="parameter-interface"><a class="header" href="#parameter-interface">Parameter Interface</a></h1>
+<p>ADRIA contains functions to collate parameter values and details on a component-level basis. Parameter details are provided as tables (see <a href="#table-format">Table format</a>) section below). The process of translating sampled values back to &quot;raw&quot; ADRIA values is also documented here under <a href="#value-transformation-process">Value transformation process</a>.</p>
+<p>The inner working of these are abstracted away by the <a href="ADRIA_interface.html">ADRIA Interface</a> for users who only wish to interact with ADRIA, but is detailed here for developers.</p>
+<p>Parameters of interest are currently grouped over four components:</p>
+<ol>
+<li>Intervention Options</li>
+<li>Decision maker preferences (criteria weights)</li>
+<li>Coral parameters (those relating to the coral ecosystem)</li>
+<li>Simulation constants (values that remain the same across all simulations)</li>
+</ol>
+<p>Parameter groups that are intended to be varied are generated with functions with the suffix <code>Details</code>, and <code>Constants</code> for those that are not.</p>
+<ul>
+<li><code>interventionDetails()</code>, which provides intervention parameters</li>
+<li><code>criteriaDetails()</code>, for criteria weights</li>
+<li><code>coralDetails()</code>, for coral parameters</li>
+<li><code>simConstants()</code>, for ecological values treated as constants</li>
+</ul>
+<p>These functions have identical behaviour and their use can be seen within the <a href="ADRIA_interface.html">ADRIA Interface</a>. The ADRIA Interface itself exposes these as object properties and so the same data can be accessed with:</p>
+<pre><code class="language-matlab">ai = ADRIA();
+
+ai.interventions  % equivalent to interventionDetails()
+
+ai.criterias      % same as criteriaDetails()
+
+ai.corals         % same as coralDetails()
+
+ai.constants      % same as simConstants()
+</code></pre>
+<p>See the documentation for the <a href="ADRIA_interface.html">ADRIA Interface</a> for more information.</p>
+<p>These functions produce a table of parameter names, and &quot;raw&quot; and &quot;sample&quot; values and bounds (see details in sections below) for use with usual optimization and/or sampling methods.</p>
+<p>Values returned from sampling/optimization routines can be translated back to values expected by ADRIA with the <code>convertScenarioSelection()</code> function (again, see details below).</p>
+<h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
+<p>These functions simplify the process of collecting input factors and their details such as their expected bounds and likely or &quot;best guess&quot; values, reducing maintenance overhead by simplifying the process by which parameter values and their details are updated. Leveraging the <code>*Details()</code> group of functions listed above then only requires those same changes to occur in a single location (i.e., within the functions themselves).</p>
+<p>Another motivation is to address conceptual mismatches between sampling methods and usual software/model implementations. Typical variance-based approaches to exploring model behavior require input factors to be varied (&quot;perturbed&quot;) within an identified range. A wide number of software is available to sample from these bounds, using expected or known distributions. Sampling these parameters is a common activity across all model exploration approaches<sup class="footnote-reference"><a href="#1">1</a></sup>. </p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>As an aside, correlations between parameters are not a widely considered aspect.</p>
+</div>
+<p>One complication is that these sampling methods (and associated tooling) expect real values (i.e., xᵢ ∈ ℝ), represented in a single &quot;flat&quot; data structure (e.g., a table). Environmental models and decision support tools on the other hand can be designed to work with whole number (integers) or categorical values, and their definitions may occur inside a nested data structure (hashmaps, dictionaries, etc). 
+In the context of ADRIA, these may indicate a specific simulation context (e.g., RCP scenario), environmental scenario (climate sequences, data held in raster format, etc). It is therefore necessary to have a process that is able to pass parameter values from ADRIA into samplers for the purpose of sensitivity analysis, uncertainty propagation, optimization and other Monte Carlo or probabilistic processes, and to translate sampled values back to those expected by ADRIA.</p>
+<h2 id="table-format"><a class="header" href="#table-format">Table format</a></h2>
+<p>The functions listed above produces a table of parameter details consisting of:</p>
+<ul>
+<li><code>name</code>, listing the parameter names</li>
+<li><code>ptype</code>, denoting the parameter type (<code>categorical</code>, <code>integer</code>, or <code>float</code>)</li>
+<li><code>sample_defaults</code>, indicates the transformed &quot;best guess&quot; value for use with samplers</li>
+<li><code>lower_bound</code>, discrete min values for sampling purposes</li>
+<li><code>upper_bound</code>, discrete max values for sampling purposes</li>
+<li><code>options</code>, column of hashmaps (<a href="https://au.mathworks.com/help/matlab/map-containers.html"><code>Map Containers</code></a> in MATLAB) which maps possible discrete values back to their categorical options, or NaN if not applicable)</li>
+<li><code>raw_defaults</code> indicates the raw untransformed default values</li>
+<li><code>raw_bounds</code> ('raw' min/max of option values indicating their original ADRIA value ranges)</li>
+</ul>
+<blockquote>
+<p>TODO: Include description of each entry in the table - could be useful if tooltips are to be incorporated into UIs</p>
+<p>It may also be useful to be able to specify known distributions for parameters</p>
+</blockquote>
+<pre><code class="language-matlab">&gt;&gt; interv_opts = interventionDetails()
+
+interv_opts =
+
+  9×8 table
+
+       name          ptype       sample_defaults   lower_bound    upper_bound      options      raw_defaults       raw_bounds    
+    __________   _____________   _______________   ___________   ______________   __________   ______________   _________________
+
+    &quot;Guided&quot;     &quot;categorical&quot;   {[         1]}    {[     1]}    {[         3]}   {1×1 cell}   {[         0]}   {[          0 1]}
+    &quot;PrSites&quot;    &quot;integer&quot;       {[         3]}    {[     1]}    {[         4]}   {1×1 cell}   {[         3]}   {[          1 3]}
+    &quot;Seed1&quot;      &quot;float&quot;         {[5.0000e-04]}    {[     0]}    {[1.0000e-03]}   {[   NaN]}   {[5.0000e-04]}   {[ 0 1.0000e-03]}
+    &quot;Seed2&quot;      &quot;float&quot;         {[         0]}    {[     0]}    {[         1]}   {[   NaN]}   {[         0]}   {[          0 1]}
+    &quot;SRM&quot;        &quot;categorical&quot;   {[         1]}    {[     1]}    {[         3]}   {1×1 cell}   {[         0]}   {[          0 1]}
+    &quot;Aadpt&quot;      &quot;integer&quot;       {[         1]}    {[     1]}    {[         8]}   {1×1 cell}   {[         6]}   {[         6 12]}
+    &quot;Natad&quot;      &quot;float&quot;         {[    0.0500]}    {[0.0100]}    {[    0.1000]}   {[   NaN]}   {[    0.0500]}   {[0.0100 0.1000]}
+    &quot;Seedyrs&quot;    &quot;integer&quot;       {[         1]}    {[     1]}    {[         7]}   {1×1 cell}   {[        10]}   {[        10 15]}
+    &quot;Shadeyrs&quot;   &quot;integer&quot;       {[         1]}    {[     1]}    {[         6]}   {1×1 cell}   {[         1]}   {[          1 5]}
+</code></pre>
+<p>Default values can be changed/specified by name if needed (note use of ADRIA expected values).
+Compare values in the rows for &quot;Guided&quot;, &quot;Aadpt&quot; and &quot;Seedyrs&quot; below, with the values shown above.</p>
+<pre><code class="language-matlab">&gt;&gt; user_specified_defaults = interventionDetails(Guided=1, Aadpt=8, Seedyrs=14)
+
+user_specified_defaults =
+
+  9×8 table
+
+       name           ptype        sample_defaults    lower_bound     upper_bound       options       raw_defaults        raw_bounds    
+    __________    _____________    _______________    ___________    ______________    __________    ______________    _________________
+
+    &quot;Guided&quot;      &quot;categorical&quot;    {[         2]}     {[     1]}     {[         3]}    {1×1 cell}    {[         1]}    {[          0 1]}
+    &quot;PrSites&quot;     &quot;integer&quot;        {[         3]}     {[     1]}     {[         4]}    {1×1 cell}    {[         3]}    {[          1 3]}
+    &quot;Seed1&quot;       &quot;float&quot;          {[5.0000e-04]}     {[     0]}     {[1.0000e-03]}    {[   NaN]}    {[5.0000e-04]}    {[ 0 1.0000e-03]}
+    &quot;Seed2&quot;       &quot;float&quot;          {[         0]}     {[     0]}     {[         1]}    {[   NaN]}    {[         0]}    {[          0 1]}
+    &quot;SRM&quot;         &quot;categorical&quot;    {[         1]}     {[     1]}     {[         3]}    {1×1 cell}    {[         0]}    {[          0 1]}
+    &quot;Aadpt&quot;       &quot;integer&quot;        {[         3]}     {[     1]}     {[         8]}    {1×1 cell}    {[         8]}    {[         6 12]}
+    &quot;Natad&quot;       &quot;float&quot;          {[    0.0500]}     {[0.0100]}     {[    0.1000]}    {[   NaN]}    {[    0.0500]}    {[0.0100 0.1000]}
+    &quot;Seedyrs&quot;     &quot;integer&quot;        {[         5]}     {[     1]}     {[         7]}    {1×1 cell}    {[        14]}    {[        10 15]}
+    &quot;Shadeyrs&quot;    &quot;integer&quot;        {[         1]}     {[     1]}     {[         6]}    {1×1 cell}    {[         1]}    {[          1 5]}
+</code></pre>
+<h2 id="value-transformation-process"><a class="header" href="#value-transformation-process">Value transformation process</a></h2>
+<p>For Monte Carlo approaches, the typical process is:</p>
+<ol>
+<li>Generate $N$ samples using the indicated bounds from <code>lower_bounds</code> and <code>upper_bounds</code></li>
+<li>Pass sampled values into a wrapper/interface function</li>
+<li>A step within the interface function in Step 2 maps the sampled values back to the values expected by ADRIA</li>
+<li>Run ADRIA with these transformed values</li>
+</ol>
+<p>To reiterate, the process is automated and abstracted away for regular users who use the <a href="">ADRIA Interface</a>.</p>
+<p>Transformation of sampled values to the so-called &quot;ADRIA values&quot; for integer and categorical parameters relies on the &quot;flooring trick&quot; (as it is referred to here), and adopted from the &quot;General Probabilistic Framework&quot; described in <a href="https://doi.org/10.1016/j.envsoft.2013.09.022">Baroni and Tarantola (2014)</a>.</p>
+<p>To illustrate the approach, take a parameter $x_i$ that can take the form of discrete values between 1 and 3 (inclusive). In other words, there are 3 valid options to take: $x_i = \{1, 2, 3\}$.</p>
+<ol>
+<li>The <code>upper_bound</code> value becomes $\text{max}(x_i) + \text{min}(x_i)$ (i.e., 4)</li>
+<li>Sample from this range usual a given sampler, which returns a value $v_i$; $1 \leq v_i \lt 4$, where $v_i \in \mathbb{R}$</li>
+<li>Take the <code>floor</code> of $v_i$. If $v_i = 3.9$, then $\text{floor}(v_i) = 3$.</li>
+</ol>
+<p>For <code>categorical</code> parameters, an extra step is to extract the corresponding <code>Map Container</code> from the <code>options</code> column and use the floored value as the key to obtain the categorical value.</p>
+<p>As an example, $x_i$ may in fact represent &quot;high&quot;, &quot;medium&quot;, &quot;low&quot; (i.e., ADRIA expects a string input) and so the relationship between sampled and ADRIA values becomes:</p>
+<ul>
+<li><code>1 =&gt; &quot;high&quot;</code></li>
+<li><code>2 =&gt; &quot;medium&quot;</code></li>
+<li><code>3 =&gt; &quot;low&quot;</code></li>
+</ul>
+<p>and this relationship is encapsulated by the <code>Map Container</code>.</p>
+<p>For <code>integer</code> parameters, the same process above may be used. In some cases, however, the options may be represented in an array of valid options
+in which case the index of the matching value is used:</p>
+<pre><code class="language-matlab">   name          ptype          sample_defaults   lower_bound    upper_bound      options      raw_defaults       raw_bounds    
+   __________   _____________   _______________   ___________   ______________   __________   ______________   _________________
+   &quot;Seedyrs&quot;    &quot;integer&quot;       {[         1]}    {[     1]}    {[         7]}   {1×1 cell}   {[        10]}   {[        10 15]}
+</code></pre>
+<p>In the above, the &quot;true&quot; bounds of values are between 10 to 15 (so six entries: 10, 11, 12, 13, 14, 15).
+In other cases, these may be arrays (e.g., <code>[[0,1], [1,2], [2,1]]</code>).</p>
+<p>The sample bounds for <code>integer</code> parameters are tied to the number of options rather than their values.
+This is so the conversion approach is generic and applicable to both cases outlined above.</p>
+<p>Following the $\text{max}(x_i) + \text{min}(x_i)$ approach, the sample range becomes $1 \leq v_i \lt 7$.
+In the first example above, <code>1 =&gt; 10</code> and $\text{floor}(6.999) = 6$, and resolves to <code>6 =&gt; 15</code>, thus the sample values between 1 and 7 are transformed to discrete whole number values between (and including) 10 and 15.</p>
+<p>The process described above is conducted by the <code>convertScenarioSelection()</code> function, which takes two inputs: (1) an array of sampled values, and (2) the parameter details table.</p>
+<p>The process above comes with a risk of biased samples being produced as unique combinations of sampled parameter values could be mapped to non-unique combinations.
+Care should be taken to determine the level of bias. To conform to some sampling design and reduce runtime, non-unique scenarios could be identified and results for a single simulation assigned to match indices of relevant rows. The functions listed here aid in doing so:</p>
+<ul>
+<li><code>mapDuplicateScenarios()</code></li>
+<li><code>mapDuplicateResults()</code></li>
+</ul>
+<p><strong>Note:</strong> The only requirement is that the the number and order of items in the sample array has to match what is defined in the table. By satisficing this requirement, any subset of parameters can be used.</p>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<p>The following snippet is illustrative only, and should not be expected to work.
+Its only intention is to highlight usage of the <code>*Details()</code> group of functions in combination with <code>convertScenarioSelection()</code>.</p>
+<pre><code class="language-matlab">function Y = someObjectiveFunc(sampled_x, param_details)
+    % Convert sampled values back to &quot;ADRIA expected&quot; values
+    interv_x = convertScenarioSelection(sampled_x, param_details);
+
+    % Run a single simulation/scenario
+    intermediate = runADRIAScenario(interv_x, [... other parameters considered constant for this example ...]);
+
+    Y = some_processing(intermediate); % e.g., calculate a metric or extract averages...
+end
+
+
+% Collect details of intervention parameters
+interv_opts = interventionDetails();
+
+% Parameter details can be collated into a single table
+% like so:
+% [interventionDetails(); criteriaDetails()]
+% TO BE UPDATED WITH A MORE ROBUST APPROACH
+
+% Extract names of each intervention parameter
+interv_names = interv_opts.name;
+
+% Use defaults as the initial best guess
+x0 = interv_opts.sample_defaults;
+
+% Retrieve the bounds for sampling purposes for each parameter
+lb = interv_opts.lower_bounds;
+ub = interv_opts.upper_bounds;
+
+objfunc = @(x) someObjectiveFunc(x, interv_opts);
+
+% Begin optimisation (only run for 30 seconds)
+obj_opts = optimoptions('simulannealbnd', 'MaxTime', 30);
+x = simulannealbnd(objfunc, x0, lb, ub, obj_opts);
+</code></pre>
+<h1 id="references"><a class="header" href="#references">References</a></h1>
+<ol>
+<li>Baroni, G., &amp; Tarantola, S. (2014). A General Probabilistic Framework for uncertainty and global sensitivity analysis of deterministic models: A hydrological case study. Environmental Modelling &amp; Software, 51, 26–34. https://doi.org/10.1016/j.envsoft.2013.09.022</li>
+</ol>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: {inlineMath: [['$', '$']]}, messageStyle: "none" });</script>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../dev_guide/dev_setup.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../dev_guide/dMCDA.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../dev_guide/dev_setup.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../dev_guide/dMCDA.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

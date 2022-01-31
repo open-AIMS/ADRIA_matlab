@@ -40,3 +40,6 @@ Outputs/Output_Conversion_Functions/*
 
 # Mac related files
 *.DS_Store
+
+config.m
+

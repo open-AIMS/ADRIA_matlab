@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Introduction</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro_to_ADRIA.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> User Guide</div></li><li class="chapter-item expanded "><a href="dev_guide/SUMMARY.html"><strong aria-hidden="true">3.</strong> ADRIA Developer Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="dev_guide/dev_setup.html"><strong aria-hidden="true">3.1.</strong> Setup</a></li><li class="chapter-item expanded "><a href="dev_guide/parameter_interface.html"><strong aria-hidden="true">3.2.</strong> ADRIA Parameter Interface</a></li><li class="chapter-item expanded "><a href="dev_guide/dMCDA.html"><strong aria-hidden="true">3.3.</strong> Dynamic Multi-Criteria Decision Making/Analysis</a></li><li class="chapter-item expanded "><a href="dev_guide/metrics.html"><strong aria-hidden="true">3.4.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="dev_guide/sensitivity_analysis.html"><strong aria-hidden="true">3.5.</strong> Sensitivity Analysis</a></li><li class="chapter-item expanded "><a href="dev_guide/optimization.html"><strong aria-hidden="true">3.6.</strong> Optimization</a></li><li class="chapter-item expanded "><a href="dev_guide/scenario_discovery.html"><strong aria-hidden="true">3.7.</strong> Scenario Discovery</a></li><li class="chapter-item expanded "><a href="dev_guide/documentation_build.html"><strong aria-hidden="true">3.8.</strong> Documentation Build Process</a></li><li class="chapter-item expanded "><a href="dev_guide/concise_API.html"><strong aria-hidden="true">3.9.</strong> Concise API</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="synopsis"><a class="header" href="#synopsis">Synopsis</a></h2>
+<p>Climate change is transforming coral reefs. Continued climate change has scope to erode reef biodiversity, key ecosystem functions, and the ecosystem services they provide for people. Conventional management strategies remain essential but will not be sufficient on their own to sustain coral reefs in a warming and acidifying ocean. New interventions are increasingly being considered, including assisted gene flow, cooling and shading, and reef structures that provide reef habitats and substrates for enhanced recruitment. </p>
+<p>Deciding where, when, and how to intervene – if at all - using new reef restoration and adaptation measures is challenging on at least three fronts. </p>
+<ol>
+<li>are new interventions likely to create more benefits than damage? And if so, whom do they benefit, or pose risks to, and at what spatial and temporal scales?</li>
+<li>which interventions, individually and in combination, represent solutions that provide the highest return on investment for reef, people, and industries? </li>
+<li>which R&amp;D paths and deployment strategies represent optimal solutions given multiple key objectives, trade-offs, and limited time, resources, and logistical constraints?</li>
+</ol>
+<p>To help reef modellers, decision-support teams and reef managers address these questions, AIMS has developed the Adaptive, Dynamic Reef Intervention Algorithm (ADRIA). In short, ADRIA simulates a reef decision maker operating inside the dynamic state space of a coral reef. </p>
+<p>For reef managers, ADRIA help provide line of sight to conservation solutions in complex settings where multiple objectives need to be considered. For investors, ADRIA helps analysts identify which options (R&amp;D and/or deployment solutions) might have the highest likelihood of providing ecological and social returns on investment. While ADRIA’s key function is as a decision-support tool for intervention deployment, it uses a simple proxy model for reef coral dynamics, consisting of vital rates parameterised in a set of linked differential equations for four coral groups. The growth, mortality and recruitment of those four coral groups are further parameterised by environmental drivers and by different restoration and adaptation interventions.</p>
+<p>The primary purpose of ADRIA is to help guide intervention deployment such that net benefits are maximised against primary objectives and minimised against costs. Solutions can be tuned (eventually optimised) via heuristics that control the selection of sites and/or reefs and the prioritisation of species, ecosystem services or benefits that favour what people (society) want. The key benefits considered in ADRIA are consistent with a triple-bottom-line approach, i.e. </p>
+<ol>
+<li>ecological (e.g. biodiversity), </li>
+<li>economic (e.g. tourism and fisheries values) and </li>
+<li>social and cultural (e.g. recreation and supporting identities).</li>
+</ol>
+<p>The guiding principles for decision support in ADRIA are currently a set of dynamic multi-criteria decision analyses (dMCDA) applied at each time step. Criteria in the model are a composite of spatial environmental variables (risk from wave damage, thermal stress, and water quality) and ecological information (coral cover, substrate availability). </p>
+<p>ADRIA is currently set up for the Moore Reef cluster: 26 sites in a cluster of four reefs off Cairns in North Queensland.</p>
+<p>Note: Environmental input files from the RECOM model runs are currently not included. Instead, transition-probability tables for connectivity are created (and stored as netCDFs) and forward projections for DHW based on simple, linear heating rates for RCPs and based on observed spatial patterns of DHW for the study area between three bleaching years.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="next" href="dev_guide/SUMMARY.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="next" href="dev_guide/SUMMARY.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
