@@ -4,7 +4,7 @@ function params = coralSpec()
 % sampled or user-specified values.
 %
 % Notes:
-% Values for the historical, temporal pattsiern of degree heating weeks
+% Values for the historical, temporal patterns of degree heating weeks
 % between bleaching years come from [1].
 %
 % Outputs:
@@ -78,12 +78,12 @@ params.coral_id = join([tn(:), params.taxa_id, params.class_id], "_");
 %%% Base covers
 %First express as number of colonies per size class per 100m2 of reef
 base_coral_numbers = ...
-    [0, 0, 0, 0, 0, 0; ...              % Tabular Acropora Enhanced
-     2000, 200, 100, 50, 30, 10; ... % Tabular Acropora Unenhanced
-     0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
-     2000, 200, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-     2000, 500, 200, 200, 100, 0; ... % small massives
-     2000, 500, 20, 20, 20, 10];      % large massives
+    [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
+     0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
+     0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
+     200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
+     200, 100, 200, 30, 0, 0; ...   % small massives
+     0, 0, 0, 0, 0, 0];             % large massives
 
 % To convert to covers we need to first calculate the area of colonies,
 % multiply by how many corals in each bin, and divide by reef area

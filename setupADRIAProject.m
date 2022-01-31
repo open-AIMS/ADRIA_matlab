@@ -59,6 +59,7 @@ addFolderIncludingChildFiles(proj, './ADRIAfunctions/IOHandler');
 addFolderIncludingChildFiles(proj, './ADRIAfunctions/Metrics');
 addFolderIncludingChildFiles(proj, './ADRIAfunctions/Plotting');
 addFolderIncludingChildFiles(proj, './ADRIAfunctions/Translation');
+addFolderIncludingChildFiles(proj, './ADRIAfunctions/third_party/ndSparse');
 
 % Add main directories and files to project spec
 addFolderIncludingChildFiles(proj, './ADRIAfunctions');
@@ -67,7 +68,13 @@ addFolderIncludingChildFiles(proj, './examples');
 addFolderIncludingChildFiles(proj, './examples/running_ADRIA');
 addFolderIncludingChildFiles(proj, './examples/running_ADRIA_HPC');
 addFolderIncludingChildFiles(proj, './examples/optimization');
+
 addFolderIncludingChildFiles(proj, './Inputs');
+addFolderIncludingChildFiles(proj, './Inputs/Moore');
+addFolderIncludingChildFiles(proj, './Inputs/Moore/connectivity');
+addFolderIncludingChildFiles(proj, './Inputs/Moore/DHWs');
+addFolderIncludingChildFiles(proj, './Inputs/Moore/site_data');
+
 
 % Add to MATLAB path
 addPath(proj, './ADRIAfunctions/SystemInfo');
@@ -77,6 +84,8 @@ addPath(proj, './ADRIAfunctions/Metrics');
 addPath(proj, './ADRIAfunctions/Plotting');
 addPath(proj, './ADRIAfunctions/Translation');
 
+addPath(proj, './ADRIAfunctions/third_party/ndSparse');
+
 addPath(proj, './ADRIAfunctions');
 addPath(proj, './ADRIAmain');
 addPath(proj, './examples');
@@ -84,6 +93,11 @@ addPath(proj, './examples/running_ADRIA');
 addPath(proj, './examples/running_ADRIA_HPC');
 addPath(proj, './examples/optimization');
 addPath(proj, './Inputs');
+
+addPath(proj, './Inputs/Moore');
+addPath(proj, './Inputs/Moore/connectivity');
+addPath(proj, './Inputs/Moore/DHWs');
+addPath(proj, './Inputs/Moore/site_data');
 
 
 % Programmatically install toolbox:

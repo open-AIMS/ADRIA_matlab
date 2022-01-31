@@ -25,6 +25,7 @@ function out_metrics = allParamMultiObjectiveFunc(x, ai, modified_params, Nreps,
      modified_params(1,'Shadeyrs') = {x(7)};
      
      Y = ai.run(modified_params, sampled_values = false, nreps = Nreps);
+     Y = Y.Y;  % get raw results, ignoring seed/shade logs
      [~, ~, coral_params] = ai.splitParameterTable(modified_params);
      
      % Collect metrics

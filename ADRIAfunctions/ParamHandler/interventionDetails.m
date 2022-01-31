@@ -5,15 +5,15 @@ function interventions = interventionDetails(varargin)
 %
 % Inputs:
 %    Argument list of parameters to override.
-%    Possible arguments (with default values/ranges):
-%      - Guided   : [0, 1, 2, 3, 4], where 0 is unguided
-%      - Seed1    : [100, 10000], 1000
-%      - Seed2    : [100, 10000], 1000
-%      - SRM      : [0, 12], 0
-%      - Aadpt    : [0, 12], 0
-%      - Natad    : [0, 0.1], 0.025
-%      - Seedyrs  : [10, 15], 10
-%      - Shadeyrs : [10, 25], 10
+%    Possible arguments (with [value range], default value):
+%      - Guided   : integer, [0, 1, 2, 3, 4], where 0 is unguided
+%      - Seed1    : integer, [100, 10000], 1000  
+%      - Seed2    : integer, [100, 10000], 1000
+%      - SRM      : float, [0, 12], 0
+%      - Aadpt    : float, [0, 12], 0
+%      - Natad    : float, [0, 0.1], 0.025
+%      - Seedyrs  : integer, [10, 15], 10
+%      - Shadeyrs : integer, [10, 25], 10
 %
 % Outputs:
 %   table of name, ptype, defaults, lower_bound, upper_bound, options,
@@ -57,6 +57,7 @@ defaults = [
 
 
 p_bounds = [
+
     [0, 4];  % Guided
     [100, 10000];  % Seed1
     [100, 10000];  % Seed2
@@ -74,8 +75,6 @@ p_bounds = [
 %
 % integers: values have to be a whole number
 % float: real-valued inputs
-
-
 ptype = [
     "integer";
     "integer";

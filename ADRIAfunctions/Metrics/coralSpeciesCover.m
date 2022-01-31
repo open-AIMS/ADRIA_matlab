@@ -1,4 +1,4 @@
-function Y = coralSpeciesCover(X, ~)
+function Y = coralSpeciesCover(X, coral_params)
 % Converts outputs from coralScenario to relative cover of the six
 % different coral groups
 %
@@ -6,10 +6,18 @@ function Y = coralSpeciesCover(X, ~)
 %   X : array, of coralScenario results
 %       Dimensions: time, species, sites, interventions, sims
 
-[nsteps, ~, nsites] = size(X);
-Y = zeros(nsteps, 6, nsites);  % TODO: Remove hardcoded `6` value...
-for sp = 1:6
-    Y(:,sp,:) = sum(X(:,6*sp-5:sp*6,:), 2);
+[nsteps, ~, nsites, nint, nreps] = size(X);
+
+% Get unique coral names to determine number of corals
+tmp = split(string(coral_params.Properties.VariableNames)', "__");
+tmp = regexp(tmp(:, 1), "\_[0-9]", "split", "once");
+tmp = vertcat(tmp{:, 1});
+coral_names = unique(vertcat(tmp(:, 1)));
+n_corals = length(coral_names);
+
+Y = zeros(nsteps, n_corals, nsites, nint, nreps);
+for sp = 1:n_corals
+    Y(:,sp,:,:,:) = sum(X(:,n_corals*sp-(n_corals-1):sp*n_corals,:,:,:), 2);
 end
 
 end

@@ -16,8 +16,8 @@ for i = 1:length(ptype)
         l_val = this_bound(1);
         u_val = this_bound(2);
 
-        options{i, :} = paramCombinations({l_val:u_val});
-    else
+        % options{i, :} = paramCombinations({l_val:u_val});
+    elseif tmp_ptype == "categorical"
         % simply map integer id to categorical value
         % e.g. 1 => "Option A", 2 => "Option B"
         options{i, :} = containers.Map(1:length(this_bound), this_bound);
@@ -48,7 +48,7 @@ sample_defaults = defaults;
 param_table = table(name, ptype, sample_defaults, lower_bound, upper_bound, ...
                     options, raw_defaults, raw_bounds);
 
-% Update "raw_default" column with user-provided values (if given)
+% Update raw and sample default value column with user-provided values (if given)
 varargin = varargin{:};
 if nargin > 0
     valid_names = name(:);
@@ -61,30 +61,34 @@ if nargin > 0
         assert(~isempty(val), strcat("Provided value for ", name, " is empty!"));
 
         param_table{param_table.name == name, "raw_defaults"} = val;
+        param_table{param_table.name == name, "sample_defaults"} = val;
     end
 end
 
+%% Disable categorical value mapping for now
 % Update "sample_defaults" to match specified values in the "raw" column
-cats = param_table((param_table.ptype == "integer") | (param_table.ptype == "categorical"), :);
-cat_opts = cats.options;
-num_entries = length(cat_opts);
-for ci = 1:num_entries
-    cont = cat_opts{ci};
-    default_val = cats.raw_defaults(ci);
-
-    if isfloat(cont)
-        % not a map container, so use index value
-        idx = find(cont == default_val);
-        mapped_default_val = cont(idx);
-    else
-        % is map container
-        poss_vals = values(cont);
-        tmp_keys = keys(cont);
-        tmp = tmp_keys([poss_vals{:}] == default_val);
-        mapped_default_val = tmp{1};
-    end
-
-    param_table{param_table.name == cats.name(ci), "sample_defaults"} = mapped_default_val;
-end
+% cats = param_table((param_table.ptype == "integer") | (param_table.ptype == "categorical"), :);
+% cat_opts = cats.options;
+% num_entries = length(cat_opts);
+% for ci = 1:num_entries
+%     cont = cat_opts{ci};
+%     default_val = cats.raw_defaults(ci);
+%     
+%     mapped_default_val = cont(cont == default_val);
+% 
+%     
+%     if isfloat(cont)
+%         % not a map container, so use index value
+%         mapped_default_val = cont(cont == default_val);
+%     else
+%         % is map container
+%         poss_vals = values(cont);
+%         tmp_keys = keys(cont);
+%         tmp = tmp_keys([poss_vals{:}] == default_val);
+%         mapped_default_val = tmp{1};
+%     end
+% 
+%     param_table{param_table.name == cats.name(ci), "sample_defaults"} = mapped_default_val;
+% end
 
 end
