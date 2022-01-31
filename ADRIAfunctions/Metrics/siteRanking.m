@@ -29,6 +29,8 @@ function mean_r = siteRanking(rankings, orient, func)
         target_col = 1;
     elseif orient == "shade"
         target_col = 2;
+    else
+        error(strcat("Unknown result set for site ranking: ", orient))
     end
 
     res_type = ndims(rankings);
