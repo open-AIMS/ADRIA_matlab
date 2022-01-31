@@ -43,6 +43,8 @@ ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
 
 % Gather results, applying a metric to each result set.
 % The last entry is an example of how one might create a custom aggregator
+% In this case, it collects the average of Total Coral Cover across all
+% simulations.
 desired_metrics = {@coralTaxaCover, ...
                    @coralEvenness, ...
                    @coralSpeciesCover, ...
@@ -50,6 +52,7 @@ desired_metrics = {@coralTaxaCover, ...
                    @(x, p) mean(coralTaxaCover(x, p).total_cover, 4)};
 Y = ai.gatherResults('./Outputs/example_multirun', desired_metrics);
 
+% Collect logged values from raw result set
 Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "MCDA_rankings");
 
 tmp = toc;
@@ -57,8 +60,30 @@ disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simu
 
 %% Extract metric values from batched result set
 
+% Get the mean total coral cover at end of simulation time across all
+% simulations.
+% Note the name of the custom function has been transformed from its 
+% function name to a representative string (brackets/dots to underscores).
+mean_TC = concatMetrics(Y, "mean_coralTaxaCover_x_p_total_cover_4");
+mean_TC = squeeze(mean(mean_TC(end, :, :, :), 4));
+figure;
+plot(mean(mean_TC, 2));
+title('Mean Total Coral Cover across all simulations');
+xlabel('Site');
+
+% Extract site rankings for shading
 rankings = concatMetrics(Y_rankings, "MCDA_rankings");
+figure;
 barh(siteRanking(rankings, "shade"));
+title('Site Rankings for Shading');
+xlabel('Site');
+
+% Site rankings for seeding
+figure;
+barh(siteRanking(rankings, "seed"));
+title('Site Rankings for Seeding');
+ylabel('Site');
+
 
 % Total coral cover
 TC = concatMetrics(Y, "coralTaxaCover.total_cover");
@@ -74,6 +99,7 @@ BC = concatMetrics(Y, "coralTaxaCover.juveniles");
 
 % Calculate coral shelter volume per ha
 SV_per_ha = concatMetrics(Y, "shelterVolume");
+
 
 %% Plot coral covers over time and sites
 figure; 
