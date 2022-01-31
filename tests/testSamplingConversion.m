@@ -57,9 +57,9 @@ ub_vals = tmp(:, 2);
 arrayfun(assert_lb, combined_opts.name, lb_vals);
 arrayfun(assert_ub, combined_opts.name, ub_vals);
 
-%% Check integer options
+%% Check categorical options
 % Collect all integer parameters
-int_idxs = combined_opts.ptype == 'integer';
+int_idxs = combined_opts.ptype == 'categorical';
 int_opts = combined_opts(int_idxs, :);
 
 int_samples = converted_tbl(:, int_idxs);
