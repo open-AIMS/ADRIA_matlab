@@ -262,7 +262,7 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
-               runargs.collect_logs logical = true
+               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
             if isempty(obj.site_data)
@@ -307,7 +307,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
-               runargs.collect_logs string = [""]
+               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
             nreps = runargs.nreps;

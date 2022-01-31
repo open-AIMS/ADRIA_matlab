@@ -72,19 +72,19 @@ coral_spec = coralSpec();
 n_species = height(coral_spec);  % total number of species considered
 
 if ~exist('collect_logs', 'var')
-    collect_logs = false;
+    collect_logs = [];
 end
 
 Y = zeros(timesteps, n_species, nsites, N, n_reps);
-if ismember("seed", collect_logs)
+if any(ismember("seed", collect_logs))
     seed = zeros(timesteps, n_species, nsites, N, n_reps);
 end
 
-if ismember("shade", collect_logs)
+if any(ismember("shade", collect_logs))
     shade = zeros(timesteps, nsites, N, n_reps);
 end
 
-if ismember("site_rankings", collect_logs)
+if any(ismember("site_rankings", collect_logs))
     rankings = zeros(timesteps, nsites, 2, N, n_reps);
 end
 
@@ -110,18 +110,18 @@ parfor i = 1:N
                                site_data, collect_logs);
         Y(:, :, :, i, j) = res.Y;
         
-        if strlength(collect_logs) > 0
+        if any(strlength(collect_logs) > 0)
             % TODO: Generalize so we're not manually adding logs
             %       as we add them...
-            if ismember("seed", collect_logs)
+            if any(ismember("seed", collect_logs))
                 seed(:, :, :, i, j) = res.seed_log;
             end
 
-            if ismember("shade", collect_logs)
+            if any(ismember("shade", collect_logs))
                 shade(:, :, i, j) = res.shade_log;
             end
 
-            if ismember("site_rankings", collect_logs)
+            if any(ismember("site_rankings", collect_logs))
                 rankings(:, :, :, i, j) = res.MCDA_rankings;
             end
         end
@@ -131,15 +131,15 @@ end
 results = struct();
 results.Y = Y;
 
-if ismember("seed", collect_logs)
+if any(ismember("seed", collect_logs))
     results.seed_log = seed;
 end
 
-if ismember("shade", collect_logs)
+if any(ismember("shade", collect_logs))
     results.shade_log = shade;
 end
 
-if ismember("site_rankings", collect_logs)
+if any(ismember("site_rankings", collect_logs))
     results.MCDA_rankings = rankings;
 end
 

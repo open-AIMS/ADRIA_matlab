@@ -109,7 +109,7 @@ param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
 %% Run ADRIA
 % Run a single simulation
-res = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=true);
+res = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=["seed", "shade", "site_rankings"]);
 seed_log = res.seed_log;
 shade_log = res.shade_log;
 rankings = res.MCDA_rankings;
@@ -224,6 +224,3 @@ xlabel(LO2,'Years', 'FontSize', 14)
 %ylabel(LO,'Cover (prop)')
 aa = gca;
 aa.FontSize = font_size;
-
-disp("Shade log all zero?")
-all(all(all(shade_log == 0)))
