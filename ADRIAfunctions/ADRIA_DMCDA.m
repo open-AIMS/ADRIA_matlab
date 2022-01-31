@@ -228,7 +228,7 @@ switch alg_ind
 
         C = S_n./(S_p + S_n);
         SHwt = [SH(:,1), C];
-        order = sortrows(SHwt,2,'descend');
+        order = sortrows(SHwt,2,'ascend');
         %highest indicators picks the cool sites
         prefshadesites = order(1:nsiteint,1);
         nprefshadesites = numel(prefshadesites); 
@@ -269,7 +269,7 @@ switch alg_ind
             Q = [SE(:,1),Q];
 
             % sort Q in ascending order rows
-            orderQ = sortrows(Q,2,'descend');
+            orderQ = sortrows(Q,2,'ascend');
             prefseedsites = orderQ(1:nsiteint,1);
             nprefseedsites = numel(prefseedsites); 
         end

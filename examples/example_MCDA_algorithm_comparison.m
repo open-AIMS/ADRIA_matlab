@@ -69,10 +69,10 @@ else
  
         %% Scenario runs
         % set all criteria weights and seed yrs/ shade yrs to be the same
-         p_sel.Seedyrs(:) = ones(length(p_sel.Seedyrs(:)),1);
-         p_sel.Shadeyrs(:) = ones(length(p_sel.Shadeyrs(:)),1);
-         p_sel.Seed1(:) = linspace(100,1000,25);
-         p_sel.Seed2(:) = linspace(100,1000,25);
+         p_sel.Seedyrs(:) = 10*ones(length(p_sel.Seedyrs(:)),1);
+         p_sel.Shadeyrs(:) = 10*ones(length(p_sel.Shadeyrs(:)),1);
+         % p_sel.Seed1(:) = linspace(100,10000,N);
+         % p_sel.Seed2(:) = linspace(100,10000,N);
          p_sel.coral_cover_high(:) = ones(length(p_sel.coral_cover_high(:)),1);
          p_sel.coral_cover_low(:) = ones(length(p_sel.coral_cover_low(:)),1);
          p_sel.wave_stress(:) = ones(length(p_sel.wave_stress(:)),1);
@@ -82,17 +82,14 @@ else
          p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
          p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
          p_sel.SRM(:) = zeros(length(p_sel.SRM(:)),1);
-         p_sel.Aadpt(:) = [7*ones(20,1); zeros(5,1)];
+         %p_sel.Aadpt(:) = 7*ones(N,1);
+         %p_sel.Natad(:) = 0.1*ones(N,1);
         p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
 
    for al = 0:nalgs
        % for each algorithm
 
-         p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1)+1;
-         if al == 4
-            p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1)+1.1;
-         end
-
+         p_sel.Guided(:) = al*ones(length(p_sel.Guided(:)),1);
         tic
         Y = ai.run(p_sel,sampled_values = false, nreps = num_reps);
         tmp = toc;
