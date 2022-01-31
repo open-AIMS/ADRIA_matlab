@@ -2,7 +2,7 @@
 % Connectivity
 [TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
 RCP = 45;
-Year = 2034;
+Year = 2026;
 yrstr = num2str(Year);
 % Site Data
 sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
@@ -45,9 +45,9 @@ nsiteint = 5; %nsites;
     
 sumcover = (site_data.(strcat('Acropora',yrstr)) + site_data.(strcat('Goniastrea',yrstr)))/100.0;
 
-store_seed_rankings_alg1 = zeros(1,nsites,nreps);
-store_seed_rankings_alg2 = zeros(1,nsites,nreps);
-store_seed_rankings_alg3 = zeros(1,nsites,nreps);
+store_seed_rankings_alg1 = zeros(nreps,nsites,2);
+store_seed_rankings_alg2 = zeros(nreps,nsites,2);
+store_seed_rankings_alg3 = zeros(nreps,nsites,2);
 
 for l = 1:nreps
     dhw_step = dhw_scen(tstep,:,l);
@@ -61,25 +61,24 @@ for l = 1:nreps
     [~, ~, ~, ~, rankingsalg1] = ADRIA_DMCDA(dMCDA_vars, 1);
     [~, ~, ~, ~, rankingsalg2] = ADRIA_DMCDA(dMCDA_vars, 2);
     [~, ~, ~, ~, rankingsalg3] = ADRIA_DMCDA(dMCDA_vars, 3);
-    store_seed_rankings_alg1(:,:,l) = rankingsalg1(:,2);
-    store_seed_rankings_alg2(:,:,l) = rankingsalg2(:,2);
-    store_seed_rankings_alg3(:,:,l) = rankingsalg3(:,2);
+    store_seed_rankings_alg1(l,:,:) = rankingsalg1(:,2:end);
+    store_seed_rankings_alg2(l,:,:) = rankingsalg2(:,2:end);
+    store_seed_rankings_alg3(l,:,:) = rankingsalg3(:,2:end);
 end
 
-% siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
-% siteranks_alg2 = siteRanking(store_seed_rankings_alg2,"seed");
-% siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
-siteranks_alg1 = mean(squeeze(store_seed_rankings_alg1),2);
-siteranks_alg2 = mean(squeeze(store_seed_rankings_alg2),2);
-siteranks_alg3 = mean(squeeze(store_seed_rankings_alg3),2);
-
-siteranks_alg1_round = round(siteranks_alg1);
-siteranks_alg2_round = round(siteranks_alg2);
-siteranks_alg3_round = round(siteranks_alg3);
+siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
+siteranks_alg2 = siteRanking(store_seed_rankings_alg2,"seed");
+siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
+% siteranks_alg1 = mean(squeeze(store_seed_rankings_alg1),2);
+% siteranks_alg2 = mean(squeeze(store_seed_rankings_alg2),2);
+% siteranks_alg3 = mean(squeeze(store_seed_rankings_alg3),2);
+% 
+% siteranks_alg1_round = round(siteranks_alg1);
+% siteranks_alg2_round = round(siteranks_alg2);
+% siteranks_alg3_round = round(siteranks_alg3);
 
 sites_after_filtering = depth_priority;
-T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3,...
-    siteranks_alg1_round,siteranks_alg2_round,siteranks_alg3_round);
+T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3);
 writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f_revised.xlsx',RCP,Year))
 
 

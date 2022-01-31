@@ -24,8 +24,10 @@ param_table.Seed2 = 5000;
 
 %% Run ADRIA
 
-% Specify connectivity data
-ai.loadConnectivity('MooreTPmean.xlsx');
+% Load site specific data
+ai.loadConnectivity('Inputs/Moore/connectivity/2015/');
+ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
+
 tic
 % Run a single simulation with 1 replicate
 Y = ai.run(param_table, sampled_values=false, nreps=1);
