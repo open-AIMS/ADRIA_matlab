@@ -13,14 +13,21 @@ ai = ADRIA();
 % D is the number of parameters.
 param_table = ai.raw_defaults;
 
-% See the "Parameter Interface" section in the documentation for
-% details on how these two differ.
-% sample_value_table = ai.sample_defaults;
+
+% If multiple scenarios are to be run, extend the parameter table
+% up to the N runs required, and adjust each row as desired
+% For example, if 5 runs are desired, we would repeat the single row
+% 5 times:
+% param_table = repmat(param_table, 5, 1);
+
 
 %% 3. Modify table as desired...
-param_table.Guided = 4;
+param_table.Guided = 2;
 param_table.Seed1 = 9000;
 param_table.Seed2 = 5000;
+
+% If running multiple scenarios, specify the values for each run
+% param_table.Seed1 = [600; 700; 800; 900; 1000];
 
 %% Run ADRIA
 
@@ -28,8 +35,13 @@ param_table.Seed2 = 5000;
 ai.loadConnectivity('Inputs/Moore/connectivity/2015/');
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
+n_reps = 2;
+
 tic
 % Run a single simulation with 1 replicate
-Y = ai.run(param_table, sampled_values=false, nreps=1);
-Y = Y.Y;  % get raw results, ignoring seed/shade logs
-toc
+res = ai.run(param_table, sampled_values=false, nreps=n_reps);
+Y = res.Y;  % get raw results, ignoring seed/shade logs
+tmp = toc;
+
+N = size(Y, 4);
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
