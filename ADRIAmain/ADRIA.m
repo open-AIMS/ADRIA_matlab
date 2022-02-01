@@ -410,8 +410,8 @@ classdef ADRIA < handle
             %       columns are removed
             arguments
                 obj
-                values  % matrix of updated parameter values
-                opts.p_table table = table() % table to update (uses raw defaults if not provided)
+                values  % matrix/table of updated parameter values
+                opts.p_table table = table() % Optional: table to update (uses raw defaults if not provided)
                 opts.ignore string = "" % string, or string array, of columns to ignore
                 opts.partial logical = false  % partial match on list of columns to ignore (e.g., "natad" will match "coral_1_natad")
             end
