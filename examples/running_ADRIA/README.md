@@ -16,5 +16,5 @@ which would otherwise crash due to an "out-of-memory" error.
 
 The end goal with these is to allow a relatively informed user to be able 
 to cobble together a new script by taking snippets from one, some, or all 
-of the above examples (perhaps referring back to the manual a little bit) 
-to conduct new runs/analyses with ADRIA.
+of the above examples (with some reference to the user manual) to conduct 
+new runs/analyses with ADRIA.
