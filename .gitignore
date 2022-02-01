@@ -38,3 +38,6 @@ Outputs/
 *.DS_Store
 
 config.m
+
+# Exploratory/Experimental files
+sandbox/
