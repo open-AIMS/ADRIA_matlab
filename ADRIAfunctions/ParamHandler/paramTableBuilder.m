@@ -48,7 +48,7 @@ sample_defaults = defaults;
 param_table = table(name, ptype, sample_defaults, lower_bound, upper_bound, ...
                     options, raw_defaults, raw_bounds);
 
-% Update "raw_default" column with user-provided values (if given)
+% Update raw and sample default value column with user-provided values (if given)
 varargin = varargin{:};
 if nargin > 0
     valid_names = name(:);
@@ -61,6 +61,7 @@ if nargin > 0
         assert(~isempty(val), strcat("Provided value for ", name, " is empty!"));
 
         param_table{param_table.name == name, "raw_defaults"} = val;
+        param_table{param_table.name == name, "sample_defaults"} = val;
     end
 end
 

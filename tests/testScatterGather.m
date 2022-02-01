@@ -15,8 +15,8 @@ tmp_dir = strcat(parent_dir, '/', right_now, '/');
 mkdir(tmp_dir)
 
 % Number of scenarios
-N = 4;
-num_reps = 3;  % Number of replicate RCP scenarios
+N = 2;
+num_reps = 50;  % Number of replicate RCP scenarios
 
 ai = ADRIA();
 rd = ai.raw_defaults;
@@ -50,7 +50,7 @@ try
     Y_true = ai.run(p_sel, sampled_values=true, nreps=num_reps);
     
     [~, ~, coral_params] = ai.splitParameterTable(p_sel);
-    Yt_TC = collectMetrics(Y_true, coral_params, {mean_TC});
+    Yt_TC = collectMetrics(Y_true.Y, coral_params, {mean_TC});
     Ytt = Yt_TC.mean_coralTaxaCover_x_p_total_cover_4;
     Ytt = squeeze(mean(Ytt(end, :, :, :), 4));
 
@@ -68,7 +68,7 @@ try
     scattered_TC = squeeze(mean(scattered(end, :, :, :), 4));
 
     assert(isequal(Ytt, scattered_TC), "Results are not equal!")
-    assert(all(all(collated.TC(:, :, 1, 1) ~= 0)), "Results were zeros!")
+    assert(~all(all(scattered(:, :, 1, 1))), "Results were zeros!")
 
 catch err
 end

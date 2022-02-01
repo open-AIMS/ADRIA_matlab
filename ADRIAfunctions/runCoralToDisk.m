@@ -110,16 +110,16 @@ parfor b_i = 1:n_batches
     shade_log = [];
     rankings = [];
     
-    if strlength(collect_logs) > 0
-        if ismember("seed", collect_logs)
+    if any(strlength(collect_logs) > 0)
+        if any(ismember("seed", collect_logs))
             seed_log = ndSparse(zeros(timesteps, nspecies, nsites, b_len, n_reps));
         end
 
-        if ismember("shade", collect_logs)
+        if any(ismember("shade", collect_logs))
             shade_log = ndSparse(zeros(timesteps, nsites, b_len, n_reps));
         end
 
-        if ismember("site_rankings", collect_logs)
+        if any(ismember("site_rankings", collect_logs))
             rankings = ndSparse(zeros(timesteps, nsites, 2, b_len, n_reps));
         end
     end
@@ -147,16 +147,16 @@ parfor b_i = 1:n_batches
                                    site_data, collect_logs);
             raw(:, :, :, i, j) = res.Y;
             
-            if strlength(collect_logs) > 0
-                if ismember("seed", collect_logs)
+            if any(strlength(collect_logs) > 0)
+                if any(ismember("seed", collect_logs))
                     seed_log(:, :, :, i, j) = res.seed_log;
                 end
                 
-                if ismember("shade", collect_logs)
+                if any(ismember("shade", collect_logs))
                     shade_log(:, :, i, j) = res.shade_log;
                 end
                 
-                if ismember("site_rankings", collect_logs)
+                if any(ismember("site_rankings", collect_logs))
                     rankings(:, :, :, i, j) = res.MCDA_rankings;
                 end
             end
@@ -167,16 +167,16 @@ parfor b_i = 1:n_batches
     tmp_d = struct();
     tmp_d.all = raw;
     
-    if strlength(collect_logs) > 0
-        if ismember("seed", collect_logs)
+    if any(strlength(collect_logs) > 0)
+        if any(ismember("seed", collect_logs))
             tmp_d.seed_log = full(seed_log);
         end
 
-        if ismember("shade", collect_logs)
+        if any(ismember("shade", collect_logs))
             tmp_d.shade_log = full(shade_log);
         end
 
-        if ismember("site_rankings", collect_logs)
+        if any(ismember("site_rankings", collect_logs))
             tmp_d.MCDA_rankings = full(rankings);
         end
     end

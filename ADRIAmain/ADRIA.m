@@ -247,7 +247,7 @@ classdef ADRIA < handle
             end 
             
             sdata = readtable(filename);
-            tmp_s = sdata(:, [["site_id", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
+            tmp_s = sdata(:, [["site_id", "area", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
             
             % Set any missing coral cover data to 0
             tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
@@ -262,7 +262,8 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
-               runargs.collect_logs string = [""]
+
+               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
             if isempty(obj.site_data)
@@ -307,7 +308,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
-               runargs.collect_logs string = [""]
+               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
             nreps = runargs.nreps;

@@ -1,5 +1,7 @@
 % Example script illustrating running multiple ADRIA scenarios
-rng(101)
+% with sampled values
+
+rng(101)  % set random seed for consistency
 
 %% Generate monte carlo samples
 
@@ -38,7 +40,7 @@ ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.cs
 %% Scenario runs
 
 tic
-res = ai.run(sample_table, sampled_values=true, nreps=n_reps);
+res = ai.run(sample_table, sampled_values=true, nreps=n_reps, collect_logs=["site_rankings"]);
 Y = res.Y;  % get raw results, ignoring seed/shade logs
 % ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
 %     file_prefix='./test', batch_size=4);

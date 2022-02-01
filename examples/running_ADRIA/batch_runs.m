@@ -1,4 +1,4 @@
-% Example script illustrating running ADRIA scenarios in batches
+%% Example script illustrating running ADRIA scenarios in batches
 rng(101)
 
 
