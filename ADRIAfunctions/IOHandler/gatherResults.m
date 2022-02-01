@@ -31,7 +31,11 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
     for i = 1:num_files
         fn = target_files(i);
         
-        full_path = fullfile(folder, fn);
+        % Necessary to support mac not respecting paths
+        [~, fn_t, ext] = fileparts(fn);
+        fn = strcat(fn_t, ext);
+        
+        full_path = fullfile(strcat(folder, filesep), fn);
         [Ytable, md] = readDistributed(full_path, target_var);
         
         b_start = md.record_start;
