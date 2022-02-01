@@ -262,7 +262,7 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
-               runargs.collect_logs logical = true
+               runargs.collect_logs string = [""]
             end
             
             if isempty(obj.site_data)

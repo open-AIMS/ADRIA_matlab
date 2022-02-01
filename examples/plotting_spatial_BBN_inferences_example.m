@@ -3,11 +3,11 @@
 % filetype of saved raw data
 filetype = 'mat';
 % rcps to include
-rcps = [26,45,60];
+rcps = 45;
 % algorithms to include
-algs = 1:3;
+algs = 1;
 % sites to include
-sites = 1:26;
+sites = 1:66;
 % intervention variables to include
 col_names = {'Guided','PrSites','Seed1','Seed2','SRM','Aadpt','Natad','Seedyrs','Shadeyrs'};
 % output metrics to include
