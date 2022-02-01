@@ -22,7 +22,7 @@ param_table = ai.raw_defaults;
 
 
 %% 3. Modify table as desired...
-param_table.Guided = 2;
+param_table.Guided = 1;
 param_table.Seed1 = 9000;
 param_table.Seed2 = 5000;
 
