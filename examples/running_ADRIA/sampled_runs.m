@@ -1,5 +1,7 @@
 % Example script illustrating running multiple ADRIA scenarios
-rng(101)
+% with sampled values
+
+rng(101)  % set random seed for consistency
 
 %% Generate monte carlo samples
 
