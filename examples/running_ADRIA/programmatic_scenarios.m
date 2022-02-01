@@ -38,9 +38,9 @@ ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.cs
 n_reps = 2;
 
 tic
-% Run a single simulation with 1 replicate
+% Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps);
-Y = res.Y;  % get raw results, ignoring seed/shade logs
+Y = res.Y;  % get raw results
 tmp = toc;
 
 N = size(Y, 4);
