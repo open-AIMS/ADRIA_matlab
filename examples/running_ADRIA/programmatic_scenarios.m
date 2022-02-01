@@ -1,4 +1,4 @@
-%% Script showcasing how to define and run a single scenario.
+%% Example showcasing how to define and run specific scenarios
 
 rng(101) % set seed for reproducibility
 

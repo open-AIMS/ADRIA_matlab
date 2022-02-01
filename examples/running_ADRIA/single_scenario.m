@@ -1,4 +1,4 @@
-% Example script running a single scenario.
+%% Example script running a single scenario with user input.
 
 rng(101) % set seed for reproducibility
 
@@ -25,6 +25,8 @@ for n = 1:height(inter_opts)
     bnds = inter_opts.raw_bounds(n, :);  % range of values
     bs = num2str(bnds(1));
     be = num2str(bnds(2));
+    
+    % Ask user to input a value within the indicated range
     prompt(n) = {strcat(inter_opts.name(n), " (", bs, " - ", be, ")")};
 end
 
@@ -39,6 +41,8 @@ for n = 1:height(criteria_opts)
     bnds = criteria_opts.raw_bounds(n, :);
     bs = num2str(bnds(1));
     be = num2str(bnds(2));
+    
+    % Ask user to input a value within the indicated range
     prompt(n) = {strcat(criteria_opts.name(n), " (", bs, " - ", be, ")")};
 end
 
