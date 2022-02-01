@@ -20,22 +20,15 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
 
     file_prefix = fullfile(file_loc);
     pat = strcat(file_prefix, '_*]].nc');
-    target_files = string(ls(pat));
-    folder = dir(pat).folder;
-    
-    % ds = datastore(target_files, "FileExtensions", ".nc", "Type", "file", "ReadFcn", @readDistributed);
-    num_files = length(target_files);
+    file_info = dir(pat);
+    folder = file_info.folder;
 
     % Store results in a cell array of structs
-    Y_collated = repmat({0}, height(coral_params), 1);
-    for i = 1:num_files
-        fn = target_files(i);
-        
-        % Necessary to support mac not respecting paths
-        [~, fn_t, ext] = fileparts(fn);
-        fn = strcat(fn_t, ext);
-        
-        full_path = fullfile(strcat(folder, filesep), fn);
+    % ds = datastore(target_files, "FileExtensions", ".nc", "Type", "file", "ReadFcn", @readDistributed);
+    i = 1;
+    for file = file_info
+        fn = file.name;
+        full_path = fullfile(folder, fn);
         [Ytable, md] = readDistributed(full_path, target_var);
         
         b_start = md.record_start;
@@ -49,15 +42,15 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
                 Ytmp{j, :} = t;
             end
         else
-            
             cp_subset = coral_params(b_start:b_start+(b_len-1), :);
             parfor j = 1:b_len
-                % rec_id = (b_start - 1) + j;
                 Ytmp{j} = collectMetrics(Ytable{j, :}{:}, cp_subset(j, :), metrics);
             end
         end
         
         Y_collated(b_start:(b_start+b_len)-1) = Ytmp;
+        
+        i = i + 1;
     end
 end
 
