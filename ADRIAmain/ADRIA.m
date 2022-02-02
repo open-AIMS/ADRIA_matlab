@@ -138,7 +138,7 @@ classdef ADRIA < handle
                 init_cover(:, row) = tmp(:);
             end
             
-            assert(all(any(isnan(init_cover)) == 0), "NaNs found in coral cover data")
+            assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
         end
 
         %% object methods
