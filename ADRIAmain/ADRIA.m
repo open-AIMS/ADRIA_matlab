@@ -89,7 +89,7 @@ classdef ADRIA < handle
         
         function init_cover = get.init_coral_cover(obj)
             if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
-                % If empty, default base covers will be used
+                % If empty, default base covers from coralSpec will be used
                 init_cover = [];
                 return
             end
@@ -138,7 +138,7 @@ classdef ADRIA < handle
                 init_cover(:, row) = tmp(:);
             end
             
-            assert(all(any(isnan(init_cover)) == 0), "NaNs found in coral cover data")
+            assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
         end
 
         %% object methods
