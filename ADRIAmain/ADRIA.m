@@ -109,7 +109,7 @@ classdef ADRIA < handle
             % target shape is nspecies * nsites
             init_cover = zeros(numel(base_coral_numbers), nsites);
             for row = 1:nsites
-                x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
+                x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
                 base_coral_numbers(4:5, :) = x;
                 
                 tmp = base_coral_numbers';
@@ -209,6 +209,9 @@ classdef ADRIA < handle
             %
             %     % load and aggregate multiple datasets using their mean
             %     ai.loadConnectivity("./example", agg_func=@mean)
+            %
+            %     % load with a different cutoff value
+            %     ai.loadConnectivity("./example/x.csv", cutoff=0.05)
             arguments
                obj
                fileset string
