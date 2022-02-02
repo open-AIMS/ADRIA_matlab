@@ -77,6 +77,9 @@ params.coral_id = join([tn(:), params.taxa_id, params.class_id], "_");
 
 %%% Base covers
 %First express as number of colonies per size class per 100m2 of reef
+
+% NOTE: These values are currently being overwritten by init_coral_cover
+% in the ADRIA class (see init_coral_cover method in ADRIA.m)
 base_coral_numbers = ...
     [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
      0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
