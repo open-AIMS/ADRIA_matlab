@@ -89,7 +89,7 @@ classdef ADRIA < handle
         
         function init_cover = get.init_coral_cover(obj)
             if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
-                % If empty, default base covers will be used
+                % If empty, default base covers from coralSpec will be used
                 init_cover = [];
                 return
             end
