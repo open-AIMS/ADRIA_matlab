@@ -97,20 +97,42 @@ classdef ADRIA < handle
             % Create initial coral cover by size class based on input data
             prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
             nsites = height(obj.site_data);
-            
-            base_coral_numbers = ...
-                [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
-                 0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
-                 0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
-                 200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-                 200, 100, 200, 30, 0, 0; ...   % small massives
-                 0, 0, 0, 0, 0, 0];             % large massives
+             
+            if obj.constants.mimic_IPMF
+                % TODO: A much neater way of handling these two cases
+                
+                % This is copied here and used as a template to fill in
+                base_coral_numbers = ...
+                    [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
+                     0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
+                     0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
+                     200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
+                     200, 100, 200, 30, 0, 0; ...   % small massives
+                     0, 0, 0, 0, 0, 0];             % large massives
+                disp("Mimicking IPMF: Loading only two coral types");
+            else
+                % This is copied here and used as a template to fill in
+                base_coral_numbers = ...
+                    [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
+                     200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
+                     0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
+                     200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
+                     200, 100, 200, 200, 100, 0; ... % small massives
+                     200, 100, 20, 20, 20, 10];      % large massives
+                disp("Loading all coral types");
+            end
             
             % target shape is nspecies * nsites
             init_cover = zeros(numel(base_coral_numbers), nsites);
             for row = 1:nsites
-                x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
-                base_coral_numbers(4:5, :) = x;
+                if obj.constants.mimic_IPMF
+                    % TODO: A much neater way of handling these two cases
+                    x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
+                    base_coral_numbers(4:5, :) = x;
+                else
+                    x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
+                    base_coral_numbers(:, :) = x;
+                end
                 
                 tmp = base_coral_numbers';
                 init_cover(:, row) = tmp(:);
@@ -209,6 +231,9 @@ classdef ADRIA < handle
             %
             %     % load and aggregate multiple datasets using their mean
             %     ai.loadConnectivity("./example", agg_func=@mean)
+            %
+            %     % load with a different cutoff value
+            %     ai.loadConnectivity("./example/x.csv", cutoff=0.05)
             arguments
                obj
                fileset string
@@ -344,7 +369,22 @@ classdef ADRIA < handle
             all_fields = string(fieldnames(obj.constants));
             for i = 1:length(all_fields)
                 af = all_fields(i);
-                ncwriteatt(tmp_fn, "constants", af, obj.constants.(af));
+                
+                try
+                    ncwriteatt(tmp_fn, "constants", af, obj.constants.(af));
+                catch err
+                    if ~(strcmp(err.identifier, 'MATLAB:invalidType'))
+                        rethrow(err);
+                    end
+                    
+                    % Integer values sometimes gets interpreted as logical
+                    % which the netCDF writer cannot handle
+                    if contains(err.message, "its type was logical")
+                        ncwriteatt(tmp_fn, "constants", af, int8(obj.constants.(af)));
+                    else
+                        rethrow(err);
+                    end
+                end
             end
 
             ncwriteatt(tmp_fn, "metadata", "n_reps", nreps);

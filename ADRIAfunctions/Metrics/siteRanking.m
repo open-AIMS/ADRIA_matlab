@@ -25,26 +25,24 @@ function mean_r = siteRanking(rankings, orient, func)
     nsites = nsites(2);
     rankings(rankings == 0) = nsites + 1;
     
+    if orient == "seed"
+        target_col = 1;
+    elseif orient == "shade"
+        target_col = 2;
+    else
+        error(strcat("Unknown result set for site ranking: ", orient))
+    end
+
     res_type = ndims(rankings);
     switch res_type
         case 3
-            if orient == "seed"
-                mean_r = func(squeeze(rankings(:, :, 1)), 1)';
-            elseif orient == "shade"
-                mean_r = func(squeeze(rankings(:, :, 2)), 1)';
-            end
+            mean_r = func(squeeze(rankings(:, :, target_col)), 1)';
         case 5
-            if orient == "seed"
-                mean_r = func(squeeze(func(squeeze(rankings(:, :, 1, :, :)), 1)), [2,3]);
-            elseif orient == "shade"
-                mean_r = func(squeeze(func(squeeze(rankings(:, :, 2, :, :)), 1)), [2,3]);
-            end
+            mean_r = func(squeeze(func(squeeze(rankings(:, :, target_col, :, :)), 1)), [2,3]);
         otherwise
             error("Unknown number of ranking log dimensions.")
     end
     
     % Assign sites that are never considered a 0
     mean_r(mean_r == nsites+1) = 0;
-        
-     
 end

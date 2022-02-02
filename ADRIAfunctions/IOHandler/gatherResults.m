@@ -26,7 +26,7 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
     % Store results in a cell array of structs
     % ds = datastore(target_files, "FileExtensions", ".nc", "Type", "file", "ReadFcn", @readDistributed);
     i = 1;
-    for file = file_info
+    for file = file_info'
         fn = file.name;
         full_path = fullfile(folder, fn);
         [Ytable, md] = readDistributed(full_path, target_var);
@@ -52,6 +52,8 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
         
         i = i + 1;
     end
+    
+    Y_collated = Y_collated';
 end
 
 
