@@ -37,7 +37,7 @@ if isfolder(file_loc)
         t_dirs = [files.isdir];
     end
     
-    % Get list of files from list (removes folders)
+    % Get list of files from list ignoring (sub)folders
     t_files = files(~t_dirs);
 
     locs = string({t_files.folder});
@@ -120,6 +120,6 @@ for s = 1:nsites
 end
 
 site_ranks = table(C1);
-site_ranks(nsites+1:end,:) = [];
+% site_ranks(nsites+1:end,:) = [];  % Not sure what this was for
 
 end
