@@ -11,8 +11,8 @@ function prob = calcBBNProb(dist,val,ind)
 %           prob : probability calculated from distribution
 
 if logical(ind)
-    prob = sum((dist>val))/length(dist);
+    prob = sum((dist>=val))/length(dist);
 else
-    prob = sum((dist<val))/length(dist);
+    prob = sum((dist<=val))/length(dist);
 end
 end
