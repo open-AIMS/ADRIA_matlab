@@ -93,7 +93,7 @@ Y(35, :) = P_x(35, :) .* X(34, :) .* r(34) - P_x(36, :) .* X(35, :) .* r(35) - X
 Y(36, :) = P_x(36, :) .* X(35, :) .* r(35) + P_x(36, :) .* X(36, :) .* r(36) - X(36, :) .* mb(36);
 
 % Ensure no non-negative values
-Y = max(Y, 0);
+Y = max(Y, 0);  % .* logical(X);
 
 Y = Y(:); % convert to column vector (necessary for ODE to work)
 end

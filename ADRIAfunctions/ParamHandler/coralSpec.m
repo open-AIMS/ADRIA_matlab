@@ -4,7 +4,7 @@ function params = coralSpec()
 % sampled or user-specified values.
 %
 % Notes:
-% Values for the historical, temporal pattsiern of degree heating weeks
+% Values for the historical, temporal patterns of degree heating weeks
 % between bleaching years come from [1].
 %
 % Outputs:
@@ -77,13 +77,16 @@ params.coral_id = join([tn(:), params.taxa_id, params.class_id], "_");
 
 %%% Base covers
 %First express as number of colonies per size class per 100m2 of reef
+
+% NOTE: These values are currently being overwritten by init_coral_cover
+% in the ADRIA class (see init_coral_cover method in ADRIA.m)
 base_coral_numbers = ...
-    [0, 0, 0, 0, 0, 0; ...              % Tabular Acropora Enhanced
-     0, 0, 0, 0, 0, 0; ... % Tabular Acropora Unenhanced
-     0, 0, 0, 0, 0, 0; ...              % Corymbose Acropora Enhanced
+    [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
+     0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
+     0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
      200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-     200, 100, 200, 30, 0, 0; ... % small massives
-     0, 0, 0, 0, 0, 0];      % large massives
+     200, 100, 200, 30, 0, 0; ...   % small massives
+     0, 0, 0, 0, 0, 0];             % large massives
 
 % To convert to covers we need to first calculate the area of colonies,
 % multiply by how many corals in each bin, and divide by reef area
@@ -146,29 +149,29 @@ params.fec = reshape(fec_m2_rel', [], 1);
 
 % Wave mortality risk : wave damage for the 90 percentile of routine wave stress
 wavemort90 = ...
-   [0, 0, 0.00, 0.02, 0.05, 0.05; ... % Tabular Acropora Enhanced
-    0, 0, 0.00, 0.02, 0.05, 0.05; ...  % Tabular Acropora Unenhanced
-    0, 0, 0.00, 0.02, 0.04, 0.05; ...  % Corymbose Acropora Enhanced
-    0, 0, 0.00, 0.02, 0.04, 0.05; ...  % Corymbose Acropora Unenhanced
-    0, 0, 0.00, 0.02, 0.02, 0.02; ...  % Small massives
-    0, 0, 0.00, 0.02, 0.01, 0.01];     % Large massives
+   [0, 0, 0.00, 0.00, 0.00, 0.00; ... % Tabular Acropora Enhanced
+    0, 0, 0.00, 0.00, 0.00, 0.00; ...  % Tabular Acropora Unenhanced
+    0, 0, 0.00, 0.00, 0.00, 0.00; ...  % Corymbose Acropora Enhanced
+    0, 0, 0.00, 0.00, 0.00, 0.00; ...  % Corymbose Acropora Unenhanced
+    0, 0, 0.00, 0.00, 0.00, 0.00; ...  % Small massives
+    0, 0, 0.00, 0.00, 0.00, 0.00];     % Large massives
 
 params.wavemort90 = reshape(wavemort90', [], 1);
 
 % Background mortality taken from Bozec et al. 2021 (Table S2)
-mb = [0.2, 0.15, 0.10, 0.05, 0.05, 0.05; ... % Tabular Acropora Enhanced
-      0.2, 0.15, 0.10, 0.05, 0.05, 0.05; ...   % Tabular Acropora Unenhanced
-      0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Enhanced
-      0.2, 0.15, 0.10, 0.05, 0.04, 0.03; ...   % Corymbose Acropora Unenhanced
-      0.2, 0.04, 0.04, 0.02, 0.02, 0.02; ...   % small massives and encrusting
-      0.2, 0.04, 0.04, 0.02, 0.02, 0.02];      % large massives
+mb = [0.20, 0.19, 0.15, 0.098, 0.098, 0.098; ... % Tabular Acropora Enhanced
+      0.20, 0.19, 0.15, 0.098, 0.098, 0.098; ...   % Tabular Acropora Unenhanced
+      0.20, 0.17, 0.12, 0.088, 0.088, 0.088; ...   % Corymbose Acropora Enhanced
+      0.20, 0.17, 0.12, 0.088, 0.088, 0.088; ...   % Corymbose Acropora Unenhanced
+      0.20, 0.10, 0.04, 0.030, 0.020, 0.020; ...   % small massives and encrusting
+      0.20, 0.10, 0.04, 0.030, 0.020, 0.020];      % large massives
 
 params.mb_rate = reshape(mb', [], 1);
 
 % Background rates of natural adaptation. User-defined natad rates will be 
 % added to these
 
-natad = repmat(0.025, 36, 1);
+natad = repmat(0.00, 36, 1);
 params.natad = natad;
 
 % Estimated bleaching resistance (as DHW) relative to the assemblage 

@@ -56,3 +56,6 @@ params.LPDprm2 = 5; % parameter offsetting LPD curve
 % competition: probability that large tabular Acropora overtop small massives
 params.comp = 0.3;
 %params.max_settler_density = 20; %per m2, more optimistic than Bozec et al 2021
+
+% Whether or not to mimic IPMF by loading only two coral types
+params.mimic_IPMF = int8(0);  % Use 0 or 1 as booleans cannot be stored in netCDF

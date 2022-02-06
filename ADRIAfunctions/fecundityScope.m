@@ -20,7 +20,7 @@ ngroups = 6;
 nsites = size(Y_pstep, 2);
 fec_groups = zeros(ngroups, nsites);
 
-fec_all =  coral_params.fec.* Y_pstep; %
+fec_all = coral_params.fec .* Y_pstep;
 
 fec_groups(1, :) = sum(fec_all(1:6, :)); %Tabular Acropora enhanced
 fec_groups(2, :) = sum(fec_all(7:12, :)); %Tabular Acropora unenhanced

@@ -9,9 +9,11 @@ classdef ADRIA < handle
     end
 
     properties (Access = private)
-        TP_data  % site connectivity data
+        TP_data     % site connectivity data
         site_ranks  % site rank
         strongpred  % strongest predecessor
+        site_data   % table of site data (dpeth, carrying capacity, etc)
+        init_coral_cov_col  % column name to derive initial coral cover from
     end
 
     properties (Dependent)
@@ -20,6 +22,8 @@ classdef ADRIA < handle
 
         sample_defaults
         sample_bounds
+        
+        init_coral_cover
     end
 
     methods (Access = private)
@@ -42,12 +46,12 @@ classdef ADRIA < handle
             % Load wave/DHW scenario data
             % Generated with generateWaveDHWs.m
             % TODO: Replace these with wave/DHW projection scenarios instead
-            fn = strcat("Inputs/example_wave_DHWs_RCP", num2str(obj.constants.RCP), ".nc");
+            fn = strcat("Inputs/example_wave_DHWs_RCP_expanded_", num2str(obj.constants.RCP), ".nc");
             wave_scens = ncread(fn, "wave");
             dhw_scens = ncread(fn, "DHW");
 
             % Select random subset of RCP conditions WITHOUT replacement
-            n_rep_scens = length(wave_scens);
+            [~, ~, n_rep_scens] = size(wave_scens);
             rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
             w_scens = wave_scens(:, :, rcp_scens);
             d_scens = dhw_scens(:, :, rcp_scens);
@@ -81,6 +85,60 @@ classdef ADRIA < handle
             % Returns table of name, lower_bound, upper_bound
             details = obj.parameterDetails();
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
+        end
+        
+        function init_cover = get.init_coral_cover(obj)
+            if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
+                % If empty, default base covers from coralSpec will be used
+                init_cover = [];
+                return
+            end
+            
+            % Create initial coral cover by size class based on input data
+            prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
+            nsites = height(obj.site_data);
+             
+            if obj.constants.mimic_IPMF
+                % TODO: A much neater way of handling these two cases
+                
+                % This is copied here and used as a template to fill in
+                base_coral_numbers = ...
+                    [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
+                     0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
+                     0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
+                     200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
+                     200, 100, 200, 30, 0, 0; ...   % small massives
+                     0, 0, 0, 0, 0, 0];             % large massives
+                disp("Mimicking IPMF: Loading only two coral types");
+            else
+                % This is copied here and used as a template to fill in
+                base_coral_numbers = ...
+                    [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
+                     200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
+                     0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
+                     200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
+                     200, 100, 200, 200, 100, 0; ... % small massives
+                     200, 100, 20, 20, 20, 10];      % large massives
+                disp("Loading all coral types");
+            end
+            
+            % target shape is nspecies * nsites
+            init_cover = zeros(numel(base_coral_numbers), nsites);
+            for row = 1:nsites
+                if obj.constants.mimic_IPMF
+                    % TODO: A much neater way of handling these two cases
+                    x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
+                    base_coral_numbers(4:5, :) = x;
+                else
+                    x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
+                    base_coral_numbers(:, :) = x;
+                end
+                
+                tmp = base_coral_numbers';
+                init_cover(:, row) = tmp(:);
+            end
+            
+            assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
         end
 
         %% object methods
@@ -159,11 +217,27 @@ classdef ADRIA < handle
             coral_r = coral_s:coral_e;
         end
 
-        function obj = loadConnectivity(obj, filename, conargs)
-            % Load site connectivity data from a given file.
+        function obj = loadConnectivity(obj, fileset, conargs)
+            % Load site connectivity data from a given file or set of files.
+            %
+            % If `fileset` is a path to file, loads the file directly. 
+            % If it is a path to a folder, then loads the all files found
+            % within and aggregates with the function specified with
+            % `agg_func`
+            %
+            % Example:
+            %     % load single dataset
+            %     ai.loadConnectivity("./example/x.csv")
+            %
+            %     % load and aggregate multiple datasets using their mean
+            %     ai.loadConnectivity("./example", agg_func=@mean)
+            %
+            %     % load with a different cutoff value
+            %     ai.loadConnectivity("./example/x.csv", cutoff=0.05)
             arguments
                obj
-               filename string
+               fileset string
+               conargs.agg_func function_handle
                conargs.cutoff {mustBeFloat} = NaN
             end
 
@@ -173,12 +247,38 @@ classdef ADRIA < handle
                cutoff = conargs.cutoff;
             end
 
-            [tp, sr, sp] = ...
-               siteConnectivity(filename, cutoff);
+            [tp, sr, sp] = siteConnectivity(fileset, cutoff);
 
             obj.TP_data = tp;
             obj.site_ranks = sr;
             obj.strongpred = sp;
+        end
+        
+        function loadSiteData(obj, filename, init_coral_cov_col)
+            % Load data on site carrying capacity, depth and connectivity
+            % from indicated CSV file.
+            
+            % readtable("Inputs/Moore/site_data/MooreReefCluster_Spatial.csv")
+            arguments
+                obj
+                filename
+                % TODO: Fix hardcoded column selection! (note `k` column is hard set below too)
+                init_coral_cov_col = ["Acropora2026", "Goniastrea2026"]
+                % max_coral_col = "k"  % column to load max coral cover from
+            end
+            
+            if strlength(init_coral_cov_col) > 0
+                obj.init_coral_cov_col = init_coral_cov_col;
+            end 
+            
+            sdata = readtable(filename);
+            tmp_s = sdata(:, [["site_id", "area", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
+            
+            % Set any missing coral cover data to 0
+            tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
+            
+            obj.site_data = tmp_s;
+            obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
         function Y = run(obj, X, runargs)
@@ -187,15 +287,29 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
+               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+            end
+            
+            if isempty(obj.site_data)
+                error("Site data not loaded! Preload with `loadSiteData()`");
             end
             
             if isempty(obj.TP_data)
-                error("Site data not loaded! Preload with `loadConnectivity()`");
+                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
             end
             
             nreps = runargs.nreps;
 
-            [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
+            % NEEDS TO BE CLEANED UP.
+            % Load DHW time series for each site
+            % Wave data is all zeros (ignore mortality due to wave damage
+            % and cyclones).
+            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            tf = obj.constants.tf;
+            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            [~, nsites, ~] = size(d_scens);
+            w_scens = zeros(tf, nsites, nreps);
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
@@ -204,8 +318,9 @@ classdef ADRIA < handle
             [interv, crit, coral] = obj.splitParameterTable(X);
 
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
-                     obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens);
+                     obj.TP_data, obj.site_ranks, obj.strongpred, ...
+                     obj.init_coral_cover, nreps, ...
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
         end
         
         function runToDisk(obj, X, runargs)
@@ -217,12 +332,23 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
+               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
             nreps = runargs.nreps;
+            
+            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
+            % NEEDS TO BE CLEANED UP.
+            % Load DHW time series for each site
+            % Wave data is all zeros (ignore mortality due to wave damage
+            % and cyclones).
+            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            % [~, n_sites, ~] = size(w_scens);
 
-            [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
-            [~, n_sites, ~] = size(w_scens);
+            tf = obj.constants.tf;
+            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            [~, n_sites, ~] = size(d_scens);
+            w_scens = zeros(tf, n_sites, nreps);
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
@@ -232,7 +358,7 @@ classdef ADRIA < handle
             tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
             
             if exist(tmp_fn, "file")
-                error("Input file already exists. Aborting runs.")
+                error("Input file already exists. Aborting runs to avoid overwriting.")
             end
             
             tmp = struct('input_parameters', table2array(X));
@@ -243,7 +369,22 @@ classdef ADRIA < handle
             all_fields = string(fieldnames(obj.constants));
             for i = 1:length(all_fields)
                 af = all_fields(i);
-                ncwriteatt(tmp_fn, "constants", af, obj.constants.(af));
+                
+                try
+                    ncwriteatt(tmp_fn, "constants", af, obj.constants.(af));
+                catch err
+                    if ~(strcmp(err.identifier, 'MATLAB:invalidType'))
+                        rethrow(err);
+                    end
+                    
+                    % Integer values sometimes gets interpreted as logical
+                    % which the netCDF writer cannot handle
+                    if contains(err.message, "its type was logical")
+                        ncwriteatt(tmp_fn, "constants", af, int8(obj.constants.(af)));
+                    else
+                        rethrow(err);
+                    end
+                end
             end
 
             ncwriteatt(tmp_fn, "metadata", "n_reps", nreps);
@@ -255,15 +396,18 @@ classdef ADRIA < handle
             [interv, crit, coral] = obj.splitParameterTable(X);
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
-                     obj.TP_data, obj.site_ranks, obj.strongpred, nreps, ...
-                     w_scens, d_scens, fprefix, runargs.batch_size);
+                     obj.TP_data, obj.site_ranks, obj.strongpred, ...
+                     obj.init_coral_cover, nreps, w_scens, d_scens, ...
+                     obj.site_data, runargs.collect_logs, ...
+                     fprefix, runargs.batch_size);
         end
         
-        function Y = gatherResults(obj, file_loc, metrics)
+        function Y = gatherResults(obj, file_loc, metrics, target_var)
             arguments
                 obj
                 file_loc string
-                metrics cell = {}
+                metrics cell = {}  % collect raw results with no transformations if nothing specified
+                target_var string = "all"  % apply metrics to raw results if nothing specified
             end
             % Gather results from a given file.
             seps = split(file_loc, "_[[");
@@ -287,7 +431,65 @@ classdef ADRIA < handle
 
             [~, ~, coral] = obj.splitParameterTable(input_table);
 
-            Y = gatherResults(file_loc, coral, metrics);
+            Y = gatherResults(file_loc, coral, metrics, target_var);
+        end
+        
+        function updated = setParameterValues(obj, values, opts)
+            % Update a parameter table with new values.
+            % Number of new values has to be >= number of rows in target
+            % table.
+            %
+            % If the target table has less rows than updated value matrix
+            % then the target table will be replaced with repeating
+            % the first row N times to match size of new values.
+            %
+            % Columns can be ignored by providing a string (or string
+            % array) of column names to ignore.
+            %
+            % NOTE: This method assumes column orders match after ignored
+            %       columns are removed
+            arguments
+                obj
+                values  % matrix/table of updated parameter values
+                opts.p_table table = table() % Optional: table to update (uses raw defaults if not provided)
+                opts.ignore string = "" % string, or string array, of columns to ignore
+                opts.partial logical = false  % partial match on list of columns to ignore (e.g., "natad" will match "coral_1_natad")
+            end
+            
+            if istable(values)
+                % Convert to matrix
+                values = values{:, :};
+            end
+
+            if isempty(opts.p_table)
+                p_table = obj.raw_defaults;
+            else
+                p_table = opts.p_table;
+            end
+
+            % Match lengths
+            n = height(values);
+            if n ~= height(p_table)
+                p_table = repelem(p_table(1, :), n, 1);
+            end
+
+            % Fill target table with updated values
+            if strlength(opts.ignore) > 0
+                p_names = p_table.Properties.VariableNames;
+                
+                if ~opts.partial
+                    [~, idx] = ismember(p_names, opts.ignore);
+                else
+                    idx = contains(p_names, opts.ignore);
+                end
+
+                p_table{:, ~idx} = values;
+                
+            else
+                p_table{:, :} = values;
+            end
+
+            updated = p_table;
         end
     end
 end

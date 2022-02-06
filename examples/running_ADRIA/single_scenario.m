@@ -1,4 +1,4 @@
-% Example script running a single scenario.
+%% Example script running a single scenario with user input.
 
 rng(101) % set seed for reproducibility
 
@@ -25,6 +25,8 @@ for n = 1:height(inter_opts)
     bnds = inter_opts.raw_bounds(n, :);  % range of values
     bs = num2str(bnds(1));
     be = num2str(bnds(2));
+    
+    % Ask user to input a value within the indicated range
     prompt(n) = {strcat(inter_opts.name(n), " (", bs, " - ", be, ")")};
 end
 
@@ -39,6 +41,8 @@ for n = 1:height(criteria_opts)
     bnds = criteria_opts.raw_bounds(n, :);
     bs = num2str(bnds(1));
     be = num2str(bnds(2));
+    
+    % Ask user to input a value within the indicated range
     prompt(n) = {strcat(criteria_opts.name(n), " (", bs, " - ", be, ")")};
 end
 
@@ -97,17 +101,23 @@ new_criteria_opts = array2table(user_criteria_opts', 'VariableNames', criteria_o
 
 
 %% Load site data
-ai.loadConnectivity('MooreTPmean.xlsx');
+ai.loadConnectivity('Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv', cutoff=0.01);
+ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
 %% Update ADRIA Interface with user specified constants
 ai.constants = new_sim_opts;
 
+new_interv_opts.Guided = 1;
 %% Create input table of user-defined values
 param_table = [new_interv_opts, new_criteria_opts, coral_params];
 
 %% Run ADRIA
 % Run a single simulation
-Y = ai.run(param_table, sampled_values=false, nreps=1);
+res = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=["seed", "shade", "site_rankings"]);
+seed_log = res.seed_log;
+shade_log = res.shade_log;
+rankings = res.MCDA_rankings;
+Y = res.Y;  % get raw results, ignoring seed/shade logs
 
 % Collect metrics
 metric_results = collectMetrics(Y, coral_params, ...
@@ -218,4 +228,3 @@ xlabel(LO2,'Years', 'FontSize', 14)
 %ylabel(LO,'Cover (prop)')
 aa = gca;
 aa.FontSize = font_size;
-

@@ -57,9 +57,9 @@ ub_vals = tmp(:, 2);
 arrayfun(assert_lb, combined_opts.name, lb_vals);
 arrayfun(assert_ub, combined_opts.name, ub_vals);
 
-%% Check integer options
+%% Check categorical options
 % Collect all integer parameters
-int_idxs = combined_opts.ptype == 'integer';
+int_idxs = combined_opts.ptype == 'categorical';
 int_opts = combined_opts(int_idxs, :);
 
 int_samples = converted_tbl(:, int_idxs);
@@ -118,10 +118,25 @@ assert(raw_val == 0, ...
         strcat("Unexpected value: Raw Guided, 0 == ", received));
 
 %% Check MCDA approach choice is properly respected
-% ai = ADRIA();
-% 
-% X = ai.sample_defaults;
-% X.Guided = 4;
-% 
-% ai.run(X, sampled_values=true, nreps=3);
+ai = ADRIA();
+
+X = ai.sample_defaults;
+X.Guided(:) = 0.5;  % should convert to 0 (unguided)
+converted = ai.convertSamples(X);
+assert(converted.Guided(1, :) == 0, "Categorical choice not respected (Set 0.5, expected 0)")
+
+X = ai.sample_defaults;
+X.Guided(:) = 4.9;  % should convert to 0 (unguided)
+converted = ai.convertSamples(X);
+assert(converted.Guided(1, :) == 4, "Categorical choice not respected (Set 4.9, expected 4)")
+
+X = ai.sample_defaults;
+X.Guided(:) = 4;
+converted = ai.convertSamples(X);
+assert(converted.Guided(1, :) == 4, "Categorical choice not respected (Set 4, expected 4)")
+
+X = ai.sample_defaults;
+X.Guided(:) = 1;
+converted = ai.convertSamples(X);
+assert(converted.Guided(1, :) == 1, "Categorical choice not respected (Set 1, expected 1)")
 
