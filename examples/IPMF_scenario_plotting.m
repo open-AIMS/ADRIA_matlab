@@ -1,3 +1,4 @@
+%% Loading file if batch net cdfs
 file_location_prefix = './Outputs/mimi_IPMF_data/fri_deliv_2022-02-04_mimic_IPMF_d2_2015';
 n_batches = 5;
 n_reps = 50;  % num DHW/Wave/RCP replicates
@@ -7,7 +8,6 @@ desired_metrics = {@coralTaxaCover, ...
                    @shelterVolume, ...
                    @(x, p) mean(coralTaxaCover(x, p).total_cover, 4)};
 Y = ai.gatherResults(file_location_prefix, desired_metrics);
-
 %% Collect metrics
 
 % Get the mean total coral cover at end of simulation time across all
