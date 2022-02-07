@@ -226,7 +226,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             % NOTE: Wave Damage is turned off for Feb deliv. These are all zeros!
             dMCDA_vars.damprob = squeeze(mwaves(tstep, :, :))'; % wave_scen(tstep, :)';
             dMCDA_vars.heatstressprob = dhw_step'; % heat stress
-
+            dMCDA_vars.sumcover = squeeze(sum(Y_pstep,1))';
             %Factor 4: total coral cover state used as criterion in site selection;
 
             [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
