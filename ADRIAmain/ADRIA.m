@@ -287,8 +287,10 @@ classdef ADRIA < handle
                X table
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
-               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+               runargs.collect_logs string = [""]  
+                
             end
+
             
             if isempty(obj.site_data)
                 error("Site data not loaded! Preload with `loadSiteData()`");
