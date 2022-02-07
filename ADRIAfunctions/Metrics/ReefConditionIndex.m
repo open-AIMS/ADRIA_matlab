@@ -93,8 +93,8 @@ end
 Y = zeros(ntsteps, nsites, ninterv, nreps);
 
 % In single simulation cases, `inter` and `rep` are set to 1.
-% Although matrices A, B, C etc only have 3 dimensions, MATLAB
-% accepts `1` and just squeezes this out.
+% Although matrices A, B, C etc may only have 3 dimensions, MATLAB
+% accepts `1` in dims > 3, and just squeezes these out.
 for inter = 1:ninterv
     for rep = 1:nreps
         for tstep = 1:ntsteps
