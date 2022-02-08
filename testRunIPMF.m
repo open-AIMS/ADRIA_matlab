@@ -1,6 +1,6 @@
 %% Load site data for 2026;
 % Connectivity
-[TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv', 0.1);
+[TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015_IPMF/connectivity_mean_day1to3_2015.csv', 0.1);
 RCP = 45;
 Year = 2026;
 yrstr = num2str(Year);
@@ -79,6 +79,6 @@ T = table(site_data{considered_id, "reef_siteid"}, considered_id, ...
           considered_recom_ids, siteranks_Order, siteranks_TOPSIS, siteranks_VIKOR);
 
 T.Properties.VariableNames = {'reef_siteid' 'site_index_id' 'recom_id' 'order_rank' 'TOPSIS_rank', 'VIKOR_rank'};
-writetable(T,sprintf('./Outputs/Rankings_RCP%2.0f_Year%4.0f_revised_w_idx_day2.xlsx',RCP,Year))
+writetable(T,sprintf('./Outputs/Rankings_RCP%2.0f_Year%4.0f_revised_w_idx_mean_2015_IPMF.xlsx',RCP,Year))
 
 
