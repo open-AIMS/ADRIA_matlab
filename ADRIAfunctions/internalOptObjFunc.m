@@ -38,4 +38,4 @@ function Y = internalOptObjFunc(prefsites,nsiteint,ode_vars)
             Y(:, idx) = (Ys ./ sum(Ys)) * e_P;
         end
 
-endode_vars.ode_vars.ode_vars.
+end

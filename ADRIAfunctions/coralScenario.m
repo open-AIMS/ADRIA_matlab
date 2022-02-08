@@ -53,9 +53,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided, -1 is global opt.
-    is_guided = strategy > 0;
-    is_opt = strategy < 0;
-    if is_guided
+    if strategy>0
         %% Weights for connectivity , waves (ww), high cover (whc) and low
         wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
         wtheat = criteria.heat_stress; % weight of heat damage in MCDA
@@ -217,8 +215,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         dhw_step = dhw_scen(tstep, :); % subset of DHW for given timestep
 
         %% Select preferred intervention sites based on criteria (heuristics)
-        if ~is_opt
-            if is_guided
+        if strategy>0
                 % Update values for dMCDA
     
                 % Factor 2
@@ -242,12 +239,16 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                     % skip first col as it only holds site ids
                     site_rankings(tstep, rankings(:, 1), :) = rankings(:, 2:end);
                 end
-            else
+        elseif strategy==0
                 % Unguided deployment, seed/shade corals anywhere
                 prefseedsites = randi(nsites, [nsiteint, 1])';
                 prefshadesites = randi(nsites, [nsiteint, 1])';
-            end
-
+        else
+                ode_vars = struct('tstep',tstep,'shadeyrs',shadeyrs,'seedyrs',seedyrs,'srm',srm,'seed1',seed1,'seed2',seed2,'Yshade',Yshade,...
+                'dhw_step',dhw_step,'neg_e_p1',neg_e_p1,'neg_e_p2',neg_e_p2,'assistadapt',assistadapt,...
+                'natad',natad,'bleach_resist',bleach_resist,'Sw_t',S_wt,'Y_pstep',Y_pstep,...
+                's1_idx',s1_idx,'s2_idx',s2_idx) 
+        end
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
             Yshade(tstep, prefshadesites) = srm;
@@ -289,25 +290,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             Ys = Y(:, idx);
             Y(:, idx) = (Ys ./ sum(Ys)) * e_P;
         end
-            ode_vars = struct('tstep',tstep,'shadeyrs',shadeyrs,'seedyrs',seedyrs,'srm',srm,'seed1',seed1,'seed2',seed2,'Yshade',Yshade,...
-                'dhw_step',dhw_step,'neg_e_p1',neg_e_p1,'neg_e_p2',neg_e_p2,'assistadapt',assistadapt,...
-                'natad',natad,'bleach_resist',bleach_resist,'Sw_t',S_wt,'Y_pstep',Y_pstep,...
-                's1_idx',s1_idx,'s2_idx',s2_idx)
 
-        
-         if (tstep <= seedyears) && ~all(prefseedsites == 0)
-            % Seed each site with the value indicated with seed1/seed2
-            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
-            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
-            
-            % Log seed values/sites
-            Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
-            Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
-        end
-        else
         Yout(tstep, :, :) = Y;
-        end
-    end % tstep
+    end% tstep
+  
     
     % Assign to output variable
     results = struct();
