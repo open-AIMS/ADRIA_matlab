@@ -2,6 +2,8 @@ function [TP_data, site_ranks, strongpred] =  siteConnectivity(file_loc, con_cut
 % Create transitional probability matrix indicating connectivity between
 % sites, level of centrality, and the strongest predecessor for each site.
 %
+% NOTE: Transposes transitional probability matrix!
+%
 % Inputs:
 %   file_loc   : str, path to data file (or datasets) to load.
 %                  If a folder, searches subfolders as well.
