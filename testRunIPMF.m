@@ -1,18 +1,22 @@
 %% Load site data for 2026;
 % Connectivity
-[TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
+[TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv', 0.1);
 RCP = 45;
 Year = 2026;
 yrstr = num2str(Year);
+
 % Site Data
 sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
-site_data = sdata(:,[["site_id", "k", [strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity"]]);
+site_data = sdata(:,[["site_id", "k", [strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity", "reef_siteid"]]);
 site_data = sortrows(site_data, "recom_connectivity");
+
+% Duplicate TP rows/columns for sites that site within the same
+% connectivity cell
 [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
 TP_data = TP_data(g_idx, g_idx);
 
 % DHW data
-tf = 25;
+tf = 50;
 nreps = 50;
 dhw_scen = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
 
@@ -34,8 +38,9 @@ depth_offset = 5; % depth range from min depth
 
 % Filter out sites outside of desired depth range
 max_depth = depth_min + depth_offset;
-depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min);
-depth_priority = site_data{depth_criteria, "recom_connectivity"};
+
+considered_site_idx = find((site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min));
+considered_recom_ids = site_data{considered_site_idx, "recom_connectivity"};
 
 max_cover = site_data.k/100.0; % Max coral cover at each site
 
@@ -45,14 +50,14 @@ nsiteint = 5; %nsites;
     
 sumcover = (site_data.(strcat('Acropora',yrstr)) + site_data.(strcat('Goniastrea',yrstr)))/100.0;
 
-store_seed_rankings_alg1 = zeros(nreps,nsites,2);
-store_seed_rankings_alg2 = zeros(nreps,nsites,2);
-store_seed_rankings_alg3 = zeros(nreps,nsites,2);
+store_seed_rankings_Order = zeros(nreps,nsites,2);
+store_seed_rankings_TOPSIS = zeros(nreps,nsites,2);
+store_seed_rankings_VIKOR = zeros(nreps,nsites,2);
 
 for l = 1:nreps
     dhw_step = dhw_scen(tstep,:,l);
     heatstressprob = dhw_step';
-    dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
+    dMCDA_vars = struct('site_ids', considered_recom_ids, 'nsiteint', nsiteint, 'prioritysites', [], ...
                 'strongpred', strong_pred, 'centr', site_ranks.C1, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
                 'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                 'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
@@ -61,24 +66,19 @@ for l = 1:nreps
     [~, ~, ~, ~, rankingsalg1] = ADRIA_DMCDA(dMCDA_vars, 1);
     [~, ~, ~, ~, rankingsalg2] = ADRIA_DMCDA(dMCDA_vars, 2);
     [~, ~, ~, ~, rankingsalg3] = ADRIA_DMCDA(dMCDA_vars, 3);
-    store_seed_rankings_alg1(l,:,:) = rankingsalg1(:,2:end);
-    store_seed_rankings_alg2(l,:,:) = rankingsalg2(:,2:end);
-    store_seed_rankings_alg3(l,:,:) = rankingsalg3(:,2:end);
+    store_seed_rankings_Order(l,:,:) = rankingsalg1(:,2:end);
+    store_seed_rankings_TOPSIS(l,:,:) = rankingsalg2(:,2:end);
+    store_seed_rankings_VIKOR(l,:,:) = rankingsalg3(:,2:end);
 end
 
-siteranks_alg1 = siteRanking(store_seed_rankings_alg1,"seed");
-siteranks_alg2 = siteRanking(store_seed_rankings_alg2,"seed");
-siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
-% siteranks_alg1 = mean(squeeze(store_seed_rankings_alg1),2);
-% siteranks_alg2 = mean(squeeze(store_seed_rankings_alg2),2);
-% siteranks_alg3 = mean(squeeze(store_seed_rankings_alg3),2);
-% 
-% siteranks_alg1_round = round(siteranks_alg1);
-% siteranks_alg2_round = round(siteranks_alg2);
-% siteranks_alg3_round = round(siteranks_alg3);
+siteranks_Order = siteRanking(store_seed_rankings_Order,"seed");
+siteranks_TOPSIS = siteRanking(store_seed_rankings_TOPSIS,"seed");
+siteranks_VIKOR = siteRanking(store_seed_rankings_VIKOR,"seed");
 
-sites_after_filtering = depth_priority;
-T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3);
-writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f_revised.xlsx',RCP,Year))
+T = table(site_data{considered_id, "reef_siteid"}, considered_id, ...
+          considered_recom_ids, siteranks_Order, siteranks_TOPSIS, siteranks_VIKOR);
+
+T.Properties.VariableNames = {'reef_siteid' 'site_index_id' 'recom_id' 'order_rank' 'TOPSIS_rank', 'VIKOR_rank'};
+writetable(T,sprintf('./Outputs/Rankings_RCP%2.0f_Year%4.0f_revised_w_idx_day2.xlsx',RCP,Year))
 
 
