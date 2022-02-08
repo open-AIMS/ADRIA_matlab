@@ -38,9 +38,11 @@ cov2n_CorAcr = totcoverIPMF_CorAcr_2026 ./ nIPMF_CorAcr_2026;
 cov2n_SmlMas = totcoverIPMF_SmlMas_2026 ./ nIPMF_SmlMas_2026;
 cov2n_LrgMas = totcoverLrgMas_2026 ./ nLrgMas_2026;
 
+
 % Initial values for Corymbose Acropora and Small Massives
 % all other coral types should be set to 0.
 % (needs to be repeated for all sites)
+
 conversion_vector = zeros(6,6);
 conversion_vector(:,1) = 0; %Enhanced Tab Acropora are zero at start
 conversion_vector(:,2) = cov2n_CorAcr*2; %Half of IPMF's Acroporas are Tabular 
@@ -59,6 +61,8 @@ base_cover(5,:) = ((target_covers(2) / 100) ./ conversion_vector(:,5) .* cover_f
 % Preliminarily set start cover for Large Massive to 5 percent
 base_cover(6,:) = ((5.0 / 100.0) ./ conversion_vector(:,6) .* cover_factor)';
 
+
 assert(~all(any(isnan(base_cover))), "NaN found during conversion of coral numbers");
+
 
 end
