@@ -68,9 +68,13 @@ try
     scattered_TC = squeeze(mean(scattered(end, :, :, :), 4));
 
     assert(isequal(Ytt, scattered_TC), "Results are not equal!")
-    assert(~all(all(scattered(:, :, 1, 1))), "Results were zeros!")
+    assert(all(all(scattered(:, :, 1, 1))), "Results were zeros!")
 
 catch err
+    % This try/catch is here simply to allow the subsequent directory clean
+    % up to occur regardless of pass/failure.
+    
+    % The error will be rethrown after the clean up 
 end
 
 try
