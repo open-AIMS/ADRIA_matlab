@@ -8,7 +8,7 @@ yrstr = num2str(Year);
 
 % Site Data
 sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
-site_data = sdata(:,[["site_id", "k", [strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity", "reef_siteid"]]);
+site_data = sdata(:,[["site_id", "k", [strcat("Total",yrstr), strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity", "reef_siteid"]]);
 
 
 % Account for cases where multiple sites are located within a single recom
@@ -66,8 +66,10 @@ nsites = length(considered_recom_ids);
 damprob = zeros(length(site_data.recom_connectivity),1);
 nsiteint = 5; %nsites;
     
-sumcover = (site_data.(strcat('Acropora',yrstr)) + site_data.(strcat('Goniastrea',yrstr)))/100.0;
-coral_criteria = (sumcover>coral_min);
+sumcover = site_data.(strcat('Total',yrstr))/100.0;
+coral_criteria = (sumcover<=coral_min);
+
+assert(all(site_data{coral_criteria, strcat('Total',yrstr)} / 100.0 <= 0.15), "Not <= 15%!");
 
 
 depth_coral_priority_idx = find((depth_criteria+coral_criteria)==2);
