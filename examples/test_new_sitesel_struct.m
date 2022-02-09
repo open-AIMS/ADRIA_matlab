@@ -1,4 +1,5 @@
-%% Load site data for 2026;
+%% Demonstrates sslog usage in ADRIA_MCDA
+
 % Connectivity
 [TP_data, site_ranks, strong_pred] = siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
 RCP = 45;

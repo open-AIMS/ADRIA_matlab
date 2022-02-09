@@ -38,6 +38,8 @@ name = [
     "Natad";
     "Seedyrs";
     "Shadeyrs";
+    "SeedTimes";
+    "ShadeTimes";
     % Seed decision years go here
     % Shade decision years go here
     "Seedyr_start";
@@ -53,6 +55,8 @@ defaults = [
     0.025;  % Natad
     10;  % Seedyrs
     10;  % Shadeyrs
+    5; % Seedtimes
+    1; % Shadetimes
     % Seed decision years go here
     % Shade decision years go here
     2; % Year to start seed interventions
@@ -67,8 +71,10 @@ p_bounds = [
     [0, 12];  % SRM, float, reduction in DHWs due to shading
     [0.0, 12];  % Aadpt, float, float, increased adaptation rate
     [0.0, 0.1];  % Natad, float, natural adaptation rate
-    [10, 15];  % Seedyrs, integer, years into simulation during which seeding is considered (this will be Seedyr_start + Seedyrs)
-    [10, 25];  % Shadeyrs, integer, years into simulation during which shading is considered (this will be Shadeyr_start + Shadeyrs)
+    [10, 15];  % Seedyrs, integer, years into simulation during which seeding is considered
+    [10, 25];  % Shadeyrs, integer, years into simulation during which shading is considered
+    [0, 25]; % SeedTimes, integer, yearly intervals to adjust seeding site selection (0 is set and forget)
+    [0, 25]; % ShadeTimes, integer, yearly intervals to adjust shading site selection (0 is set and forget)
     % seed decision years
     % shade decision years
     [2, 10];  % Seedyr_start, seed intervention start offset from simulation start
@@ -88,6 +94,7 @@ ptype = [
     "float";
     "float";
     "integer";
+    ""integer";
     "integer";
     % seed year frequency
     % shade year frequency
