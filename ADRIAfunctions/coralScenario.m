@@ -72,7 +72,28 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         depth_priority = site_data{depth_criteria, "recom_connectivity"};
 
         max_cover = site_data.k/100.0; % Max coral cover at each site
+
+        rankings = [depth_priority,zeros(length(depth_priority),1),zeros(length(depth_priority),1)];
+        prefseedsites = zeros(1,nsiteint);
+        prefshadesites = zeros(1,nsiteint);
         
+        if ~isnan(sim_params.seedtimes)
+            yrslogseed = repmat(logical(0),1,sim_params.tf);
+            yrschangeseed = 2:sim_params.seedtimes:sim_params.tf;
+            yrslogseed(yrschangeseed) = logical(1);
+        else
+            yrslogseed = repmat(logical(0),1,sim_params.tf);
+            yrslogseed(2) = logical(1);
+        end
+        if ~isnan(sim_params.shadetimes)
+            yrslogshade = repmat(logical(0),1,sim_params.tf);
+            yrschangeshade = 2:sim_params.shadetimes:sim_params.tf;
+            yrslogshade(yrschangeshade) = logical(1);
+        else
+            yrslogshade = repmat(logical(0),1,sim_params.tf);
+            yrslogshade(2) = logical(1);
+        end
+        sslog = struct('seed',logical(1),'shade',logical(1));
         dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
@@ -231,8 +252,9 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             dMCDA_vars.sumcover = squeeze(sum(Y_pstep, 1))';  % Dims: nsites * 1
             % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
-
-            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
+            sslog.seed = yrslogseed(tstep);
+            sslog.shade = yrslogshade(tstep);
+            [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy,sslog,prefseedsites,prefshadesites,rankings); % site selection function for intervention deployment
             nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
             nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
             
