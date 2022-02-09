@@ -73,26 +73,33 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         max_cover = site_data.k/100.0; % Max coral cover at each site
 
+        % pre-allocate prefseedsites, prefshadesites and rankings
         rankings = [depth_priority,zeros(length(depth_priority),1),zeros(length(depth_priority),1)];
         prefseedsites = zeros(1,nsiteint);
         prefshadesites = zeros(1,nsiteint);
         
-        if ~isnan(sim_params.seedtimes)
-            yrslogseed = repmat(logical(0),1,sim_params.tf);
-            yrschangeseed = 2:sim_params.seedtimes:sim_params.tf;
-            yrslogseed(yrschangeseed) = logical(1);
-        else
-            yrslogseed = repmat(logical(0),1,sim_params.tf);
+        % find yrs at which to reassess seeding site selection and indicate
+        % these in yrslogseed
+        yrslogseed = repmat(logical(0),1,sim_params.tf);
+        yrschangeseed = 2:interv.SeedTimes:sim_params.tf;
+        yrslogseed(yrschangeseed) = logical(1);
+
+        % if seed_times is zero, only assess at the 
+        if interv.SeedTimes == 0
             yrslogseed(2) = logical(1);
         end
-        if ~isnan(sim_params.shadetimes)
-            yrslogshade = repmat(logical(0),1,sim_params.tf);
-            yrschangeshade = 2:sim_params.shadetimes:sim_params.tf;
-            yrslogshade(yrschangeshade) = logical(1);
-        else
-            yrslogshade = repmat(logical(0),1,sim_params.tf);
+
+        % find yrs at which to reassess seeding site selection and indicate
+        % these in yrslogseed
+        yrslogshade = repmat(logical(0),1,sim_params.tf);
+        yrschangeshade = 2:interv.ShadeTimes:sim_params.tf;
+        yrslogshade(yrschangeshade) = logical(1);
+        
+        % if shade_times is zero, only assess at the 
+        if interv.ShadeTimes == 0
             yrslogshade(2) = logical(1);
         end
+
         sslog = struct('seed',logical(1),'shade',logical(1));
         dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...

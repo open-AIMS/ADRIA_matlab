@@ -38,6 +38,8 @@ name = [
     "Natad";
     "Seedyrs";
     "Shadeyrs";
+    "SeedTimes";
+    "ShadeTimes";
 ];
 
 defaults = [
@@ -49,6 +51,8 @@ defaults = [
     0.025;  % Natad
     10;  % Seedyrs
     10;  % Shadeyrs
+    5; % Seedtimes
+    1; % Shadetimes
 ];
 
 
@@ -61,6 +65,8 @@ p_bounds = [
     [0.0, 0.1];  % Natad, float, natural adaptation rate
     [10, 15];  % Seedyrs, integer, years into simulation during which seeding is considered
     [10, 25];  % Shadeyrs, integer, years into simulation during which shading is considered
+    [0, 25]; % SeedTimes, integer, yearly intervals to adjust seeding site selection (0 is set and forget)
+    [0, 25]; % ShadeTimes, integer, yearly intervals to adjust shading site selection (0 is set and forget)
 ];
 
 % categoricals: values indicated by whole number mapped back to arbitrary
@@ -75,6 +81,8 @@ ptype = [
     "float";
     "float";
     "float";
+    "integer";
+    "integer";
     "integer";
     "integer";
 ];

@@ -26,7 +26,7 @@ param_table.Guided = 1;
 param_table.Seed1 = 9000;
 param_table.Seed2 = 5000;
 param_table.SRM = 2;
-ai.constants.seedtimes = nan;
+param_table.SeedTimes = 0;
 % If running multiple scenarios, specify the values for each run
 % param_table.Seed1 = [600; 700; 800; 900; 1000];
 
