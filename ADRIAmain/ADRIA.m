@@ -281,6 +281,46 @@ classdef ADRIA < handle
             obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
+        function [prefseed,prefshade,ranks] = siteSelection(obj,nreps)
+            arguments
+                obj
+                nreps {mustBeInteger}
+            end
+            criteria = obj.criteria;
+            % Connectivity
+            [TP_data, site_ranks, strong_pred] = obj.siteConnectivity('./Inputs/Moore/connectivity/2015', 0.1);
+
+            % Site Data
+            sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
+            sitedata = sdata(:,[["site_id", "k", [strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity"]]);
+            site_data = sortrows(sitedata, "recom_connectivity");
+            [~, ~, g_idx] = unique(sitedata.recom_connectivity, 'rows', 'first');
+            TP_data = TP_data(g_idx, g_idx);
+ 
+            % Weights for connectivity , waves (ww), high cover (whc) and low
+            wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
+            wtheat = criteria.heat_stress; % weight of heat damage in MCDA
+            wtconshade = criteria.shade_connectivity; % weight of connectivity for shading in MCDA
+            wtconseed = criteria.seed_connectivity; % weight of connectivity for seeding in MCDA
+            wthicover = criteria.coral_cover_high; % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
+            wtlocover = criteria.coral_cover_low; % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
+            wtpredecseed = criteria.seed_priority; % weight for the importance of seeding sites that are predecessors of priority reefs
+            wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
+            risktol = criteria.deployed_coral_risk_tol; % risk tolerance
+    
+            % Filter out sites outside of desired depth range
+            max_depth = criteria.depth_min + criteria.depth_offset;
+            depth_criteria = (sitedata.sitedepth > -max_depth) & (sitedata.sitedepth < -criteria.depth_min);
+            depth_priority = sitedata{depth_criteria, "recom_connectivity"};
+    
+            max_cover = sitedata.k/100.0; % Max coral cover at each site
+            
+            dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
+                'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
+                'sumcover', 0,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+                'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+        end
+
         function Y = run(obj, X, runargs)
             arguments
                obj
