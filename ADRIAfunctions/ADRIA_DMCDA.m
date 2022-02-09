@@ -46,6 +46,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     heatstressprob = DMCDA_vars.heatstressprob(site_ids);
     sumcover = DMCDA_vars.sumcover(site_ids);
     maxcover = DMCDA_vars.maxcover(site_ids);
+    area = DMCDA_vars.area(site_ids);
     risktol = DMCDA_vars.risktol;
     wtconseed = DMCDA_vars.wtconseed;
     wtconshade = DMCDA_vars.wtconshade;
@@ -70,7 +71,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% prefseedsites
     % Combine data into matrix
     A(:, 1) = site_ids; %site IDs
-    A(:, 2) = centr / max(centr); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
+    A(:, 2) = centr*sumcover*area / max(centr*sumcover*area); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
+    
 
     % Account for cases where no chance of damage or heat stress
     if max(damprob) ~= 0
@@ -92,6 +94,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %     A(:,6) = 1 - prop_cover;
     A(:, 5) = predec(:, 3); % priority predecessors
     A(:, 6) = (maxcover - sumcover) ./ maxcover; % proportion of cover compared to max possible cover
+    % set any infs to zero
+    A(maxcover==0, 6) = 0;
 
     % Filter out sites that have high risk of wave damage, specifically
     % exceeding the risk tolerance
@@ -117,7 +121,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% Seeding - Filtered set
     % define seeding weights
     wse = [1, wtconseed, wtwaves, wtheat, wtpredecseed, wtlocover];
-    wse(2:end) = wse(2:end) ./ sum(wse(2:end));
+    wse(2:end) = wse(2:end) ./ sqrt(sum(wse(2:end).^2));
     % define seeding decision matrix
     SE(:, 1) = A(:, 1); % sites column (remaining)
     SE(:, 2) = A(:, 2); % multiply centrality with connectivity weight
@@ -132,7 +136,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% Shading filtered set
     % define shading weights
     wsh = [1, wtconshade, wtwaves, wtheat, wtpredecshade, wthicover];
-    wsh(2:end) = wsh(2:end) ./ sum(wsh(2:end));
+    wsh(2:end) = wsh(2:end) ./ sqrt(sum(wsh(2:end).^2));
     SH(:, 1) = A(:, 1); % sites column (remaining)
     SH(:, 2) = A(:, 2); % multiply centrality with connectivity weight
     SH(:, 3) = (1 - A(:, 3)); % multiply complementary of damage risk with disturbance weight
@@ -153,7 +157,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
 
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
 
                 % simple ranking - add criteria weighted values for each sites
@@ -175,7 +179,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             wsh(all(SH == 0, 1)) = [];
             SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             SHwt(:, 1) = SH(:, 1);
@@ -200,7 +204,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 wse(all(SE == 0, 1)) = [];
                 SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
                 % compute the set of positive ideal solutions for each criteria (max for
                 % good crieteria, min for bad criteria). Max used as all crieteria
@@ -235,7 +239,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
             
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             % compute the set of positive ideal solutions for each criteria (max for
@@ -278,7 +282,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 wse(all(SE == 0, 1)) = [];
                 SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
 
                 F_s = max(SE(:, 2:end));
@@ -312,7 +316,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             % shading rankings
 
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             F_s = max(SH(:, 2:end));
@@ -364,7 +368,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 intcon = 1:length(SE(:, 1));
 
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
 
                 % multi-objective function for seeding
@@ -397,7 +401,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             intcon = 1:length(SH(:, 1));
 
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             lb = zeros(1, length(SH(:, 1))); % x (weightings) can be 0
