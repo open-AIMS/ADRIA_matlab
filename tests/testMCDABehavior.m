@@ -80,6 +80,8 @@ nsites = length(strongpred);
 nsiteint = 1;
 p_sites = randi([1,9], 1):randi([10,25], 1);
 
+strategy = 1;
+sslog = struct('seed',true,'shade',false);
 dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
     'prioritysites', p_sites, 'maxcover', repmat(0.8, 26, 1), ...
     'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', ones(26,1), ...
@@ -92,7 +94,8 @@ dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
 % None of these should error and cause test failure (test if 1 or 0 as
 % either the single site does not satify the wave and heat risk tolerances
 % and so = 0 or it does and = 1)
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1);
+rankings = [];
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy,sslog,prefseedsites,prefshadesites,rankings);
 num_selected = [nprefseedsites, nprefshadesites];
 assert(all(num_selected == 1), "Number of sites expected to be 1, but some were not");
 

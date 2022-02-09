@@ -94,9 +94,10 @@ ptype = [
     "float";
     "float";
     "integer";
+    ""integer";
     "integer";
-    "integer";
-    "integer";
+    % seed year frequency
+    % shade year frequency
     "integer";
     "integer";
 ];
