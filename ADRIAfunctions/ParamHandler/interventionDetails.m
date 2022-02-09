@@ -38,6 +38,10 @@ name = [
     "Natad";
     "Seedyrs";
     "Shadeyrs";
+    % Seed decision years go here
+    % Shade decision years go here
+    "Seedyr_start";
+    "Shadeyr_start";
 ];
 
 defaults = [
@@ -49,6 +53,10 @@ defaults = [
     0.025;  % Natad
     10;  % Seedyrs
     10;  % Shadeyrs
+    % Seed decision years go here
+    % Shade decision years go here
+    2; % Year to start seed interventions
+    2; % Year to start shading interventions
 ];
 
 
@@ -59,8 +67,12 @@ p_bounds = [
     [0, 12];  % SRM, float, reduction in DHWs due to shading
     [0.0, 12];  % Aadpt, float, float, increased adaptation rate
     [0.0, 0.1];  % Natad, float, natural adaptation rate
-    [10, 15];  % Seedyrs, integer, years into simulation during which seeding is considered
-    [10, 25];  % Shadeyrs, integer, years into simulation during which shading is considered
+    [10, 15];  % Seedyrs, integer, years into simulation during which seeding is considered (this will be Seedyr_start + Seedyrs)
+    [10, 25];  % Shadeyrs, integer, years into simulation during which shading is considered (this will be Shadeyr_start + Shadeyrs)
+    % seed decision years
+    % shade decision years
+    [2, 10];  % Seedyr_start, seed intervention start offset from simulation start
+    [2, 10];  % Shadeyr_start, shade intervention start offset from simulation start
 ];
 
 % categoricals: values indicated by whole number mapped back to arbitrary
