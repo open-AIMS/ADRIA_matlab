@@ -65,6 +65,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     predec = zeros(nsites, 3);
     predec(:, 1:2) = strongpred;
     predprior = predec(prioritysites, 2);
+    predprior(isnan(predprior)) = [];
     predec(predprior, 3) = 1;
 
     %% prefseedsites
@@ -172,6 +173,11 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
                 end
+
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.seed 
+                    prefseedsites = prefseedsites;
+                    nprefseedsites = numel(prefseedsites);
             end
             if sslog.shade
                 % shading rankings
@@ -190,6 +196,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     
                 %highest indicators picks the cool sites
                 prefshadesites = shade_order(1:last_idx, 1);
+                nprefshadesites = numel(prefshadesites);
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.shade 
+                prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end
         case 2
@@ -232,7 +242,12 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
+
                 end
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.seed 
+                prefseedsites = prefseedsites;
+                nprefseedsites = numel(prefseedsites);
             end
             if sslog.shade 
                 % shading rankings
@@ -265,6 +280,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 %highest indicators picks the cool sites
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
+                nprefshadesites = numel(prefshadesites);
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.shade 
+                prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end
 
@@ -312,6 +331,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
                 end
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.seed 
+                prefseedsites = prefseedsites;
+                nprefseedsites = numel(prefseedsites);
             end
             if sslog.shade
                 wsh(all(SH == 0, 1)) = [];
@@ -344,6 +367,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
+                nprefshadesites = numel(prefshadesites);
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.shade 
+                prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end
         case 4
@@ -392,6 +419,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     
                     seed_order = repmat(prefseedsites, 1, 2);
                 end
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.seed 
+                prefseedsites = prefseedsites;
+                nprefseedsites = numel(prefseedsites);
             end
             if sslog.shade
                 % shading rankings
@@ -424,6 +455,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 nprefshadesites = numel(prefshadesites);
                 
                 shade_order = repmat(prefshadesites, 1, 2);
+                % reassign as input if not updated so matlab has output
+            elseif ~sslog.shade 
+                prefshadesites = prefshadesites;
+                nprefshadesites = numel(prefshadesites);
             end
     otherwise
             error("Unknown MCDA algorithm choice.")
@@ -448,11 +483,11 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
         rankings(align, 3) = shade_order(:, 3);
     end  
     % if seeding or shading rankings have not been filled, replace with input rankings
-    if (sum(rankings(:,2)) == 0)
+    if (sum(rankings(:,2)) == 0) && (nprefseedsites~=0)
         rankings(:,2) = rankingsin(:,2);
         nprefseedsites = numel(prefseedsites);
                 
-    elseif (sum(rankings(:,3)) == 0)
+    elseif (sum(rankings(:,3)) == 0) && (nprefshadesites~=0)
         rankings(:,3) = rankingsin(:,3);
         nprefshadesites = numel(prefshadesites);
     end
