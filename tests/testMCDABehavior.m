@@ -23,9 +23,9 @@ depth_offset = 5; % depth range from min depth
 
 
 % Filter out sites outside of desired depth range
-max_depth = depth_min + depth_offset;
-depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min);
-depth_priority = site_data{depth_criteria, "recom_connectivity"};
+% max_depth = depth_min + depth_offset;
+% depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min);
+% depth_priority = site_data{depth_criteria, "recom_connectivity"};
 nsites = length(strongpred);
 risktol = eg_vals(1, 9); % risk tolerance
 
