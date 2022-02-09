@@ -66,25 +66,25 @@ dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
     'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, ...
     'wtpredecshade', wtpredecshade);
 
-strategy = 1;
 sslog = struct('seed',true,'shade',false);
-rankings = [];
+
+rankings = zeros(nsiteint, 3);
+rankings(:, 1) = 1:nsiteint;
+
 prefseedsites = zeros(1,nsiteint);
 prefshadesites = zeros(1,nsiteint);
 
 % These should all be zero
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1, sslog, prefseedsites, prefshadesites, rankings);
 tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
 assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
-strategy = 2;
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2, sslog, prefseedsites, prefshadesites, rankings);
 
 tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
 assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
-strategy = 3;
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3, sslog, prefseedsites, prefshadesites, rankings);
 tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
 assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
@@ -108,7 +108,10 @@ dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
 % and so = 0 or it does and = 1)
 strategy = 1;
 sslog = struct('seed',true,'shade',false);
-rankings = [];
+
+rankings = zeros(nsiteint, 3);
+rankings(:, 1) = 1:nsiteint;
+
 prefseedsites = zeros(1,nsiteint);
 prefshadesites = zeros(1,nsiteint);
         
@@ -119,10 +122,10 @@ assert(all(num_selected == 1), "Number of sites expected to be 1, but some were 
 % sel_sites = [prefseedsites, prefshadesites];
 % assert(sel_sites == sel_sites(1), "Selected sites should be identical!");
 
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2, sslog, prefseedsites, prefshadesites, rankings);
 num_selected = [nprefseedsites, nprefshadesites];
 assert(all(num_selected == 1), "Number of sites expected to be 1, but some were not");
 
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3, sslog, prefseedsites, prefshadesites, rankings);
 num_selected = [nprefseedsites, nprefshadesites];
 assert(all(num_selected == 1), "Number of sites expected to be 1, but some were not");
