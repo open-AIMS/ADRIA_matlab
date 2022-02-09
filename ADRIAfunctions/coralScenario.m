@@ -78,10 +78,14 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         prefseedsites = zeros(1,nsiteint);
         prefshadesites = zeros(1,nsiteint);
         
+
+        % years to start seeding/shading
+        seed_start_year = interv.Seedyr_start;
+        shade_start_year = interv.Shadeyr_start;
         % find yrs at which to reassess seeding site selection and indicate
         % these in yrslogseed
         yrslogseed = repmat(logical(0),1,sim_params.tf);
-        yrschangeseed = 2:interv.SeedTimes:sim_params.tf;
+        yrschangeseed = shade_start_year:interv.SeedTimes:sim_params.tf;
         yrslogseed(yrschangeseed) = logical(1);
 
         % if seed_times is zero, only assess at the 
@@ -92,7 +96,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % find yrs at which to reassess seeding site selection and indicate
         % these in yrslogseed
         yrslogshade = repmat(logical(0),1,sim_params.tf);
-        yrschangeshade = 2:interv.ShadeTimes:sim_params.tf;
+        yrschangeshade = shade_start_year:interv.ShadeTimes:sim_params.tf;
         yrslogshade(yrschangeshade) = logical(1);
         
         % if shade_times is zero, only assess at the 
@@ -276,7 +280,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
 
         % Warming and disturbance event going into the pulse function
-        if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
+        if (srm > 0) && (tstep <= (shade_start_year+shadeyears)) && ~all(prefshadesites == 0)
             Yshade(tstep, prefshadesites) = srm;
             
             % Apply reduction in DHW due to shading
@@ -294,7 +298,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
         Yin1 = Y_pstep .* prop_loss;
 
-        if (tstep <= seedyears) && ~all(prefseedsites == 0)
+        if (tstep <= (seed_start_year+seedyears)) && ~all(prefseedsites == 0)
             % Seed each site with the value indicated with seed1/seed2
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
