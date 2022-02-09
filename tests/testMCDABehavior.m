@@ -4,7 +4,14 @@ rd = ai.sample_defaults;
 eg_vals = ai.convertSamples(rd);
 eg_vals = table2array(eg_vals);
 
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', 0.1);
+[TP_data, site_ranks, strongpred] = siteConnectivity('moore_d2_2015_transfer_probability_matrix_wide.csv', 0.1);
+sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
+site_data = sdata(:,[["site_id", "k", [strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity"]]);
+site_data = sortrows(site_data, "recom_connectivity");
+[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+TP_data = TP_data(g_idx, g_idx);
+
+dhw_scen = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
 
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = eg_vals(:, 1); % weight of wave damage in MCDA
@@ -17,6 +24,14 @@ wtpredecseed = eg_vals(:, 7); % weight for the importance of seeding sites that 
 wtpredecshade = eg_vals(:, 8); % weight for the importance of shading sites that are predecessors of priority reefs
 risktol = eg_vals(1, 9); % risk tolerance
 
+depth_min = 5; % minimum site depth
+depth_offset = 5; % depth range from min depth
+
+
+% Filter out sites outside of desired depth range
+max_depth = depth_min + depth_offset;
+depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min);
+depth_priority = site_data{depth_criteria, "recom_connectivity"};
 nsites = length(strongpred);
 risktol = eg_vals(1, 9); % risk tolerance
 
@@ -37,7 +52,7 @@ for ns = 1:10
     prefseedsites = zeros(1,nsiteint);
     prefshadesites = zeros(1,nsiteint);
     
-    dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
+    dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, ...
         'prioritysites', p_sites, 'maxcover', repmat(0.8, 26, 1), ...
         'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', zeros(26,1), ...
         'heatstressprob', zeros(26,1), 'sumcover', zeros(26,1), 'risktol', risktol, ...

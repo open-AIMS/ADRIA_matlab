@@ -172,6 +172,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
                 end
+            elseif ~sslog.seed 
+                    nprefseedsites = nprefseedsites;
             end
             if sslog.shade
                 % shading rankings
@@ -191,6 +193,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 %highest indicators picks the cool sites
                 prefshadesites = shade_order(1:last_idx, 1);
                 nprefshadesites = numel(prefshadesites);
+            elseif ~sslog.shade 
+                nprefshadesites = nprefshadesites;
             end
         case 2
 
@@ -232,7 +236,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
+
                 end
+            elseif ~sslog.seed 
+                nprefseedsites = nprefseedsites;
             end
             if sslog.shade 
                 % shading rankings
@@ -266,6 +273,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
                 nprefshadesites = numel(prefshadesites);
+            elseif ~sslog.shade 
+                nprefshadesites = nprefshadesites;
             end
 
         case 3
@@ -312,6 +321,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
                 end
+            elseif ~sslog.seed 
+                nprefseedsites = nprefseedsites;
             end
             if sslog.shade
                 wsh(all(SH == 0, 1)) = [];
@@ -345,6 +356,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
                 nprefshadesites = numel(prefshadesites);
+            elseif ~sslog.shade 
+                nprefshadesites = nprefshadesites;
             end
         case 4
 
@@ -392,6 +405,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     
                     seed_order = repmat(prefseedsites, 1, 2);
                 end
+            elseif ~sslog.seed 
+                nprefseedsites = nprefseedsites;
             end
             if sslog.shade
                 % shading rankings
@@ -424,6 +439,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 nprefshadesites = numel(prefshadesites);
                 
                 shade_order = repmat(prefshadesites, 1, 2);
+            elseif ~sslog.shade 
+                nprefshadesites = nprefshadesites;
             end
     otherwise
             error("Unknown MCDA algorithm choice.")
