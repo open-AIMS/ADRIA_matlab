@@ -40,8 +40,6 @@ name = [
     "Shadeyrs";
     "SeedTimes";
     "ShadeTimes";
-    % Seed decision years go here
-    % Shade decision years go here
     "Seedyr_start";
     "Shadeyr_start";
 ];
@@ -57,8 +55,6 @@ defaults = [
     10;  % Shadeyrs
     5; % Seedtimes
     1; % Shadetimes
-    % Seed decision years go here
-    % Shade decision years go here
     2; % Year to start seed interventions
     2; % Year to start shading interventions
 ];
@@ -75,8 +71,6 @@ p_bounds = [
     [10, 25];  % Shadeyrs, integer, years into simulation during which shading is considered
     [0, 25]; % SeedTimes, integer, yearly intervals to adjust seeding site selection (0 is set and forget)
     [0, 25]; % ShadeTimes, integer, yearly intervals to adjust shading site selection (0 is set and forget)
-    % seed decision years
-    % shade decision years
     [2, 10];  % Seedyr_start, seed intervention start offset from simulation start
     [2, 10];  % Shadeyr_start, shade intervention start offset from simulation start
 ];
@@ -94,10 +88,9 @@ ptype = [
     "float";
     "float";
     "integer";
-    ""integer";
     "integer";
-    % seed year frequency
-    % shade year frequency
+    "integer";
+    "integer";
     "integer";
     "integer";
 ];
