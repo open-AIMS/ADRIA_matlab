@@ -1,8 +1,10 @@
-function [TP_data, site_ranks, strongpred] =  siteConnectivity(file_loc, con_cutoff, agg_func)
+function [TP_data, site_ranks, strongpred, site_ids] =  siteConnectivity(file_loc, con_cutoff, agg_func)
 % Create transitional probability matrix indicating connectivity between
 % sites, level of centrality, and the strongest predecessor for each site.
 %
-% NOTE: Transposes transitional probability matrix!
+% NOTE: Transposes transitional probability matrix
+%       If multiple files are read in, this assumes all file rows/cols 
+%       follow the same order as the first file read in.
 %
 % Inputs:
 %   file_loc   : str, path to data file (or datasets) to load.
@@ -54,8 +56,16 @@ if isfolder(file_loc)
 
     % Load first file to determine size
     x = readtable(full_paths(1), 'PreserveVariableNames', true, 'ReadVariableNames', true);
+    site_ids = x{:, 1};
     x(:, 1) = []; % remove row ID column
+
+    % Reorder rows/columns to ensure identical indexes when matching up
+    % with ordered spatial data
+    [site_ids, order_idx] = sort(site_ids);
+    x = x(order_idx, order_idx);
     
+    site_ids = string(site_ids);
+
     [w, h] = size(x);
     
     data = zeros(length(full_paths), w, h);
@@ -64,6 +74,9 @@ if isfolder(file_loc)
         t_fn = full_paths(fn_i);
         x = readtable(t_fn, 'PreserveVariableNames', true, 'ReadVariableNames', true);
         x(:, 1) = [];  % remove row ID column
+        
+        % Reorder rows/columns, assuming identical ID orders...
+        x = x(order_idx, order_idx);
         
         % Store data
         % Transition probability matrix for all sites
@@ -83,7 +96,13 @@ else
 
     % remove site ids
     % F1(1, :) = [];
+    site_ids = string(x{:, 1});
     x(:, 1) = [];
+    
+    % Reorder rows/columns to ensure identical indexes when matching up
+    % with ordered spatial data
+    [site_ids, order_idx] = sort(site_ids);
+    x = x(order_idx, order_idx);
     
     TPbase = transpose(table2array(x)); % Transition probability matrix for all sites
 end

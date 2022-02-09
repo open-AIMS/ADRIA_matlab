@@ -4,7 +4,7 @@ rd = ai.sample_defaults;
 eg_vals = ai.convertSamples(rd);
 eg_vals = table2array(eg_vals);
 
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', 0.1);
+[TP_data, site_ranks, strongpred, site_ids] = siteConnectivity('MooreTPmean.xlsx', 0.1);
 
 % Weights for connectivity , waves (ww), high cover (whc) and low
 wtwaves = eg_vals(:, 1); % weight of wave damage in MCDA
