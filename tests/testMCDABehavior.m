@@ -22,14 +22,20 @@ risktol = eg_vals(1, 9); % risk tolerance
 
 %% Testing randomised sites
 
+sslog = struct('seed',true,'shade',false);
+
 % do 10 trials...
 for ns = 1:10
-    % nsites = rand_sites(ns);
-    
     % Randomly select number of sites to intervene
     % and priority sites
     nsiteint = randi([1, nsites], 1);
     p_sites = randi([1,9], 1):randi([10,25], 1);
+    
+    rankings = zeros(nsites, 3);
+    rankings(:, 1) = 1:nsites;
+    
+    prefseedsites = zeros(1,nsiteint);
+    prefshadesites = zeros(1,nsiteint);
     
     dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
         'prioritysites', p_sites, 'maxcover', repmat(0.8, 26, 1), ...
@@ -41,9 +47,9 @@ for ns = 1:10
         'wtpredecshade', wtpredecshade);
 
     % None of these should error and cause test failure
-    [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1);
-    [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
-    [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
+    [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1, sslog, prefseedsites, prefshadesites, rankings);
+    [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2, sslog, prefseedsites, prefshadesites, rankings);
+    [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3, sslog, prefseedsites, prefshadesites, rankings);
 end
 
 %% Testing zero sites
@@ -60,17 +66,25 @@ dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
     'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, ...
     'wtpredecshade', wtpredecshade);
 
+strategy = 1;
+sslog = struct('seed',true,'shade',false);
+rankings = [];
+prefseedsites = zeros(1,nsiteint);
+prefshadesites = zeros(1,nsiteint);
+
 % These should all be zero
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 1);
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings);
 tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
 assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 2);
+strategy = 2;
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings);
 
 tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
 assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, 3);
+strategy = 3;
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings);
 tmp = [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites];
 assert(all(tmp == 0), "All values expected to be 0, but some were not")
 
@@ -80,8 +94,6 @@ nsites = length(strongpred);
 nsiteint = 1;
 p_sites = randi([1,9], 1):randi([10,25], 1);
 
-strategy = 1;
-sslog = struct('seed',true,'shade',false);
 dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
     'prioritysites', p_sites, 'maxcover', repmat(0.8, 26, 1), ...
     'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', ones(26,1), ...
@@ -94,8 +106,13 @@ dMCDA_vars = struct('site_ids', [1:26]', 'nsiteint', nsiteint, ...
 % None of these should error and cause test failure (test if 1 or 0 as
 % either the single site does not satify the wave and heat risk tolerances
 % and so = 0 or it does and = 1)
+strategy = 1;
+sslog = struct('seed',true,'shade',false);
 rankings = [];
-[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy,sslog,prefseedsites,prefshadesites,rankings);
+prefseedsites = zeros(1,nsiteint);
+prefshadesites = zeros(1,nsiteint);
+        
+[prefseedsites, prefshadesites, nprefseedsites, nprefshadesites] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings);
 num_selected = [nprefseedsites, nprefshadesites];
 assert(all(num_selected == 1), "Number of sites expected to be 1, but some were not");
 
