@@ -89,6 +89,10 @@ ptype = [
     "float";
     "integer";
     "integer";
+    % seed year frequency
+    % shade year frequency
+    "integer";
+    "integer";
 ];
 
 interventions = paramTableBuilder(name, ptype, defaults, p_bounds, ...
