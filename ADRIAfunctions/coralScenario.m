@@ -49,6 +49,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
     
+    tf = sim_params.tf; % timeframe: total number of time steps
+    
     % Set up result structure where necessary
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
@@ -71,10 +73,44 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         depth_priority = site_data{depth_criteria, "recom_connectivity"};
 
         max_cover = site_data.k/100.0; % Max coral cover at each site
+
+        % pre-allocate prefseedsites, prefshadesites and rankings
+        rankings = [depth_priority,zeros(length(depth_priority),1),zeros(length(depth_priority),1)];
+        prefseedsites = zeros(1,nsiteint);
+        prefshadesites = zeros(1,nsiteint);
         
+
+        % years to start seeding/shading
+        seed_start_year = interv.Seedyr_start;
+        shade_start_year = interv.Shadeyr_start;
+        % find yrs at which to reassess seeding site selection and indicate
+        % these in yrslogseed
+        yrslogseed = false(1, tf);
+        yrschangeseed = shade_start_year:interv.Seedfreq:tf;
+        yrslogseed(yrschangeseed) = true;
+
+        % if seed_times is zero, assess once in year 2
+        % (set and forget site selection)
+        if interv.Seedfreq == 0
+            yrslogseed(2) = true;
+        end
+
+        % find yrs at which to reassess seeding site selection and indicate
+        % these in yrslogseed
+        yrslogshade = false(1, tf);
+        yrschangeshade = shade_start_year:interv.Shadefreq:tf;
+        yrslogshade(yrschangeshade) = true;
+        
+        % if shade_times is zero, assess once in year 2
+        % (set and forget site selection)
+        if interv.Shadefreq == 0
+            yrslogshade(2) = true;
+        end
+
+        sslog = struct('seed',true, 'shade',true);
         dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
-            'sumcover', 0,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+            'sumcover', 0, 'maxcover', max_cover, 'area', site_data.area, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
     end
     
@@ -85,7 +121,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
     %% Set up result structure
-    tf = sim_params.tf; % timeframe: total number of time steps
     nspecies = height(coral_params);
 
     % containers for seeding, shading and cooling
@@ -231,7 +266,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 % dMCDA_vars.prioritysites = prioritysites;
                 % DCMAvars.centr = centr
     
-                [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy); % site selection function for intervention deployment
+                [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy,sslog,prefseedsites,prefshadesites,rankings)); % site selection function for intervention deployment
                 nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
                 nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
                 
@@ -243,6 +278,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 % Unguided deployment, seed/shade corals anywhere
                 prefseedsites = randi(nsites, [nsiteint, 1])';
                 prefshadesites = randi(nsites, [nsiteint, 1])';
+
         else
                 ode_vars = struct('tstep',tstep,'shadeyrs',shadeyrs,'seedyrs',seedyrs,'srm',srm,'seed1',seed1,'seed2',seed2,'Yshade',Yshade,...
                 'dhw_step',dhw_step,'neg_e_p1',neg_e_p1,'neg_e_p2',neg_e_p2,'assistadapt',assistadapt,...
@@ -250,7 +286,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 's1_idx',s1_idx,'s2_idx',s2_idx) 
         end
         % Warming and disturbance event going into the pulse function
-        if (srm > 0) && (tstep <= shadeyears) && ~all(prefshadesites == 0)
+        if (srm > 0) && (tstep <= (shade_start_year+shadeyears)) && ~all(prefshadesites == 0)
             Yshade(tstep, prefshadesites) = srm;
             
             % Apply reduction in DHW due to shading
@@ -268,7 +304,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
         Yin1 = Y_pstep .* prop_loss;
 
-        if (tstep <= seedyears) && ~all(prefseedsites == 0)
+        if (tstep <= (seed_start_year+seedyears)) && ~all(prefseedsites == 0)
             % Seed each site with the value indicated with seed1/seed2
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
