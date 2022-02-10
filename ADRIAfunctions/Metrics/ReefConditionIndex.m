@@ -21,7 +21,7 @@ E = coralEvenness(X);
 SV = shelterVolume(X, coral_params);
 
 %% Coral juveniles
-juv = covers.juveniles; 
+juv = covers.juveniles;%./max(covers.juveniles, [], 'all'); 
 
 %% Compare outputs against reef condition criteria provided by experts 
 
@@ -70,31 +70,50 @@ E_juv = juv > rci_crit(5,4);
 crit_thr = 0.75; %threshold for the proportion of criteria needed to be 
 % met for category to be satisfied.
 
-ntsteps = 25;
-nsites = 26;
-
-reefcondition = zeros(ntsteps, nsites);
-        
 A = (A_TC + A_E + A_SV + A_juv)/4;
 B = (B_TC + B_E + B_SV + B_juv)/4;
 C = (C_TC + C_E + C_SV + C_juv)/4;
 D = (D_TC + D_E + D_SV + D_juv)/4;
 E = (E_TC + E_E + E_SV + E_juv)/4;
 
-for tstep = 1:ntsteps
-     for site = 1:nsites
-        if A(tstep,site) > crit_thr
-            reefcondition(tstep, site) = 0.9; %representative of very good
-        elseif B(tstep,site) > crit_thr && A(tstep,site) < crit_thr
-            reefcondition(tstep, site) = 0.7; %representative of good
-        elseif C(tstep,site) > crit_thr && A(tstep,site) < crit_thr && B(tstep,site) < crit_thr
-            reefcondition(tstep, site) = 0.5; %representative of fair
-        elseif D(tstep,site) > crit_thr && C(tstep,site) < crit_thr && A(tstep,site) < crit_thr && B(tstep,site) < crit_thr
-            reefcondition(tstep, site) = 0.3; %representative of poor
-        else
-            reefcondition(tstep, site) = 0.1; %
-        end %if
-    end %site
-end %tstep
+num_dims = ndims(X);
+if num_dims == 5
+    % multi-scenario case
+    [ntsteps, ~, nsites, ninterv, nreps] = size(X);
+elseif num_dims == 3
+    % single scenario case
+    [ntsteps, ~, nsites] = size(X);
+    ninterv = 1;
+    nreps = 1;
+else
+    error("Unexpected number of dimensions in result set.")
+end
 
-Y = reefcondition;
+Y = zeros(ntsteps, nsites, ninterv, nreps);
+
+% In single simulation cases, `inter` and `rep` are set to 1. Although
+% matrices A, B, C etc may only have 3 dimensions, MATLAB accepts `1` in
+% dims > 3, and just squeezes these out.
+for inter = 1:ninterv
+    for rep = 1:nreps
+        for tstep = 1:ntsteps
+             for site = 1:nsites
+                 A_below_thres = A(tstep,site,inter,rep) <= crit_thr;
+                 B_below_thres = B(tstep,site,inter,rep) <= crit_thr;
+                 
+         
+                 if A(tstep,site,inter,rep) >= crit_thr
+                     Y(tstep, site, inter, rep) = 0.9; %representative of very good
+                 elseif B(tstep,site,inter,rep) >= crit_thr && A_below_thres
+                     Y(tstep,site,inter,rep) = 0.7; %representative of good
+                 elseif C(tstep,site,inter,rep) >= crit_thr && A_below_thres && B_below_thres
+                     Y(tstep,site,inter,rep) = 0.5; %representative of fair
+                 elseif D(tstep,site,inter,rep) >= crit_thr && C(tstep,site, inter, rep) <= crit_thr && A_below_thres && B_below_thres
+                     Y(tstep,site,inter,rep) = 0.3; %representative of poor
+                 else
+                     Y(tstep,site,inter,rep) = 0.1; %
+                 end %if
+            end %site
+        end %tstep
+    end  % reps
+end  %interv
