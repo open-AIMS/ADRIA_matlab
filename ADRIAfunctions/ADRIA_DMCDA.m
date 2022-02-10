@@ -46,6 +46,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     heatstressprob = DMCDA_vars.heatstressprob(site_ids);
     sumcover = DMCDA_vars.sumcover(site_ids);
     maxcover = DMCDA_vars.maxcover(site_ids);
+    area = DMCDA_vars.area(site_ids);
     risktol = DMCDA_vars.risktol;
     wtconseed = DMCDA_vars.wtconseed;
     wtconshade = DMCDA_vars.wtconshade;
@@ -71,7 +72,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% prefseedsites
     % Combine data into matrix
     A(:, 1) = site_ids; %site IDs
-    A(:, 2) = centr / max(centr); %centrality
+    A(:, 2) = centr*sumcover*area / max(centr*sumcover*area); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
 
     % Account for cases where no chance of damage or heat stress
     if max(damprob) ~= 0
@@ -91,7 +92,9 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     A(:, 5) = predec(:, 3); % priority predecessors
    
     A(:, 6) = (maxcover - sumcover) ./ maxcover; % proportion of cover compared to max possible cover
-    A(maxcover == 0,6) = 0; % replace any infs with zeros
+
+    % set any infs to zero
+    A(maxcover==0, 6) = 0;
 
     % Filter out sites that have high risk of wave damage, specifically
     % exceeding the risk tolerance
