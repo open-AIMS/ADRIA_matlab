@@ -281,7 +281,7 @@ classdef ADRIA < handle
             obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
-        function ranks = siteSelection(obj,nreps, tstep, alg,...
+        function store_rankings = siteSelection(obj,nreps, tstep, alg,...
                                                 sslog, confilepath, sitedfilepath, ...
                                                 initcovcol, dhwfilepath)
             arguments
@@ -300,7 +300,7 @@ classdef ADRIA < handle
             [TP_data, site_ranks, strong_pred] = obj.siteConnectivity(confilepath, 0.1);
    
             % Site Data
-            sdata = readtable(siteidfilepath);
+            sdata = readtable(sitedfilepath);
             sitedata = sdata(:,[["site_id", "k", initcovcol, "sitedepth", "recom_connectivity"]]);
             site_data = sortrows(sitedata, "recom_connectivity");
             [~, ~, g_idx] = unique(sitedata.recom_connectivity, 'rows', 'first');
@@ -333,7 +333,7 @@ classdef ADRIA < handle
             end
             sumcover = sumcover/100.0;
 
-            store_rankings = zeros(nreps,nsites,2);
+            store_rankings = zeros(nreps,nsites,3);
 
             for l = 1:nreps
                 % site_id, seeding rank, shading rank
@@ -343,11 +343,12 @@ classdef ADRIA < handle
                 dhw_step = dhw_scen(tstep,:,l);
                 heatstressprob = dhw_step';
                 dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
-                    'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', zeros(nsites,1), 'heatstressprob', heatstressprob, ...
+                    'strongpred', strong_pred, 'centr', site_ranks.C1, 'damprob', zeros(nsites,1), 'heatstressprob', heatstressprob, ...
                     'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                     'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', ...
                     wtpredecseed, 'wtpredecshade', wtpredecshade);
                 [~, ~, ~,~, rankings] = ADRIA_DMCDA(dMCDA_vars,alg,sslog,prefseedsites,prefshadesites,rankings);
+                store_rankings(l,:,:) = rankings;
             end
         end
 
