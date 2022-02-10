@@ -49,6 +49,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
     
+    tf = sim_params.tf; % timeframe: total number of time steps
+    
     % Set up result structure where necessary
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
@@ -84,30 +86,32 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         shade_start_year = interv.Shadeyr_start;
         % find yrs at which to reassess seeding site selection and indicate
         % these in yrslogseed
-        yrslogseed = repmat(logical(0),1,sim_params.tf);
-        yrschangeseed = shade_start_year:interv.SeedTimes:sim_params.tf;
-        yrslogseed(yrschangeseed) = logical(1);
+        yrslogseed = false(1, tf);
+        yrschangeseed = shade_start_year:interv.Seedfreq:tf;
+        yrslogseed(yrschangeseed) = true;
 
-        % if seed_times is zero, only assess at the 
-        if interv.SeedTimes == 0
-            yrslogseed(2) = logical(1);
+        % if seed_times is zero, assess once in year 2
+        % (set and forget site selection)
+        if interv.Seedfreq == 0
+            yrslogseed(2) = true;
         end
 
         % find yrs at which to reassess seeding site selection and indicate
         % these in yrslogseed
-        yrslogshade = repmat(logical(0),1,sim_params.tf);
-        yrschangeshade = shade_start_year:interv.ShadeTimes:sim_params.tf;
-        yrslogshade(yrschangeshade) = logical(1);
+        yrslogshade = false(1, tf);
+        yrschangeshade = shade_start_year:interv.Shadefreq:tf;
+        yrslogshade(yrschangeshade) = true;
         
-        % if shade_times is zero, only assess at the 
-        if interv.ShadeTimes == 0
-            yrslogshade(2) = logical(1);
+        % if shade_times is zero, assess once in year 2
+        % (set and forget site selection)
+        if interv.Shadefreq == 0
+            yrslogshade(2) = true;
         end
 
-        sslog = struct('seed',logical(1),'shade',logical(1));
+        sslog = struct('seed',true, 'shade',true);
         dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
-            'sumcover', 0,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+            'sumcover', 0, 'maxcover', max_cover, 'area', site_data.area, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
     end
     
@@ -118,7 +122,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
     %% Set up result structure
-    tf = sim_params.tf; % timeframe: total number of time steps
     nspecies = height(coral_params);
 
     % containers for seeding, shading and cooling
