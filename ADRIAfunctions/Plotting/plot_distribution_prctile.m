@@ -1,4 +1,4 @@
-function plot_distribution_prctile(varargin)
+function h = plot_distribution_prctile(varargin)
 % PLOT_DISTRIBUTION_PRCTILE(X,Y) - Plots the median with percentile errors as a shaded region in the open 
 % figure window.
 % Inputs:
@@ -31,7 +31,7 @@ for j=1:numel(p_value)
         fill(Px,Py,color_value,'FaceAlpha',alpha_value,'EdgeColor','none');
     end
 end
-plot(X,median(Y),'LineWidth',line_width,'Color',color_value);
+h = plot(X,median(Y),'LineWidth',line_width,'Color',color_value);
 hold off
 
 
