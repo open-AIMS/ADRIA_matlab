@@ -100,8 +100,7 @@ for inter = 1:ninterv
              for site = 1:nsites
                  A_below_thres = A(tstep,site,inter,rep) <= crit_thr;
                  B_below_thres = B(tstep,site,inter,rep) <= crit_thr;
-                 
-         
+
                  if A(tstep,site,inter,rep) >= crit_thr
                      Y(tstep, site, inter, rep) = 0.9; %representative of very good
                  elseif B(tstep,site,inter,rep) >= crit_thr && A_below_thres
