@@ -72,7 +72,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% prefseedsites
     % Combine data into matrix
     A(:, 1) = site_ids; %site IDs
-    A(:, 2) = centr*sumcover*area / max(centr*sumcover*area); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
+    A(:, 2) = centr.*sumcover.*area / max(centr.*sumcover.*area); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
 
     % Account for cases where no chance of damage or heat stress
     if max(damprob) ~= 0
