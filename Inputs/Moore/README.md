@@ -10,21 +10,21 @@ Consists of a shapefile and CSV. The CSV holds identical attribute data
 as the shapefile.
 
 - Moore_cluster_poly.shp (and associated files)
-- MooreReefCluster_Spatial.csv
-- MooreReefCluster_Spatial_with_DHW_corrected.xlsx
+- MooreReefCluster_Spatial_with_DHW_corrected.csv
+- MooreReefCluster_Spatial_w4.5covers.csv
 
-It holds:
-- site_id
+They hold:
+- site_id, non-unique site id
 - habitat
 - area (in m^2 ???)
 - rubble (true or false)
 - k, maximum carrying capacity for the associated site (in percentage values, gets divided by 100 in ADRIA)
-- Reef
-- reef_siteid
+- Reef, name of reef
+- reef_siteid, unique id of site
 - long
 - lat
-- sitedepth
-- recom_connectivity, should align with cell ID in RECOM connectivity data
+- sitedepth, depth in negative values (meters)
+- recom_connectivity, cell ID that should align with row/column position in RECOM connectivity data
 
 The `MooreReefCluster_Spatial_with_DHW_corrected.xlsx` includes maximum DHWs for each site for 2015, 2017, and 2020.
 These were extracted from a collection of netCDF files (referred to as the "Robson files") using the script `ADRIA_dhwMoore_new.m`
@@ -62,3 +62,6 @@ The last will also be replaced with a more robust approach.
 
 Connectivity matrices from RECOM runs, provided by B. Robson.
 
+The `2015_IPMF` directory holds an averaged 2015 data (days 1-3), with the
+processing done by the IPMF team. This dataset is used to inform their 
+initial site selection for their model runs.

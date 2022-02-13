@@ -1,21 +1,4 @@
-%% Test total cover
-ai = ADRIA();
-ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
-ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv')
-
-X = ai.sample_defaults;
-X.Guided = 2;
-
-Y = ai.run(X, sampled_values=true, nreps=3);
-Y = Y.Y;  % get raw results, ignoring seed/shade logs
-
-[~, ~, coral_params] = ai.splitParameterTable(X);
-
-met = collectMetrics(Y, coral_params, {@coralTaxaCover});
-
-assert(all(met.coralTaxaCover.total_cover < 1.0, 'all'), 'Non-relative cover found!');
-
-%% Test RCI (not all 0.1)
+% Minimum working example for RCI issue (#76/#77)
 
 rng(101)  % set random seed for reproducibility
 
@@ -24,7 +7,7 @@ n_reps = 5;  % Number of replicate RCP scenarios
 
 ai = ADRIA();
 
-% Parameter prep
+%% Parameter prep
 % Collect details of available parameters
 combined_opts = ai.parameterDetails();
 sim_constants = ai.constants;
@@ -43,9 +26,12 @@ end
 
 sample_table.Guided(:) = 2;
 
+% IPMF site selection specific options
+% Disable certain aspects IPMF team are not concerned with
 sample_table.Shadeyrs(:) = 0;
 sample_table.Natad(:) = 0;
 
+% JC informed values for criteria weighting
 sample_table.coral_cover_high(:) = 0;
 sample_table.coral_cover_low(:) = 1;
 sample_table.seed_connectivity(:) = 1;
@@ -58,16 +44,29 @@ sample_table.deployed_coral_risk_tol(:) = 0;
 sample_table.depth_min(:) = 5;
 sample_table.depth_offset(:) = 5;
 
-ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
-ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
+%% Load site specific data
+ai.loadConnectivity('Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
+ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
+
+%% Scenario runs
+
+tic
 res = ai.run(sample_table, sampled_values=true, nreps=n_reps, collect_logs=["site_rankings"]);
-Y = res.Y;
+Y = res.Y;  % get raw results, ignoring seed/shade logs
+% ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
+%     file_prefix='./test', batch_size=4);
+tmp = toc;
 
 [~, ~, coral_params] = ai.splitParameterTable(sample_table);
 
+% If saving results to disk
+% Y = ai.gatherResults('./test', {@coralTaxaCover});
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+
 
 % ReefConditionIndex
+
 RCI_test = ReefConditionIndex(Y, @coralEvenness, @shelterVolume, @coralTaxaCover, coral_params);
 
-assert(~all(all(all(all(RCI_test == 0.1)))), "All results were 0.1!")
+all(all(all(all(RCI_test == 0.1))))

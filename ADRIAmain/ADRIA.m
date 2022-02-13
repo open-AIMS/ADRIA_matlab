@@ -14,6 +14,7 @@ classdef ADRIA < handle
         strongpred  % strongest predecessor
         site_data   % table of site data (dpeth, carrying capacity, etc)
         init_coral_cov_col  % column name to derive initial coral cover from
+        connectivity_site_ids  % Site IDs as specified by the connectivity dataset
     end
 
     properties (Dependent)
@@ -247,11 +248,12 @@ classdef ADRIA < handle
                cutoff = conargs.cutoff;
             end
 
-            [tp, sr, sp] = siteConnectivity(fileset, cutoff);
+            [tp, sr, sp, site_ids] = siteConnectivity(fileset, cutoff);
 
             obj.TP_data = tp;
             obj.site_ranks = sr;
             obj.strongpred = sp;
+            obj.connectivity_site_ids = site_ids;
         end
         
         function loadSiteData(obj, filename, init_coral_cov_col)
