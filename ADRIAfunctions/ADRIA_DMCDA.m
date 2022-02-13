@@ -263,6 +263,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
                 
                 % normalisation
+
                 SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
                 SH = SH .* repmat(wsh, size(SH, 1), 1);
     
@@ -445,6 +446,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 intcon = 1:length(SH(:, 1));
     
                 % normalisation
+
                 SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
                 SH = SH .* repmat(wsh, size(SH, 1), 1);
     
@@ -453,6 +455,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     
                 % multi-objective function for shading
                 fun2 = @(x) -1 * ADRIA_siteobj(x, SH(:, 2:end));
+
                 % solve multi-objective problem using genetic alg
                 x2 = gamultiobj(fun2, length(SH(:, 1)), Aeq, beq, A, b, lb, ub, [], intcon, opts);
     
@@ -469,6 +472,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end
+
     otherwise
             error("Unknown MCDA algorithm choice.")
     end
