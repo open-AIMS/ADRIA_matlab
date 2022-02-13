@@ -48,11 +48,11 @@ sumcover = (site_data.(strcat('Acropora',yrstr)) + site_data.(strcat('Goniastrea
 store_seed_rankings_alg1 = zeros(nreps,nsites,2);
 store_seed_rankings_alg2 = zeros(nreps,nsites,2);
 store_seed_rankings_alg3 = zeros(nreps,nsites,2);
-
+prior = [];
 for l = 1:nreps
     dhw_step = dhw_scen(tstep,:,l);
     heatstressprob = dhw_step';
-    dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
+    dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', prior, ...
                 'strongpred', strong_pred, 'centr', site_ranks.C1, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
                 'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                 'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
@@ -79,6 +79,6 @@ siteranks_alg3 = siteRanking(store_seed_rankings_alg3,"seed");
 
 sites_after_filtering = depth_priority;
 T = table(sites_after_filtering,siteranks_alg1,siteranks_alg2,siteranks_alg3);
-writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f_revised.xlsx',RCP,Year))
+writetable(T,sprintf('Rankings_RCP%2.0f_Year%4.0f_revised2.xlsx',RCP,Year))
 
 

@@ -87,9 +87,6 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
         A(:, 4) = heatstressprob / 1;
     end
 
-    %prop_cover = sumcover/max(sumcover);  %proportional coral cover
-    %     A(:,5) = prop_cover;
-    %     A(:,6) = 1 - prop_cover;
     A(:, 5) = predec(:, 3); % priority predecessors
     A(:, 6) = (maxcover - sumcover) ./ maxcover; % proportion of cover compared to max possible cover
 
@@ -117,22 +114,20 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% Seeding - Filtered set
     % define seeding weights
     wse = [1, wtconseed, wtwaves, wtheat, wtpredecseed, wtlocover];
-    wse(2:end) = wse(2:end) ./ sum(wse(2:end));
+    wse(2:end) = wse(2:end) ./ sqrt(sum(wse(2:end).^2));
     % define seeding decision matrix
     SE(:, 1) = A(:, 1); % sites column (remaining)
-    SE(:, 2) = A(:, 2); % multiply centrality with connectivity weight
-    SE(:, 3) = (1 - A(:, 3)); % multiply complementary of damage risk with disturbance weight
-    SE(:, 4) = (1 - A(:, 4)); % complimetary of wave risk
-    % SE(:,5) = A(:,6);  %multiply by coral cover with its weight for high cover
+    SE(:, 2) = A(:, 2); % centrality
+    SE(:, 3) = (1 - A(:, 3)); % complementary of wave risk
+    SE(:, 4) = (1 - A(:, 4)); % complimetary of heat risk
     SE(:, 5) = A(:, 5); % multiply priority predecessor indicator by weight
-    %SE(find(A(:,5)>=1),:) = [];
     SE(:, 6) = A(:, 6); % proportion of max cover which is not covered
     SE(A(:, 6) <= 0, :) = []; % remove sites at maximum carrying capacity
 
     %% Shading filtered set
     % define shading weights
     wsh = [1, wtconshade, wtwaves, wtheat, wtpredecshade, wthicover];
-    wsh(2:end) = wsh(2:end) ./ sum(wsh(2:end));
+    wsh(2:end) = wsh(2:end) ./ sqrt(sum(wsh(2:end).^2));
     SH(:, 1) = A(:, 1); % sites column (remaining)
     SH(:, 2) = A(:, 2); % multiply centrality with connectivity weight
     SH(:, 3) = (1 - A(:, 3)); % multiply complementary of damage risk with disturbance weight
@@ -153,7 +148,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
 
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
 
                 % simple ranking - add criteria weighted values for each sites
@@ -175,7 +170,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             wsh(all(SH == 0, 1)) = [];
             SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             SHwt(:, 1) = SH(:, 1);
@@ -200,7 +195,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 wse(all(SE == 0, 1)) = [];
                 SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
                 % compute the set of positive ideal solutions for each criteria (max for
                 % good crieteria, min for bad criteria). Max used as all crieteria
@@ -235,7 +230,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
             
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             % compute the set of positive ideal solutions for each criteria (max for
@@ -277,7 +272,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 wse(all(SE == 0, 1)) = [];
                 SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
 
                 F_s = max(SE(:, 2:end));
@@ -310,7 +305,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
             % shading rankings
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             F_s = max(SH(:, 2:end));
@@ -362,7 +357,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 intcon = 1:length(SE(:, 1));
 
                 % normalisation
-                SE(:, 2:end) = SE(:, 2:end) ./ sum(SE(:, 2:end).^2);
+                SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                 SE = SE .* repmat(wse, size(SE, 1), 1);
 
                 % multi-objective function for seeding
@@ -394,7 +389,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
             intcon = 1:length(SH(:, 1));
 
             % normalisation
-            SH(:, 2:end) = SH(:, 2:end) ./ sum(SH(:, 2:end).^2);
+            SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
             SH = SH .* repmat(wsh, size(SH, 1), 1);
 
             lb = zeros(1, length(SH(:, 1))); % x (weightings) can be 0
