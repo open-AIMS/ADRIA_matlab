@@ -54,6 +54,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Set up result structure where necessary
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
+        % Filter out sites outside of desired depth range
+    max_depth = criteria.depth_min + criteria.depth_offset;
+    depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
+    depth_priority = site_data{depth_criteria, "recom_connectivity"};
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided, -1 is global opt.
     if strategy>0
         %% Weights for connectivity , waves (ww), high cover (whc) and low
@@ -67,10 +71,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
         risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
-        % Filter out sites outside of desired depth range
-        max_depth = criteria.depth_min + criteria.depth_offset;
-        depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
-        depth_priority = site_data{depth_criteria, "recom_connectivity"};
 
         max_cover = site_data.k/100.0; % Max coral cover at each site
 
@@ -266,7 +266,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 % dMCDA_vars.prioritysites = prioritysites;
                 % DCMAvars.centr = centr
     
-                [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy,sslog,prefseedsites,prefshadesites,rankings)); % site selection function for intervention deployment
+                [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy,sslog,prefseedsites,prefshadesites,rankings); % site selection function for intervention deployment
                 nprefseed(tstep, 1) = nprefseedsites; % number of preferred seeding sites
                 nprefshade(tstep, 1) = nprefshadesites; % number of preferred shading sites
                 
@@ -280,10 +280,34 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 prefshadesites = randi(nsites, [nsiteint, 1])';
 
         else
-                ode_vars = struct('tstep',tstep,'shadeyrs',shadeyrs,'seedyrs',seedyrs,'srm',srm,'seed1',seed1,'seed2',seed2,'Yshade',Yshade,...
+            if yrslogshade(tstep) || yrslogseed(tstep)
+                ndepthsites = length(depth_priority);
+
+                % store variables for odes in struct
+                ode_vars = struct('tstep',tstep,'Yshade',Yshade(tstep,:),'srm',srm,'seed1',seed1,'seed2',seed2,...
                 'dhw_step',dhw_step,'neg_e_p1',neg_e_p1,'neg_e_p2',neg_e_p2,'assistadapt',assistadapt,...
-                'natad',natad,'bleach_resist',bleach_resist,'Sw_t',S_wt,'Y_pstep',Y_pstep,...
-                's1_idx',s1_idx,'s2_idx',s2_idx) 
+                'natad',natad,'bleach_resist',bleach_resist,'Sw_t',Sw_t(p_step, :, :),'Y_pstep',Y_pstep,...
+                's1_idx',s1_idx,'s2_idx',s2_idx,'e_r',e_r,'e_P',e_P,'e_mb',e_mb,'rec',rec,'e_comp',e_comp,'tspan',tspan,...
+                'non_neg_opt',non_neg_opt,'nspecies',nspecies); 
+                % create objective functio n to calculate metrics at next
+                % time step
+                objFunc = @(x) internalOptObjFunc(x,ndepthsites,nsites,depth_priority,ode_vars,coral_params);
+                % set upper, lower bounds and constraints
+                lb = zeros(1,ndepthsites*2);
+                ub = ones(1,ndepthsites*2);
+                A = [];
+                b = [];
+                Aeq = [ones(1,ndepthsites) zeros(1,ndepthsites);zeros(1,ndepthsites) ones(1,ndepthsites)];
+                beq = [nsiteint;nsiteint];
+                % perform optimisation
+                [x tc] = ga(objFunc,ndepthsites*2,A,b,Aeq,beq,lb,ub,[],1:(ndepthsites*2))
+                if yrslogseed(tstep)
+                    prefseedsites = find(x(1:length(x)/2)==1);
+                end
+                if yrslogshade(tstep)
+                    prefshadesites = find(x((length(x)/2)+1:end)==1);
+                end
+            end
         end
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && (tstep <= (shade_start_year+shadeyears)) && ~all(prefshadesites == 0)
