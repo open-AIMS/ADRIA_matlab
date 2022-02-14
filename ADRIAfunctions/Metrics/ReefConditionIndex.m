@@ -1,9 +1,9 @@
 function Y = ReefConditionIndex(TC, E, SV, juveniles)
 % Translates coral metrics in ADRIA to a Reef Condition Metrics
 % Inputs:
-%   TC : Total relative coral cover across all groups 
-%   E  : Evenness across four coral groups
-%   SV : Shelter volume based coral sizes and abundances
+%   TC        : Total relative coral cover across all groups 
+%   E         : Evenness across four coral groups
+%   SV        : Shelter volume based coral sizes and abundances
 %   juveniles : Abundance of coral juveniles < 5 cm diameter
 
 % Input dimensions: ntimesteps, nspecies, nsites
