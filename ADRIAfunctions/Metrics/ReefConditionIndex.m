@@ -9,19 +9,6 @@ function Y = ReefConditionIndex(TC, E, SV, juveniles)
 % Input dimensions: ntimesteps, nspecies, nsites
 % Output dimensions: ntimesteps, nsites, ninterventions, nreplicates
 
-%% Total coral cover
-% covers = coralTaxaCover(X);
-% TC = covers.total_cover;
-
-%% Coral evenness 
-% E = coralEvenness(X);
-
-%% Shelter volume
-% SV = shelterVolume(X, coral_params);
-
-%% Coral juveniles
-% juv = covers.juveniles;%./max(covers.juveniles, [], 'all'); 
-
 %% Compare outputs against reef condition criteria provided by experts 
 
 %These are median values for 7 experts. TODO: draw from distributions
@@ -73,7 +60,7 @@ A = (A_TC + A_E + A_SV + A_juv)/4;
 B = (B_TC + B_E + B_SV + B_juv)/4;
 C = (C_TC + C_E + C_SV + C_juv)/4;
 D = (D_TC + D_E + D_SV + D_juv)/4;
-E = (E_TC + E_E + E_SV + E_juv)/4;
+% E = (E_TC + E_E + E_SV + E_juv)/4;
 
 num_dims = ndims(TC);
 if num_dims == 5
