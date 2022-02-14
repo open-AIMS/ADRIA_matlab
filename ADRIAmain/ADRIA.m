@@ -283,18 +283,20 @@ classdef ADRIA < handle
             obj.site_data = sortrows(obj.site_data, "recom_connectivity");
         end
 
-        function store_rankings = siteSelection(obj,nreps, tstep, alg,...
-                                                sslog, initcovcol, dhwfilepath)
+        function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
+                                                alg, sslog, initcovcol, ...
+                                                dhwfilepath)
             arguments
                 obj
-                nreps {mustBeInteger}
+                criteria table
                 tstep {mustBeInteger}
+                nreps {mustBeInteger}
                 alg {mustBeInteger}
                 sslog struct
                 initcovcol string
                 dhwfilepath string
             end
-            criteria = obj.criterias.sample_defaults;
+            
             % Check site data and connectivity loaded
             if isempty(obj.site_data)
                 error("Site data not loaded! Preload with `loadSiteData()`");
@@ -307,23 +309,21 @@ classdef ADRIA < handle
             % Site Data
             site_data = obj.site_data;
             TP_data = obj.TP_data;
-            [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
-            TP_data = TP_data(g_idx, g_idx);
             site_ranks = obj.site_ranks;
             strongpred = obj.strongpred;
             area = site_data.area;
             % Weights for connectivity , waves (ww), high cover (whc) and low
-            wtwaves = criteria(1); % weight of wave damage in MCDA
-            wtheat = criteria(2); % weight of heat damage in MCDA
-            wtconshade = criteria(3); % weight of connectivity for shading in MCDA
-            wtconseed = criteria(4); % weight of connectivity for seeding in MCDA
-            wthicover = criteria(5); % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
-            wtlocover = criteria(6); % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
-            wtpredecseed = criteria(7); % weight for the importance of seeding sites that are predecessors of priority reefs
-            wtpredecshade = criteria(8); % weight for the importance of shading sites that are predecessors of priority reefs
-            risktol = criteria(9); % risk tolerance
-            depth_min = criteria(10);
-            depth_offset = criteria(11);
+            wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
+            wtheat = criteria.heat_stress; % weight of heat damage in MCDA
+            wtconshade = criteria.shade_connectivity; % weight of connectivity for shading in MCDA
+            wtconseed = criteria.seed_connectivity; % weight of connectivity for seeding in MCDA
+            wthicover = criteria.coral_cover_high; % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
+            wtlocover = criteria.coral_cover_low; % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
+            wtpredecseed = criteria.seed_priority; % weight for the importance of seeding sites that are predecessors of priority reefs
+            wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
+            risktol = criteria.deployed_coral_risk_tol; % risk tolerance
+            depth_min = criteria.depth_min;
+            depth_offset = criteria.depth_offset;
     
             % Filter out sites outside of desired depth range
             max_depth = depth_min + depth_offset;

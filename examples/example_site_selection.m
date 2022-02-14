@@ -1,15 +1,9 @@
-%% Example showcasing how to define and run specific scenarios
-
-rng(101) % set seed for reproducibility
+%% Example showcasing how use the ADRIA interface to do pure site selection, 
+% without running the ecological model
 
 %% 1. initialize ADRIA interface
 
 ai = ADRIA();
-
-%% Change any weights as desires
-% e.g. change shade_connectivity weight and coral cover high weight to 1
-ai.criterias.sample_defaults(3) = 1;
-ai.criterias.sample_defaults(5) = 1;
 
 %% Set-up scenario
 
@@ -35,9 +29,17 @@ alg_ind = 1;
 % specify timeslice to use in dhw data
 tstep = 1;
 
+% retrieve default criteria weights 
+[~,criteria,~] = ai.splitParameterTable(ai.sample_defaults);
+
+%% Change any weights as desired
+% e.g. change shade_connectivity weight and coral cover high weight to 1
+criteria.shade_connectivity = 1;
+criteria.coral_cover_high = 1;
+
 %% Run site selection
 % calculate rankings
-rankings_mat = ai.siteSelection(n_reps,tstep,alg_ind,sslog,init_coral_cov_col,dhw_dat);
+rankings_mat = ai.siteSelection(criteria,tstep,n_reps,alg_ind,sslog,init_coral_cov_col,dhw_dat);
 % find mean seeding ranks over climate stochasticity
 mean_ranks_seed = siteRanking(rankings_mat(:,:,2:end),'seed');
 % pair with site IDs
