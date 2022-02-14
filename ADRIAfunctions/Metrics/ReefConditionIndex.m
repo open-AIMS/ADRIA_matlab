@@ -1,27 +1,26 @@
-function Y = ReefConditionIndex(X, coralEvenness, shelterVolume, coralTaxaCover, coral_params)
-
-%% Translates coral metrics in ADRIA to a Reef Condition Metrics
+function Y = ReefConditionIndex(TC, E, SV, juveniles)
+% Translates coral metrics in ADRIA to a Reef Condition Metrics
 % Inputs:
-% 1. Total relative coral cover across all groups
-% 2. Evenness across four coral groups
-% 3. Abundance of coral juveniles < 5 cm diam
-% 4. Shelter volume based coral sizes and abundances
+%   TC : Total relative coral cover across all groups 
+%   E  : Evenness across four coral groups
+%   SV : Shelter volume based coral sizes and abundances
+%   juveniles : Abundance of coral juveniles < 5 cm diameter
 
 % Input dimensions: ntimesteps, nspecies, nsites
-% Output dimensions: ntimesteps, nsites
+% Output dimensions: ntimesteps, nsites, ninterventions, nreplicates
 
 %% Total coral cover
-covers = coralTaxaCover(X);
-TC = covers.total_cover;
+% covers = coralTaxaCover(X);
+% TC = covers.total_cover;
 
 %% Coral evenness 
-E = coralEvenness(X);
+% E = coralEvenness(X);
 
 %% Shelter volume
-SV = shelterVolume(X, coral_params);
+% SV = shelterVolume(X, coral_params);
 
 %% Coral juveniles
-juv = covers.juveniles;%./max(covers.juveniles, [], 'all'); 
+% juv = covers.juveniles;%./max(covers.juveniles, [], 'all'); 
 
 %% Compare outputs against reef condition criteria provided by experts 
 
@@ -61,11 +60,11 @@ C_SV = SV > rci_crit(3,3);
 D_SV = SV > rci_crit(4,3);
 E_SV = SV > rci_crit(5,3);
 
-A_juv = juv > rci_crit(1,4);
-B_juv = juv > rci_crit(2,4);
-C_juv = juv > rci_crit(3,4);
-D_juv = juv > rci_crit(4,4);
-E_juv = juv > rci_crit(5,4);
+A_juv = juveniles > rci_crit(1,4);
+B_juv = juveniles > rci_crit(2,4);
+C_juv = juveniles > rci_crit(3,4);
+D_juv = juveniles > rci_crit(4,4);
+E_juv = juveniles > rci_crit(5,4);
 
 crit_thr = 0.75; %threshold for the proportion of criteria needed to be 
 % met for category to be satisfied.
@@ -76,13 +75,15 @@ C = (C_TC + C_E + C_SV + C_juv)/4;
 D = (D_TC + D_E + D_SV + D_juv)/4;
 E = (E_TC + E_E + E_SV + E_juv)/4;
 
-num_dims = ndims(X);
+num_dims = ndims(TC);
 if num_dims == 5
     % multi-scenario case
-    [ntsteps, ~, nsites, ninterv, nreps] = size(X);
+    [ntsteps, ~, nsites, ninterv, nreps] = size(TC);
+elseif num_dims == 4
+    [ntsteps, nsites, ninterv, nreps] = size(TC);
 elseif num_dims == 3
     % single scenario case
-    [ntsteps, ~, nsites] = size(X);
+    [ntsteps, ~, nsites] = size(TC);
     ninterv = 1;
     nreps = 1;
 else
@@ -102,13 +103,13 @@ for inter = 1:ninterv
                  B_below_thres = B(tstep,site,inter,rep) <= crit_thr;
 
                  if A(tstep,site,inter,rep) >= crit_thr
-                     Y(tstep, site, inter, rep) = 0.9; %representative of very good
+                     Y(tstep, site, inter, rep) = 0.9; % representative of very good
                  elseif B(tstep,site,inter,rep) >= crit_thr && A_below_thres
-                     Y(tstep,site,inter,rep) = 0.7; %representative of good
+                     Y(tstep,site,inter,rep) = 0.7; % representative of good
                  elseif C(tstep,site,inter,rep) >= crit_thr && A_below_thres && B_below_thres
-                     Y(tstep,site,inter,rep) = 0.5; %representative of fair
+                     Y(tstep,site,inter,rep) = 0.5; % representative of fair
                  elseif D(tstep,site,inter,rep) >= crit_thr && C(tstep,site, inter, rep) <= crit_thr && A_below_thres && B_below_thres
-                     Y(tstep,site,inter,rep) = 0.3; %representative of poor
+                     Y(tstep,site,inter,rep) = 0.3; % representative of poor
                  else
                      Y(tstep,site,inter,rep) = 0.1; %
                  end %if
