@@ -336,10 +336,8 @@ classdef ADRIA < handle
             nsites = length(max_cover);
             w_scens = zeros(nsites, nreps);
             dhw_scen = load(dhwfilepath).dhw(tstep, :, 1:nreps);
-            sumcover = 0;
-            for j = 1:length(initcovcol)
-                sumcover = sumcover + site_data.(initcovcol(j)); 
-            end
+
+            sumcover = sum(site_data{:,initcovcol},2); 
             sumcover = sumcover/100.0;
 
             store_rankings = zeros(nreps,length(depth_priority),3);
