@@ -403,6 +403,49 @@ classdef ADRIA < handle
                      obj.site_data, runargs.collect_logs, ...
                      fprefix, runargs.batch_size);
         end
+
+        function EF = run_EF(obj, x,X, runargs)
+            arguments
+               obj
+               x {mustBeInteger}
+               X table
+               runargs.sampled_values logical
+               runargs.nreps {mustBeInteger}
+               runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+            end
+            
+            if isempty(obj.site_data)
+                error("Site data not loaded! Preload with `loadSiteData()`");
+            end
+            
+            if isempty(obj.TP_data)
+                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
+            end
+            
+            nreps = runargs.nreps;
+
+            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
+            % NEEDS TO BE CLEANED UP.
+            % Load DHW time series for each site
+            % Wave data is all zeros (ignore mortality due to wave damage
+            % and cyclones).
+            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            tf = obj.constants.tf;
+            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            [~, nsites, ~] = size(d_scens);
+            w_scens = zeros(tf, nsites, nreps);
+
+            if runargs.sampled_values
+                X = obj.convertSamples(X);
+            end
+
+            [interv, crit, coral] = obj.splitParameterTable(X);
+
+            EF = runESADRIA(x, interv, crit, coral, obj.constants, ...
+                     obj.TP_data, obj.site_ranks, obj.strongpred, ...
+                     obj.init_coral_cover, nreps, ...
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
+        end
         
         function Y = gatherResults(obj, file_loc, metrics, target_var)
             arguments

@@ -19,7 +19,22 @@ param_table = ai.raw_defaults;
 % For example, if 5 runs are desired, we would repeat the single row
 % 5 times:
 % param_table = repmat(param_table, 5, 1);
+param_table = ai.raw_defaults;
 
+
+% If multiple scenarios are to be run, extend the parameter table
+% up to the N runs required, and adjust each row as desired
+% For example, if 5 runs are desired, we would repeat the single row
+% 5 times:
+% param_table = repmat(param_table, 5, 1);
+
+
+%% 3. Modify table as desired...
+param_table.Guided = 1;
+param_table.Seed1 = 9000;
+param_table.Seed2 = 5000;
+param_table.SRM = 2;
+param_table.Seedfreq = 0;
 
 %% 3. Modify table as desired...
 param_table.Guided = 1;
