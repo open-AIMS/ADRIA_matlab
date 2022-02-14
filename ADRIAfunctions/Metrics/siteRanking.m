@@ -40,7 +40,18 @@ function mean_r = siteRanking(rankings, orient, func)
         case 3
             mean_r = func(squeeze(rankings(:, :, target_col)), 1)';
         case 5
-            mean_r = func(squeeze(func(squeeze(rankings(:, :, target_col, :, :)), 1)), [2,3]);
+            try
+                mean_r = func(squeeze(func(squeeze(rankings(:, :, target_col, :, :)), 1)), [2,3]);
+            catch err
+                if strcmp(err.identifier, 'MATLAB:sizeDimensionsMustMatch')
+                    mean_r = func(squeeze(func(squeeze(rankings(:, :, target_col, :, :)), 1)), [], [2,3]);
+                elseif strcmp(err.identifier, 'MATLAB:var:invalidSizeWgts')
+                    mean_r = func(squeeze(func(squeeze(rankings(:, :, target_col, :, :)), 1)), 0, [2,3]);
+                else
+                    rethrow(err)
+                end
+            end
+            
         otherwise
             error("Unknown number of ranking log dimensions.")
     end
