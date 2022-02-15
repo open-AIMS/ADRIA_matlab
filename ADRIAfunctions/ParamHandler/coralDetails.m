@@ -44,7 +44,7 @@ for c_id = 1:n_corals
         name(i, :) = strcat(coral_ids(c_id), '__', bp_name);
         tmp = coral_spec(coral_spec.coral_id == row_name, bp_name);
         defaults(i, :) = tmp{1, :};
-        p_bounds(i, :) = [defaults(i, :) * 0.6, defaults(i, :) * 1.4];
+        p_bounds(i, :) = [defaults(i, :) * 0.5, defaults(i, :) * 1.5];
         i = i + 1;
     end
 end
