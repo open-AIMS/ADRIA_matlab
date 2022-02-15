@@ -113,6 +113,38 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             'sumcover', 0, 'maxcover', max_cover, 'area', site_data.area, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
     end
+    if strategy<0
+        prefseedsites = zeros(1,nsiteint);
+        prefshadesites = zeros(1,nsiteint);
+        
+
+        % years to start seeding/shading
+        seed_start_year = interv.Seedyr_start;
+        shade_start_year = interv.Shadeyr_start;
+        % find yrs at which to reassess seeding site selection and indicate
+        % these in yrslogseed
+        yrslogseed = false(1, tf);
+        yrschangeseed = shade_start_year:interv.Seedfreq:tf;
+        yrslogseed(yrschangeseed) = true;
+
+        % if seed_times is zero, assess once in year 2
+        % (set and forget site selection)
+        if interv.Seedfreq == 0
+            yrslogseed(2) = true;
+        end
+
+        % find yrs at which to reassess seeding site selection and indicate
+        % these in yrslogseed
+        yrslogshade = false(1, tf);
+        yrschangeshade = shade_start_year:interv.Shadefreq:tf;
+        yrslogshade(yrschangeshade) = true;
+        
+        % if shade_times is zero, assess once in year 2
+        % (set and forget site selection)
+        if interv.Shadefreq == 0
+            yrslogshade(2) = true;
+        end
+    end
     
     seed1 = interv.Seed1*(pi*((2-1)/2)^2)/10^4/10^2; %tabular Acropora size class 2, converted to rel cover
     seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
@@ -256,7 +288,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 % Factor 2
                 % probability of coral damage from waves used as criterion in
                 % site selection
-                
+                sslog.seed = yrslogseed(tstep);
+                sslog.shade = yrslogshade(tstep);
                 % NOTE: Wave Damage is turned off for Feb deliv. These are all zeros!
                 dMCDA_vars.damprob = squeeze(mwaves(tstep, :, :))'; % wave_scen(tstep, :)';
                 dMCDA_vars.heatstressprob = dhw_step'; % heat stress
@@ -280,9 +313,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 prefshadesites = randi(nsites, [nsiteint, 1])';
 
         else
-            if yrslogshade(tstep) || yrslogseed(tstep)
+            if yrslogshade(tstep) && yrslogseed(tstep)
                 ndepthsites = length(depth_priority);
-
                 % store variables for odes in struct
                 ode_vars = struct('tstep',tstep,'Yshade',Yshade(tstep,:),'srm',srm,'seed1',seed1,'seed2',seed2,...
                 'dhw_step',dhw_step,'neg_e_p1',neg_e_p1,'neg_e_p2',neg_e_p2,'assistadapt',assistadapt,...
@@ -300,13 +332,51 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 Aeq = [ones(1,ndepthsites) zeros(1,ndepthsites);zeros(1,ndepthsites) ones(1,ndepthsites)];
                 beq = [nsiteint;nsiteint];
                 % perform optimisation
-                [x tc] = ga(objFunc,ndepthsites*2,A,b,Aeq,beq,lb,ub,[],1:(ndepthsites*2))
-                if yrslogseed(tstep)
-                    prefseedsites = find(x(1:length(x)/2)==1);
-                end
-                if yrslogshade(tstep)
-                    prefshadesites = find(x((length(x)/2)+1:end)==1);
-                end
+                [x tc] = ga(objFunc,ndepthsites*2,A,b,Aeq,beq,lb,ub,[],1:(ndepthsites*2));
+                prefseedsites = depth_priority(find(x(1:length(x)/2)==1));
+                prefshadesites = depth_priority(find(x((length(x)/2)+1:end)==1));
+            elseif ~yrslogshade(tstep) && yrslogseed(tstep)
+                ndepthsites = length(depth_priority);
+                % store variables for odes in struct
+                ode_vars = struct('tstep',tstep,'Yshade',Yshade(tstep,:),'srm',srm,'seed1',seed1,'seed2',seed2,...
+                'dhw_step',dhw_step,'neg_e_p1',neg_e_p1,'neg_e_p2',neg_e_p2,'assistadapt',assistadapt,...
+                'natad',natad,'bleach_resist',bleach_resist,'Sw_t',Sw_t(p_step, :, :),'Y_pstep',Y_pstep,...
+                's1_idx',s1_idx,'s2_idx',s2_idx,'e_r',e_r,'e_P',e_P,'e_mb',e_mb,'rec',rec,'e_comp',e_comp,'tspan',tspan,...
+                'non_neg_opt',non_neg_opt,'nspecies',nspecies); 
+                % create objective functio n to calculate metrics at next
+                % time step
+                objFunc = @(x) internalOptObjFuncSeed(x,prefshadesites,ndepthsites,nsites,depth_priority,ode_vars,coral_params);
+                % set upper, lower bounds and constraints
+                lb = zeros(1,ndepthsites);
+                ub = ones(1,ndepthsites);
+                A = [];
+                b = [];
+                Aeq = ones(1,ndepthsites);
+                beq = nsiteint;
+                % perform optimisation
+                [x tc] = ga(objFunc,ndepthsites,A,b,Aeq,beq,lb,ub,[],1:(ndepthsites));
+                prefseedsites = depth_priority(find(x==1));
+           elseif yrslogshade(tstep) && ~yrslogseed(tstep)
+                ndepthsites = length(depth_priority);
+                % store variables for odes in struct
+                ode_vars = struct('tstep',tstep,'Yshade',Yshade(tstep,:),'srm',srm,'seed1',seed1,'seed2',seed2,...
+                'dhw_step',dhw_step,'neg_e_p1',neg_e_p1,'neg_e_p2',neg_e_p2,'assistadapt',assistadapt,...
+                'natad',natad,'bleach_resist',bleach_resist,'Sw_t',Sw_t(p_step, :, :),'Y_pstep',Y_pstep,...
+                's1_idx',s1_idx,'s2_idx',s2_idx,'e_r',e_r,'e_P',e_P,'e_mb',e_mb,'rec',rec,'e_comp',e_comp,'tspan',tspan,...
+                'non_neg_opt',non_neg_opt,'nspecies',nspecies); 
+                % create objective functio n to calculate metrics at next
+                % time step
+                objFunc = @(x) internalOptObjFuncShade(x,prefseedsites,ndepthsites,nsites,depth_priority,ode_vars,coral_params);
+                % set upper, lower bounds and constraints
+                lb = zeros(1,ndepthsites);
+                ub = ones(1,ndepthsites);
+                A = [];
+                b = [];
+                Aeq = ones(1,ndepthsites);
+                beq = nsiteint;
+                % perform optimisation
+                [x tc] = ga(objFunc,ndepthsites,A,b,Aeq,beq,lb,ub,[],1:(ndepthsites));
+                prefshadesites = depth_priority(find(x==1));
             end
         end
         % Warming and disturbance event going into the pulse function
