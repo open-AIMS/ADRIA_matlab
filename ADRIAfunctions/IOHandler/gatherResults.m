@@ -8,6 +8,8 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
 %   coral_params : table, coral parameters used in all runs
 %   metrics      : cell, array of functions to apply. If none provided, 
 %                    collates the raw results instead.
+%   target_var   : str, variable to collate (returns everything if not
+%                    specified)
 %
 % Output:
 %    Y_collated : cell, of structs for each run, with fieldnames for each metric.
