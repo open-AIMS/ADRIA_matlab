@@ -25,14 +25,17 @@ param_table = ai.raw_defaults;
 param_table.Guided = 1;
 param_table.Seed1 = 9000;
 param_table.Seed2 = 5000;
-
+param_table.SRM = 2;
+param_table.Seedfreq = 0;
 % If running multiple scenarios, specify the values for each run
 % param_table.Seed1 = [600; 700; 800; 900; 1000];
 
 %% Run ADRIA
 
 % Load site specific data
-ai.loadConnectivity('Inputs/Moore/connectivity/2015/');
+ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
+
+
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
 n_reps = 2;

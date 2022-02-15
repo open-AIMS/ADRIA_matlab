@@ -17,7 +17,7 @@ alg_ind = 1;
 
 %% Load site data
 [F0, xx, yy, nsites] = ADRIA_siteTable('MooreSites.xlsx');
-[TP_data, site_ranks, strongpred] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
+[TP_data, site_ranks, strongpred, site_ids] = siteConnectivity('MooreTPmean.xlsx', params.con_cutoff);
 
 %% ... generate parameter permutations ...
 M = height(combined_opts);

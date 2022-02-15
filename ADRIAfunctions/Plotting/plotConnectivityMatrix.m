@@ -1,4 +1,4 @@
-function plotConnectivity(TP_data)
+function plotConnectivityMatrix(TP_data)
     figure;
     imshow(TP_data);
     colorbar();

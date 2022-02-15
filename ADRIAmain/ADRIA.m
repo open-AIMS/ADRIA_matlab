@@ -14,6 +14,7 @@ classdef ADRIA < handle
         strongpred  % strongest predecessor
         site_data   % table of site data (dpeth, carrying capacity, etc)
         init_coral_cov_col  % column name to derive initial coral cover from
+        connectivity_site_ids  % Site IDs as specified by the connectivity dataset
     end
 
     properties (Dependent)
@@ -247,11 +248,12 @@ classdef ADRIA < handle
                cutoff = conargs.cutoff;
             end
 
-            [tp, sr, sp] = siteConnectivity(fileset, cutoff);
+            [tp, sr, sp, site_ids] = siteConnectivity(fileset, cutoff);
 
             obj.TP_data = tp;
             obj.site_ranks = sr;
             obj.strongpred = sp;
+            obj.connectivity_site_ids = site_ids;
         end
         
         function loadSiteData(obj, filename, init_coral_cov_col)
@@ -307,6 +309,82 @@ classdef ADRIA < handle
                     'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                     'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
                     'wtpredecshade', wtpredecshade);
+            end
+        end
+
+        function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
+                                                alg, sslog, initcovcol, ...
+                                                dhwfilepath)
+            arguments
+                obj
+                criteria table
+                tstep {mustBeInteger}
+                nreps {mustBeInteger}
+                alg {mustBeInteger}
+                sslog struct
+                initcovcol string
+                dhwfilepath string
+            end
+            
+            % Check site data and connectivity loaded
+            if isempty(obj.site_data)
+                error("Site data not loaded! Preload with `loadSiteData()`");
+            end
+            
+            if isempty(obj.TP_data)
+                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
+            end
+
+            % Site Data
+            site_data = obj.site_data;
+            TP_data = obj.TP_data;
+            site_ranks = obj.site_ranks;
+            strongpred = obj.strongpred;
+            area = site_data.area;
+            % Weights for connectivity , waves (ww), high cover (whc) and low
+            wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
+            wtheat = criteria.heat_stress; % weight of heat damage in MCDA
+            wtconshade = criteria.shade_connectivity; % weight of connectivity for shading in MCDA
+            wtconseed = criteria.seed_connectivity; % weight of connectivity for seeding in MCDA
+            wthicover = criteria.coral_cover_high; % weight of high coral cover in MCDA (high cover gives preference for seeding corals but high for SRM)
+            wtlocover = criteria.coral_cover_low; % weight of low coral cover in MCDA (low cover gives preference for seeding corals but high for SRM)
+            wtpredecseed = criteria.seed_priority; % weight for the importance of seeding sites that are predecessors of priority reefs
+            wtpredecshade = criteria.shade_priority; % weight for the importance of shading sites that are predecessors of priority reefs
+            risktol = criteria.deployed_coral_risk_tol; % risk tolerance
+            depth_min = criteria.depth_min;
+            depth_offset = criteria.depth_offset;
+    
+            % Filter out sites outside of desired depth range
+            max_depth = depth_min + depth_offset;
+            depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min);
+            depth_priority = site_data{depth_criteria, "recom_connectivity"};
+    
+            max_cover = site_data.k/100.0; % Max coral cover at each site
+
+            nsiteint = obj.constants.nsiteint;
+            nsites = length(max_cover);
+            w_scens = zeros(nsites, nreps);
+            dhw_scen = load(dhwfilepath).dhw(tstep, :, 1:nreps);
+
+            sumcover = sum(site_data{:,initcovcol},2); 
+            sumcover = sumcover/100.0;
+
+            store_rankings = zeros(nreps,length(depth_priority),3);
+
+            for l = 1:nreps
+                % site_id, seeding rank, shading rank
+                rankings = [depth_priority, zeros(length(depth_priority), 1), zeros(length(depth_priority), 1)];
+                prefseedsites = zeros(1,nsiteint);
+                prefshadesites = zeros(1,nsiteint);
+                dhw_step = dhw_scen(1,:,l);
+                heatstressprob = dhw_step';
+                dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
+                    'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', w_scens(:,l), 'heatstressprob', heatstressprob, ...
+                    'sumcover', sumcover,'maxcover', max_cover, 'area',area,'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+                    'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', ...
+                    wtpredecseed, 'wtpredecshade', wtpredecshade);
+                [~, ~, ~,~, rankings] = ADRIA_DMCDA(dMCDA_vars,alg,sslog,prefseedsites,prefshadesites,rankings);
+                store_rankings(l,:,:) = rankings;
             end
         end
 

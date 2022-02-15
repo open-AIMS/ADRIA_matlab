@@ -53,7 +53,7 @@ user_criteria_opts = inputdlg(prompt, dlgtitle, dims, definput);
 %% Ask for simulation details (skipping psg, beta, and p)
 sim_names = fieldnames(sim_constants);
 prompt = cell(height(sim_names), 1);
-definput = zeros(height(sim_names), 1);
+definput = NaN(height(sim_names), 1);
 for n = 1:length(sim_names)
     field_name = sim_names(n);
     if contains(field_name, 'psg') || ...
@@ -67,7 +67,7 @@ for n = 1:length(sim_names)
 end
 
 prompt = prompt(~cellfun('isempty',prompt));
-definput = string(definput(~definput==0));
+definput = string(definput(~arrayfun(@isnan, definput)));  % (~definput==0)
 
 dlgtitle = 'Simulation Options';
 user_sim_opts = inputdlg(prompt, dlgtitle, dims, definput);

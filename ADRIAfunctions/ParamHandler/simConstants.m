@@ -59,3 +59,4 @@ params.comp = 0.3;
 
 % Whether or not to mimic IPMF by loading only two coral types
 params.mimic_IPMF = int8(0);  % Use 0 or 1 as booleans cannot be stored in netCDF
+
