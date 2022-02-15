@@ -55,6 +55,9 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
+    % years to start seeding/shading
+    seed_start_year = interv.Seedyr_start;
+    shade_start_year = interv.Shadeyr_start;
     is_guided = strategy > 0;
     if is_guided
         %% Weights for connectivity , waves (ww), high cover (whc) and low
@@ -80,10 +83,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         prefseedsites = zeros(1,nsiteint);
         prefshadesites = zeros(1,nsiteint);
         
-
-        % years to start seeding/shading
-        seed_start_year = interv.Seedyr_start;
-        shade_start_year = interv.Shadeyr_start;
         % find yrs at which to reassess seeding site selection and indicate
         % these in yrslogseed
         yrslogseed = false(1, tf);

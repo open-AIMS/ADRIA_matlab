@@ -5,9 +5,9 @@ nalgs = 3;
 nmetrics = 1;
 timef = 50;
 % Number of scenarios
-N = 25;
+N = 8;
 example_file = 'Inputs/MCDA_example.nc';
-metric = {@coralTaxaCover};
+metric = {@coralSpeciesCover};
 
 if isfile(example_file)
     % Load example data from file if pre-prepared
@@ -18,7 +18,7 @@ if isfile(example_file)
     for count = 1:N
          %for k =1:nalgs+1
             
-            subplot(5,5,count)
+            subplot(2,4,count)
             hold on
             plot(1:timef,alg_cont_TC(:,1,count),'r')
             plot(1:timef,alg_cont_TC(:,2,count),'b')
@@ -41,7 +41,7 @@ else
         combined_opts = ai.parameterDetails();
         % Get default parameters
         ai.constants.tf = timef;
-        ai.constants.nsiteint = 10;
+        ai.constants.nsiteint = 5;
         ai.constants.RCP = 45;
         % Generate samples using simple monte carlo
         % Create selection table based on lower/upper parameter bounds
@@ -64,18 +64,23 @@ else
         %% Scenario runs
         % set all criteria weights and seed yrs/ shade yrs to be the same
          p_sel.Seedyrs(:) = 10*ones(length(p_sel.Seedyrs(:)),1);
-         p_sel.Shadeyrs(:) = 10*ones(length(p_sel.Shadeyrs(:)),1);
+         p_sel.Shadeyrs(:) = ones(length(p_sel.Shadeyrs(:)),1);
          p_sel.coral_cover_high(:) = ones(length(p_sel.coral_cover_high(:)),1);
          p_sel.coral_cover_low(:) = ones(length(p_sel.coral_cover_low(:)),1);
          p_sel.wave_stress(:) = ones(length(p_sel.wave_stress(:)),1);
          p_sel.heat_stress(:) = ones(length(p_sel.heat_stress(:)),1);
-         p_sel.shade_connectivity(:) = zeros(length(p_sel.shade_connectivity(:)),1);
+         p_sel.shade_connectivity(:) = ones(length(p_sel.shade_connectivity(:)),1);
          p_sel.seed_connectivity(:) = ones(length(p_sel.seed_connectivity(:)),1);
          p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
          p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
-         p_sel.SRM(:) = zeros(length(p_sel.SRM(:)),1);
+         p_sel.SRM(:) = ones(length(p_sel.SRM(:)),1);
          p_sel.Aadpt(:) = 4*ones(N,1);
-         p_sel.Natad(:) = 0.05*ones(N,1);
+         p_sel.Natad(:) = 0.25*ones(N,1);
+         p_sel.Seedfreq(:) = ones(length(p_sel.Seedfreq(:)),1);
+         p_sel.Shadefreq(:) = ones(length(p_sel.Shadefreq(:)),1);
+          p_sel.Seedyr_start(:) = 2*ones(length(p_sel.Seedyr_start(:)),1);
+         p_sel.Shadeyr_start(:) = 2*ones(length(p_sel.Shadeyr_start(:)),1);
+         p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
         p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
 
    for al = 0:nalgs
@@ -87,8 +92,8 @@ else
         disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
 
         out = collectMetrics(Y.Y,coral_params,metric);
-        TC = out.coralTaxaCover.total_cover;             
-        results(:,al+1,:) = squeeze(mean(mean(TC,2),4));      
+        TC = out.coralSpeciesCover;             
+        results(:,al+1,:) = squeeze(mean(mean(mean(TC,2),3),5));      
    end
     filename='Inputs/MCDA_example.nc';
     nccreate(filename,'TC','Dimensions',{'time',timef,'algs',nalgs+1,'pars',N});
