@@ -3,6 +3,8 @@ function mean_r = siteRanking(rankings, orient, func)
 % If multiple scenarios are provided, returns the mean of total for each
 % site.
 %
+% NOTE: Sites assigned a rank of nsites + 1 are not considered!
+%
 % Inputs:
 %     rankings : matrix, logged time series from ADRIA runs.
 %     orient   : str, gather metrics for 'seed' or 'shade'
@@ -42,7 +44,4 @@ function mean_r = siteRanking(rankings, orient, func)
         otherwise
             error("Unknown number of ranking log dimensions.")
     end
-    
-    % Assign sites that are never considered a 0
-    mean_r(mean_r == nsites+1) = 0;
 end
