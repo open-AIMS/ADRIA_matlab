@@ -197,6 +197,15 @@ classdef ADRIA < handle
             crit = x(crit_r, :);
             coral = x(coral_r, :);
         end
+        
+        function pd = idConstants(obj)
+            % Get index of constant parameters from parameter details
+            % table.
+            param_details = obj.parameterDetails();
+            xmin = param_details.lower_bound;
+            xmax = param_details.upper_bound;
+            pd = xmin == xmax;
+        end
 
         function tbl = convertSamples(obj, X)
             % Convert sample values back to ADRIA expected values
