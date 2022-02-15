@@ -7,8 +7,8 @@ function interventions = interventionDetails(varargin)
 %    Argument list of parameters to override.
 %    Possible arguments (with [value range], default value):
 %      - Guided   : integer, [0, 1, 2, 3, 4], where 0 is unguided
-%      - Seed1    : integer, [100, 10000], 1000  
-%      - Seed2    : integer, [100, 10000], 1000
+%      - Seed1    : integer, [0, 400], 100  
+%      - Seed2    : integer, [0, 400], 100
 %      - SRM      : float, [0, 12], 0
 %      - Aadpt    : float, [0, 12], 0
 %      - Natad    : float, [0, 0.1], 0.025
@@ -46,8 +46,8 @@ name = [
 
 defaults = [
     0;  % Guided
-    1000;  % Seed1
-    1000;  % Seed2
+    100;  % Seed1
+    100;  % Seed2
     0;  % SRM
     0;  % Aadpt
     0.025;  % Natad
@@ -62,15 +62,15 @@ defaults = [
 
 p_bounds = [
     [0, 4];  % Guided, choice of MCDA approach
-    [100, 10000];  % Seed1, integer, number of Enhanced TA to seed
-    [100, 10000];  % Seed2, integer, number of Enhanced TC to seed
+    [0, 400];  % Seed1, integer, number of Enhanced TA to seed
+    [0, 400];  % Seed2, integer, number of Enhanced TC to seed
     [0, 12];  % SRM, float, reduction in DHWs due to shading
     [0.0, 12];  % Aadpt, float, float, increased adaptation rate
     [0.0, 0.1];  % Natad, float, natural adaptation rate
-    [10, 15];  % Seedyrs, integer, years into simulation during which seeding is considered
-    [10, 25];  % Shadeyrs, integer, years into simulation during which shading is considered
-    [0, 25]; % Seedfreq, integer, yearly intervals to adjust seeding site selection (0 is set and forget)
-    [0, 25]; % Shadefreq, integer, yearly intervals to adjust shading site selection (0 is set and forget)
+    [5, 15];  % Seedyrs, integer, years into simulation during which seeding is considered
+    [5, 25];  % Shadeyrs, integer, years into simulation during which shading is considered
+    [0, 5]; % Seedfreq, integer, yearly intervals to adjust seeding site selection (0 is set and forget)
+    [0, 5]; % Shadefreq, integer, yearly intervals to adjust shading (fogging) site selection (0 is set and forget)
     [2, 25];  % Seedyr_start, integer, seed intervention start offset from simulation start
     [2, 25];  % Shadeyr_start, integer, shade intervention start offset from simulation start
 ];
