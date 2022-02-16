@@ -54,6 +54,33 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Set up result structure where necessary
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
     
+    % years to start seeding/shading
+    seed_start_year = interv.Seedyr_start;
+    shade_start_year = interv.Shadeyr_start;
+    % find yrs at which to reassess seeding site selection and indicate
+    % these in yrslogseed
+    yrslogseed = false(1, tf);
+    yrschangeseed = shade_start_year:interv.Seedfreq:tf;
+    yrslogseed(yrschangeseed) = true;
+
+    % if seed_times is zero, assess once in year 2
+    % (set and forget site selection)
+    if interv.Seedfreq == 0
+        yrslogseed(2) = true;
+    end
+
+    % find yrs at which to reassess seeding site selection and indicate
+    % these in yrslogseed
+    yrslogshade = false(1, tf);
+    yrschangeshade = shade_start_year:interv.Shadefreq:tf;
+    yrslogshade(yrschangeshade) = true;
+
+    % if shade_times is zero, assess once in year 2
+    % (set and forget site selection)
+    if interv.Shadefreq == 0
+        yrslogshade(2) = true;
+    end
+    
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
     is_guided = strategy > 0;
     if is_guided
@@ -79,34 +106,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         rankings = [depth_priority,zeros(length(depth_priority),1),zeros(length(depth_priority),1)];
         prefseedsites = zeros(1,nsiteint);
         prefshadesites = zeros(1,nsiteint);
-        
-
-        % years to start seeding/shading
-        seed_start_year = interv.Seedyr_start;
-        shade_start_year = interv.Shadeyr_start;
-        % find yrs at which to reassess seeding site selection and indicate
-        % these in yrslogseed
-        yrslogseed = false(1, tf);
-        yrschangeseed = shade_start_year:interv.Seedfreq:tf;
-        yrslogseed(yrschangeseed) = true;
-
-        % if seed_times is zero, assess once in year 2
-        % (set and forget site selection)
-        if interv.Seedfreq == 0
-            yrslogseed(2) = true;
-        end
-
-        % find yrs at which to reassess seeding site selection and indicate
-        % these in yrslogseed
-        yrslogshade = false(1, tf);
-        yrschangeshade = shade_start_year:interv.Shadefreq:tf;
-        yrslogshade(yrschangeshade) = true;
-        
-        % if shade_times is zero, assess once in year 2
-        % (set and forget site selection)
-        if interv.Shadefreq == 0
-            yrslogshade(2) = true;
-        end
 
         sslog = struct('seed',true, 'shade',true);
         dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
