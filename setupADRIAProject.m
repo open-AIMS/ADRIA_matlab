@@ -98,6 +98,8 @@ addPath(proj, './Inputs/Moore');
 addPath(proj, './Inputs/Moore/connectivity');
 addPath(proj, './Inputs/Moore/DHWs');
 addPath(proj, './Inputs/Moore/site_data');
+addPath(proj, './Inputs/inputs_forecast');
+addPath(proj, './Inputs/inputs_hindcast');
 
 
 % Programmatically install toolbox:

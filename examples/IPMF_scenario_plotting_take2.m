@@ -52,6 +52,10 @@ for l = 1:nyrs
                  store_table(count,8) = Y_g1{m}.evenness(l,depth_priority(s));
                  store_table(count,9) = Y_g1{m}.SV_per_ha(l,depth_priority(s));
                  store_table(count,10) = Y_g1{m}.juveniles(l,depth_priority(s));
+%                  store_table(count,11) = Y_g1{m}.mean_TC(l,depth_priority(s))-Y_g1{1}.mean_TC(l,depth_priority(s));
+%                  store_table(count,12) = Y_g1{m}.evenness(l,depth_priority(s))-Y_g1{1}.evenness(l,depth_priority(s));
+%                  store_table(count,13) = Y_g1{m}.SV_per_ha(l,depth_priority(s))-Y_g1{1}.SV_per_ha(l,depth_priority(s));
+%                  store_table(count,14) = Y_g1{m}.juveniles(l,depth_priority(s))-Y_g1{1}.juveniles(l,depth_priority(s));
         end
     end
 end
@@ -68,7 +72,7 @@ end
 
 R = bn_rankcorr(ParentCell,store_table,1,1,nodeNames);
 figure(1)
-bn_visualize(ParentCell,R,nodeNames,gca)
+%bn_visualize(ParentCell,R,nodeNames,gca)
 %% Begin inferences
 % seeding scenario
 inf_cells = [1 3 4 5 6];
@@ -262,7 +266,21 @@ store_map(:,8)= F_psites(3,:);
 store_map(:,9)= F_psitesc(3,:);
 store_map(:,10)= F_psites(4,:);
 store_map(:,11)= F_psitesc(4,:);
+%% try mapping probabilities with geoplotting toolbox
+maptable1 = array2table(store_map(:,1:4),"VariableNames",["Sites","Latitude","Longitude","Probability"])
+catnames = ["0.0-0.4","0.4-0.45","0.45-0.5","0.5-0.6","0.6-0.7",">0.7"]
+bins = [0,0.4,0.45,0.5,0.6,0.7,1]
+maptable1.ProbabilityCat = discretize(maptable1.Probability,bins,'categorical',catnames)
 
+maptable2 = array2table(store_map(:,[1:3,5]),"VariableNames",["Sites","Latitude","Longitude","Probability"])
+maptable2.ProbabilityCat = discretize(maptable2.Probability,bins,'categorical',catnames)
+fig = figure()
+hold on
+subplot(1,2,1)
+gb = geobubble(maptable1,'Latitude','Longitude','SizeVariable','Probability','ColorVariable','ProbabilityCat','Basemap','satellite')
+subplot(1,2,2)
+gb = geobubble(maptable2,'Latitude','Longitude','SizeVariable','Probability','ColorVariable','ProbabilityCat','Basemap','satellite')
+colororder(prism(11))
 %% Coral cover
 figure(10)
 %hold on
