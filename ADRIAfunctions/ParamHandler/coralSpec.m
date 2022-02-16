@@ -177,7 +177,7 @@ params.natad = natad;
 % Estimated bleaching resistance (as DHW) relative to the assemblage 
 % response for 2016 bleaching on the GBR (based on Hughes et al. 2018). 
 bleach_resist = [...  
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0;    
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
