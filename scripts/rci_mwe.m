@@ -54,8 +54,6 @@ ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.cs
 tic
 res = ai.run(sample_table, sampled_values=true, nreps=n_reps, collect_logs=["site_rankings"]);
 Y = res.Y;  % get raw results, ignoring seed/shade logs
-% ai.runToDisk(sample_table, sampled_values=true, nreps=n_reps, ...
-%     file_prefix='./test', batch_size=4);
 tmp = toc;
 
 [~, ~, coral_params] = ai.splitParameterTable(sample_table);
@@ -64,9 +62,11 @@ tmp = toc;
 % Y = ai.gatherResults('./test', {@coralTaxaCover});
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
+E = coralEvenness(Y);
+SV = shelterVolume(Y, coral_params);
+TC_a = coralTaxaCover(Y);
+TC = TC_a.total_cover;
+juv = TC_a.juveniles;
 
 % ReefConditionIndex
-
-RCI_test = ReefConditionIndex(Y, @coralEvenness, @shelterVolume, @coralTaxaCover, coral_params);
-
-all(all(all(all(RCI_test == 0.1))))
+RCI_test = ReefConditionIndex(TC, E, SV, juv);
