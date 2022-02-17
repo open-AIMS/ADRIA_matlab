@@ -28,6 +28,50 @@ for k = 1:length(guided1)
         'evenness',Y.evenness(:,:,guided1(k)),...
         'juveniles',Y.juveniles(:,:,guided1(k)));
 end
+%% Some spatial movies of changing metrics as predicted by ADRIA
+% counterfactuals
+counter_TC = Y_g1{1}.mean_TC;
+% scenario 1 seed1 =200, seed2 = 200
+scen1_TC = Y_g1{20}.mean_TC-counter_TC;
+% scenario 2 seed1 = 200, seed2 = 200, As Adt. = 4
+scen2_TC = Y_g1{21}.mean_TC-counter_TC;
+
+catnames = ["0.0-0.001","0.001-0.002","0.002-0.003","0.003-0.004","0.004-0.005","0.005>"]
+bins = [-0.01,0.001,0.002,0.003,0.004,0.005,1]
+myWriter = VideoWriter('CCbubblemov');
+myWriter.FrameRate = 2;
+fileloc = 'Inputs/';
+load([fileloc,'MooreSitesDomainInfo.mat']);
+% find lats and longs corresponding to site numbers
+store_map = zeros(length(depth_priority),5);
+store_map(:,1) = depth_priority;
+store_map(:,2)= sdata{depth_criteria,"lat"};
+store_map(:,3)= sdata{depth_criteria,"long"};
+open(myWriter);
+% movie comparing counterfactual and scenario 1
+for t = 1:50
+    store_map(:,4)= scen1_TC(t,depth_priority);
+    store_map(:,5)= scen2_TC(t,depth_priority);
+    maptable1 = array2table(store_map(:,1:4),"VariableNames",["Sites","Latitude","Longitude","MeanCC"])   
+    maptable1.CCCat = discretize(maptable1.MeanCC,bins,'categorical',catnames)    
+    maptable2 = array2table(store_map(:,[1:3,5]),"VariableNames",["Sites","Latitude","Longitude","MeanCC"])
+    maptable2.CCCat = discretize(maptable2.MeanCC,bins,'categorical',catnames)
+    fig = figure()
+    hold on
+    subplot(1,2,1)
+    gb = geobubble(maptable1,'Latitude','Longitude','SizeVariable','MeanCC','ColorVariable','CCCat','Basemap','satellite')
+    subplot(1,2,2)
+    gb = geobubble(maptable2,'Latitude','Longitude','SizeVariable','MeanCC','ColorVariable','CCCat','Basemap','satellite')
+    colororder(prism(11))
+    set(gcf,'Position',get(0,'Screensize'))
+    movieVector = getframe(fig);
+
+    writeVideo(myWriter,movieVector);
+
+    clf
+end
+    close(myWriter);
+
 
 %% Create BBN table
 

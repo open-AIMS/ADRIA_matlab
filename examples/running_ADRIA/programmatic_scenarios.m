@@ -19,7 +19,7 @@ param_table = ai.raw_defaults;
 % For example, if 5 runs are desired, we would repeat the single row
 % 5 times:
 % param_table = repmat(param_table, 5, 1);
-
+[~,~,coral_params] = ai.splitParameterTable(param_table)
 
 %% 3. Modify table as desired...
 param_table.Guided = 1;
@@ -44,6 +44,8 @@ tic
 % Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps);
 Y = res.Y;  % get raw results
+
+SV = collectMetrics(Y,coral_params,{@shelterVolume})
 tmp = toc;
 
 N = size(Y, 4);
