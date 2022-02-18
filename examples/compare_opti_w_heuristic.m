@@ -6,7 +6,7 @@ nmetrics = 1;
 timef = 50;
 alg_ind = [-1 0 1];
 % Number of scenarios
-N = 8;
+N = 1;
 example_file = 'Inputs/MCDA_example.nc';
 metric = {@coralTaxaCover};
 
@@ -16,20 +16,18 @@ if isfile(example_file)
     figure(1)
    title('TC comparison')
 
-    for count = 1:N
-         %for k =1:nalgs+1
-            
-            subplot(5,5,count)
+%     for count = 1:N
+%          %for k =1:nalgs+1
+%             
+%             subplot(5,5,count)
             hold on
             plot(1:timef,alg_cont_TC(:,1,count),'r')
             plot(1:timef,alg_cont_TC(:,2,count),'b')
             plot(1:timef,alg_cont_TC(:,3,count),'g--')
-            plot(1:timef,alg_cont_TC(:,4,count),'m')
-            %plot(1:25,alg_cont_TC(:,5,count),'--')
            % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
             hold off
         % end
-    end
+%     end
 else
    
         %% Generate monte carlo samples
@@ -66,20 +64,24 @@ else
         % set all criteria weights and seed yrs/ shade yrs to be the same
          p_sel.Seedyrs(:) = 10*ones(length(p_sel.Seedyrs(:)),1);
          p_sel.Shadeyrs(:) = 10*ones(length(p_sel.Shadeyrs(:)),1);
-         p_sel.coral_cover_high(:) = ones(length(p_sel.coral_cover_high(:)),1);
+         p_sel.coral_cover_high(:) = zeros(length(p_sel.coral_cover_high(:)),1);
          p_sel.coral_cover_low(:) = ones(length(p_sel.coral_cover_low(:)),1);
          p_sel.wave_stress(:) = ones(length(p_sel.wave_stress(:)),1);
          p_sel.heat_stress(:) = ones(length(p_sel.heat_stress(:)),1);
          p_sel.shade_connectivity(:) = zeros(length(p_sel.shade_connectivity(:)),1);
          p_sel.seed_connectivity(:) = ones(length(p_sel.seed_connectivity(:)),1);
-         p_sel.shade_priority(:) = ones(length(p_sel.shade_priority(:)),1);
+         p_sel.shade_priority(:) = zeros(length(p_sel.shade_priority(:)),1);
          p_sel.seed_priority(:) = ones(length(p_sel.seed_priority(:)),1);
          p_sel.SRM(:) = zeros(length(p_sel.SRM(:)),1);
          p_sel.Aadpt(:) = 4*ones(N,1);
          p_sel.Natad(:) = 0.05*ones(N,1);
-         p_sel.Seedfreq(:) = 5*ones(N,1);
-         p_sel.Shadefreq(:) = ones(N,1);
-        p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
+         p_sel.Seedfreq(:) = ones(N,1);
+         p_sel.Shadefreq(:) = zeros(N,1);
+         p_sel.Seedyr_start(:) = 2*ones(N,1);
+         p_sel.Shadeyr_start(:) = 2*ones(N,1);
+         p_sel.Seed1(:) = 400*ones(N,1);
+         p_sel.Seed2(:) = 400*ones(N,1);
+         p_sel.deployed_coral_risk_tol(:) = ones(length(p_sel.deployed_coral_risk_tol(:)),1);
 
    for al = 1:nalgs
        % for each algorithm
