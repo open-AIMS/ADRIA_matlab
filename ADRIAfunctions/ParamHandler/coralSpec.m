@@ -139,11 +139,14 @@ params.growth_rate = reshape(r', [], 1);
 %Scope for fecundity as a function of colony area (Hall and Hughes 1996)
 fec_par_a = [1.02; 1.02; 1.69; 1.69; 0.86; 0.86]; %fecundity parameter a 
 fec_par_b = [1.28; 1.28; 1.05; 1.05; 1.21; 1.21]; %fecundity parameter b 
-%fecundity as a function of colony basal area (cm2) from Hall and Hughes 1996
+% fecundity as a function of colony basal area (cm2) from Hall and Hughes 1996
+% unit is number of larvae per colony
 fec = exp(fec_par_a + fec_par_b.*log(colony_area_m2_from.*10^4));
+% then convert to number of larvae produced per m2
 fec_m2 = fec./colony_area_m2_from; %convert from per colony area to per m2
-fec_m2_rel = fec_m2./ mean(fec_m2(:,3:6),2); %as a proportion of adult corals
-params.fec = reshape(fec_m2_rel', [], 1);
+%fec_m2_rel = fec_m2./ mean(fec_m2(:,3:6),2); %as a proportion of adult corals
+params.fec = reshape(fec_m2', [], 1);
+%params.fec = reshape(fec_m2_rel', [], 1);
 
 %% Mortality
 
