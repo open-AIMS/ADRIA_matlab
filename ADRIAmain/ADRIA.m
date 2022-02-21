@@ -301,6 +301,7 @@ classdef ADRIA < handle
             elseif endsWith(dhw_fn, ".nc")
                 d_scens = ncread(dhw_fn, "DHW");
                 d_scens = d_scens(1:obj.constants.tf, :, 1:nreps);
+
             end
 
             obj.dhw_scens = d_scens;
