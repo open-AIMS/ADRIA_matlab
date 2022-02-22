@@ -30,7 +30,7 @@ params.nsiteint = 5; % max number of sites we intervene on in a given year. May 
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
 % params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
 params.RCP = 45;  % RCP scenario to use
-
+params.prioritysites = []; % sites to prioritize when seeding or shading
 %% Environmental parameters
 params.beta = [1, 3]; % beta parameters for wave disturbance (distribution parameter)
 params.dhwmax25 = 5; % dhwmax at year 2025. NOTE: all warming simulations will change with new common DHW input for MDS team
