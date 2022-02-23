@@ -39,7 +39,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Set up connectivity
     nsites = height(site_data);
-    
+
     % Some sites are within the same grid cell for connectivity
     % Here, we find those sites and map the connectivity data
     % (e.g., repeat the relevant row/columns)
@@ -312,11 +312,11 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
-        Y = Y(end, :);  % get last step in ODE
         
+        % Using the last step from ODE above,
         % If any sites are above their maximum possible value,
         % proportionally adjust each entry so that their sum is <= P
-        Y = reshape(Y, nspecies, nsites);
+        Y = reshape(Y(end, :), nspecies, nsites);
         if any(sum(Y, 1) > e_P)
             idx = find(sum(Y, 1) > e_P);
             Ys = Y(:, idx);
@@ -328,9 +328,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
     
     % Assign to output variable
-    results = struct();
-    results.Y = Yout;
-    
+    results = struct('Y', Yout);
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
             results.seed_log = full(Yseed);
