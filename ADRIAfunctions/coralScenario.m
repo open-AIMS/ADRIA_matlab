@@ -39,7 +39,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Set up connectivity
     nsites = height(site_data);
-    
+
     % Some sites are within the same grid cell for connectivity
     % Here, we find those sites and map the connectivity data
     % (e.g., repeat the relevant row/columns)
@@ -112,6 +112,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0, 'maxcover', max_cover, 'area', site_data.area, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+    else
+        % set random seed based on selection of intervention parameters
+        % for repeatability
+        rng(int64(sum(interv{:, :}) + sum(criteria{:, :})))
     end
     
     %% A few hard-coded things here we need to convert to input variables
@@ -225,6 +229,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % total_cover = zeros(tf, nsites);
     end
 
+    max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
+    density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+    basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
+
     %% Running the model as pulse-impulsive
     % Loop for time steps
     for tstep = 2:tf
@@ -243,13 +251,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         
         % calculates scope for coral fedundity for each size class and at 
         % each site. Now using coral fecundity per m2 in 'coralSpec()'
-        fecundity_scope = fecundityScope(Y_pstep, coral_params, site_data); 
-
-%         max_settler_density_Acropora = 2.5; %unit m^-2, Bozec et al 2021 for Acropora
-%         max_settler_density_others = 1.5; %unit m^-2, Bozec et al 2021 for Acropora
-        max_settler_density = 2.0; %average of Acropora and others, Bozec 2021;
-        density_ratio_of_settlers_to_larvae = 1/2000; %Bozec et al. 2021
-        basal_area_per_settler = pi*((0.5/100)^2); % unit m2 assuming 1 cm diameter
+        fecundity_scope = fecundityScope(Y_pstep, coral_params, site_data);
         
         potential_settler_cover = max_settler_density * basal_area_per_settler ...
                                 * density_ratio_of_settlers_to_larvae;
@@ -327,11 +329,11 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
-        Y = Y(end, :);  % get last step in ODE
         
+        % Using the last step from ODE above,
         % If any sites are above their maximum possible value,
         % proportionally adjust each entry so that their sum is <= P
-        Y = reshape(Y, nspecies, nsites);
+        Y = reshape(Y(end, :), nspecies, nsites);
         if any(sum(Y, 1) > e_P)
             idx = find(sum(Y, 1) > e_P);
             Ys = Y(:, idx);
@@ -343,9 +345,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
     
     % Assign to output variable
-    results = struct();
-    results.Y = Yout;
-    
+    results = struct('Y', Yout);
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
             results.seed_log = full(Yseed);

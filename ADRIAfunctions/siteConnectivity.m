@@ -54,22 +54,23 @@ if isfolder(file_loc)
         full_paths(i) = fullfile(locs(i), fns(i));
     end
 
-    % Load first file to determine size
+    % Load first file to determine size (width/height)
     x = readtable(full_paths(1), 'PreserveVariableNames', true, 'ReadVariableNames', true);
+    
+    % Retrieve and sort by site ids
+    % This is to ensure identical indexes when matching up with spatial 
+    % site data, which will also be ordered by site id.
     site_ids = x{:, 1};
     x(:, 1) = []; % remove row ID column
-
-    % Reorder rows/columns to ensure identical indexes when matching up
-    % with ordered spatial data
-    [site_ids, order_idx] = sort(site_ids);
-    x = x(order_idx, order_idx);
+    [site_ids, order_idx] = sort(site_ids);  % reordering
+    x = x(order_idx, order_idx);  % enforce order
     
     site_ids = string(site_ids);
 
     [w, h] = size(x);
     
     data = zeros(length(full_paths), w, h);
-    data(1, :, :) = table2array(x);
+    data(1, :, :) = transpose(table2array(x));
     for fn_i = 2:length(full_paths)
         t_fn = full_paths(fn_i);
         x = readtable(t_fn, 'PreserveVariableNames', true, 'ReadVariableNames', true);

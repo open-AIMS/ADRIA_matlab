@@ -136,24 +136,23 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
         SE(:, 6) = A(:, 6); % coral real estate relative to max capacity
         SE(A(:, 6) <= 0, :) = []; % remove sites at maximum carrying capacity
     end
-    if sslog.shade
 
-    %% Shading filtered set
-    % define shading weights
-    wsh = [1, wtconshade, wtwaves, wtheat, wtpredecshade, wthicover];
-    wsh(2:end) = wsh(2:end) ./ sqrt(sum(wsh(2:end).^2));
-    SH(:, 1) = A(:, 1); % sites column (remaining)
-    SH(:, 2) = A(:, 2); % absolute centrality
-    SH(:, 3) = (1 - A(:, 3)); % complimentary of wave damage risk
-    SH(:, 4) = A(:, 4); % complimentary of heat damage risk
-    SH(:, 5) = A(:, 5); % priority predecessors
-    SH(:, 6) = (1 - A(:, 6)); % coral cover relative to max capacity
+    if sslog.shade
+        %% Shading filtered set
+        % define shading weights
+        wsh = [1, wtconshade, wtwaves, wtheat, wtpredecshade, wthicover];
+        wsh(2:end) = wsh(2:end) ./ sqrt(sum(wsh(2:end).^2));
+        SH(:, 1) = A(:, 1); % sites column (remaining)
+        SH(:, 2) = A(:, 2); % absolute centrality
+        SH(:, 3) = (1 - A(:, 3)); % complimentary of wave damage risk
+        SH(:, 4) = A(:, 4); % complimentary of heat damage risk
+        SH(:, 5) = A(:, 5); % priority predecessors
+        SH(:, 6) = (1 - A(:, 6)); % coral cover relative to max capacity
     end
+
     switch alg_ind
         case 1
-
             %% Order ranking
-
             % seeding rankings
             if sslog.seed
                 if isempty(SE)
@@ -181,12 +180,12 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
                 end
-
-                % reassign as input if not updated so matlab has output
             elseif ~sslog.seed 
-                    prefseedsites = prefseedsites;
-                    nprefseedsites = numel(prefseedsites);
+                % reassign as input if not updated so matlab has output
+                prefseedsites = prefseedsites;
+                nprefseedsites = numel(prefseedsites);
             end
+
             if sslog.shade
                 % shading rankings
                 wsh(all(SH == 0, 1)) = [];
@@ -257,6 +256,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 prefseedsites = prefseedsites;
                 nprefseedsites = numel(prefseedsites);
             end
+
             if sslog.shade 
                 % shading rankings
                 wsh(all(SH == 0, 1)) = [];
@@ -289,14 +289,13 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
                 nprefshadesites = numel(prefshadesites);
+            elseif ~sslog.shade
                 % reassign as input if not updated so matlab has output
-            elseif ~sslog.shade 
                 prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end
 
         case 3
-
             %% VIKOR
             % level of compromise (utility vs. regret). v = 0.5 is consensus, v<0.5
             % is minimal regret, v>0.5 is max group utility (majority rules)
@@ -344,6 +343,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 prefseedsites = prefseedsites;
                 nprefseedsites = numel(prefseedsites);
             end
+
             if sslog.shade
                 wsh(all(SH == 0, 1)) = [];
                 SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
@@ -376,8 +376,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
                 nprefshadesites = numel(prefshadesites);
+            elseif ~sslog.shade
                 % reassign as input if not updated so matlab has output
-            elseif ~sslog.shade 
                 prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end
@@ -427,11 +427,12 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     
                     seed_order = repmat(prefseedsites, 1, 2);
                 end
-                % reassign as input if not updated so matlab has output
             elseif ~sslog.seed 
+                % reassign as input if not updated so matlab has output
                 prefseedsites = prefseedsites;
                 nprefseedsites = numel(prefseedsites);
             end
+
             if sslog.shade
                 % shading rankings
                 wsh(all(SH == 0, 1)) = [];
@@ -463,8 +464,8 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 nprefshadesites = numel(prefshadesites);
                 
                 shade_order = repmat(prefshadesites, 1, 2);
+            elseif ~sslog.shade
                 % reassign as input if not updated so matlab has output
-            elseif ~sslog.shade 
                 prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end

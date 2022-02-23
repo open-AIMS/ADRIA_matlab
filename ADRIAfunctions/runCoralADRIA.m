@@ -88,7 +88,7 @@ if any(ismember("site_rankings", collect_logs))
     rankings = zeros(timesteps, nsites, 2, N, n_reps);
 end
 
-parfor i = 1:N
+for i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
     initial_cover = init_cov;
@@ -101,7 +101,7 @@ parfor i = 1:N
         initial_cover = repmat(c_params.basecov, 1, nsites);
     end
 
-    for j = 1:n_reps
+    parfor j = 1:n_reps
         res = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
