@@ -39,7 +39,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     site_ids = DMCDA_vars.site_ids;
     nsites = length(site_ids);
     nsiteint = DMCDA_vars.nsiteint;
-    prioritysites = DMCDA_vars.prioritysites;
+    prioritysites = DMCDA_vars.prioritysites(site_ids);
     strongpred = DMCDA_vars.strongpred(site_ids, :);
     centr = DMCDA_vars.centr(site_ids);
     damprob = DMCDA_vars.damprob(site_ids);
@@ -65,7 +65,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% Identify and assign key larval source sites for priority sites
     predec = zeros(nsites, 3);
     predec(:, 1:2) = strongpred;
-    predprior = predec(prioritysites, 2);
+    predprior = predec(prioritysites', 2);
     predprior(isnan(predprior)) = [];
     predec(predprior, 3) = 1;
 
