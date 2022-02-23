@@ -218,6 +218,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % total_cover = zeros(tf, nsites);
     end
 
+    max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
+    density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+    basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
+
     %% Running the model as pulse-impulsive
     % Loop for time steps
     for tstep = 2:tf
@@ -237,10 +241,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % calculates scope for coral fedundity for each size class and at 
         % each site
         fecundity_scope = fecundityScope(Y_pstep, coral_params); 
-
-        max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
-        density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
-        basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
         
         potential_settler_cover = max_settler_density * basal_area_per_settler ...
                                 * density_ratio_of_larvae_to_settlers;
