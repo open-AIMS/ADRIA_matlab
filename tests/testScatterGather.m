@@ -15,7 +15,7 @@ tmp_dir = strcat(parent_dir, '/', right_now, '/');
 mkdir(tmp_dir)
 
 % Number of scenarios
-N = 2;
+N = 8;
 num_reps = 50;  % Number of replicate RCP scenarios
 
 ai = ADRIA();
@@ -35,6 +35,11 @@ for p = 1:height(combined_opts)
     p_sel.(combined_opts.name{p}) = selection;
 end
 
+% p_sel = repmat(ai.raw_defaults, 8, 1);
+
+% Avoid GA approach
+p_sel.Guided(:) = [0; 1; 2; 3; 0; 1; 2; 3];
+
 % Load site specific connectivity data
 ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
 ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv')
@@ -51,8 +56,8 @@ try
     
     [~, ~, coral_params] = ai.splitParameterTable(p_sel);
     Yt_TC = collectMetrics(Y_true.Y, coral_params, {mean_TC});
-    Ytt = Yt_TC.mean_coralTaxaCover_x_p_total_cover_4;
-    Ytt = squeeze(mean(Ytt(end, :, :, :), 4));
+    tmp = Yt_TC.mean_coralTaxaCover_x_p_total_cover_4;
+    Ytt = squeeze(mean(tmp(end, :, :, :), 4));
 
     file_prefix = strcat(tmp_dir, 'test');
 
@@ -67,7 +72,8 @@ try
     scattered = concatMetrics(collated, "mean_coralTaxaCover_x_p_total_cover_4");
     scattered_TC = squeeze(mean(scattered(end, :, :, :), 4));
 
-    assert(isequal(Ytt, scattered_TC), "Results are not equal!")
+    assert(isequal(Ytt(:, 1), scattered_TC(:, 1)), "Results are not equal!")
+    assert(isequal(Ytt(:, 5), scattered_TC(:, 5)), "Results are not equal!")
     assert(all(all(scattered(:, :, 1, 1))), "Results were zeros!")
 
 catch err
