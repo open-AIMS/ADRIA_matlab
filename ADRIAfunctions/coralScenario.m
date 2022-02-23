@@ -112,6 +112,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0, 'maxcover', max_cover, 'area', site_data.area, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+    else
+        % set random seed based on selection of intervention parameters
+        % for repeatability
+        rng(int64(sum(interv{:, :}) + sum(criteria{:, :})))
     end
     
     seed1 = interv.Seed1*(pi*((2-1)/2)^2)/10^4/10^2; %tabular Acropora size class 2, converted to rel cover
