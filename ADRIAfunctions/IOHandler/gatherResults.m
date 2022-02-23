@@ -25,9 +25,15 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
     file_info = dir(pat);
     folder = file_info.folder;
 
+    % Get relevant input set
+    input_md_fi = dir(strcat(file_prefix, "*]]_inputs.nc"));
+    inputs = extractInputsUsed(strcat(input_md_fi.folder, "/", input_md_fi.name));
+    N = height(inputs);
+    clear inputs;
+
     % Store results in a cell array of structs
     % ds = datastore(target_files, "FileExtensions", ".nc", "Type", "file", "ReadFcn", @readDistributed);
-    i = 1;
+    Y_collated = repmat({0}, N, 1);
     for file = file_info'
         fn = file.name;
         full_path = fullfile(folder, fn);
@@ -35,27 +41,19 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
         
         b_start = md.record_start;
         b_len = md.n_sims;
-        Ytmp = repmat({0}, height(b_len), 1);
+        subset = b_start:(b_start+b_len-1);
         if isempty(metrics)
             % Collate raw results if no metrics specified
-            for j = 1:b_len
-                t = struct();
-                t.(target_var) = Ytable{j, :}{1};  % Extract from individual cell values
-                Ytmp{j, :} = t;
-            end
+            Y_collated(subset) = {struct(target_var, Ytable{:, :}{:})};
         else
-            cp_subset = coral_params(b_start:b_start+(b_len-1), :);
-            parfor j = 1:b_len
-                Ytmp{j} = collectMetrics(Ytable{j, :}{:}, cp_subset(j, :), metrics);
+            for j = 1:b_len
+                Y_collated(b_start-1+j) = {collectMetrics(...
+                    Ytable.(target_var){1}, ...
+                    coral_params(b_start-1+j, :), ...
+                    metrics)};
             end
         end
-        
-        Y_collated(b_start:(b_start+b_len)-1) = Ytmp;
-        
-        i = i + 1;
     end
-    
-    Y_collated = Y_collated';
 end
 
 
