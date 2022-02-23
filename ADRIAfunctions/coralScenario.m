@@ -124,11 +124,11 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     colony_area_seeded_corals = (pi*(diam_seeded_corals/2)^2)/10^4; %m2
     
     %size of the coral arena used when we define Seed1 and Seed2 (inputs) 
-    Aarena = 100;  %10m by 10m
+    A_arena = 100;  %10m by 10m
     
     %calculate what seeding rates correspond to in proportion of area added 
-    seed1 = interv.Seed1*colony_area_seeded_corals/Aarena; %tabular Acropora size class 2, converted to rel cover
-    seed2 = interv.Seed2*colony_area_seeded_corals/Aarena; %corymbose Acropora size class 2, converted to rel cover
+    seed1 = interv.Seed1*colony_area_seeded_corals/A_arena; %tabular Acropora size class 2, converted to rel cover
+    seed2 = interv.Seed2*colony_area_seeded_corals/A_arena; %corymbose Acropora size class 2, converted to rel cover
     %seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
     
     srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
@@ -230,7 +230,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     end
 
     max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
-    density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+    density_ratio_of_settlers_to_larvae = 1/2000; %Bozec et al. 2021
     basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
 
     %% Running the model as pulse-impulsive

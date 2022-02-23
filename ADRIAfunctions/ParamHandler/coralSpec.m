@@ -21,7 +21,11 @@ function params = coralSpec()
 %      & Roelfsema, C. (2021). 
 %        Baseline mapping to support reef restoration and resilience-based 
 %        management in the Whitsundays. 
+%
 %      https://doi.org/10.13140/RG.2.2.26976.20482
+% 3. Hall,V.R. & Hughes, T.P. 1996. Reproductive strategies of modular 
+%       organisms: comparative studies of reef-building corals. Ecology, 
+%       77: 950 - 963.
 
 % Below parameters pertaining to species are new. We now add size classes
 % to each coral species, but treat each coral size class as a 'species'.
@@ -144,9 +148,7 @@ fec_par_b = [1.28; 1.28; 1.05; 1.05; 1.21; 1.21]; %fecundity parameter b
 fec = exp(fec_par_a + fec_par_b.*log(colony_area_m2_from.*10^4));
 % then convert to number of larvae produced per m2
 fec_m2 = fec./colony_area_m2_from; %convert from per colony area to per m2
-%fec_m2_rel = fec_m2./ mean(fec_m2(:,3:6),2); %as a proportion of adult corals
 params.fec = reshape(fec_m2', [], 1);
-%params.fec = reshape(fec_m2_rel', [], 1);
 
 %% Mortality
 
