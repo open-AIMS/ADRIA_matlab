@@ -24,7 +24,7 @@ function params = simConstants()
 %          https://doi.org/10.13140/RG.2.2.26976.20482
 
 %% Base scenario parameters
-params.tf = 25; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
+params.tf = 50; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
 params.nsiteint = 5; % max number of sites we intervene on in a given year. May be updated in the intervention table
 
 params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
