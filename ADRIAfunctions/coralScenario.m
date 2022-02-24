@@ -44,7 +44,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Here, we find those sites and map the connectivity data
     % (e.g., repeat the relevant row/columns)
     [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
-    TP_data = TP_data(g_idx, g_idx);
+    TP_data = TP_data(g_idx, g_idx);  
 
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
@@ -100,7 +100,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
         depth_priority = site_data{depth_criteria, "recom_connectivity"};
 
-        max_cover = site_data.k/100.0; % Max coral cover at each site
+        max_cover = site_data.k/100.0; % Max coral cover at each site. Divided by 100 to convert to proportion  
 
         % pre-allocate prefseedsites, prefshadesites and rankings
         rankings = [depth_priority,zeros(length(depth_priority),1),zeros(length(depth_priority),1)];
@@ -118,8 +118,19 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         rng(int64(sum(interv{:, :}) + sum(criteria{:, :})))
     end
     
-    seed1 = interv.Seed1*(pi*((2-1)/2)^2)/10^4/10^2; %tabular Acropora size class 2, converted to rel cover
-    seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
+    %% A few hard-coded things here we need to convert to input variables
+    %sizes of corals seeded
+    diam_seeded_corals = 2; %cm
+    colony_area_seeded_corals = (pi*(diam_seeded_corals/2)^2)/10^4; %m2
+    
+    %size of the coral arena used when we define Seed1 and Seed2 (inputs) 
+    A_arena = 100;  %10m by 10m
+    
+    %calculate what seeding rates correspond to in proportion of area added 
+    seed1 = interv.Seed1*colony_area_seeded_corals/A_arena; %tabular Acropora size class 2, converted to rel cover
+    seed2 = interv.Seed2*colony_area_seeded_corals/A_arena; %corymbose Acropora size class 2, converted to rel cover
+    %seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
+    
     srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
@@ -219,7 +230,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     end
 
     max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
-    density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
+    density_ratio_of_settlers_to_larvae = 1/2000; %Bozec et al. 2021
     basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
 
     %% Running the model as pulse-impulsive
@@ -239,15 +250,17 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         Y_pstep = squeeze(full(Yout(p_step, :, :))); %dimensions: species and sites
         
         % calculates scope for coral fedundity for each size class and at 
-        % each site
-        fecundity_scope = fecundityScope(Y_pstep, coral_params); 
+        % each site. Now using coral fecundity per m2 in 'coralSpec()'
+        fecundity_scope = fecundityScope(Y_pstep, coral_params, site_data);
         
         potential_settler_cover = max_settler_density * basal_area_per_settler ...
-                                * density_ratio_of_larvae_to_settlers;
+                                * density_ratio_of_settlers_to_larvae;
         
-        rec = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
-        % rec = rec .* site_data.area';  % adjust for area DISABLED FOR NOW
+        rec_abs = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
 
+       % adjusting recruitment at each site by dividing by the area
+        rec = rec_abs ./ site_data.area';
+               
         %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
@@ -305,7 +318,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yin1 = Y_pstep .* prop_loss;
 
         if (tstep <= (seed_start_year+seedyears)) && ~all(prefseedsites == 0)
-            % Seed each site with the value indicated with seed1/seed2
+            % Seed each site with the value indicated with seed1 and/or seed2
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
             

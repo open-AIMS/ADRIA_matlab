@@ -66,8 +66,37 @@ Y = res.Y;
 
 [~, ~, coral_params] = ai.splitParameterTable(sample_table);
 
+E = coralEvenness(Y);
+SV = shelterVolume(Y, coral_params);
+TC_a = coralTaxaCover(Y);
+TC = TC_a.total_cover;
+juv = TC_a.juveniles;
 
 % ReefConditionIndex
-RCI_test = ReefConditionIndex(Y, @coralEvenness, @shelterVolume, @coralTaxaCover, coral_params);
+RCI_test = ReefConditionIndex(TC, E, SV, juv);
 
 assert(~all(all(all(all(RCI_test == 0.1)))), "All results were 0.1!")
+
+
+%% Test single scenario RCI result
+ai = ADRIA();
+ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
+ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv')
+
+sample_table = ai.sample_defaults;
+sample_table.Guided = 2;
+n_reps = 1;
+res = ai.run(sample_table, sampled_values=true, nreps=n_reps);
+Y = res.Y;  % get raw results, ignoring seed/shade logs
+
+[~, ~, coral_params] = ai.splitParameterTable(sample_table);
+
+E = coralEvenness(Y);
+SV = shelterVolume(Y, coral_params);
+TC_a = coralTaxaCover(Y);
+TC = TC_a.total_cover;
+juv = TC_a.juveniles;
+
+% ReefConditionIndex
+RCI_test = ReefConditionIndex(TC, E, SV, juv);
+
