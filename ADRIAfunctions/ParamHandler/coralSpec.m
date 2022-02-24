@@ -171,7 +171,7 @@ params.mb_rate = reshape(mb', [], 1);
 % Background rates of natural adaptation. User-defined natad rates will be 
 % added to these
 
-natad = repmat(0.00, 36, 1);
+natad = zeros(36, 1);
 params.natad = natad;
 
 % Estimated bleaching resistance (as DHW) relative to the assemblage 
