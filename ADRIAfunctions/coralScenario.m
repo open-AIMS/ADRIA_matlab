@@ -161,7 +161,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     LPDprm2 = sim_params.LPDprm2; % parameter offsetting LPD curve
 
     %% project wave mortality
-    mwaves = zeros(tf, nspecies, nsites);
+    mwaves = ndSparse(zeros(tf, nspecies, nsites));  % overwrite input
     
     % Disable wave mortality for now: Agreed on action for Feb deliverable
     % See email: Mon 24/01/2022 15:17 - RE: IPMF and ADRIA workflow for BC
@@ -201,14 +201,14 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% States at time = 1
     % Set base cover for all species, and initial population sizes
     % matrix in which to store the output
-    Yout = zeros(tf, nspecies, nsites);
+    Yout = ndSparse(zeros(tf, nspecies, nsites));
 
     % Set initial population sizes at tstep = 1
     Yout(1, :, :) = init_cov;
     
     % These logs need to be collected as part of the run
     Yshade = ndSparse(zeros(tf, nsites));
-    Yseed = ndSparse(zeros(tf, nspecies, nsites));
+    Yseed = ndSparse(zeros(tf, 2, nsites));  % only log seedable corals to save memory
 
     if any(strlength(collect_logs) > 0)
         % Optional logs
@@ -236,7 +236,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % for each species, site and year as a function of past heat exposure
         %LP_graph(tstep,:,:) = LPs
         
-        Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
+        Y_pstep = squeeze(full(Yout(p_step, :, :))); %dimensions: species and sites
         
         % calculates scope for coral fedundity for each size class and at 
         % each site
@@ -310,8 +310,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
             
             % Log seed values/sites
-            Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
-            Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+            Yseed(tstep, 1, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
+            Yseed(tstep, 2, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
         end
 
         % Run ODE for all species and sites
@@ -332,7 +332,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
     
     % Assign to output variable
-    results = struct('Y', Yout);
+    results = struct('Y', full(Yout));
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
             results.seed_log = full(Yseed);

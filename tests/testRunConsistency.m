@@ -1,4 +1,3 @@
-
 %% Test result consistency across random parameters
 
 % Test to check that ADRIA set up run using the "scatter-gather" pattern

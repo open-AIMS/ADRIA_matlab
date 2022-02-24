@@ -7,7 +7,7 @@ function interventions = interventionDetails(varargin)
 %    Argument list of parameters to override.
 %    Possible arguments (with [value range], default value):
 %      - Guided   : integer, [0, 1, 2, 3, 4], where 0 is unguided
-%      - Seed1    : integer, [0, 400], 100  
+%      - Seed1    : integer, [0, 400], 100
 %      - Seed2    : integer, [0, 400], 100
 %      - SRM      : float, [0, 12], 0
 %      - Aadpt    : float, [0, 12], 0

@@ -41,10 +41,18 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
         
         b_start = md.record_start;
         b_len = md.n_sims;
-        subset = b_start:(b_start+b_len-1);
         if isempty(metrics)
+            subset = b_start:(b_start+b_len-1);
+            Ytmp = repmat({0}, height(b_len), 1);
+
             % Collate raw results if no metrics specified
-            Y_collated(subset) = {struct(target_var, Ytable{:, :}{:})};
+            for j = 1:b_len
+                % Extract from individual cell values
+                Ytmp{j, :} = struct(target_var, Ytable{j, :}{1});
+            end
+            
+            Y_collated(subset) = Ytmp;
+            % Y_collated(subset) = {struct(target_var, Ytable{:, :}{:})};
         else
             for j = 1:b_len
                 Y_collated(b_start-1+j) = {collectMetrics(...
