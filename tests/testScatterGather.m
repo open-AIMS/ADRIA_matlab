@@ -16,7 +16,7 @@ mkdir(tmp_dir)
 
 % Number of scenarios
 N = 8;
-num_reps = 50;  % Number of replicate RCP scenarios
+num_reps = 3;  % Number of replicate RCP scenarios
 
 ai = ADRIA();
 rd = ai.raw_defaults;
