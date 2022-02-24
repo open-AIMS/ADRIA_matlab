@@ -206,7 +206,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% States at time = 1
     % Set base cover for all species, and initial population sizes
     % matrix in which to store the output
-    Yout = ndSparse(zeros(tf, nspecies, nsites));
+    Yout = zeros(tf, nspecies, nsites);
 
     % Set initial population sizes at tstep = 1
     Yout(1, :, :) = init_cov;
@@ -244,7 +244,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % for each species, site and year as a function of past heat exposure
         %LP_graph(tstep,:,:) = LPs
         
-        Y_pstep = squeeze(full(Yout(p_step, :, :))); %dimensions: species and sites
+        Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
         
         % calculates scope for coral fedundity for each size class and at 
         % each site. Now using coral fecundity per m2 in 'coralSpec()'
@@ -339,7 +339,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
     
     % Assign to output variable
-    results = struct('Y', full(Yout));
+    results = struct('Y', Yout);
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
             results.seed_log = full(Yseed);
