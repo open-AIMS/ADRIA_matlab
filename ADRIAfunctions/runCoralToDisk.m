@@ -102,7 +102,7 @@ parfor b_i = 1:n_batches
     b_cp = b_coralp{b_i};
     
     % Create batch cache
-    raw = zeros(timesteps, nspecies, nsites, b_len, n_reps);
+    raw = ndSparse(zeros(timesteps, nspecies, nsites, b_len, n_reps));
     
     % Create empty log cache, otherwise matlab complains about
     % uninitialized temporary variables
@@ -164,9 +164,7 @@ parfor b_i = 1:n_batches
     end
     
     % save results
-    tmp_d = struct();
-    tmp_d.all = raw;
-    
+    tmp_d = struct('all', full(raw));
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
             tmp_d.seed_log = full(seed_log);
