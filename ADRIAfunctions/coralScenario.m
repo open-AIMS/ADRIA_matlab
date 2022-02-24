@@ -226,6 +226,9 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
     density_ratio_of_settlers_to_larvae = 1/2000; %Bozec et al. 2021
     basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
+    
+    potential_settler_cover = max_settler_density * basal_area_per_settler ...
+                                * density_ratio_of_settlers_to_larvae;
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
@@ -247,12 +250,9 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % each site. Now using coral fecundity per m2 in 'coralSpec()'
         fecundity_scope = fecundityScope(Y_pstep, coral_params, site_data);
         
-        potential_settler_cover = max_settler_density * basal_area_per_settler ...
-                                * density_ratio_of_settlers_to_larvae;
-        
         rec_abs = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
 
-       % adjusting recruitment at each site by dividing by the area
+        % adjusting recruitment at each site by dividing by the area
         rec = rec_abs ./ site_data.area';
                
         %% Setup MCDA before bleaching season
