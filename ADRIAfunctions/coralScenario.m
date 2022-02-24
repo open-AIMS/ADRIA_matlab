@@ -40,12 +40,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     %% Set up connectivity
     nsites = height(site_data);
 
-    % Some sites are within the same grid cell for connectivity
-    % Here, we find those sites and map the connectivity data
-    % (e.g., repeat the relevant row/columns)
-    [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
-    TP_data = TP_data(g_idx, g_idx);  
-
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
     

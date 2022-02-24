@@ -83,6 +83,15 @@ end
 clear('intervs')
 clear('crit_weights')
 
+% Some sites are within the same grid cell for connectivity
+% Here, we find those sites and map the connectivity data
+% (e.g., repeat the relevant row/columns)
+[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+TP_data = TP_data(g_idx, g_idx);
+
+w_scen_ss = wave_scen(:, :, 1:n_reps);
+d_scen_ss = dhw_scen(:, :, 1:n_reps);
+
 parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
@@ -137,8 +146,8 @@ parfor b_i = 1:n_batches
         end
 
         for j = 1:n_reps
-            w_scen = wave_scen(:, :, j);
-            d_scen = dhw_scen(:, :, j);
+            w_scen = w_scen_ss(:, :, j);
+            d_scen = d_scen_ss(:, :, j);
             res = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
