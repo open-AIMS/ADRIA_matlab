@@ -70,6 +70,8 @@ try
     % Collect all data
     collated = ai.gatherResults(file_prefix, {mean_TC});
     scattered = concatMetrics(collated, "mean_coralTaxaCover_x_p_total_cover_4");
+    % collated = ai.gatherResults(file_prefix);
+    % scattered = concatMetrics(collated, "all");
     scattered_TC = squeeze(mean(scattered(end, :, :, :), 4));
 
     assert(isequal(Ytt(:, 1), scattered_TC(:, 1)), "Results are not equal!")
