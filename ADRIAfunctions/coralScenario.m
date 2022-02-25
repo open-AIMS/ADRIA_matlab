@@ -350,7 +350,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
         
         if any(ismember("site_rankings", collect_logs))
-            results.MCDA_rankings = full(site_rankings);
+            results.site_rankings = full(site_rankings);
         end
     end
 end

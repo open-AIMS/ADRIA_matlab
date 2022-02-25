@@ -445,7 +445,8 @@ classdef ADRIA < handle
             tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
             
             if exist(tmp_fn, "file")
-                error("Input file already exists. Aborting runs to avoid overwriting.")
+                warning("Input file already exists. Aborting runs to avoid overwriting.")
+                return
             end
             
             tmp = struct('input_parameters', table2array(X));
