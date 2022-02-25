@@ -8,7 +8,7 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
 %   coral_params : table, coral parameters used in all runs
 %   metrics      : cell, array of functions to apply. If none provided, 
 %                    collates the raw results instead.
-%   target_var   : str, variable to collate (returns everything if not
+%   target_var   : str, variable to collate (returns raw results if not
 %                    specified)
 %
 % Output:
@@ -37,6 +37,7 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
     for file = file_info'
         fn = file.name;
         full_path = fullfile(folder, fn);
+        
         [Ytable, md] = readDistributed(full_path, target_var);
         
         b_start = md.record_start;
@@ -56,7 +57,7 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
         else
             for j = 1:b_len
                 Y_collated(b_start-1+j) = {collectMetrics(...
-                    Ytable.(target_var){1}, ...
+                    Ytable.(target_var){j}, ...
                     coral_params(b_start-1+j, :), ...
                     metrics)};
             end
@@ -77,34 +78,78 @@ function [result, md] = readDistributed(filename, target_var)
     md = getADRIARunMetadata(filename);
 
     % Extract variable names and datatypes
-    var_names = string({fileInfo.Variables.Name});
-    
-    n_vars = length(var_names);
-    result = table();
-    nsims = md.n_sims;
-    for v = 1:n_vars
-        var_n = var_names{v};
-        if var_n ~= target_var
-            % skip logs for now...
-            % we'd need to restructure the return type to be a struct
-            % or add a flag indicating what result set (raw or logs) is 
-            % desired...
-            continue
+    try
+        var_names = string({fileInfo.Variables.Name});
+        is_group = false;
+    catch ME
+        if strcmp("MATLAB:structRefFromNonStruct", ME.identifier)
+            is_group = true;
+        else
+            rethrow(ME)
         end
-        result.(var_n) = repmat({0}, nsims, 1);
-        tmp = ncread(filename, var_n);
-        dim_len = ndims(tmp);
-        switch dim_len
-            case 5
-                for i = 1:nsims
-                    result(i, var_n) = {tmp(:, :, :, i, :)};
-                end
-            case 4
-                for i = 1:nsims
-                    result(i, var_n) = {tmp(:, :, i, :)};
-                end
-            otherwise
-                error("Unexpected number of dims in result file");
+    end
+    
+    nsims = md.n_sims;
+    result = table();
+    result.(target_var) = repmat({0}, nsims, 1);
+    
+    if ~is_group
+        % Handle older result structure where results were ungrouped
+        n_vars = length(var_names);
+        for v = 1:n_vars
+            var_n = var_names{v};
+            if var_n ~= target_var
+                % skip logs for now...
+                % we'd need to restructure the return type to be a struct
+                % or add a flag indicating what result set (raw or logs) is 
+                % desired...
+                continue
+            end
+
+            tmp = ncread(filename, var_n);
+            dim_len = ndims(tmp);
+            switch dim_len
+                case 5
+                    for i = 1:nsims
+                        result(i, var_n) = {tmp(:, :, :, i, :)};
+                    end
+                case 4
+                    for i = 1:nsims
+                        result(i, var_n) = {tmp(:, :, i, :)};
+                    end
+                otherwise
+                    error("Unexpected number of dims in result file");
+            end
+        end
+        
+        return
+    end
+
+    % Handle cases where results were grouped
+    vars = fileInfo.Groups.Variables;
+    nsims = md.n_sims;
+    for run_id = 1:nsims
+        grp_name = strcat("run_", num2str(run_id));
+        for v = 1:length(vars)
+            var_name = vars(v).Name;
+            if var_name ~= target_var
+                continue
+            end
+
+            entry = strcat('/', grp_name, '/', var_name);
+            tmp = ncread(filename, entry);
+            
+            % ismember(var_name, result.Properties.VariableNames)
+            % result.(var_name) = repmat({0}, nsims, 1);
+
+            switch ndims(tmp)
+                case 5
+                    result(run_id, var_name) = {tmp(:, :, :, 1, :)};
+                case 4
+                    result(run_id, var_name) = {tmp(:, :, 1, :)};
+                otherwise
+                    error("Unexpected number of dims in result file");
+            end
         end
     end
 end
