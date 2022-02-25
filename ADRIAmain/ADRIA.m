@@ -320,6 +320,7 @@ classdef ADRIA < handle
             obj.wave_scens = w_scens;
         end
 
+
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
                                                 alg, sslog, initcovcol, ...
                                                 dhwfilepath)

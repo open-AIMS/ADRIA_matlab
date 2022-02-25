@@ -15,7 +15,7 @@ param_table = ai.raw_defaults;
 
 %% parameter combos as per deliv specifications
 guided = [0,1];
-% srm ?
+srm =0;
 natad = [0,0.05];
 aadt = [0,4,8];
 seed1 = [0,200,400];
@@ -26,24 +26,17 @@ seedstartyr = [2,6,11,16];
 shadestartyr = [2,6,11,16];
 seedyrs = [5,10];
 shadeyrs = [5,10];
-params = cell(1,12);
-params{1} = guided;
-params{2} = seed1;
-params{3} = seed2;
-params{4} = 0;
-params{5} = aadt;
-params{6} = natad;
-params{7} = seedyrs;
-params{8} = shadeyrs;
-params{9} = seedfreq;
-params{10} = shadefreq;
-params{11} = seedstartyr;
-params{12} = shadestartyr;
 
-perm_table = createPermTable(params);
+params_table = table(guided,seed1,seed2,srm,natad,aadt,seedyrs,shadeyrs, seedfreq,...
+    shadefreq,seedstartyr,shadestartyr);
+
+perm_table = createPermutationTable(params_table);
 % add repettions of remainding variables
-perm_table = [perm_table, repmat(table2array(param_table(1,13:end)),size(perm_table,1),1)];;
-param_table_mod = array2table(perm_table,VariableNames = param_table.Properties.VariableNames);
+% perm_table = [perm_table, repmat(table2array(param_table(1,13:end)),size(perm_table,1),1)];;
+% param_table_mod = array2table(perm_table,VariableNames = param_table.Properties.VariableNames);
+ignore_cols = ["1","2","3","4","5","6","7","8","9","10","11","13","13"];
+
+perm_table_new = ai.setParameterValues(perm_table, ignore=ignore_cols, partial=true);
 %% 3. Modify table as desired...
 
 % If running multiple scenarios, specify the values for each run
