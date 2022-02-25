@@ -94,7 +94,6 @@ end
 [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
 TP_data = TP_data(g_idx, g_idx);
 
-
 parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
