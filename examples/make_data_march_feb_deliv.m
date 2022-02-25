@@ -31,12 +31,16 @@ params_table = table(guided,seed1,seed2,srm,natad,aadt,seedyrs,shadeyrs, seedfre
     shadefreq,seedstartyr,shadestartyr);
 
 perm_table = createPermutationTable(params_table);
+
+% Get column names
+col_names = param_table.Properties.VariableNames;
+ignore_cols = convertCharsToStrings(col_names(find(~ismember(col_names,["Guided","Seed1","Seed2","SRM","Aadpt","Natad","Seedyrs","Shadeyrs","Seedfreq","Shadefreq","Seedyr_start","Shadeyr_start"]))))
 % add repettions of remainding variables
 % perm_table = [perm_table, repmat(table2array(param_table(1,13:end)),size(perm_table,1),1)];;
 % param_table_mod = array2table(perm_table,VariableNames = param_table.Properties.VariableNames);
-ignore_cols = ["1","2","3","4","5","6","7","8","9","10","11","13","13"];
 
-perm_table_new = ai.setParameterValues(perm_table, ignore=ignore_cols, partial=true);
+
+perm_table_new = ai.setParameterValues(perm_table, ignore=ignore_cols', partial=true);
 %% 3. Modify table as desired...
 
 % If running multiple scenarios, specify the values for each run
