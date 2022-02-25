@@ -56,7 +56,7 @@ ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_pro
 
 
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
-bsize = 32;
+bsize = 128;
 n_reps = 50;
 
 tic
