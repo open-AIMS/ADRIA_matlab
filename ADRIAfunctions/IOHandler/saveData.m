@@ -53,7 +53,7 @@ function saveData(data, filename, nc_settings)
         nc_settings.var_name string
         nc_settings.dim_spec cell
         nc_settings.attributes struct = struct()
-        nc_settings.compression {mustBeNumeric} = 4
+        nc_settings.compression {mustBeInteger} = 6
         nc_settings.group string = ""
     end
         
@@ -117,19 +117,40 @@ function saveData(data, filename, nc_settings)
             for i = 1:n_vars
                 tmp_fn = f_names{i};  % fieldname
                 t_data = data.(tmp_fn);
-                [x, y, z, v, w] = size(t_data);
-                
+
                 if strlength(group_name) > 0
-                    grp_fn = strcat('/', group_name, '/', tmp_fn);
+                    if ~startsWith(group_name, '/')
+                        grp_fn = strcat('/', group_name, '/', tmp_fn);
+                    else
+                        grp_fn = strcat(group_name, '_', tmp_fn);
+                    end
                 else
                     grp_fn = tmp_fn;
                 end
 
-                nccreate(filename, grp_fn, 'Dimensions', ...
-                    {[tmp_fn '_x'], x, [tmp_fn '_y'], y, ...
-                     [tmp_fn '_z'], z, [tmp_fn '_v'], v, ...
-                     [tmp_fn '_w'], w}, 'DeflateLevel', c_level, 'Format', 'netcdf4');
-                ncwrite(filename, grp_fn, t_data);
+                dtype = class(t_data);
+                switch dtype
+                    case {'double', 'single'}
+                        [x, y, z, v, w] = size(t_data);
+
+                        nccreate(filename, grp_fn, 'Dimensions', ...
+                            {[tmp_fn '_x'], x, [tmp_fn '_y'], y, ...
+                             [tmp_fn '_z'], z, [tmp_fn '_v'], v, ...
+                             [tmp_fn '_w'], w}, 'DeflateLevel', c_level, 'Format', 'netcdf4');
+                        ncwrite(filename, grp_fn, t_data);
+                    case {'char', 'string'}
+                        vlen = length(t_data);
+                        nccreate(filename, grp_fn,...
+                            'Datatype', dtype,...
+                            'Dimensions', {[tmp_fn '_x'] vlen},.....
+                            'format', ncfiletype);
+                        ncwrite(filename, grp_fn, t_data);
+                    case 'struct'
+                        new_settings = nc_settings;
+                        new_settings.group = grp_fn;
+                        
+                        saveData(t_data, filename, group=grp_fn);
+                end
             end
         end
         

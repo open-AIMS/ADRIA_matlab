@@ -2,7 +2,8 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               TP_data, site_ranks, strongpred, ...
                               init_cov, ...
                               n_reps, wave_scen, dhw_scen, site_data, ...
-                              collect_logs, file_prefix, batch_size)
+                              collect_logs, file_prefix, batch_size, ...
+                              metrics)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,6 +22,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %                    storing in memory.
 %    batch_size : int, size of simulation batches to run/save when writing
 %                    to disk.
+%    metrics : cell, of function handles
 %
 % Output:
 %    results : struct,
@@ -171,7 +173,12 @@ parfor b_i = 1:n_batches
         end
         
         % save results
-        tmp_d = struct("all", raw);
+        if isempty(metrics)
+            tmp_d = struct("all", raw);
+        else
+            tmp_d = collectMetrics(raw, coral_params, metrics);
+        end
+        
         if any(strlength(collect_logs) > 0)
             if any(ismember("seed", collect_logs))
                 tmp_d.seed_log = seed_log;

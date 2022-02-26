@@ -55,11 +55,29 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
             Y_collated(subset) = Ytmp;
             % Y_collated(subset) = {struct(target_var, Ytable{:, :}{:})};
         else
-            for j = 1:b_len
-                Y_collated(b_start-1+j) = {collectMetrics(...
-                    Ytable.(target_var){j}, ...
-                    coral_params(b_start-1+j, :), ...
-                    metrics)};
+            var_names = string(Ytable.Properties.VariableNames);
+            if (target_var == "all") && ~ismember(target_var, var_names)
+                result_var_names = string(Ytable.Properties.VariableNames);
+                for v = 1:length(var_names)
+                    vname = var_names(v);
+                    for j = 1:b_len
+                        if ismember(vname, result_var_names)
+                            Y_collated(b_start-1+j) = {table2struct(Ytable(j, var_names))};
+                        else
+                            Y_collated(b_start-1+j) = {collectMetrics(...
+                                Ytable.(vname){j}, ...
+                                coral_params(b_start-1+j, :), ...
+                                metrics)};
+                        end
+                    end
+                end
+            else
+                for j = 1:b_len
+                    Y_collated(b_start-1+j) = {collectMetrics(...
+                        Ytable.(target_var){j}, ...
+                        coral_params(b_start-1+j, :), ...
+                        metrics)};
+                end
             end
         end
     end
@@ -91,8 +109,7 @@ function [result, md] = readDistributed(filename, target_var)
     
     nsims = md.n_sims;
     result = table();
-    result.(target_var) = repmat({0}, nsims, 1);
-    
+
     if ~is_group
         % Handle older result structure where results were ungrouped
         n_vars = length(var_names);
@@ -128,25 +145,59 @@ function [result, md] = readDistributed(filename, target_var)
     % Handle cases where results were grouped
     vars = fileInfo.Groups.Variables;
     nsims = md.n_sims;
-    for run_id = 1:nsims
-        grp_name = strcat("run_", num2str(run_id));
+    
+    if (target_var == "all") && ~ismember(target_var, string({vars.Name}))
         for v = 1:length(vars)
             var_name = vars(v).Name;
-            if var_name ~= target_var
-                continue
-            end
+            result.(var_name) = repmat({0}, nsims, 1);
+            for run_id = 1:nsims
+                grp_name = strcat("run_", num2str(run_id));
 
-            entry = strcat('/', grp_name, '/', var_name);
+                entry = strcat('/', grp_name, '/', var_name);
+                tmp = ncread(filename, entry);
+                
+                switch ndims(tmp)
+                    case 5
+                        result(run_id, var_name) = {tmp(:, :, :, 1, :)};
+                    case 4
+                        result(run_id, var_name) = {tmp(:, :, 1, :)};
+                    case 3
+                        result(run_id, var_name) = {tmp};
+                    otherwise
+                        error("Unexpected number of dims in result file");
+                end
+            end
+        end
+    elseif ismember(target_var, string({vars.Name}))
+        result.(target_var) = repmat({0}, nsims, 1);
+        for run_id = 1:nsims
+            grp_name = strcat("run_", num2str(run_id));
+            entry = strcat('/', grp_name, '/', target_var);
             tmp = ncread(filename, entry);
-            
-            % ismember(var_name, result.Properties.VariableNames)
-            % result.(var_name) = repmat({0}, nsims, 1);
 
             switch ndims(tmp)
                 case 5
-                    result(run_id, var_name) = {tmp(:, :, :, 1, :)};
+                    result(run_id, target_var) = {tmp(:, :, :, 1, :)};
                 case 4
-                    result(run_id, var_name) = {tmp(:, :, 1, :)};
+                    result(run_id, target_var) = {tmp(:, :, 1, :)};
+                case 3
+                    result(run_id, target_var) = {tmp};
+                otherwise
+                    error("Unexpected number of dims in result file");
+            end
+        end
+    elseif target_var == "all"
+        result.(target_var) = repmat({0}, nsims, 1);
+        for run_id = 1:nsims
+            grp_name = strcat("run_", num2str(run_id));
+            entry = strcat('/', grp_name, '/', 'all');
+            tmp = ncread(filename, entry);
+
+            switch ndims(tmp)
+                case 5
+                    result(run_id, "all") = {tmp(:, :, :, 1, :)};
+                case 4
+                    result(run_id, "all") = {tmp(:, :, 1, :)};
                 otherwise
                     error("Unexpected number of dims in result file");
             end
