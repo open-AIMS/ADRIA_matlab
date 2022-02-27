@@ -74,6 +74,7 @@ try
     % scattered = concatMetrics(collated, "all");
     scattered_TC = squeeze(mean(scattered(end, :, :, :), 4));
 
+    assert(isequal(Ytt, scattered_TC), "Results are not equal!")
     assert(isequal(Ytt(:, 1), scattered_TC(:, 1)), "Results are not equal!")
     assert(isequal(Ytt(:, 5), scattered_TC(:, 5)), "Results are not equal!")
     assert(all(all(scattered(:, :, 1, 1))), "Results were zeros!")

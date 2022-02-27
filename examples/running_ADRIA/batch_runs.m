@@ -53,7 +53,7 @@ desired_metrics = {@coralTaxaCover, ...
 Y = ai.gatherResults('./Outputs/example_multirun', desired_metrics);
 
 % Collect logged values from raw result set
-Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "MCDA_rankings");
+Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "site_rankings");
 
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
@@ -72,7 +72,7 @@ title('Mean Total Coral Cover across all simulations');
 xlabel('Site');
 
 % Extract site rankings for shading
-rankings = concatMetrics(Y_rankings, "MCDA_rankings");
+rankings = concatMetrics(Y_rankings, "site_rankings");
 figure;
 barh(siteRanking(rankings, "shade"));
 title('Site Rankings for Shading');
