@@ -60,7 +60,7 @@ desired_metrics = {@coralEvenness, ...
 Y = ai.gatherResults(file_prefix, desired_metrics);
 
 % Get the logged site rankings as well
-Y_rankings = ai.gatherResults(file_prefix, {}, "MCDA_rankings");
+Y_rankings = ai.gatherResults(file_prefix, {}, "site_rankings");
 
 % Total coral cover
 TC = concatMetrics(Y, "coralTaxaCover_x_p_total_cover");
@@ -105,7 +105,7 @@ problem_stats = rmmissing(problem_stats);
 
 % Raise error if any fields have an unexpected number of dimensions
 if ~isempty(problem_stats)
-    error(strcat(msg, problem_stats));
+    error(strcat(msg, strjoin(problem_stats, ", ")));
 end
 
 try
