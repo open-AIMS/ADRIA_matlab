@@ -12,7 +12,8 @@ criteria.shade_priority = 1;
 criteria.depth_min = 0;
 
 %% Connectivity
-connectivity_file = './Inputs/Cairns/Connectivity/Cairns_connectivity_2014.csv';
+cyear = 2014;
+connectivity_file = sprintf('./Inputs/Cairns/Connectivity/Cairns_connectivity_%4.0f.csv',cyear);
 ai.loadConnectivity(connectivity_file, cutoff=0.1);
 
 %% Site Data
@@ -22,13 +23,13 @@ area = sdata.area;
 nsites = length(area);
 reef_siteid = 1:nsites;
 reef_siteid = reef_siteid';
-k = repmat(0.7,nsites,1);
+k = repmat(70,nsites,1);
 recom_connectivity = reef_siteid;
-IC = load("ReefModInitialCoverCairns.mat").cover;
-sitedepth = ones(nsites,1);;
-sitedata_tab = table(reef_siteid,area,k,IC,sitedepth,recom_connectivity)
+TC = load("ReefModInitialCoverCairns.mat").cover*100;
+sitedepth = -1*ones(nsites,1);;
+sitedata_tab = table(reef_siteid,area,k,TC,sitedepth,recom_connectivity);
 writetable(sitedata_tab,'./Inputs/Cairns/Site_data/CairnsSiteData.csv');
-ai.loadSiteData('./Inputs/Cairns/Site_data/CairnsSiteData.csv',['IC']);
+ai.loadSiteData('./Inputs/Cairns/Site_data/CairnsSiteData.csv',['TC']);
 
 %% DHW data
 tf = 92;
@@ -41,42 +42,11 @@ dhw_dat60 = "ReefModBleachMortCairnsRCP60.mat";
 damprob = "ReefModCycMortCairns.mat";
 tstep = 1;
 
-%% Ranking calcs RCP 26
-sslog = struct('seed',true,'shade',true)
-store_seed_rankings_Order26 = zeros(nreps,nsites,2);
-store_seed_rankings_TOPSIS26 = zeros(nreps,nsites,2);
-store_seed_rankings_VIKOR26 = zeros(nreps,nsites,2);
-% site_id, seeding rank, shading rank
-rankings = [sites', zeros(nsites, 1), zeros(nsites, 1)];
-prefseedsites = zeros(nsiteint,1);
-prefshadesites = zeros(nsiteint,1);
-
-for l = 1:nreps
-    dhw_step = dhw_scen26(tstep,:,l);
-    heatstressprob = dhw_step';
-
-    dMCDA_vars = struct('site_ids', sites, 'nsiteint', nsiteint, 'prioritysites', [], ...
-                'strongpred', strong_pred, 'centr', centr, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
-                'sumcover', IC.cover,'maxcover', k, 'area',area,'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
-                'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
-                'wtpredecshade', wtpredecshade);
-    
-    [~, ~, ~, ~, rankingsalg1] = ADRIA_DMCDA(dMCDA_vars, 1, sslog,prefseedsites,prefshadesites,rankings);
-    [~, ~, ~, ~, rankingsalg2] = ADRIA_DMCDA(dMCDA_vars, 2, sslog,prefseedsites,prefshadesites,rankings);
-    [~, ~, ~, ~, rankingsalg3] = ADRIA_DMCDA(dMCDA_vars, 3, sslog,prefseedsites,prefshadesites,rankings);
-    store_seed_rankings_Order26(l,:,:) = rankingsalg1(:,2:end);
-    store_seed_rankings_TOPSIS26(l,:,:) = rankingsalg2(:,2:end);
-    store_seed_rankings_VIKOR26(l,:,:) = rankingsalg3(:,2:end);
-end
-
-siteranks_Order26 = siteRanking(store_seed_rankings_Order26,"seed");
-siteranks_TOPSIS26 = siteRanking(store_seed_rankings_TOPSIS26,"seed");
-siteranks_VIKOR26 = siteRanking(store_seed_rankings_VIKOR26,"seed");
-
 %% Rnaking variables
-sslog = struct('seed',true,'shade',true)
+nsiteint = ai.constants.nsiteint;
+sslog = struct('seed',true,'shade',true);
 % site_id, seeding rank, shading rank
-rankings = [sites', zeros(nsites, 1), zeros(nsites, 1)];
+rankings = [reef_siteid, zeros(nsites, 1), zeros(nsites, 1)];
 prefseedsites = zeros(nsiteint,1);
 prefshadesites = zeros(nsiteint,1);
 
@@ -112,3 +82,13 @@ rankings_mat_RCP60_alg3 = ai.siteSelection(criteria,tstep,n_reps,3,sslog,init_co
 mean_ranks_seed_RCP60_alg1 = siteRanking(rankings_mat_RCP60_alg1(:,:,2:end),'seed');
 mean_ranks_seed_RCP60_alg2 = siteRanking(rankings_mat_RCP60_alg2(:,:,2:end),'seed');
 mean_ranks_seed_RCP60_alg3 = siteRanking(rankings_mat_RCP60_alg3(:,:,2:end),'seed');
+
+%% Saving ranks
+filename = sprintf('./Outputs/Rankings_RCPs264560_connectivity%4.0f.xlsx',cyear);
+T = table(reef_siteid,mean_ranks_seed_RCP26_alg1,mean_ranks_seed_RCP26_alg2,mean_ranks_seed_RCP26_alg3,...
+    mean_ranks_seed_RCP45_alg1,mean_ranks_seed_RCP45_alg2,mean_ranks_seed_RCP45_alg3,...
+    mean_ranks_seed_RCP60_alg1,mean_ranks_seed_RCP60_alg2,mean_ranks_seed_RCP60_alg3);
+T.Properties.VariableNames ={'Site','Order, RCP 26', 'TOPSIS, RCP 26', 'VIKOR, RCP 26',...
+                            'Order, RCP 45', 'TOPSIS, RCP 45', 'VIKOR, RCP 45',...
+                            'Order, RCP 60', 'TOPSIS, RCP 60', 'VIKOR, RCP 60'};
+writetable(T,filename,'Sheet','Site ranks no cover filtering');

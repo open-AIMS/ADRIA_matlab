@@ -295,6 +295,7 @@ classdef ADRIA < handle
                 sslog struct
                 initcovcol string
                 dhwfilepath string
+                wavefilepath string
             end
             
             % Check site data and connectivity loaded
@@ -349,8 +350,10 @@ classdef ADRIA < handle
                 prefshadesites = zeros(1,nsiteint);
                 dhw_step = dhw_scen(1,:,l);
                 heatstressprob = dhw_step';
+                w_step = w_scens(1,:,l);
+                damprob = w_step';
                 dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
-                    'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', w_scens(:,l), 'heatstressprob', heatstressprob, ...
+                    'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
                     'sumcover', sumcover,'maxcover', max_cover, 'area',area,'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                     'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', ...
                     wtpredecseed, 'wtpredecshade', wtpredecshade);
