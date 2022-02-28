@@ -1,7 +1,7 @@
 
 
 %% Connectivity
-connectivity_file = './Inputs/Cairns/Connectivity/Cairns_connectivity_2011.xlsx';
+connectivity_file = './Inputs/Cairns/Connectivity/Cairns_connectivity_2014.xlsx';
 [TP_data, site_ranks, strong_pred, site_ids] = siteConnectivity(connectivity_file, 0.1);
 
 %% Site Data
@@ -9,7 +9,7 @@ sdata = load('./Inputs/Cairns/Site_data/Cairns_reef_data.mat');
 area = sdata.area;
 centr = site_ranks.C1;
 nsites = length(area);
-k = repmat(0.7,1,nsites-1);
+k = repmat(0.7,1,nsites);
 
 %% Initial Coral Cover
 IC = load("ReefModInitialCoverCairns.mat");
