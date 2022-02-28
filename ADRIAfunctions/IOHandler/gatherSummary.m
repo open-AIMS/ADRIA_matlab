@@ -1,22 +1,16 @@
-function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
-% Gather results for a given set of metrics from ADRIA runs spread across 
-% many NetCDF files.
+function collated_mets = gatherSummary(file_loc, target_var)
+% Gather summary statistics of results saved across many NetCDF files.
 %
 % Inputs:
 %   file_loc     : str, directory location and filename prefix
 %                   e.g., "./some_folder/file_prefix"
-%   coral_params : table, coral parameters used in all runs
-%   metrics      : cell, array of functions to apply. If none provided, 
-%                    collates the raw results instead.
-%   target_var   : str, variable to collate (returns raw results if not
+%   target_var   : str, variable to collate (returns all results if not
 %                    specified)
 %
 % Output:
-%    Y_collated : cell, of structs for each run, with fieldnames for each metric.
+%    collated_mets : struct, of summary stats for each metric across time (tf) and space (nsites).
     arguments
         file_loc string
-        coral_params table
-        metrics cell = {}  % Collate results with no transformation if nothing specified.
         target_var string = "all"  % collate raw results if nothing specified.
     end
 
@@ -41,23 +35,44 @@ function Y_collated = gatherResults(file_loc, coral_params, metrics, target_var)
         [Ytable, md] = readDistributed(full_path, target_var);
         
         b_start = md.record_start;
-        if isempty(metrics)
-            Y_collated(b_start:md.record_end) = cellfun(@(x) struct(target_var, ndSparse(x)), Ytable{:, :}, "UniformOutput", false);
-        else
-            var_names = string(Ytable.Properties.VariableNames);
-            if (target_var == "all") && ~ismember(target_var, var_names)                
-                parfor i = b_start:md.record_end
-                    x = i - b_start + 1;
-                    Y_collated(i) = {table2struct(Ytable(x, :))};
-                end
+        var_names = string(Ytable.Properties.VariableNames);
+        if (target_var == "all") && ~ismember(target_var, var_names)                
+            for i = b_start:md.record_end
+                x = i - b_start + 1;
+                Y_collated(i) = {table2struct(Ytable(x, :))};
+            end
+        end
+    end
+    
+    fnames = string(fieldnames(Y_collated{1}));
+    
+    split_fnames = arrayfun(@(x) split(x, "__"), fnames, 'UniformOutput', false);
+    unique_entries = unique(string(cellfun(@(x) string(strjoin(x(1:end-1), "__")), split_fnames, 'UniformOutput', false)));
+    unique_entries = unique_entries(strlength(unique_entries) > 0);
+
+    % Include ADRIA logs that aren't summarized stats
+    collated_mets = struct();
+    log_entries = fnames(~contains(fnames, ["mean", "std", "median", "std", "min", "max"]));
+    for logs = log_entries
+        collated_mets.(logs) = concatMetrics(Y_collated, logs);
+    end
+
+    for ent = unique_entries'
+        if ~contains(strcat(ent, "__", "mean"), fnames)
+            % skip non-summarized entries (e.g., site selection logs)
+            continue
+        end
+        collated_mets.(ent) = struct();
+        for stat = ["mean", "median", "std", "min", "max"]
+            stat_func = str2func(stat);
+            tmp_fn = strcat(ent, "__", stat);
+            if ismember(stat, ["min", "max"])
+                collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), [], 3));
+            elseif stat == "std"
+                collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), 0, 3));
             else
-                parfor i = b_start:md.record_end
-                    x = i - b_start + 1;
-                    Y_collated(i) = {collectMetrics(...
-                            Ytable{x, target_var}{1}, ...
-                            coral_params(i, :), ...
-                            metrics)};
-                end
+                % mean/median
+                collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), 3));
             end
         end
     end
@@ -95,7 +110,7 @@ function [result, md] = readDistributed(filename, target_var)
         n_vars = length(var_names);
         for v = 1:n_vars
             var_n = var_names{v};
-            if var_n ~= target_var
+            if ~contains(target_var, var_n)
                 % skip logs for now...
                 % we'd need to restructure the return type to be a struct
                 % or add a flag indicating what result set (raw or logs) is 
@@ -126,14 +141,14 @@ function [result, md] = readDistributed(filename, target_var)
     vars = fileInfo.Groups.Variables;
     nsims = md.n_sims;
     
-    if (target_var == "all") && ~ismember(target_var, string({vars.Name}))
+    if (target_var == "all") && ~contains(target_var, string({vars.Name}))
         % prep table first
         for v = 1:length(vars)
             var_name = vars(v).Name;
             result.(var_name) = cell(nsims, 1);
         end
 
-        parfor v = 1:length(vars)
+        for v = 1:length(vars)
             var_name = vars(v).Name;
             for run_id = 1:nsims
                 grp_name = strcat("run_", num2str(run_id));
@@ -146,27 +161,27 @@ function [result, md] = readDistributed(filename, target_var)
                         result(run_id, v) = {tmp(:, :, :, 1, :)};
                     case 4
                         result(run_id, v) = {tmp(:, :, 1, :)};
-                    case {2, 3}
+                    case {2,3}
                         result(run_id, v) = {tmp};
                     otherwise
                         error("Unexpected number of dims in result file");
                 end
             end
         end
-    elseif ismember(target_var, string({vars.Name}))
+    elseif contains(target_var, string({vars.Name}))
         % Single target variable
         result.(target_var) = repmat({0}, nsims, 1);
         parfor run_id = 1:nsims
             grp_name = strcat("run_", num2str(run_id));
             entry = strcat('/', grp_name, '/', target_var);
-            tmp = ncread(filename, entry);
+            tmp = single(ncread(filename, entry));
 
             switch ndims(tmp)
                 case 5
                     result(run_id, 1) = {tmp(:, :, :, 1, :)};
                 case 4
                     result(run_id, 1) = {tmp(:, :, 1, :)};
-                case 3
+                case {2,3}
                     result(run_id, 1) = {tmp};
                 otherwise
                     error("Unexpected number of dims in result file");
