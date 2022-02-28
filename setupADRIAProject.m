@@ -99,6 +99,10 @@ addPath(proj, './Inputs/Moore/connectivity');
 addPath(proj, './Inputs/Moore/DHWs');
 addPath(proj, './Inputs/Moore/site_data');
 
-
+addPath(proj, './Inputs/Cairns');
+addPath(proj, './Inputs/Cairns/Connectivity');
+addPath(proj, './Inputs/Cairns/DHWs');
+addPath(proj, './Inputs/Cairns/Site_data');
+addPath(proj, './Inputs/Cairns/Waves');
 % Programmatically install toolbox:
 % https://au.mathworks.com/help/matlab/ref/matlab.addons.toolbox.installtoolbox.html
