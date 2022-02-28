@@ -105,7 +105,7 @@ problem_stats = rmmissing(problem_stats);
 
 % Raise error if any fields have an unexpected number of dimensions
 if ~isempty(problem_stats)
-    error(strcat(msg, problem_stats));
+    error(strcat(msg, strjoin(problem_stats, ", ")));
 end
 
 try
