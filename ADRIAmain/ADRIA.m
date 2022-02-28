@@ -478,6 +478,7 @@ classdef ADRIA < handle
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
                runargs.metrics cell = {}  % metrics to collect
+               runargs.summarize logical = false  % to summarize metric results or not
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
@@ -546,7 +547,7 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, w_scens, d_scens, ...
                      obj.site_data, runargs.collect_logs, ...
-                     fprefix, runargs.batch_size, runargs.metrics);
+                     fprefix, runargs.batch_size, runargs.metrics, runargs.summarize);
         end
         
         function Y = gatherResults(obj, file_loc, metrics, target_var)
@@ -579,6 +580,11 @@ classdef ADRIA < handle
             [~, ~, coral] = obj.splitParameterTable(input_table);
 
             Y = gatherResults(file_loc, coral, metrics, target_var);
+        end
+
+        function Y = gatherSummary(obj, file_loc)
+            % Gather summarized result sets from batch runs.
+            Y = gatherSummary(file_loc);
         end
         
         function updated = setParameterValues(obj, values, opts)

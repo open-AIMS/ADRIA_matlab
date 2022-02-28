@@ -8,16 +8,25 @@ function concated = concatMetrics(Y_all, attr)
         return
     end
     
-    a = getfield(Y_all{1}, nested{:});
+    concated = getfield(Y_all{1}, nested{:});
     b = getfield(Y_all{2}, nested{:});
-    a = cat(length(size(a))+1, a, b);
-    
-    run_dim = length(size(a));
-    
+
+    concated = cat(ndims(concated)+1, concated, b);
+    nd = ndims(concated);
+
     for i = 3:length(Y_all)
-        a = cat(run_dim, a, getfield(Y_all{i}, nested{:}));
+        concated = cat(nd, concated, getfield(Y_all{i}, nested{:}));
     end
-    
-    % Reorder into expected dimensions
-    concated = squeeze(permute(a, [1:(run_dim-2), run_dim, run_dim-1]));
+
+    % Reorder into expected dimensions if needed
+    if nd > 3
+        x = size(concated);
+        if length(Y_all) ~= x(end-1)
+            concated = squeeze(permute(concated, [1:(nd-2), nd, nd-1]));
+        end
+    end
+
+    if class(concated) == "ndSparse"
+        concated = full(concated);
+    end
 end

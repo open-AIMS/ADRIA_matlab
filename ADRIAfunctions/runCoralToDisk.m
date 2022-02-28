@@ -3,7 +3,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               initial_cover, ...
                               n_reps, wave_scen, dhw_scen, site_data, ...
                               collect_logs, file_prefix, batch_size, ...
-                              metrics)
+                              metrics, summarize)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -180,6 +180,10 @@ parfor b_i = 1:n_batches
             tmp_d = struct("all", raw);
         else
             tmp_d = collectMetrics(raw, coral_params, metrics);
+            
+            if summarize
+                tmp_d = summarizeMetrics(tmp_d);
+            end
         end
         
         if any(strlength(collect_logs) > 0)
