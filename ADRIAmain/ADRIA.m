@@ -197,6 +197,15 @@ classdef ADRIA < handle
             crit = x(crit_r, :);
             coral = x(coral_r, :);
         end
+        
+        function pd = idConstants(obj)
+            % Get index of constant parameters from parameter details
+            % table.
+            param_details = obj.parameterDetails();
+            xmin = param_details.lower_bound;
+            xmax = param_details.upper_bound;
+            pd = xmin == xmax;
+        end
 
         function tbl = convertSamples(obj, X)
             % Convert sample values back to ADRIA expected values
@@ -410,6 +419,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
+               runargs.metrics cell = {}  % metrics to collect
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
@@ -436,7 +446,8 @@ classdef ADRIA < handle
             tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
             
             if exist(tmp_fn, "file")
-                error("Input file already exists. Aborting runs to avoid overwriting.")
+                warning("Input file already exists. Aborting runs to avoid overwriting.")
+                return
             end
             
             tmp = struct('input_parameters', table2array(X));
@@ -477,7 +488,7 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, w_scens, d_scens, ...
                      obj.site_data, runargs.collect_logs, ...
-                     fprefix, runargs.batch_size);
+                     fprefix, runargs.batch_size, runargs.metrics);
         end
         
         function Y = gatherResults(obj, file_loc, metrics, target_var)

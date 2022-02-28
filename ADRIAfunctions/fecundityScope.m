@@ -1,26 +1,24 @@
-function Y = fecundityScope(Y_pstep,coral_params)
-% The scope that different coral size classes have for .
+function Y = fecundityScope(Y_pstep,coral_params, site_data)
+% The scope that different coral groups and size classes have for 
+% producing larvae without consideration of environment.
 %
 % Inputs:
 %    Y_pstep, array with dimensions: nspecies x nsites
 %    coral_params, structure
 %    coral_params.fec, vector
-% Output: relative fecundity. Dimension: array of ntaxa (6) times nsites
+% Output: fecundity per m2 of coral. Dimension: array of ntaxa (6) times nsites
 
-% Coral fecundity per coral area of the different size classes from 
-% coralParams are normalised (non-dimensionalised) such th6at relative 
-% fecundity of the largest coral size classes = 1.  When multiplied by 
-% relative cover of each size class within taxa, this allows us to
-% estimate the total relative fecundity of each coral group.  
-
-%relative scope for fecundity of all size classes and species by multiplying with
-%proportional cover
+% Coral fecundity per coral area of the different size classes.  
+% When multiplied by the relative cover of each size class within taxa,
+% this produces an estimate of the relative fecundity of each coral group and size.  
+% Total relative fecundity of a group is then calculated as the sum of 
+% fecundities across size classes. 
 
 ngroups = 6;
 nsites = size(Y_pstep, 2);
 fec_groups = zeros(ngroups, nsites);
 
-fec_all = coral_params.fec .* Y_pstep;
+fec_all = coral_params.fec .* Y_pstep .*site_data.area';
 
 fec_groups(1, :) = sum(fec_all(1:6, :)); %Tabular Acropora enhanced
 fec_groups(2, :) = sum(fec_all(7:12, :)); %Tabular Acropora unenhanced

@@ -1,1 +1,0 @@
-./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv

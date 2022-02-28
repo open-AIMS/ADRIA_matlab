@@ -1,5 +1,14 @@
 function result_set = collectMetrics(Y, coral_params, metrics)
 % Apply a set of metrics (collection of functions) to a result set.
+%
+% Inputs:
+%   Y : matrix, of raw results
+%   coral_params : table, of coral parameters used for the simulations
+%   metrics : cell, array of metric function handlers to extract from `Y`
+%
+% Outputs:
+%   result_set : struct, of metric results with function handle names as
+%                  fields
     arguments
         Y double
         coral_params table

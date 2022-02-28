@@ -1,5 +1,7 @@
 function Y = coralEvenness(X, ~)
-% Calculates evenness across functional coral groups in ADRIA
+% Calculates evenness across functional coral groups in ADRIA.
+% Inverse Simpsons diversity indicator.
+%
 % Inputs:
 %  results from coralScenario, array.  Dims: timesteps, species, sites, interventions, sims
 
