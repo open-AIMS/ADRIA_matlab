@@ -128,7 +128,7 @@ parfor i = 1:N
             end
 
             if any(ismember("site_rankings", collect_logs))
-                rankings(:, :, :, i, j) = res.MCDA_rankings;
+                rankings(:, :, :, i, j) = res.site_rankings;
             end
         end
     end
