@@ -16,7 +16,7 @@ mkdir(tmp_dir)
 
 % Number of scenarios
 N = 8;
-num_reps = 50;  % Number of replicate RCP scenarios
+num_reps = 3;  % Number of replicate RCP scenarios
 
 ai = ADRIA();
 rd = ai.raw_defaults;
@@ -70,8 +70,11 @@ try
     % Collect all data
     collated = ai.gatherResults(file_prefix, {mean_TC});
     scattered = concatMetrics(collated, "mean_coralTaxaCover_x_p_total_cover_4");
+    % collated = ai.gatherResults(file_prefix);
+    % scattered = concatMetrics(collated, "all");
     scattered_TC = squeeze(mean(scattered(end, :, :, :), 4));
 
+    assert(isequal(Ytt, scattered_TC), "Results are not equal!")
     assert(isequal(Ytt(:, 1), scattered_TC(:, 1)), "Results are not equal!")
     assert(isequal(Ytt(:, 5), scattered_TC(:, 5)), "Results are not equal!")
     assert(all(all(scattered(:, :, 1, 1))), "Results were zeros!")

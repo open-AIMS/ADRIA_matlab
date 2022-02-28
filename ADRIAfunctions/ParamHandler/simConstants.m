@@ -27,7 +27,7 @@ function params = simConstants()
 params.tf = 50; %number of years - e.g. year 2050 if we start deploying in year 2025 and run for 25 years.
 params.nsiteint = 5; % max number of sites we intervene on in a given year. May be updated in the intervention table
 
-params.con_cutoff = 0.10; % percent thresholds of max for weak connections in network
+params.con_cutoff = 0.02; % percent thresholds of max for weak connections in network, suggest we keep this low
 % params.years = 1:params.tf; % years of interest for analyses - change to yroi: years of interest
 params.RCP = 45;  % RCP scenario to use
 params.prioritysites = []; % sites to prioritize when seeding or shading
