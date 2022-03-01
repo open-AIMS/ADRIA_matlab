@@ -36,23 +36,28 @@ n_reps = 20;
 dhw_dat26 = "./Inputs/Cairns/DHWs/ReefModBleachMortCairnsRCP26.mat";
 dhw_dat45 = "./Inputs/Cairns/DHWs/ReefModBleachMortCairnsRCP45.mat";
 dhw_dat60 = "./Inputs/Cairns/DHWs/ReefModBleachMortCairnsRCP60.mat";
-% if running for the first time
-% dhw = load(dhw_dat26).bleach_mort;
+
+%% if running for the first time, need to change struct labels and order of
+% dimensions
+
+% dhw = permute(load(dhw_dat26).bleach_mort,[3,2,1]);
 % % resave with name which ai.siteSelection will recognise
 % save(dhw_dat26,'dhw')
 % % repeat for other RCPs
-% dhw = load(dhw_dat45).bleach_mort;
+% dhw = permute(load(dhw_dat45).bleach_mort,[3,2,1]);
 % save(dhw_dat45,'dhw')
-% dhw = load(dhw_dat60).bleach_mort;
+% dhw = permute(load(dhw_dat60).bleach_mort,[3,2,1]);
 % save(dhw_dat60,'dhw')
 
 %% Wave data (cyclones)
 damprob = "./Inputs/Cairns/Waves/ReefModCycMortCairns.mat";
-% if running for the first time
+
+%% if running for the first time need to change struct labels
 % wave = load(damprob).cyc_mort;
 % % resave with name which ai.siteSelection will recognise
 % save(damprob,'wave')
-tstep = 1;
+
+tstep = 5; % assuming runs start in 2021 and we have coral cover from 2025
 
 %% Ranking variables
 % actual site ids
@@ -67,10 +72,11 @@ prefshadesites = zeros(nsiteint,1);
 init_coral_cov_col = ['TC'];
 
 %% Run site selection RCP 26
+ai.loadDHWData(dhw_dat26, n_reps);
 % calculate rankings
-rankings_mat_RCP26_alg1 = ai.siteSelection(criteria,tstep,n_reps,1,sslog,init_coral_cov_col,dhw_dat26,damprob);
-rankings_mat_RCP26_alg2 = ai.siteSelection(criteria,tstep,n_reps,2,sslog,init_coral_cov_col,dhw_dat26,damprob);
-rankings_mat_RCP26_alg3 = ai.siteSelection(criteria,tstep,n_reps,3,sslog,init_coral_cov_col,dhw_dat26,damprob);
+rankings_mat_RCP26_alg1 = ai.siteSelection(criteria,tstep,n_reps,1,sslog,init_coral_cov_col,damprob);
+rankings_mat_RCP26_alg2 = ai.siteSelection(criteria,tstep,n_reps,2,sslog,init_coral_cov_col,damprob);
+rankings_mat_RCP26_alg3 = ai.siteSelection(criteria,tstep,n_reps,3,sslog,init_coral_cov_col,damprob);
 % find mean seeding ranks over climate stochasticity
 mean_ranks_seed_RCP26_alg1 = siteRanking(rankings_mat_RCP26_alg1(:,:,2:end),'seed');
 mean_ranks_seed_RCP26_alg2 = siteRanking(rankings_mat_RCP26_alg2(:,:,2:end),'seed');

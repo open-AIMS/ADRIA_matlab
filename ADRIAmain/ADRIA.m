@@ -292,7 +292,7 @@ classdef ADRIA < handle
 
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
                                                 alg, sslog, initcovcol, ...
-                                                dhwfilepath,wavefilepath)
+                                                wavefilepath)
             arguments
                 obj
                 criteria table
@@ -301,7 +301,6 @@ classdef ADRIA < handle
                 alg {mustBeInteger}
                 sslog struct
                 initcovcol string
-                dhwfilepath string
                 wavefilepath string
             end
             
@@ -343,7 +342,8 @@ classdef ADRIA < handle
             nsiteint = obj.constants.nsiteint;
             nsites = length(max_cover);
             w_scens = load(wavefilepath).wave(tstep, :, 1:nreps);
-            dhw_scen = load(dhwfilepath).dhw(tstep, :, 1:nreps);
+            dhw_scen = obj.dhw_scens;
+            %load(dhwfilepath).dhw(tstep, :, 1:nreps);
 
             sumcover = sum(site_data{:,initcovcol},2); 
             sumcover = sumcover/100.0;
