@@ -83,6 +83,7 @@ addPath(proj, './ADRIAfunctions/IOHandler');
 addPath(proj, './ADRIAfunctions/Metrics');
 addPath(proj, './ADRIAfunctions/Plotting');
 addPath(proj, './ADRIAfunctions/Translation');
+addPath(proj, './ADRIAfunctions/BBNProcessingFuncs');
 
 addPath(proj, './ADRIAfunctions/third_party/ndSparse');
 
