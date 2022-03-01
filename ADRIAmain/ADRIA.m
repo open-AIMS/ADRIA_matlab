@@ -133,11 +133,11 @@ classdef ADRIA < handle
             % Base constructor for ADRIA Input object.
             arguments
                 init_args.connectivity = ""
-                init_args.con_cutoff {mustBeFloat} = NaN  % relies on value defined in sim_constants if not provided
-                init_args.con_agg_func = @mean
+                init_args.conn_cutoff {mustBeFloat} = NaN  % relies on value defined in sim_constants if not provided
+                init_args.conn_agg_func = @mean  % aggregation method if indicated location is a folder of files
                 init_args.site_data = ""
-                init_args.coral_cols string = ["Acropora2026", "Goniastrea2026"]
-                init_args.coral_k_col string = "k"
+                init_args.coral_cols string = ["Acropora2026", "Goniastrea2026"]  % base coral cover columns to load
+                init_args.coral_k_col string = "k"  % max coral cover column
                 init_args.dhw = ""
                 init_args.wave = ""
                 init_args.n_reps = 20
@@ -153,8 +153,8 @@ classdef ADRIA < handle
             
             if ~isempty(init_args.connectivity)
                 obj.loadConnectivity(init_args.connectivity, ...
-                                     cutoff=init_args.con_cutoff, ...
-                                     agg_func=init_args.con_agg_func);
+                                     cutoff=init_args.conn_cutoff, ...
+                                     agg_func=init_args.conn_agg_func);
             end
             
             if ~(init_args.site_data == "")
