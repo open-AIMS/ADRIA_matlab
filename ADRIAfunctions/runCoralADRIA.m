@@ -88,6 +88,12 @@ if any(ismember("site_rankings", collect_logs))
     rankings = ndSparse(zeros(timesteps, nsites, 2, N, n_reps));
 end
 
+% Some sites are within the same grid cell for connectivity
+% Here, we find those sites and map the connectivity data
+% (e.g., repeat the relevant row/columns)
+[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+TP_data = TP_data(g_idx, g_idx);
+
 parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);

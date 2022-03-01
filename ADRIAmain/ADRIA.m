@@ -15,6 +15,7 @@ classdef ADRIA < handle
         site_data   % table of site data (dpeth, carrying capacity, etc)
         init_coral_cov_col  % column name to derive initial coral cover from
         connectivity_site_ids  % Site IDs as specified by the connectivity dataset
+        dhw_scens  % DHW scenarios
     end
 
     properties (Dependent)
@@ -40,22 +41,6 @@ classdef ADRIA < handle
 
             name_vals = details(:, ["name", prop_name]);
             prop = array2table(name_vals.(prop_name)', "VariableNames", name_vals.name');
-        end
-
-        function [w_scens, d_scens] = setup_waveDHWs(obj, n_reps)
-            %% setup for the geographical setting including environmental input layers
-            % Load wave/DHW scenario data
-            % Generated with generateWaveDHWs.m
-            % TODO: Replace these with wave/DHW projection scenarios instead
-            fn = strcat("Inputs/example_wave_DHWs_RCP_expanded_", num2str(obj.constants.RCP), ".nc");
-            wave_scens = ncread(fn, "wave");
-            dhw_scens = ncread(fn, "DHW");
-
-            % Select random subset of RCP conditions WITHOUT replacement
-            [~, ~, n_rep_scens] = size(wave_scens);
-            rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
-            w_scens = wave_scens(:, :, rcp_scens);
-            d_scens = dhw_scens(:, :, rcp_scens);
         end
     end
     methods
@@ -197,6 +182,15 @@ classdef ADRIA < handle
             crit = x(crit_r, :);
             coral = x(coral_r, :);
         end
+        
+        function pd = idConstants(obj)
+            % Get index of constant parameters from parameter details
+            % table.
+            param_details = obj.parameterDetails();
+            xmin = param_details.lower_bound;
+            xmax = param_details.upper_bound;
+            pd = xmin == xmax;
+        end
 
         function tbl = convertSamples(obj, X)
             % Convert sample values back to ADRIA expected values
@@ -281,6 +275,19 @@ classdef ADRIA < handle
             
             % Sort site data by reef id
             obj.site_data = sortrows(tmp_s, "reef_siteid");
+        end
+        
+        function loadDHWData(obj, dhw_fn, nreps)
+            % Load DHW data
+            %
+            if endsWith(dhw_fn, ".mat")
+                d_scens = load(dhw_fn).dhw(1:obj.constants.tf, :, 1:nreps);
+            elseif endsWith(dhw_fn, ".nc")
+                d_scens = ncread(dhw_fn, "DHW");
+                d_scens = d_scens(1:obj.constants.tf, :, 1:nreps);
+            end
+
+            obj.dhw_scens = d_scens;
         end
 
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
@@ -388,7 +395,7 @@ classdef ADRIA < handle
             % and cyclones).
             % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
             tf = obj.constants.tf;
-            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            d_scens = obj.dhw_scens;
             [~, nsites, ~] = size(d_scens);
             w_scens = zeros(tf, nsites, nreps);
 
@@ -413,6 +420,7 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
+               runargs.metrics cell = {}  % metrics to collect
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
@@ -427,7 +435,7 @@ classdef ADRIA < handle
             % [~, n_sites, ~] = size(w_scens);
 
             tf = obj.constants.tf;
-            d_scens = load("dhwRCP45.mat").dhw(1:tf, :, 1:nreps);
+            d_scens = obj.dhw_scens;
             [~, n_sites, ~] = size(d_scens);
             w_scens = zeros(tf, n_sites, nreps);
 
@@ -439,7 +447,8 @@ classdef ADRIA < handle
             tmp_fn = strcat(fprefix, '_[[', num2str(1), '-', num2str(height(X)), ']]_inputs.nc');
             
             if exist(tmp_fn, "file")
-                error("Input file already exists. Aborting runs to avoid overwriting.")
+                warning("Input file already exists. Aborting runs to avoid overwriting.")
+                return
             end
             
             tmp = struct('input_parameters', table2array(X));
@@ -480,7 +489,7 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, w_scens, d_scens, ...
                      obj.site_data, runargs.collect_logs, ...
-                     fprefix, runargs.batch_size);
+                     fprefix, runargs.batch_size, runargs.metrics);
         end
         
         function Y = gatherResults(obj, file_loc, metrics, target_var)

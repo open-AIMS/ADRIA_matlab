@@ -1,12 +1,15 @@
 %% Test total cover
 ai = ADRIA();
+n_reps = 3;
+
 ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
 ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv')
+ai.loadDHWData('../Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 X = ai.sample_defaults;
 X.Guided = 2;
 
-Y = ai.run(X, sampled_values=true, nreps=3);
+Y = ai.run(X, sampled_values=true, nreps=n_reps);
 Y = Y.Y;  % get raw results, ignoring seed/shade logs
 
 [~, ~, coral_params] = ai.splitParameterTable(X);
@@ -60,6 +63,7 @@ sample_table.depth_offset(:) = 5;
 
 ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
 ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
+ai.loadDHWData('../Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 res = ai.run(sample_table, sampled_values=true, nreps=n_reps, collect_logs=["site_rankings"]);
 Y = res.Y;

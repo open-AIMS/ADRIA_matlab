@@ -2,7 +2,8 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               TP_data, site_ranks, strongpred, ...
                               init_cov, ...
                               n_reps, wave_scen, dhw_scen, site_data, ...
-                              collect_logs, file_prefix, batch_size)
+                              collect_logs, file_prefix, batch_size, ...
+                              metrics)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,6 +22,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %                    storing in memory.
 %    batch_size : int, size of simulation batches to run/save when writing
 %                    to disk.
+%    metrics : cell, of function handles
 %
 % Output:
 %    results : struct,
@@ -61,7 +63,6 @@ if ~isfolder(target_dir)
     mkdir(target_dir);
 end
 
-
 n_batches = ceil(N / batch_size);
 b_starts = 1:batch_size:N;
 b_ends = [batch_size:batch_size:N, N];
@@ -83,6 +84,15 @@ end
 clear('intervs')
 clear('crit_weights')
 
+% Some sites are within the same grid cell for connectivity
+% Here, we find those sites and map the connectivity data
+% (e.g., repeat the relevant row/columns)
+[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+TP_data = TP_data(g_idx, g_idx);
+
+w_scen_ss = wave_scen(:, :, 1:n_reps);
+d_scen_ss = dhw_scen(:, :, 1:n_reps);
+
 parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
@@ -101,9 +111,6 @@ parfor b_i = 1:n_batches
     b_cw = b_cws{b_i};
     b_cp = b_coralp{b_i};
     
-    % Create batch cache
-    raw = ndSparse(zeros(timesteps, nspecies, nsites, b_len, n_reps));
-    
     % Create empty log cache, otherwise matlab complains about
     % uninitialized temporary variables
     seed_log = [];
@@ -112,15 +119,16 @@ parfor b_i = 1:n_batches
     
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
-            seed_log = ndSparse(zeros(timesteps, nspecies, nsites, b_len, n_reps));
+            % 2 = number of species being seeded
+            seed_log = zeros(timesteps, 2, nsites, 1, n_reps);
         end
 
         if any(ismember("shade", collect_logs))
-            shade_log = ndSparse(zeros(timesteps, nsites, b_len, n_reps));
+            shade_log = zeros(timesteps, nsites, 1, n_reps);
         end
 
         if any(ismember("site_rankings", collect_logs))
-            rankings = ndSparse(zeros(timesteps, nsites, 2, b_len, n_reps));
+            rankings = zeros(timesteps, nsites, 2, 1, n_reps);
         end
     end
     
@@ -135,65 +143,74 @@ parfor b_i = 1:n_batches
         if isempty(initial_cover)
             initial_cover = repmat(scen_coral_params.basecov, 1, nsites);
         end
+        
+        raw = zeros(timesteps, nspecies, nsites, 1, n_reps);
 
         for j = 1:n_reps
-            w_scen = wave_scen(:, :, j);
-            d_scen = dhw_scen(:, :, j);
+            w_scen = w_scen_ss(:, :, j);
+            d_scen = d_scen_ss(:, :, j);
             res = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
                                    initial_cover, ...
                                    w_scen, d_scen, ...
                                    site_data, collect_logs);
-            raw(:, :, :, i, j) = res.Y;
+            raw(:, :, :, 1, j) = res.Y;
             
             if any(strlength(collect_logs) > 0)
                 if any(ismember("seed", collect_logs))
-                    seed_log(:, :, :, i, j) = res.seed_log;
+                    seed_log(:, :, :, 1, j) = res.seed_log;
                 end
                 
                 if any(ismember("shade", collect_logs))
-                    shade_log(:, :, i, j) = res.shade_log;
+                    shade_log(:, :, 1, j) = res.shade_log;
                 end
                 
                 if any(ismember("site_rankings", collect_logs))
-                    rankings(:, :, :, i, j) = res.MCDA_rankings;
+                    rankings(:, :, :, 1, j) = res.site_rankings;
                 end
             end
         end
-    end
-    
-    % save results
-    tmp_d = struct('all', full(raw));
-    if any(strlength(collect_logs) > 0)
-        if any(ismember("seed", collect_logs))
-            tmp_d.seed_log = full(seed_log);
+        
+        % save results
+        if isempty(metrics)
+            tmp_d = struct("all", raw);
+        else
+            tmp_d = collectMetrics(raw, coral_params, metrics);
         end
+        
+        if any(strlength(collect_logs) > 0)
+            if any(ismember("seed", collect_logs))
+                tmp_d.seed_log = seed_log;
+            end
 
-        if any(ismember("shade", collect_logs))
-            tmp_d.shade_log = full(shade_log);
-        end
+            if any(ismember("shade", collect_logs))
+                tmp_d.shade_log = shade_log;
+            end
 
-        if any(ismember("site_rankings", collect_logs))
-            tmp_d.MCDA_rankings = full(rankings);
+            if any(ismember("site_rankings", collect_logs))
+                tmp_d.site_rankings = rankings;
+            end
         end
+        
+        saveData(tmp_d, tmp_fn, group=strcat("run_", num2str(i)));
+        
+        % Reassign large struct to save memory
+        % (can't use `clear` here due to `parfor`)
+        tmp_d = [];
+        
     end
-    
+
     % include metadata
-    nc_md = struct();
-    nc_md.record_start = b_start;
-    nc_md.record_end = b_end;
-    nc_md.n_sims = b_len;
-    nc_md.n_reps = n_reps;
-    nc_md.n_timesteps = timesteps;
-    nc_md.n_sites = nsites;
-    nc_md.n_species = nspecies;
-    
-    saveData(tmp_d, tmp_fn, attributes=nc_md);
-    
-    % Clear vars to save memory
-    % (can't use `clear` here due to `parfor`)
-    tmp_d = [];
+    nc_md = struct(...
+        'record_start', b_start, ...
+        'record_end', b_end, ...
+        'n_sims', b_len, ...
+        'n_reps', n_reps, ...
+        'n_timesteps', timesteps, ...
+        'n_sites', nsites, ...
+        'n_species', nspecies);
+    saveData(struct(), tmp_fn, attributes=nc_md);
 end
 
 end
