@@ -111,18 +111,21 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % for repeatability
         rng(int64(sum(interv{:, :}) + sum(criteria{:, :})))
     end
+    %(pi*((2-1)/2)^2)/(10^2)
+    seed1 = interv.Seed1; %tabular Acropora size class 2, per year per species per cluster
+    seed2 = interv.Seed2; %corymbose Acropora size class 2, per year per species per cluster
     
     %% A few hard-coded things here we need to convert to input variables
     %sizes of corals seeded
-    diam_seeded_corals = 2; %cm
-    colony_area_seeded_corals = (pi*(diam_seeded_corals/2)^2)/10^4; %m2
+  %  diam_seeded_corals = 2; %cm
+  %  colony_area_seeded_corals = (pi*(diam_seeded_corals/2)^2)/10^4; %m2
     
     %size of the coral arena used when we define Seed1 and Seed2 (inputs) 
-    A_arena = 100;  %10m by 10m
+ %   A_arena = 100;  %10m by 10m
     
     %calculate what seeding rates correspond to in proportion of area added 
-    seed1 = interv.Seed1*colony_area_seeded_corals/A_arena; %tabular Acropora size class 2, converted to rel cover
-    seed2 = interv.Seed2*colony_area_seeded_corals/A_arena; %corymbose Acropora size class 2, converted to rel cover
+  %  seed1 = interv.Seed1*colony_area_seeded_corals/A_arena; %tabular Acropora size class 2, converted to rel cover
+ %   seed2 = interv.Seed2*colony_area_seeded_corals/A_arena; %corymbose Acropora size class 2, converted to rel cover
     %seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
     
     srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
@@ -312,13 +315,29 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yin1 = Y_pstep .* prop_loss;
 
         if (tstep <= (seed_start_year+seedyears)) && ~all(prefseedsites == 0)
-            % Seed each site with the value indicated with seed1 and/or seed2
-            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
-            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
+            col_area_seed1 = coral_params.colony_area_cm2(s1_idx)/(10^4); % extract colony areas for sites selected and convert to m^2
+            col_area_seed2 = coral_params.colony_area_cm2(s2_idx)/(10^4); % extract colony areas for sites selected and convert to m^2
+
+            site_area_seed = site_data.area(prefseedsites).*(site_data.k(prefseedsites)/100); % extract site area for sites selected and scale by available space for populations (k)
+            
+            scaled_seed1 = ((seed1/nsiteint)*col_area_seed1)./site_area_seed;
+            scaled_seed2 = ((seed2/nsiteint)*col_area_seed2)./site_area_seed;
+            % Seed each site with the value indicated with seed1/seed2
+            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + scaled_seed1'; % seed Enhanced Tabular Acropora
+            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + scaled_seed2'; % seed Enhanced Corymbose Acropora
             
             % Log seed values/sites
-            Yseed(tstep, 1, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
-            Yseed(tstep, 2, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+            Yseed(tstep, s1_idx, prefseedsites) = scaled_seed1'; % log site as seeded with Enhanced Tabular Acropora
+            Yseed(tstep, s2_idx, prefseedsites) = scaled_seed2'; % log site as seeded with Enhanced Corymbose Acropora
+
+%             % Seed each site with the value indicated with seed1 and/or seed2
+%             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
+%             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
+%             
+%             % Log seed values/sites
+%             Yseed(tstep, 1, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
+%             Yseed(tstep, 2, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+
         end
 
         % Run ODE for all species and sites
