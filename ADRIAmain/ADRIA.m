@@ -42,22 +42,6 @@ classdef ADRIA < handle
             name_vals = details(:, ["name", prop_name]);
             prop = array2table(name_vals.(prop_name)', "VariableNames", name_vals.name');
         end
-
-%         function [w_scens, d_scens] = setup_waveDHWs(obj, n_reps)
-%             %% setup for the geographical setting including environmental input layers
-%             % Load wave/DHW scenario data
-%             % Generated with generateWaveDHWs.m
-%             % TODO: Replace these with wave/DHW projection scenarios instead
-%             fn = strcat("Inputs/example_wave_DHWs_RCP_expanded_", num2str(obj.constants.RCP), ".nc");
-%             wave_scens = ncread(fn, "wave");
-%             dhw_scens = ncread(fn, "DHW");
-% 
-%             % Select random subset of RCP conditions WITHOUT replacement
-%             [~, ~, n_rep_scens] = size(wave_scens);
-%             rcp_scens = datasample(1:n_rep_scens, n_reps, 'Replace', false);
-%             w_scens = wave_scens(:, :, rcp_scens);
-%             d_scens = dhw_scens(:, :, rcp_scens);
-%         end
     end
     methods
         %% Getter/setters
