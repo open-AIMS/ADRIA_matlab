@@ -343,11 +343,10 @@ classdef ADRIA < handle
             end
 
             % Site Data
-            site_data = obj.site_data;
-            TP_data = obj.TP_data;
-            site_ranks = obj.site_ranks;
-            strongpred = obj.strongpred;
-            area = site_data.area;
+            site_d = obj.site_data;
+            sr = obj.site_ranks;
+            strong_pred = obj.strongpred;
+            area = site_d.area;
             % Weights for connectivity , waves (ww), high cover (whc) and low
             wtwaves = criteria.wave_stress; % weight of wave damage in MCDA
             wtheat = criteria.heat_stress; % weight of heat damage in MCDA
@@ -363,17 +362,17 @@ classdef ADRIA < handle
     
             % Filter out sites outside of desired depth range
             max_depth = depth_min + depth_offset;
-            depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -depth_min);
-            depth_priority = site_data{depth_criteria, "recom_connectivity"};
+            depth_criteria = (site_d.sitedepth > -max_depth) & (site_d.sitedepth < -depth_min);
+            depth_priority = site_d{depth_criteria, "recom_connectivity"};
     
-            max_cover = site_data.k/100.0; % Max coral cover at each site
+            max_cover = site_d.k/100.0; % Max coral cover at each site
 
             nsiteint = obj.constants.nsiteint;
             nsites = length(max_cover);
             w_scens = zeros(nsites, nreps);
             dhw_scen = load(dhwfilepath).dhw(tstep, :, 1:nreps);
 
-            sumcover = sum(site_data{:,initcovcol},2); 
+            sumcover = sum(site_d{:,initcovcol},2); 
             sumcover = sumcover/100.0;
 
             store_rankings = zeros(nreps,length(depth_priority),3);
@@ -386,7 +385,7 @@ classdef ADRIA < handle
                 dhw_step = dhw_scen(1,:,l);
                 heatstressprob = dhw_step';
                 dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
-                    'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', w_scens(:,l), 'heatstressprob', heatstressprob, ...
+                    'strongpred', strong_pred, 'centr', sr.C1, 'damprob', w_scens(:,l), 'heatstressprob', heatstressprob, ...
                     'sumcover', sumcover,'maxcover', max_cover, 'area',area,'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                     'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', ...
                     wtpredecseed, 'wtpredecshade', wtpredecshade);
