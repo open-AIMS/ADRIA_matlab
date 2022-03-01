@@ -132,15 +132,15 @@ classdef ADRIA < handle
         function obj = ADRIA(init_args)
             % Base constructor for ADRIA Input object.
             arguments
-                init_args.connectivity = ""
+                init_args.connectivity = ""  % path to connectivity data
                 init_args.conn_cutoff {mustBeFloat} = NaN  % relies on value defined in sim_constants if not provided
                 init_args.conn_agg_func = @mean  % aggregation method if indicated location is a folder of files
                 init_args.site_data = ""
                 init_args.coral_cols string = ["Acropora2026", "Goniastrea2026"]  % base coral cover columns to load
                 init_args.coral_k_col string = "k"  % max coral cover column
-                init_args.dhw = ""
-                init_args.wave = ""
-                init_args.n_reps = 20
+                init_args.dhw = ""  % path to DHW data
+                init_args.wave = ""  % path to wave data
+                init_args.n_reps = 20  % num. replicates to use
             end
             
             obj.interventions = interventionDetails();
