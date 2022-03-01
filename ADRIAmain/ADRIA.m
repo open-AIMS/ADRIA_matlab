@@ -16,6 +16,7 @@ classdef ADRIA < handle
         init_coral_cov_col  % column name to derive initial coral cover from
         connectivity_site_ids  % Site IDs as specified by the connectivity dataset
         dhw_scens  % DHW scenarios
+        wave_scens % wave scenarios
     end
 
     properties (Dependent)
@@ -128,28 +129,44 @@ classdef ADRIA < handle
         end
 
         %% object methods
-        function obj = ADRIA(interv, crit, coral, constants, coral_spec)
-           % Base constructor for ADRIA Input object.
+        function obj = ADRIA(init_args)
+            % Base constructor for ADRIA Input object.
+            arguments
+                init_args.connectivity = ""
+                init_args.con_cutoff {mustBeFloat} = NaN  % relies on value defined in sim_constants if not provided
+                init_args.con_agg_func = @mean
+                init_args.site_data = ""
+                init_args.coral_cols string = ["Acropora2026", "Goniastrea2026"]
+                init_args.coral_k_col string = "k"
+                init_args.dhw = ""
+                init_args.wave = ""
+                init_args.n_reps = 20
+            end
+            
+            obj.interventions = interventionDetails();
+            obj.criterias = criteriaDetails();
+            obj.corals = coralDetails();
+            obj.constants = simConstants();
+            obj.coral_spec = coralSpec();
+            
+            % connectivity, site_data, dhw, wave
+            
+            if ~isempty(init_args.connectivity)
+                obj.loadConnectivity(init_args.connectivity, ...
+                                     cutoff=init_args.con_cutoff, ...
+                                     agg_func=init_args.con_agg_func);
+            end
+            
+            if ~(init_args.site_data == "")
+                obj.loadSiteData(init_args.site_data, init_args.coral_cols, init_args.coral_k_col);
+            end
 
-            if nargin >= 4
-                obj.interventions = interv;
-                obj.criterias = crit;
-                obj.corals = coral;
-                obj.constants = constants;
-
-                if nargin == 5
-                   obj.coral_spec = coral_spec;
-                else
-                   obj.coral_spec = coralSpec();
-                end
-            elseif nargin == 0
-                obj.interventions = interventionDetails();
-                obj.criterias = criteriaDetails();
-                obj.corals = coralDetails();
-                obj.constants = simConstants();
-                obj.coral_spec = coralSpec();
-            else
-                error("Unexpected number of component parameters.")
+            if ~(init_args.dhw == "")
+                obj.loadDHWData(init_args.dhw, init_args.n_reps);
+            end
+            
+            if ~(init_args.wave == "")
+                obj.loadWaveData(init_args.wave, init_args.n_reps);
             end
         end
 
@@ -249,8 +266,8 @@ classdef ADRIA < handle
             obj.strongpred = sp;
             obj.connectivity_site_ids = site_ids;
         end
-        
-        function loadSiteData(obj, filename, init_coral_cov_col)
+
+        function loadSiteData(obj, filename, init_coral_cov_col, k_col)
             % Load data on site carrying capacity, depth and connectivity
             % from indicated CSV file.
             
@@ -258,9 +275,8 @@ classdef ADRIA < handle
             arguments
                 obj
                 filename
-                % TODO: Fix hardcoded column selection! (note `k` column is hard set below too)
-                init_coral_cov_col = ["Acropora2026", "Goniastrea2026"]
-                % max_coral_col = "k"  % column to load max coral cover from
+                init_coral_cov_col = ["Acropora2026", "Goniastrea2026"]  % Columns with base coral values
+                k_col = "k"  % column to load max coral cover from
             end
             
             if strlength(init_coral_cov_col) > 0
@@ -268,7 +284,7 @@ classdef ADRIA < handle
             end 
             
             sdata = readtable(filename);
-            tmp_s = sdata(:, [["reef_siteid", "area", "k", init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
+            tmp_s = sdata(:, [["reef_siteid", "area", k_col, init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
             
             % Set any missing coral cover data to 0
             tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
@@ -276,7 +292,7 @@ classdef ADRIA < handle
             % Sort site data by reef id
             obj.site_data = sortrows(tmp_s, "reef_siteid");
         end
-        
+
         function loadDHWData(obj, dhw_fn, nreps)
             % Load DHW data
             %
@@ -288,6 +304,19 @@ classdef ADRIA < handle
             end
 
             obj.dhw_scens = d_scens;
+        end
+
+        function loadWaveData(obj, wave_fn, nreps)
+            % Load wave data
+            %
+            if endsWith(wave_fn, ".mat")
+                w_scens = load(wave_fn).dhw(1:obj.constants.tf, :, 1:nreps);
+            elseif endsWith(wave_fn, ".nc")
+                w_scens = ncread(wave_fn, "wave");
+                w_scens = w_scens(1:obj.constants.tf, :, 1:nreps);
+            end
+
+            obj.wave_scens = w_scens;
         end
 
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
