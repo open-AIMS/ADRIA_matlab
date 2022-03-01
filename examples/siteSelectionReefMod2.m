@@ -1,6 +1,5 @@
 %% Load ADRIA object
 ai = ADRIA();
-
 % retrieve default criteria weights 
 [~,criteria,~] = ai.splitParameterTable(ai.sample_defaults);
 
@@ -25,8 +24,8 @@ reef_siteid = 1:nsites;
 reef_siteid = reef_siteid';
 k = repmat(70,nsites,1);
 recom_connectivity = reef_siteid;
-TC = load("ReefModInitialCoverCairns.mat").cover*100;
-sitedepth = -1*ones(nsites,1);;
+TC = load("./Inputs/Cairns/Site_data/ReefModInitialCoverCairns.mat").cover*100;
+sitedepth = -1*ones(nsites,1);
 sitedata_tab = table(reef_siteid,area,k,TC,sitedepth,recom_connectivity);
 writetable(sitedata_tab,'./Inputs/Cairns/Site_data/CairnsSiteData.csv');
 ai.loadSiteData('./Inputs/Cairns/Site_data/CairnsSiteData.csv',['TC']);
@@ -34,15 +33,30 @@ ai.loadSiteData('./Inputs/Cairns/Site_data/CairnsSiteData.csv',['TC']);
 %% DHW data
 tf = 92;
 n_reps = 20;
-dhw_dat26 = "ReefModBleachMortCairnsRCP26.mat";
-dhw_dat45 = "ReefModBleachMortCairnsRCP45.mat";
-dhw_dat60 = "ReefModBleachMortCairnsRCP60.mat";
+dhw_dat26 = "./Inputs/Cairns/DHWs/ReefModBleachMortCairnsRCP26.mat";
+dhw_dat45 = "./Inputs/Cairns/DHWs/ReefModBleachMortCairnsRCP45.mat";
+dhw_dat60 = "./Inputs/Cairns/DHWs/ReefModBleachMortCairnsRCP60.mat";
+% if running for the first time
+% dhw = load(dhw_dat26).bleach_mort;
+% % resave with name which ai.siteSelection will recognise
+% save(dhw_dat26,'dhw')
+% % repeat for other RCPs
+% dhw = load(dhw_dat45).bleach_mort;
+% save(dhw_dat45,'dhw')
+% dhw = load(dhw_dat60).bleach_mort;
+% save(dhw_dat60,'dhw')
 
 %% Wave data (cyclones)
-damprob = "ReefModCycMortCairns.mat";
+damprob = "./Inputs/Cairns/Waves/ReefModCycMortCairns.mat";
+% if running for the first time
+% wave = load(damprob).cyc_mort;
+% % resave with name which ai.siteSelection will recognise
+% save(damprob,'wave')
 tstep = 1;
 
-%% Rnaking variables
+%% Ranking variables
+% actual site ids
+site_ids_rm = load('./Inputs/Cairns/Site_data/LIST_CAIRNS_REEFS').reefs190.Reef_ID;
 nsiteint = ai.constants.nsiteint;
 sslog = struct('seed',true,'shade',true);
 % site_id, seeding rank, shading rank
@@ -85,7 +99,7 @@ mean_ranks_seed_RCP60_alg3 = siteRanking(rankings_mat_RCP60_alg3(:,:,2:end),'see
 
 %% Saving ranks
 filename = sprintf('./Outputs/Rankings_RCPs264560_connectivity%4.0f.xlsx',cyear);
-T = table(reef_siteid,mean_ranks_seed_RCP26_alg1,mean_ranks_seed_RCP26_alg2,mean_ranks_seed_RCP26_alg3,...
+T = table(site_ids_rm,mean_ranks_seed_RCP26_alg1,mean_ranks_seed_RCP26_alg2,mean_ranks_seed_RCP26_alg3,...
     mean_ranks_seed_RCP45_alg1,mean_ranks_seed_RCP45_alg2,mean_ranks_seed_RCP45_alg3,...
     mean_ranks_seed_RCP60_alg1,mean_ranks_seed_RCP60_alg2,mean_ranks_seed_RCP60_alg3);
 T.Properties.VariableNames ={'Site','Order, RCP 26', 'TOPSIS, RCP 26', 'VIKOR, RCP 26',...
