@@ -39,6 +39,9 @@ ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_pro
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
 n_reps = 2;
+ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
+
+
 
 tic
 % Run a single simulation with `n_reps` replicates
