@@ -62,7 +62,10 @@ damprob = "./Inputs/Cairns/Waves/ReefModCycMortCairns.mat";
 %% Declare connectivity and coral cover years to use
 years = 1:5:11; % years 2025,2030 and 2035
 cyears = [2012,2013,2014];
-
+% Load full set of years used
+years_full = load('./Inputs/sR0_FORECAST_GBR_MIROC5_26.mat').years;
+% find indexes for years corresponding to 2025 to 2035
+ind =  find(ismember(years_full,[2025.0:1:2035.0]));
 %% Begin rankings calculations
 for yr = years
     for cyr = cyears
@@ -99,11 +102,10 @@ for yr = years
         % load dhw data for RCP 26
         ai.loadDHWData(dhw_dat26, n_reps);
         % calculate rankings
-        % (add 5 to tstep input as dhw and wave data has full set of years
-        % (so 2025 = yr + 4)
-        rankings_mat_RCP26_alg1 = ai.siteSelection(criteria,yr+4,n_reps,1,sslog,init_coral_cov_col,damprob);
-        rankings_mat_RCP26_alg2 = ai.siteSelection(criteria,yr+4,n_reps,2,sslog,init_coral_cov_col,damprob);
-        rankings_mat_RCP26_alg3 = ai.siteSelection(criteria,yr+4,n_reps,3,sslog,init_coral_cov_col,damprob);
+        % index using ind as dhw and wave data is full years data set
+        rankings_mat_RCP26_alg1 = ai.siteSelection(criteria,ind(yr),n_reps,1,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP26_alg2 = ai.siteSelection(criteria,ind(yr),n_reps,2,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP26_alg3 = ai.siteSelection(criteria,ind(yr),n_reps,3,sslog,init_coral_cov_col,damprob);
         % find mean seeding ranks over climate stochasticity
         mean_ranks_seed_RCP26_alg1 = siteRanking(rankings_mat_RCP26_alg1(:,:,2:end),'seed');
         mean_ranks_seed_RCP26_alg2 = siteRanking(rankings_mat_RCP26_alg2(:,:,2:end),'seed');
@@ -125,9 +127,9 @@ for yr = years
         % load dhw data for RCP 45
         ai.loadDHWData(dhw_dat45, n_reps);
         % calculate rankings
-        rankings_mat_RCP45_alg1 = ai.siteSelection(criteria,yr+4,n_reps,1,sslog,init_coral_cov_col,damprob);
-        rankings_mat_RCP45_alg2 = ai.siteSelection(criteria,yr+4,n_reps,2,sslog,init_coral_cov_col,damprob);
-        rankings_mat_RCP45_alg3 = ai.siteSelection(criteria,yr+4,n_reps,3,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP45_alg1 = ai.siteSelection(criteria,ind(yr),n_reps,1,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP45_alg2 = ai.siteSelection(criteria,ind(yr),n_reps,2,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP45_alg3 = ai.siteSelection(criteria,ind(yr),n_reps,3,sslog,init_coral_cov_col,damprob);
         % find mean seeding ranks over climate stochasticity
         mean_ranks_seed_RCP45_alg1 = siteRanking(rankings_mat_RCP45_alg1(:,:,2:end),'seed');
         mean_ranks_seed_RCP45_alg2 = siteRanking(rankings_mat_RCP45_alg2(:,:,2:end),'seed');
@@ -149,9 +151,9 @@ for yr = years
         % load dhw data for RCP 60
         ai.loadDHWData(dhw_dat60, n_reps);
         % calculate rankings
-        rankings_mat_RCP60_alg1 = ai.siteSelection(criteria,yr+4,n_reps,1,sslog,init_coral_cov_col,damprob);
-        rankings_mat_RCP60_alg2 = ai.siteSelection(criteria,yr+4,n_reps,2,sslog,init_coral_cov_col,damprob);
-        rankings_mat_RCP60_alg3 = ai.siteSelection(criteria,yr+4,n_reps,3,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP60_alg1 = ai.siteSelection(criteria,ind(yr),n_reps,1,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP60_alg2 = ai.siteSelection(criteria,ind(yr),n_reps,2,sslog,init_coral_cov_col,damprob);
+        rankings_mat_RCP60_alg3 = ai.siteSelection(criteria,ind(yr),n_reps,3,sslog,init_coral_cov_col,damprob);
         % find mean seeding ranks over climate stochasticity
         mean_ranks_seed_RCP60_alg1 = siteRanking(rankings_mat_RCP60_alg1(:,:,2:end),'seed');
         mean_ranks_seed_RCP60_alg2 = siteRanking(rankings_mat_RCP60_alg2(:,:,2:end),'seed');
