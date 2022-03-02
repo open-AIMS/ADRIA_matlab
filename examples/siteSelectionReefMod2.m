@@ -10,7 +10,7 @@ criteria.depth_min = 0;
 
 %% Site Data
 % first create data format
-sdata = load('./Inputs/Cairns/Site_data/Cairns_reef_data.mat');
+sdata = load('./Inputs/Cairns/site_data/Cairns_reef_data.mat');
 
 % extract area
 area = sdata.area;
@@ -30,7 +30,7 @@ recom_connectivity = reef_siteid;
 sitedepth = -1 * ones(nsites, 1);
 
 % actual site ids used in Reefmod
-site_ids_rm = load('./Inputs/Cairns/Site_data/LIST_CAIRNS_REEFS').reefs190.Reef_ID;
+site_ids_rm = load('./Inputs/Cairns/site_data/LIST_CAIRNS_REEFS').reefs190.Reef_ID;
 
 % coral cover threshold defining degraded corals (in %)
 c_t = 10;
@@ -56,9 +56,9 @@ dhw_dat60 = "./Inputs/Cairns/DHWs/bleachMortRCP60.mat";
 % save(dhw_dat60,'dhw')
 
 %% load all coral cover data
-TC_26 = load('./Inputs/Cairns/Site_data/initCoralCoverRCP26.mat').TC_26_f;
-TC_45 = load('./Inputs/Cairns/Site_data/initCoralCoverRCP45.mat').TC_45_f;
-TC_60 = load('./Inputs/Cairns/Site_data/initCoralCoverRCP60.mat').TC_60_f;
+TC_26 = load('./Inputs/Cairns/site_data/initCoralCoverRCP26.mat').TC_26_f;
+TC_45 = load('./Inputs/Cairns/site_data/initCoralCoverRCP45.mat').TC_45_f;
+TC_60 = load('./Inputs/Cairns/site_data/initCoralCoverRCP60.mat').TC_60_f;
 
 %% Wave data (cyclones) filepath
 damprob = "./Inputs/Cairns/Waves/cycMortCairns.mat";
@@ -75,7 +75,7 @@ ai.loadWaveData(damprob, n_reps);
 years = 1:5:11; % years 2025,2030 and 2035
 cyears = [2012, 2013, 2014];
 % Load full set of years used
-years_full = load('./Inputs/Cairns/Site_data/initCoralCover26.mat').years;
+years_full = load('./Inputs/Cairns/site_data/initCoralCover26.mat').years;
 % find indexes for years corresponding to 2025 to 2035
 ind = find(ismember(years_full, [2025.0:1:2035.0]));
 
@@ -84,7 +84,7 @@ for yr = years % coral cover years loop
     for cyr = cyears % connectivity years loop
 
         %% Connectivity
-        connectivity_file = sprintf('./Inputs/Cairns/Connectivity/cairns_connectivity_%4.0f.csv', cyr);
+        connectivity_file = sprintf('./Inputs/Cairns/connectivity/cairns_connectivity_%4.0f.csv', cyr);
         ai.loadConnectivity(connectivity_file, cutoff = 0.1);
 
         %% Ranking variables
@@ -130,9 +130,9 @@ for yr = years % coral cover years loop
         TC = TC_45(:, yr);
         % recreate site data based on generic structure
         sitedata_tab = table(reef_siteid, area, k, TC, sitedepth, recom_connectivity);
-        writetable(sitedata_tab, './Inputs/Cairns/Site_data/CairnsSiteData.csv');
+        writetable(sitedata_tab, './Inputs/Cairns/site_data/CairnsSiteData.csv');
         % load site data in ai object
-        ai.loadSiteData('./Inputs/Cairns/Site_data/CairnsSiteData.csv', ['TC']);
+        ai.loadSiteData('./Inputs/Cairns/site_data/CairnsSiteData.csv', ['TC']);
 
         % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
         low_TC = reef_siteid(TC <= 15);
@@ -154,9 +154,9 @@ for yr = years % coral cover years loop
         TC = TC_60(:, yr);
         % recreate site data based on generic structure
         sitedata_tab = table(reef_siteid, area, k, TC, sitedepth, recom_connectivity);
-        writetable(sitedata_tab, './Inputs/Cairns/Site_data/CairnsSiteData.csv');
+        writetable(sitedata_tab, './Inputs/Cairns/site_data/CairnsSiteData.csv');
         % load site data in ai object
-        ai.loadSiteData('./Inputs/Cairns/Site_data/CairnsSiteData.csv', ['TC']);
+        ai.loadSiteData('./Inputs/Cairns/site_data/CairnsSiteData.csv', ['TC']);
 
         % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
         low_TC = reef_siteid(TC <= 15);
