@@ -151,7 +151,7 @@ classdef ADRIA < handle
             
             % connectivity, site_data, dhw, wave
             
-            if ~isempty(init_args.connectivity)
+            if ~(init_args.connectivity == "")
                 obj.loadConnectivity(init_args.connectivity, ...
                                      cutoff=init_args.conn_cutoff, ...
                                      agg_func=init_args.conn_agg_func);
