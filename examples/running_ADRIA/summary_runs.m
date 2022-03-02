@@ -7,7 +7,7 @@ rng(101)
 
 % Number of scenarios
 N = 8;
-n_reps = 50;  % Number of replicate RCP scenarios
+n_reps = 10;  % Number of replicate RCP scenarios
 
 ai = ADRIA();
 
