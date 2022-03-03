@@ -1,11 +1,11 @@
 %% Load site data for 2026;
 % Connectivity
-connectivity_fn = './Inputs/Moore/connectivity/2015_IPMF/connectivity_mean_day1to3_2015.csv';
-[TP_data, site_ranks, strong_pred, site_ids] = siteConnectivity(connectivity_fn, 0.1);
-RCP = 45;
-Year = 2026;
-yrstr = num2str(Year);
-
+% connectivity_fn = './Inputs/Moore/connectivity/2015_IPMF/connectivity_mean_day1to3_2015.csv';
+% [TP_data, site_ranks, strong_pred, site_ids] = siteConnectivity(connectivity_fn, 0.1);
+% RCP = 45;
+% Year = 2026;
+% yrstr = num2str(Year);
+% 
 % Site Data
 sdata = readtable('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
 site_data = sdata(:,[["site_id", "k", [strcat("Total",yrstr), strcat("Acropora",yrstr), strcat("Goniastrea",yrstr)], "sitedepth", "recom_connectivity", "reef_siteid"]]);
