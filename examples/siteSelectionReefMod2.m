@@ -40,20 +40,20 @@ tf = 92; % no. of time steps
 n_reps = 20; % no. of replicates
 
 % 3 dhw filepaths for 3 RCPs
-dhw_dat26 = "./Inputs/Cairns/DHWs/bleachMortRCP26.mat";
-dhw_dat45 = "./Inputs/Cairns/DHWs/bleachMortRCP45.mat";
-dhw_dat60 = "./Inputs/Cairns/DHWs/bleachMortRCP60.mat";
+dhwRCP26 = "./Inputs/Cairns/DHWs/bleachMortRCP26.mat";
+dhwRCP45 = "./Inputs/Cairns/DHWs/bleachMortRCP45.mat";
+dhwRCP60 = "./Inputs/Cairns/DHWs/bleachMortRCP60.mat";
 
 %% if running for the first time, need to change struct labels and order of
 % dimensions (not sure if .mat files are transferring over github)
-% dhw = permute(load(dhw_dat26).bleach_mort,[3,2,1]);
+% dhw = permute(load(dhwRCP26).bleach_mort,[3,2,1]);
 % % resave with name which ai.siteSelection will recognise
-% save(dhw_dat26,'dhw')
+% save(dhwRCP26,'dhw')
 % % repeat for other RCPs
-% dhw = permute(load(dhw_dat45).bleach_mort,[3,2,1]);
-% save(dhw_dat45,'dhw')
-% dhw = permute(load(dhw_dat60).bleach_mort,[3,2,1]);
-% save(dhw_dat60,'dhw')
+% dhw = permute(load(dhwRCP45).bleach_mort,[3,2,1]);
+% save(dhwRCP45,'dhw')
+% dhw = permute(load(dhwRCP60).bleach_mort,[3,2,1]);
+% save(dhwRCP60,'dhw')
 
 %% load all coral cover data
 TC_26 = load('./Inputs/Cairns/site_data/initCoralCoverRCP26.mat').TC_26_f;
@@ -75,7 +75,7 @@ ai.loadWaveData(damprob, n_reps);
 years = 1:5:11; % years 2025,2030 and 2035
 cyears = [2012, 2013, 2014];
 % Load full set of years used
-years_full = load('./Inputs/Cairns/site_data/initCoralCover26.mat').years;
+years_full = load('./Inputs/Cairns/site_data/initCoralCoverRCP26.mat').years;
 % find indexes for years corresponding to 2025 to 2035
 ind = find(ismember(years_full, [2025.0:1:2035.0]));
 
