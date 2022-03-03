@@ -146,7 +146,7 @@ for yr = years % coral cover years loop
 
         %% Saving ranks
         % create filename
-        filename = sprintf('./Outputs/Rankings_RCPs264560_connectivity%4.0f_TC%4.0f.xlsx', cyr, 2024+yr);
+        filename = sprintf('./Outputs/Rankings_RCPs264560_connectivity%4.0f_coralcover%4.0f.xlsx', cyr, 2024+yr);
         
         % create table of ranks and corresponding ReefMod IDs
         T = table(site_ids_rm, ...
