@@ -74,8 +74,10 @@ ai.loadWaveData(damprob, n_reps);
 %% Declare connectivity and coral cover years to use
 years = 1:5:11; % years 2025,2030 and 2035
 cyears = [2012, 2013, 2014];
+
 % Load full set of years used
 years_full = load('./Inputs/Cairns/site_data/initCoralCoverRCP26.mat').years;
+
 % find indexes for years corresponding to 2025 to 2035
 ind = find(ismember(years_full, [2025.0:1:2035.0]));
 
