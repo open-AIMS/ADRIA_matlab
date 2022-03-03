@@ -79,6 +79,10 @@ years_full = load('./Inputs/Cairns/site_data/initCoralCoverRCP26.mat').years;
 % find indexes for years corresponding to 2025 to 2035
 ind = find(ismember(years_full, [2025.0:1:2035.0]));
 
+RCPs = ["26", "45", "60"];
+RCP_TCs = {TC_26, TC_45, TC_60};
+RCP_DHWs = [dhwRCP26, dhwRCP45, dhwRCP60];
+
 %% Begin rankings calculations
 for yr = years % coral cover years loop
     for cyr = cyears % connectivity years loop
@@ -88,7 +92,6 @@ for yr = years % coral cover years loop
         ai.loadConnectivity(connectivity_file, cutoff = 0.1);
 
         %% Ranking variables
-
         nsiteint = ai.constants.nsiteint;
         sslog = struct('seed', true, 'shade', false);
         % Set up rankings storage site_id, seeding rank, shading rank
@@ -98,92 +101,62 @@ for yr = years % coral cover years loop
 
         % initial coral cover column name
         init_coral_cov_col = ['TC'];
+        
+        %% Run site selections over each RCP scenario
+        rcp_ranks = struct();
+        for RCP_id = 1:length(RCPs)
+            RCP_scen = RCPs(RCP_id);
+            dhw = RCP_DHWs(RCP_id);
+            
+            TC = RCP_TCs{RCP_id}(:, yr);  % load initial coral cover
+            
+            % recreate site data based on generic structure
+            sitedata_tab = table(reef_siteid, area, k, TC, sitedepth, recom_connectivity);
+            writetable(sitedata_tab, './Inputs/Cairns/site_data/cairnsSiteData.csv');
 
-        %% Run site selection RCP 26
-        % load initial coral cover
-        TC = TC_26(:, yr);
-        % recreate site data based on generic structure
-        sitedata_tab = table(reef_siteid, area, k, TC, sitedepth, recom_connectivity);
-        writetable(sitedata_tab, './Inputs/Cairns/site_data/cairnsSiteData.csv');
-        % load site data in ai object
-        ai.loadSiteData('./Inputs/Cairns/site_data/cairnsSiteData.csv', ['TC']);
+            ai.loadSiteData('./Inputs/Cairns/site_data/cairnsSiteData.csv', ['TC']);
 
-        % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
-        low_TC = reef_siteid(TC <= c_t);
-        % put these sites as priority predecessor sites in MCDA
-        ai.constants.prioritysites = low_TC;
+            % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
+            % and put these sites as priority predecessor sites in MCDA
+            ai.constants.prioritysites = reef_siteid(TC <= c_t);
 
-        % load dhw data for RCP 26
-        ai.loadDHWData(dhw_dat26, n_reps);
-        % calculate rankings
-        % index using ind as dhw and wave data is full years data set
-        rankings_mat_RCP26_alg1 = ai.siteSelection(criteria, ind(yr), n_reps, 1, sslog, init_coral_cov_col);
-        rankings_mat_RCP26_alg2 = ai.siteSelection(criteria, ind(yr), n_reps, 2, sslog, init_coral_cov_col);
-        rankings_mat_RCP26_alg3 = ai.siteSelection(criteria, ind(yr), n_reps, 3, sslog, init_coral_cov_col);
-        % find mean seeding ranks over climate stochasticity
-        mean_ranks_seed_RCP26_alg1 = siteRanking(rankings_mat_RCP26_alg1(:, :, 2:end), 'seed');
-        mean_ranks_seed_RCP26_alg2 = siteRanking(rankings_mat_RCP26_alg2(:, :, 2:end), 'seed');
-        mean_ranks_seed_RCP26_alg3 = siteRanking(rankings_mat_RCP26_alg3(:, :, 2:end), 'seed');
-
-        %% Run site selection RCP 45
-        % load initial coral cover
-        TC = TC_45(:, yr);
-        % recreate site data based on generic structure
-        sitedata_tab = table(reef_siteid, area, k, TC, sitedepth, recom_connectivity);
-        writetable(sitedata_tab, './Inputs/Cairns/site_data/CairnsSiteData.csv');
-        % load site data in ai object
-        ai.loadSiteData('./Inputs/Cairns/site_data/CairnsSiteData.csv', ['TC']);
-
-        % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
-        low_TC = reef_siteid(TC <= 15);
-        % put these sites as priority predecessor sites in MCDA
-        ai.constants.prioritysites = low_TC;
-        % load dhw data for RCP 45
-        ai.loadDHWData(dhw_dat45, n_reps);
-        % calculate rankings
-        rankings_mat_RCP45_alg1 = ai.siteSelection(criteria, ind(yr), n_reps, 1, sslog, init_coral_cov_col);
-        rankings_mat_RCP45_alg2 = ai.siteSelection(criteria, ind(yr), n_reps, 2, sslog, init_coral_cov_col);
-        rankings_mat_RCP45_alg3 = ai.siteSelection(criteria, ind(yr), n_reps, 3, sslog, init_coral_cov_col);
-        % find mean seeding ranks over climate stochasticity
-        mean_ranks_seed_RCP45_alg1 = siteRanking(rankings_mat_RCP45_alg1(:, :, 2:end), 'seed');
-        mean_ranks_seed_RCP45_alg2 = siteRanking(rankings_mat_RCP45_alg2(:, :, 2:end), 'seed');
-        mean_ranks_seed_RCP45_alg3 = siteRanking(rankings_mat_RCP45_alg3(:, :, 2:end), 'seed');
-
-        %% Run site selection RCP 60
-        % load initial coral cover
-        TC = TC_60(:, yr);
-        % recreate site data based on generic structure
-        sitedata_tab = table(reef_siteid, area, k, TC, sitedepth, recom_connectivity);
-        writetable(sitedata_tab, './Inputs/Cairns/site_data/CairnsSiteData.csv');
-        % load site data in ai object
-        ai.loadSiteData('./Inputs/Cairns/site_data/CairnsSiteData.csv', ['TC']);
-
-        % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
-        low_TC = reef_siteid(TC <= 15);
-        % put these sites as priority predecessor sites in MCDA
-        ai.constants.prioritysites = low_TC;
-        % load dhw data for RCP 60
-        ai.loadDHWData(dhw_dat60, n_reps);
-        % calculate rankings
-        rankings_mat_RCP60_alg1 = ai.siteSelection(criteria, ind(yr), n_reps, 1, sslog, init_coral_cov_col);
-        rankings_mat_RCP60_alg2 = ai.siteSelection(criteria, ind(yr), n_reps, 2, sslog, init_coral_cov_col);
-        rankings_mat_RCP60_alg3 = ai.siteSelection(criteria, ind(yr), n_reps, 3, sslog, init_coral_cov_col);
-        % find mean seeding ranks over climate stochasticity
-        mean_ranks_seed_RCP60_alg1 = siteRanking(rankings_mat_RCP60_alg1(:, :, 2:end), 'seed');
-        mean_ranks_seed_RCP60_alg2 = siteRanking(rankings_mat_RCP60_alg2(:, :, 2:end), 'seed');
-        mean_ranks_seed_RCP60_alg3 = siteRanking(rankings_mat_RCP60_alg3(:, :, 2:end), 'seed');
+            % load dhw data for RCP 26
+            ai.loadDHWData(dhw, n_reps);
+            
+            % calculate rankings
+            % index using ind as dhw and wave data is full years data set
+            rcp_str_id = strcat("ranks_RCP", RCP_scen);
+            order_sel = ai.siteSelection(criteria, ind(yr), n_reps, 1, sslog, init_coral_cov_col);
+            topsis_sel = ai.siteSelection(criteria, ind(yr), n_reps, 2, sslog, init_coral_cov_col);
+            vikor_sel = ai.siteSelection(criteria, ind(yr), n_reps, 3, sslog, init_coral_cov_col);
+            
+            % Store site selections
+            rcp_ranks.(strcat(rcp_str_id, "_Order")) = order_sel;
+            rcp_ranks.(strcat(rcp_str_id, "_TOPSIS")) = topsis_sel;
+            rcp_ranks.(strcat(rcp_str_id, "_VIKOR")) = vikor_sel;
+        
+            % Find mean seeding ranks over climate stochasticity
+            mean_str_id = strcat("mean_", rcp_str_id);
+            rcp_ranks.(strcat(mean_str_id, "_Order")) = siteRanking(order_sel(:, :, 2:end), 'seed');
+            rcp_ranks.(strcat(mean_str_id, "_TOPSIS")) = siteRanking(topsis_sel(:, :, 2:end), 'seed');
+            rcp_ranks.(strcat(mean_str_id, "_VIKOR")) = siteRanking(vikor_sel(:, :, 2:end), 'seed');
+        end
 
         %% Saving ranks
         % create filename
         filename = sprintf('./Outputs/Rankings_RCPs264560_connectivity%4.0f_TC%4.0f.xlsx', cyr, 2024+yr);
+        
         % create table of ranks and corresponding ReefMod IDs
-        T = table(site_ids_rm, mean_ranks_seed_RCP26_alg1, mean_ranks_seed_RCP26_alg2, mean_ranks_seed_RCP26_alg3, ...
-            mean_ranks_seed_RCP45_alg1, mean_ranks_seed_RCP45_alg2, mean_ranks_seed_RCP45_alg3, ...
-            mean_ranks_seed_RCP60_alg1, mean_ranks_seed_RCP60_alg2, mean_ranks_seed_RCP60_alg3);
+        T = table(site_ids_rm, ...
+            rcp_ranks.("mean_ranks_RCP26_Order"), rcp_ranks.("mean_ranks_RCP26_TOPSIS"), rcp_ranks.("mean_ranks_RCP26_VIKOR"), ...
+            rcp_ranks.("mean_ranks_RCP45_Order"), rcp_ranks.("mean_ranks_RCP45_TOPSIS"), rcp_ranks.("mean_ranks_RCP45_VIKOR"), ...
+            rcp_ranks.("mean_ranks_RCP60_Order"), rcp_ranks.("mean_ranks_RCP60_TOPSIS"), rcp_ranks.("mean_ranks_RCP60_VIKOR"));
+
         % Set table column names
-        T.Properties.VariableNames = {'Site ID', 'Order, RCP 26', 'TOPSIS, RCP 26', 'VIKOR, RCP 26', ...
-            'Order, RCP 45', 'TOPSIS, RCP 45', 'VIKOR, RCP 45', ...
-            'Order, RCP 60', 'TOPSIS, RCP 60', 'VIKOR, RCP 60'};
+        T.Properties.VariableNames = {'Site ID', 'Order (RCP 26)', 'TOPSIS (RCP 26)', 'VIKOR (RCP 26)', ...
+            'Order (RCP 45)', 'TOPSIS (RCP 45)', 'VIKOR (RCP 45)', ...
+            'Order (RCP 60)', 'TOPSIS (RCP 60)', 'VIKOR (RCP 60)'};
+
         % Write table to Excel file
         writetable(T, filename, 'Sheet', sprintf('Site ranks'));
     end
