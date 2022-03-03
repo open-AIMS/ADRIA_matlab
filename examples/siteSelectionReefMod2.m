@@ -7,7 +7,8 @@ ai = ADRIA();
 %% Change weights as desired
 % change depth criteria so that no sites will be filtered due to depth
 criteria.depth_min = 0;
-
+tf = 92; % no. of time steps
+ai.constants.tf = tf;
 %% Site Data
 % first create data format
 sdata = load('./Inputs/Cairns/site_data/Cairns_reef_data.mat');
@@ -36,7 +37,6 @@ site_ids_rm = load('./Inputs/Cairns/site_data/LIST_CAIRNS_REEFS').reefs190.Reef_
 c_t = 10;
 
 %% DHW data
-tf = 92; % no. of time steps
 n_reps = 20; % no. of replicates
 
 % 3 dhw filepaths for 3 RCPs
