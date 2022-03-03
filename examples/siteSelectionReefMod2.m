@@ -135,7 +135,7 @@ for yr = years % coral cover years loop
         ai.loadSiteData('./Inputs/Cairns/site_data/CairnsSiteData.csv', ['TC']);
 
         % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
-        low_TC = reef_siteid(TC <= 15);
+        low_TC = reef_siteid(TC <= c_t);
         % put these sites as priority predecessor sites in MCDA
         ai.constants.prioritysites = low_TC;
         % load dhw data for RCP 45
@@ -159,7 +159,7 @@ for yr = years % coral cover years loop
         ai.loadSiteData('./Inputs/Cairns/site_data/CairnsSiteData.csv', ['TC']);
 
         % Find degraded sites (<0.15 coral cover to favour strongest predecessors of these sites)
-        low_TC = reef_siteid(TC <= 15);
+        low_TC = reef_siteid(TC <= c_t);
         % put these sites as priority predecessor sites in MCDA
         ai.constants.prioritysites = low_TC;
         % load dhw data for RCP 60
