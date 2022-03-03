@@ -83,16 +83,12 @@ F_yrs = multiBBNInf(store_table,R,knownVars,inf_cells,increArray,nodePos);
 knownVars = [0 0 0 0];
 F_yrsc = multiBBNInf(store_table,R,knownVars,inf_cells,increArray,nodePos);
 
+indx = 2;
 % plot as histograms
 % intervention total coral cover
 figure(7)
 subplot(1,2,1)
-hold on
-for b = 1:4
-    f = F_yrs{b};
-    h = histogram(f{2},20,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrs,indx)
 subtitle(sprintf('Seed1, Seed2 %3.0f, As. Adt. %1.0f and Nat. Adt. %1.2f',Seed,Aadt,Natad),'Fontsize',16,'Interpreter','latex')
 xlabel('Mean coral cover','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')
@@ -102,12 +98,7 @@ ylim([0 0.3])
 hold off
 
 subplot(1,2,2)
-hold on
-for b = 1:4
-    f = F_yrsc{b};
-    h = histogram(f{2},25,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrsc,indx)
 subtitle('Counterfactual','Fontsize',16,'Interpreter','latex')
 xlabel('Mean coral cover','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')
@@ -118,14 +109,10 @@ hold off
 
 % plot as histograms
 % intervention evenness
+indx = 3;
 figure(8)
 subplot(1,2,1)
-hold on
-for b = 1:4
-    f = F_yrs{b};
-    h = histogram(f{3},20,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrs,indx)
 subtitle(sprintf('Seed1, Seed2 %3.0f, As. Adt. %1.0f and Nat. Adt. %1.2f',Seed,Aadt,Natad),'Fontsize',16,'Interpreter','latex')
 xlabel('Mean Evenness','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')
@@ -135,12 +122,7 @@ ylim([0 0.3])
 hold off
 
 subplot(1,2,2)
-hold on
-for b = 1:4
-    f = F_yrsc{b};
-    h = histogram(f{3},25,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrsc,indx)
 subtitle('Counterfactual','Fontsize',16,'Interpreter','latex')
 xlabel('Mean Evenness','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')
@@ -151,29 +133,19 @@ hold off
 
 % plot as histograms
 % intervention shelter volume
+indx = 4;
 figure(9)
 subplot(1,2,1)
-hold on
-for b = 1:4
-    f = F_yrs{b};
-    h = histogram(f{4},20,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrs,indx)
 subtitle(sprintf('Seed1, Seed2 %3.0f, As. Adt. %1.0f and Nat. Adt. %1.2f',Seed,Aadt,Natad),'Fontsize',16,'Interpreter','latex')
 xlabel('Mean Shelter Volume','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')
 l1 = legend('Year 9','Year 25','Year 35','Year 49')
 set(l1,'Fontsize',16,'Interpreter','latex')
-
 hold off
 
 subplot(1,2,2)
-hold on
-for b = 1:4
-    f = F_yrsc{b};
-    h = histogram(f{4},25,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrsc,indx)
 subtitle('Counterfactual','Fontsize',16,'Interpreter','latex')
 xlabel('Mean Shelter Volume','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')
@@ -184,14 +156,10 @@ hold off
 
 % plot as histograms
 % intervention juveniles
+indx = 5;
 figure(10)
 subplot(1,2,1)
-hold on
-for b = 1:4
-    f = F_yrs{b};
-    h = histogram(f{5},20,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrs,indx)
 subtitle(sprintf('Seed1, Seed2 %3.0f, As. Adt. %1.0f and Nat. Adt. %1.2f',Seed,Aadt,Natad),'Fontsize',16,'Interpreter','latex')
 xlabel('Juveniles','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')
@@ -201,12 +169,7 @@ ylim([0 0.3])
 hold off
 
 subplot(1,2,2)
-hold on
-for b = 1:4
-    f = F_yrsc{b};
-    h = histogram(f{5},25,'FaceAlpha',0.3);
-    h.Normalization = 'probability';
-end
+plotHistMulti(F_yrsc,indx)
 subtitle('Counterfactual','Fontsize',16,'Interpreter','latex')
 xlabel('Juveniles','Fontsize',16,'Interpreter','latex')
 ylabel('Probability','Fontsize',16,'Interpreter','latex')

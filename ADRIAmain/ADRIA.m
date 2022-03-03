@@ -301,6 +301,7 @@ classdef ADRIA < handle
             elseif endsWith(dhw_fn, ".nc")
                 d_scens = ncread(dhw_fn, "DHW");
                 d_scens = d_scens(1:obj.constants.tf, :, 1:nreps);
+
             end
 
             obj.dhw_scens = d_scens;
@@ -318,6 +319,7 @@ classdef ADRIA < handle
 
             obj.wave_scens = w_scens;
         end
+
 
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
                                                 alg, sslog, initcovcol)
@@ -394,6 +396,35 @@ classdef ADRIA < handle
                     wtpredecseed, 'wtpredecshade', wtpredecshade);
                 [~, ~, ~,~, rankings] = ADRIA_DMCDA(dMCDA_vars,alg,sslog,prefseedsites,prefshadesites,rankings);
                 store_rankings(l,:,:) = rankings;
+            end
+        end
+        function [site ranks] = siteSelection(obj,wts,tols,nreps,tstep)
+            arguments
+                obj
+                wts struct
+                tols struct
+                nreps {mustBeInteger}
+                tstep {mustBeInteger}
+            end
+            if isempty(obj.site_data)
+                error("Site data not loaded! Preload with `loadSiteData()`");
+            end
+            
+            if isempty(obj.TP_data)
+                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
+            end
+            max_depth = tol.depth_min + tol.depth_offset;
+            depth_criteria = (obj.site_data.sitedepth > -max_depth) & (obj.site_data.sitedepth < -tol.depth_min);
+            depth_priority = site_data{depth_criteria, "recom_connectivity"};
+
+            nsiteint = obj.constants.nsiteint;
+            for l = 1:nreps
+                dhw_step = dhw_scen(tstep,:,l);
+                dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
+                    'strongpred', strong_pred, 'centr', site_ranks.C1, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
+                    'sumcover', sumcover,'maxcover', max_cover, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
+                    'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed,...
+                    'wtpredecshade', wtpredecshade);
             end
         end
 
