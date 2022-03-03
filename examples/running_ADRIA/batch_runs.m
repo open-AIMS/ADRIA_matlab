@@ -34,6 +34,7 @@ sample_table.Guided(:) = 2;
 %% Load site specific data
 ai.loadConnectivity('./Inputs/Moore/connectivity/2015');
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
+ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 %% Scenario runs
 
@@ -53,7 +54,7 @@ desired_metrics = {@coralTaxaCover, ...
 Y = ai.gatherResults('./Outputs/example_multirun', desired_metrics);
 
 % Collect logged values from raw result set
-Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "MCDA_rankings");
+Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "site_rankings");
 
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
@@ -72,7 +73,7 @@ title('Mean Total Coral Cover across all simulations');
 xlabel('Site');
 
 % Extract site rankings for shading
-rankings = concatMetrics(Y_rankings, "MCDA_rankings");
+rankings = concatMetrics(Y_rankings, "site_rankings");
 figure;
 barh(siteRanking(rankings, "shade"));
 title('Site Rankings for Shading');

@@ -152,11 +152,12 @@ param_table.Seed2 = 5000;
 param_table.SRM = 2;
 param_table.Seedfreq = 25;
 
+n_reps = 2;
+
 % Load site specific data
 ai.loadConnectivity('../Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv');
 ai.loadSiteData('../Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
-
-n_reps = 2;
+ai.loadDHWData('../Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 % This should not error out
 ai.run(param_table, sampled_values=false, nreps=n_reps);

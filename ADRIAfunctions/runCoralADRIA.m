@@ -75,18 +75,24 @@ if ~exist('collect_logs', 'var')
     collect_logs = [];
 end
 
-Y = zeros(timesteps, n_species, nsites, N, n_reps);
+Y = ndSparse(zeros(timesteps, n_species, nsites, N, n_reps));
 if any(ismember("seed", collect_logs))
-    seed = zeros(timesteps, n_species, nsites, N, n_reps);
+    seed = ndSparse(zeros(timesteps, n_species, nsites, N, n_reps));
 end
 
 if any(ismember("shade", collect_logs))
-    shade = zeros(timesteps, nsites, N, n_reps);
+    shade = ndSparse(zeros(timesteps, nsites, N, n_reps));
 end
 
 if any(ismember("site_rankings", collect_logs))
-    rankings = zeros(timesteps, nsites, 2, N, n_reps);
+    rankings = ndSparse(zeros(timesteps, nsites, 2, N, n_reps));
 end
+
+% Some sites are within the same grid cell for connectivity
+% Here, we find those sites and map the connectivity data
+% (e.g., repeat the relevant row/columns)
+[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+TP_data = TP_data(g_idx, g_idx);
 
 parfor i = 1:N
     scen_it = intervs(i, :);
@@ -128,19 +134,17 @@ parfor i = 1:N
     end
 end
 
-results = struct();
-results.Y = Y;
-
+results = struct('Y', full(Y));
 if any(ismember("seed", collect_logs))
-    results.seed_log = seed;
+    results.seed_log = full(seed);
 end
 
 if any(ismember("shade", collect_logs))
-    results.shade_log = shade;
+    results.shade_log = full(shade);
 end
 
 if any(ismember("site_rankings", collect_logs))
-    results.MCDA_rankings = rankings;
+    results.MCDA_rankings = full(rankings);
 end
 
 end

@@ -39,12 +39,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Set up connectivity
     nsites = height(site_data);
-    
-    % Some sites are within the same grid cell for connectivity
-    % Here, we find those sites and map the connectivity data
-    % (e.g., repeat the relevant row/columns)
-    [~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
-    TP_data = TP_data(g_idx, g_idx);
 
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
@@ -53,6 +47,33 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     
     % Set up result structure where necessary
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
+    
+    % years to start seeding/shading
+    seed_start_year = interv.Seedyr_start;
+    shade_start_year = interv.Shadeyr_start;
+    % find yrs at which to reassess seeding site selection and indicate
+    % these in yrslogseed
+    yrslogseed = false(1, tf);
+    yrschangeseed = shade_start_year:interv.Seedfreq:tf;
+    yrslogseed(yrschangeseed) = true;
+
+    % if seed_times is zero, assess once in year 2
+    % (set and forget site selection)
+    if interv.Seedfreq == 0
+        yrslogseed(2) = true;
+    end
+
+    % find yrs at which to reassess seeding site selection and indicate
+    % these in yrslogseed
+    yrslogshade = false(1, tf);
+    yrschangeshade = shade_start_year:interv.Shadefreq:tf;
+    yrslogshade(yrschangeshade) = true;
+
+    % if shade_times is zero, assess once in year 2
+    % (set and forget site selection)
+    if interv.Shadefreq == 0
+        yrslogshade(2) = true;
+    end
     
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
     % years to start seeding/shading
@@ -76,46 +97,40 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
         depth_priority = site_data{depth_criteria, "recom_connectivity"};
 
-        max_cover = site_data.k/100.0; % Max coral cover at each site
+        max_cover = site_data.k/100.0; % Max coral cover at each site. Divided by 100 to convert to proportion  
 
         % pre-allocate prefseedsites, prefshadesites and rankings
         rankings = [depth_priority,zeros(length(depth_priority),1),zeros(length(depth_priority),1)];
         prefseedsites = zeros(1,nsiteint);
         prefshadesites = zeros(1,nsiteint);
-        
-        % find yrs at which to reassess seeding site selection and indicate
-        % these in yrslogseed
-        yrslogseed = false(1, tf);
-        yrschangeseed = shade_start_year:interv.Seedfreq:tf;
-        yrslogseed(yrschangeseed) = true;
-
-        % if seed_times is zero, assess once in year 2
-        % (set and forget site selection)
-        if interv.Seedfreq == 0
-            yrslogseed(2) = true;
-        end
-
-        % find yrs at which to reassess seeding site selection and indicate
-        % these in yrslogseed
-        yrslogshade = false(1, tf);
-        yrschangeshade = shade_start_year:interv.Shadefreq:tf;
-        yrslogshade(yrschangeshade) = true;
-        
-        % if shade_times is zero, assess once in year 2
-        % (set and forget site selection)
-        if interv.Shadefreq == 0
-            yrslogshade(2) = true;
-        end
 
         sslog = struct('seed',true, 'shade',true);
         dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0, 'maxcover', max_cover, 'area', site_data.area, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
             'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', wtpredecseed, 'wtpredecshade', wtpredecshade);
+    else
+        % set random seed based on selection of intervention parameters
+        % for repeatability
+        rng(int64(sum(interv{:, :}) + sum(criteria{:, :})))
     end
+    %(pi*((2-1)/2)^2)/(10^2)
+    seed1 = interv.Seed1; %tabular Acropora size class 2, per year per species per cluster
+    seed2 = interv.Seed2; %corymbose Acropora size class 2, per year per species per cluster
     
-    seed1 = interv.Seed1*(pi*((2-1)/2)^2)/10^4/10^2; %tabular Acropora size class 2, converted to rel cover
-    seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
+    %% A few hard-coded things here we need to convert to input variables
+    %sizes of corals seeded
+  %  diam_seeded_corals = 2; %cm
+  %  colony_area_seeded_corals = (pi*(diam_seeded_corals/2)^2)/10^4; %m2
+    
+    %size of the coral arena used when we define Seed1 and Seed2 (inputs) 
+ %   A_arena = 100;  %10m by 10m
+    
+    %calculate what seeding rates correspond to in proportion of area added 
+  %  seed1 = interv.Seed1*colony_area_seeded_corals/A_arena; %tabular Acropora size class 2, converted to rel cover
+ %   seed2 = interv.Seed2*colony_area_seeded_corals/A_arena; %corymbose Acropora size class 2, converted to rel cover
+    %seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
+    
     srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
@@ -157,7 +172,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     LPDprm2 = sim_params.LPDprm2; % parameter offsetting LPD curve
 
     %% project wave mortality
-    mwaves = zeros(tf, nspecies, nsites);
+    mwaves = ndSparse(zeros(tf, nspecies, nsites));  % overwrite input
     
     % Disable wave mortality for now: Agreed on action for Feb deliverable
     % See email: Mon 24/01/2022 15:17 - RE: IPMF and ADRIA workflow for BC
@@ -204,7 +219,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     
     % These logs need to be collected as part of the run
     Yshade = ndSparse(zeros(tf, nsites));
-    Yseed = ndSparse(zeros(tf, nspecies, nsites));
+    Yseed = ndSparse(zeros(tf, 2, nsites));  % only log seedable corals to save memory
 
     if any(strlength(collect_logs) > 0)
         % Optional logs
@@ -213,6 +228,13 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
         % total_cover = zeros(tf, nsites);
     end
+
+    max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
+    density_ratio_of_settlers_to_larvae = 1/2000; %Bozec et al. 2021
+    basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
+    
+    potential_settler_cover = max_settler_density * basal_area_per_settler ...
+                                * density_ratio_of_settlers_to_larvae;
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
@@ -231,19 +253,14 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
         
         % calculates scope for coral fedundity for each size class and at 
-        % each site
-        fecundity_scope = fecundityScope(Y_pstep, coral_params); 
-
-        max_settler_density = 2.5; % used by Bozec et al 2021 for Acropora
-        density_ratio_of_larvae_to_settlers = 2000; %Bozec et al. 2021
-        basal_area_per_settler = pi*((0.5/100)^2); % in m2 assuming 1 cm diameter
+        % each site. Now using coral fecundity per m2 in 'coralSpec()'
+        fecundity_scope = fecundityScope(Y_pstep, coral_params, site_data);
         
-        potential_settler_cover = max_settler_density * basal_area_per_settler ...
-                                * density_ratio_of_larvae_to_settlers;
-        
-        rec = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
-        % rec = rec .* site_data.area';  % adjust for area DISABLED FOR NOW
+        rec_abs = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
 
+        % adjusting recruitment at each site by dividing by the area
+        rec = rec_abs ./ site_data.area';
+               
         %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
@@ -301,23 +318,40 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yin1 = Y_pstep .* prop_loss;
 
         if (tstep <= (seed_start_year+seedyears)) && ~all(prefseedsites == 0)
+            col_area_seed1 = coral_params.colony_area_cm2(s1_idx)/(10^4); % extract colony areas for sites selected and convert to m^2
+            col_area_seed2 = coral_params.colony_area_cm2(s2_idx)/(10^4); % extract colony areas for sites selected and convert to m^2
+
+            site_area_seed = site_data.area(prefseedsites).*(site_data.k(prefseedsites)/100); % extract site area for sites selected and scale by available space for populations (k)
+            
+            scaled_seed1 = ((seed1/nsiteint)*col_area_seed1)./site_area_seed;
+            scaled_seed2 = ((seed2/nsiteint)*col_area_seed2)./site_area_seed;
             % Seed each site with the value indicated with seed1/seed2
-            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
-            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
+            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + scaled_seed1'; % seed Enhanced Tabular Acropora
+            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + scaled_seed2'; % seed Enhanced Corymbose Acropora
             
             % Log seed values/sites
 
-            Yseed(tstep, s1_idx, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
-            Yseed(tstep, s2_idx, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+            Yseed(tstep, s1_idx, prefseedsites) = scaled_seed1'; % log site as seeded with Enhanced Tabular Acropora
+            Yseed(tstep, s2_idx, prefseedsites) = scaled_seed2'; % log site as seeded with Enhanced Corymbose Acropora
+
+%             % Seed each site with the value indicated with seed1 and/or seed2
+%             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
+%             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
+%             
+%             % Log seed values/sites
+%             Yseed(tstep, 1, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
+%             Yseed(tstep, 2, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+
+
         end
 
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
-        Y = Y(end, :);  % get last step in ODE
         
+        % Using the last step from ODE above,
         % If any sites are above their maximum possible value,
         % proportionally adjust each entry so that their sum is <= P
-        Y = reshape(Y, nspecies, nsites);
+        Y = reshape(Y(end, :), nspecies, nsites);
         if any(sum(Y, 1) > e_P)
             idx = find(sum(Y, 1) > e_P);
             Ys = Y(:, idx);
@@ -329,9 +363,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     end % tstep
    % save(sprintf('Alg%1.0f_sites.mat',alg_ind),'prefseedsites','prefshadesites')
     % Assign to output variable
-    results = struct();
-    results.Y = Yout;
-    
+    results = struct('Y', Yout);
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
             results.seed_log = full(Yseed);
@@ -342,7 +374,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
         
         if any(ismember("site_rankings", collect_logs))
-            results.MCDA_rankings = full(site_rankings);
+            results.site_rankings = full(site_rankings);
         end
     end
 end

@@ -99,13 +99,13 @@ user_criteria_opts = cellfun(@str2num, user_criteria_opts);
 new_interv_opts = array2table(user_interv_opts', 'VariableNames', inter_opts.name);
 new_criteria_opts = array2table(user_criteria_opts', 'VariableNames', criteria_opts.name);
 
+%% Update ADRIA Interface with user specified constants
+ai.constants = new_sim_opts;
 
 %% Load site data
 ai.loadConnectivity('Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv', cutoff=0.01);
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
-
-%% Update ADRIA Interface with user specified constants
-ai.constants = new_sim_opts;
+ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 new_interv_opts.Guided = 1;
 %% Create input table of user-defined values
