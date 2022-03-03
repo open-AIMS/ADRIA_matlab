@@ -3,7 +3,7 @@
 % for a given intervention scenario)
 nalgs = 3;
 nmetrics = 1;
-timef = 50;
+timef = 25;
 % Number of scenarios
 N = 8;
 example_file = 'Inputs/MCDA_example.nc';
@@ -56,11 +56,12 @@ else
          end     
          [~, ~, coral_params] = ai.splitParameterTable(ai.raw_defaults);
         %% Parameter prep
-
         % Load site specific data
-        ai.loadConnectivity('Inputs/Moore/connectivity/2015/');
+        ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
+                
         ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
- 
+        
+        ai.loadDHWData(sprintf('./Inputs/Moore/DHWs/dhwRCP%2.0f.mat',ai.constants.RCP), num_reps); 
         %% Scenario runs
         % set all criteria weights and seed yrs/ shade yrs to be the same
          p_sel.Seedyrs(:) = 10*ones(length(p_sel.Seedyrs(:)),1);

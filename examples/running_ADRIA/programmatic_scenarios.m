@@ -42,7 +42,6 @@ n_reps = 2;
 ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 
-
 tic
 % Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps);

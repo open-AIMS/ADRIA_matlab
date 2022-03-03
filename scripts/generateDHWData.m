@@ -1,7 +1,7 @@
 num_sims = 50;
 num_sites = 244;
 
-RCP = "6085";
+RCP = "60";
 ai = ADRIA();
 sim_constants = ai.constants;
 sim_constants.RCP = RCP;
