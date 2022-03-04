@@ -1,17 +1,20 @@
-function collated_mets = gatherSummary(file_loc, target_var)
+function collated_mets = gatherSummary(file_loc, target_var, summarize)
 % Gather summary statistics of results saved across many NetCDF files.
 %
 % Inputs:
-%   file_loc     : str, directory location and filename prefix
-%                   e.g., "./some_folder/file_prefix"
-%   target_var   : str, variable to collate (returns all results if not
-%                    specified)
+%   file_loc   : str, directory location and filename prefix
+%                  e.g., "./some_folder/file_prefix"
+%   target_var : str, variable to collate (returns all results if not
+%                  specified)
+%   summarize  : logical, to generate a single set of summary stats (true), or
+%                  to keep summary stats separate for each scenario (false; the default)
 %
 % Output:
 %    collated_mets : struct, of summary stats for each metric across time (tf) and space (nsites).
     arguments
         file_loc string
         target_var string = "all"  % collate raw results if nothing specified.
+        summarize logical = false % whether or not to collapse everything along time, or to keep individual scenarios
     end
 
     file_prefix = fullfile(file_loc);
@@ -37,7 +40,7 @@ function collated_mets = gatherSummary(file_loc, target_var)
         b_start = md.record_start;
         var_names = string(Ytable.Properties.VariableNames);
         if (target_var == "all") && ~ismember(target_var, var_names)                
-            for i = b_start:md.record_end
+            parfor i = b_start:md.record_end
                 x = i - b_start + 1;
                 Y_collated(i) = {table2struct(Ytable(x, :))};
             end
@@ -46,11 +49,12 @@ function collated_mets = gatherSummary(file_loc, target_var)
     
     fnames = string(fieldnames(Y_collated{1}));
     
+    % Get name of metric entries (without the suffix indicating the stats)
     split_fnames = arrayfun(@(x) split(x, "__"), fnames, 'UniformOutput', false);
     unique_entries = unique(string(cellfun(@(x) string(strjoin(x(1:end-1), "__")), split_fnames, 'UniformOutput', false)));
     unique_entries = unique_entries(strlength(unique_entries) > 0);
 
-    % Include ADRIA logs that aren't summarized stats
+    % Include ADRIA logs that aren't summary stats
     collated_mets = struct();
     log_entries = fnames(~contains(fnames, ["mean", "std", "median", "std", "min", "max"]));
     for logs = log_entries
@@ -62,18 +66,28 @@ function collated_mets = gatherSummary(file_loc, target_var)
             % skip non-summarized entries (e.g., site selection logs)
             continue
         end
+
+        % Prep structure to hold results
         collated_mets.(ent) = struct();
+
         for stat = ["mean", "median", "std", "min", "max"]
             stat_func = str2func(stat);
             tmp_fn = strcat(ent, "__", stat);
-            if ismember(stat, ["min", "max"])
-                collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), [], 3));
-            elseif stat == "std"
-                collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), 0, 3));
-            else
-                % mean/median
-                collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), 3));
+            if summarize
+                if ismember(stat, ["min", "max"])
+                    collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), [], 3));
+                elseif stat == "std"
+                    collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), 0, 3));
+                else
+                    % mean/median
+                    collated_mets.(ent).(stat) = squeeze(stat_func(concatMetrics(Y_collated, tmp_fn), 3));
+                end
+                
+                continue
             end
+            
+            % Otherwise just combine results into one giant result set
+            collated_mets.(ent).(stat) = concatMetrics(Y_collated, tmp_fn);
         end
     end
 end
@@ -142,13 +156,15 @@ function [result, md] = readDistributed(filename, target_var)
     nsims = md.n_sims;
     
     if (target_var == "all") && ~contains(target_var, string({vars.Name}))
+        % "all" is not in list of variables, so actually get everything
+
         % prep table first
         for v = 1:length(vars)
             var_name = vars(v).Name;
             result.(var_name) = cell(nsims, 1);
         end
 
-        for v = 1:length(vars)
+        parfor v = 1:length(vars)
             var_name = vars(v).Name;
             for run_id = 1:nsims
                 grp_name = strcat("run_", num2str(run_id));
