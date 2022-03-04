@@ -310,7 +310,7 @@ classdef ADRIA < handle
             % Load wave data
             %
             if endsWith(wave_fn, ".mat")
-                w_scens = load(wave_fn).dhw(1:obj.constants.tf, :, 1:nreps);
+                w_scens = load(wave_fn).wave(1:obj.constants.tf, :, 1:nreps);
             elseif endsWith(wave_fn, ".nc")
                 w_scens = ncread(wave_fn, "wave");
                 w_scens = w_scens(1:obj.constants.tf, :, 1:nreps);
@@ -320,8 +320,7 @@ classdef ADRIA < handle
         end
 
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
-                                                alg, sslog, initcovcol, ...
-                                                dhwfilepath)
+                                                alg, sslog, initcovcol)
             arguments
                 obj
                 criteria table
@@ -330,7 +329,6 @@ classdef ADRIA < handle
                 alg {mustBeInteger}
                 sslog struct
                 initcovcol string
-                dhwfilepath string
             end
             
             % Check site data and connectivity loaded
@@ -369,8 +367,10 @@ classdef ADRIA < handle
 
             nsiteint = obj.constants.nsiteint;
             nsites = length(max_cover);
-            w_scens = zeros(nsites, nreps);
-            dhw_scen = load(dhwfilepath).dhw(tstep, :, 1:nreps);
+            w_scens = obj.wave_scens;
+            %oad(wavefilepath).wave(tstep, :, 1:nreps);
+            dhw_scen = obj.dhw_scens;
+            %load(dhwfilepath).dhw(tstep, :, 1:nreps);
 
             sumcover = sum(site_d{:,initcovcol},2); 
             sumcover = sumcover/100.0;
@@ -382,10 +382,13 @@ classdef ADRIA < handle
                 rankings = [depth_priority, zeros(length(depth_priority), 1), zeros(length(depth_priority), 1)];
                 prefseedsites = zeros(1,nsiteint);
                 prefshadesites = zeros(1,nsiteint);
-                dhw_step = dhw_scen(1,:,l);
+                dhw_step = dhw_scen(tstep,:,l);
                 heatstressprob = dhw_step';
-                dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', [], ...
-                    'strongpred', strong_pred, 'centr', sr.C1, 'damprob', w_scens(:,l), 'heatstressprob', heatstressprob, ...
+
+                w_step = w_scens(tstep,:,l);
+                damprob = w_step';
+                dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', obj.constants.prioritysites, ...
+                    'strongpred', strong_pred, 'centr', sr.C1, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
                     'sumcover', sumcover,'maxcover', max_cover, 'area',area,'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                     'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', ...
                     wtpredecseed, 'wtpredecshade', wtpredecshade);
