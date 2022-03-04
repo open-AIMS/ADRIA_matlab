@@ -58,22 +58,22 @@ if isfolder(file_loc)
     end
 
     % Load first file to determine size (width/height)
-    x = readtable(full_paths(1), 'PreserveVariableNames', true, 'ReadVariableNames', true, 'CommentStyle', '#');
+    x = readtable(full_paths(1), 'ReadRowNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
     
     % Retrieve and sort by site ids
     % This is to ensure identical indexes when matching up with spatial 
     % site data, which will also be ordered by site id.
-    site_ids = x{:, 1};
-    x(:, 1) = []; % remove row ID column
+    site_ids = string(x.Properties.RowNames);
+
     [site_ids, order_idx] = sort(site_ids);  % reordering
     x = x(order_idx, order_idx);  % enforce order
     
+    
     x_tmp = table2array(x);
+    x_tmp(isnan(x_tmp)) = 0;  % Convert NaNs to 0
     if swap
         x_tmp = transpose(x_tmp);
     end
-    
-    site_ids = string(site_ids);
 
     [w, h] = size(x_tmp);
     
@@ -81,42 +81,48 @@ if isfolder(file_loc)
     data(1, :, :) = x_tmp;
     for fn_i = 2:length(full_paths)
         t_fn = full_paths(fn_i);
-        x = readtable(t_fn, 'PreserveVariableNames', true, 'ReadVariableNames', true, 'CommentStyle', '#');
-        x(:, 1) = [];  % remove row ID column
+        
+        x = readtable(t_fn, 'ReadVariableNames', true, 'ReadRowNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
         
         % Reorder rows/columns, assuming identical ID orders...
         x = x(order_idx, order_idx);
+        
+        % Convert NaNs to 0
+        x{:, :}(isnan(x{:, :})) = 0;
         
         % Store data
         % Transition probability matrix for all sites
         % Data set is flipped from what ADRIA expects, so transpose.
         x_tmp = table2array(x);
+        x_tmp(isnan(x_tmp)) = 0;  % Convert NaNs to 0
+        
         if swap
-            x_tmp = transpose(x_tmp);
-        end
-        data(fn_i, :, :) = x_tmp;
+            data(fn_i, :, :) = transpose(x_tmp);
+        else
+            data(fn_i, :, :) = x_tmp;
+        end 
     end
     
     % aggregate data with indicated aggregation method (default: mean)
     TPbase = squeeze(agg_func(data, 1));
 else
     %% Load a single transitional probability matrix
-    x = readtable(file_loc, 'PreserveVariableNames', true, 'ReadVariableNames', true, 'CommentStyle', '#');
-
-    % remove site ids
-    % F1(1, :) = [];
-    site_ids = string(x{:, 1});
-    x(:, 1) = [];
+    x = readtable(file_loc, 'ReadVariableNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
+    site_ids = string(x.Properties.RowNames);
     
     % Reorder rows/columns to ensure identical indexes when matching up
     % with ordered spatial data
     [site_ids, order_idx] = sort(site_ids);
     x = x(order_idx, order_idx);
     
+    x_tmp = table2array(x);
+    x_tmp(isnan(x_tmp)) = 0;  % Convert NaNs to 0
+    
     % Transition probability matrix for all sites
-    TPbase = table2array(x);
     if swap
-        TPbase = transpose(TPbase);
+        TPbase = transpose(x_tmp);
+    else
+        TPbase = x_tmp;
     end
 end
 
@@ -143,7 +149,7 @@ strongpred(:,1) = 1:nsites;
 %need to find a way here to deal with empty cells for eid
 for s = 1:nsites
     [eid,~] = inedges(DGbase,s);
-    if isempty(eid) == 1 
+    if isempty(eid)
         strongpred(s,2) = nan;
     else
         X = table2array(DGbase.Edges(eid,:));
