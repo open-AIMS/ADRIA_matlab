@@ -14,6 +14,10 @@ which would otherwise crash due to an "out-of-memory" error.
 `programmatic_scenarios` indicates how to do single or multiple runs with 
 *specific parameter values*.
 
+'example_using_priority_sites` shows how to change the priority sites variable in ADRIA to prioritise key site/reef sources for a subset of reefs or sites.
+
+`example_runs_data_HPC` shows how to retrieve shell variables to run ADRIA over a range of parameters using a HPC.
+
 The end goal with these is to allow a relatively informed user to be able 
 to cobble together a new script by taking snippets from one, some, or all 
 of the above examples (with some reference to the user manual) to conduct 
