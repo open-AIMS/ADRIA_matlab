@@ -2,22 +2,27 @@
 % total coral cover metric (shows how algorithm choice could be optimised
 % for a given intervention scenario)
 nalgs = 3;
-nmetrics = 1;
+nmetrics = 4;
 timef = 25;
 % Number of scenarios
 N = 8;
-example_file = 'Inputs/MCDA_example.nc';
-metric = {@coralSpeciesCover};
+example_file1 = 'Inputs/MCDA_example_TC.nc';
+example_file2 = 'Inputs/MCDA_example_Ev.nc';
+example_file3 = 'Inputs/MCDA_example_SV.nc';
+example_file4 = 'Inputs/MCDA_example_Ju.nc';
+metric = {@coralTaxaCover,@coralEvenness,@shelterVolume};
 
-if isfile(example_file)
+if isfile(example_file1)
     % Load example data from file if pre-prepared
-    alg_cont_TC = ncread(example_file, 'TC');
+    alg_cont_TC = ncread(example_file1, 'TC');
+    alg_cont_Ev = ncread(example_file2, 'Ev');
+    alg_cont_SV = ncread(example_file3, 'SV');
+    alg_cont_Ju = ncread(example_file4, 'Ju');
+
     figure(1)
    title('TC comparison')
-
     for count = 1:N
-         %for k =1:nalgs+1
-            
+         %for k =1:nalgs+1            
             subplot(2,4,count)
             hold on
             plot(1:timef,alg_cont_TC(:,1,count),'r')
@@ -29,19 +34,64 @@ if isfile(example_file)
             hold off
         % end
     end
+    figure(2)
+   title('Ev comparison')
+    for count = 1:N
+         %for k =1:nalgs+1            
+            subplot(2,4,count)
+            hold on
+            plot(1:timef,alg_cont_Ev(:,1,count),'r')
+            plot(1:timef,alg_cont_Ev(:,2,count),'b')
+            plot(1:timef,alg_cont_Ev(:,3,count),'g--')
+            plot(1:timef,alg_cont_Ev(:,4,count),'m')
+            %plot(1:25,alg_cont_TC(:,5,count),'--')
+           % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
+            hold off
+        % end
+    end
+   figure(3)
+   title('SV comparison')
+    for count = 1:N
+         %for k =1:nalgs+1            
+            subplot(2,4,count)
+            hold on
+            plot(1:timef,alg_cont_SV(:,1,count),'r')
+            plot(1:timef,alg_cont_SV(:,2,count),'b')
+            plot(1:timef,alg_cont_SV(:,3,count),'g--')
+            plot(1:timef,alg_cont_SV(:,4,count),'m')
+            %plot(1:25,alg_cont_TC(:,5,count),'--')
+           % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
+            hold off
+        % end
+    end
+       figure(4)
+   title('Ju comparison')
+    for count = 1:N
+         %for k =1:nalgs+1            
+            subplot(2,4,count)
+            hold on
+            plot(1:timef,alg_cont_Ju(:,1,count),'r')
+            plot(1:timef,alg_cont_Ju(:,2,count),'b')
+            plot(1:timef,alg_cont_Ju(:,3,count),'g--')
+            plot(1:timef,alg_cont_Ju(:,4,count),'m')
+            %plot(1:25,alg_cont_TC(:,5,count),'--')
+           % title(sprintf('(%1.4f, %1.3f, %1.0f, %2.0f, %1.3f)',IT.Seed1(count),IT.Seed2(count),IT.SRM(count),IT.Aadpt(count),IT.Natad(count)));
+            hold off
+        % end
+    end
 else
    
         %% Generate monte carlo samples
-        num_reps = 50;  % Number of replicate RCP scenarios
+        num_reps = 25;  % Number of replicate RCP scenarios
         % timesteps, n_algs, n_scenarios, n_metrics
-        results = zeros(timef, nalgs+1, N);
+        results = zeros(timef, nalgs+1, N,nmetrics);
         ai = ADRIA();
         
         % Collect details of available parameters
         combined_opts = ai.parameterDetails();
         % Get default parameters
         ai.constants.tf = timef;
-        ai.constants.nsiteint = 5;
+        ai.constants.nsiteint = 15;
         ai.constants.RCP = 45;
         % Generate samples using simple monte carlo
         % Create selection table based on lower/upper parameter bounds
@@ -93,12 +143,27 @@ else
         disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*num_reps), " simulations (", num2str(tmp/(N*num_reps)), " seconds per run)"))
 
         out = collectMetrics(Y.Y,coral_params,metric);
-        TC = out.coralSpeciesCover;             
-        results(:,al+1,:) = squeeze(mean(mean(mean(TC,2),3),5));      
+        TC = out.coralTaxaCover.total_cover;  
+        Ev = out.coralEvenness;
+        SV = out.shelterVolume;;
+        Ju = out.coralTaxaCover.juveniles;
+        results(:,al+1,:,1) = squeeze(mean(mean(TC,2),4));
+        results(:,al+1,:,2) = squeeze(mean(mean(Ev,2),4)); 
+        results(:,al+1,:,3) = squeeze(mean(mean(SV,2),4)); 
+        results(:,al+1,:,4) = squeeze(mean(mean(Ju,2),4)); 
    end
-    filename='Inputs/MCDA_example.nc';
-    nccreate(filename,'TC','Dimensions',{'time',timef,'algs',nalgs+1,'pars',N});
-    ncwrite(filename,'TC',results);
+    filenameTC='Inputs/MCDA_example_TC.nc';
+    filenameEv='Inputs/MCDA_example_Ev.nc';
+    filenameSV='Inputs/MCDA_example_SV.nc';
+    filenameJu='Inputs/MCDA_example_Ju.nc';
+    nccreate(filenameTC,'TC','Dimensions',{'time',timef,'algs',nalgs+1,'pars',N});
+    ncwrite(filenameTC,'TC',results(:,:,:,1));
+    nccreate(filenameEv,'Ev','Dimensions',{'time',timef,'algs',nalgs+1,'pars',N});
+    ncwrite(filenameEv,'Ev',results(:,:,:,2));    
+    nccreate(filenameSV,'SV','Dimensions',{'time',timef,'algs',nalgs+1,'pars',N});
+    ncwrite(filenameSV,'SV',results(:,:,:,3));
+    nccreate(filenameJu,'Ju','Dimensions',{'time',timef,'algs',nalgs+1,'pars',N});
+    ncwrite(filenameJu,'Ju',results(:,:,:,4));
 end
 
 %% plotting comparisons
