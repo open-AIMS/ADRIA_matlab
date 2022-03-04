@@ -72,7 +72,8 @@ function Y = runADRIAScenario(interv, criteria, params, vital_params, ...
     pgs = interv.PrSites; % group of priority sites
     seed1 = interv.Seed1; %species seeded - here the sensitive Acropora
     seed2 = interv.Seed2; %species seeded - here the hardier other coral
-    srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
+    fogging = interv.fogging;  % percent reduction in bleaching mortality through fogging
+    srm = interv.SRM; % DHW equivalents reduced by some shading mechanism
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
@@ -241,7 +242,7 @@ function Y = runADRIAScenario(interv, criteria, params, vital_params, ...
             % survivors from bleaching event
             Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
                                                neg_e_p2, assistadapt, ...
-                                               natad, dhw_step(site));
+                                               natad, dhw_step(site), fogging);
 
             % those survival rates are used to adjust overall coral
             % survival

@@ -114,21 +114,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     %(pi*((2-1)/2)^2)/(10^2)
     seed1 = interv.Seed1; %tabular Acropora size class 2, per year per species per cluster
     seed2 = interv.Seed2; %corymbose Acropora size class 2, per year per species per cluster
-    
-    %% A few hard-coded things here we need to convert to input variables
-    %sizes of corals seeded
-  %  diam_seeded_corals = 2; %cm
-  %  colony_area_seeded_corals = (pi*(diam_seeded_corals/2)^2)/10^4; %m2
-    
-    %size of the coral arena used when we define Seed1 and Seed2 (inputs) 
- %   A_arena = 100;  %10m by 10m
-    
-    %calculate what seeding rates correspond to in proportion of area added 
-  %  seed1 = interv.Seed1*colony_area_seeded_corals/A_arena; %tabular Acropora size class 2, converted to rel cover
- %   seed2 = interv.Seed2*colony_area_seeded_corals/A_arena; %corymbose Acropora size class 2, converted to rel cover
-    %seed2 = interv.Seed2*(pi*((2-1)/2)^2)/10^4/10^2; %corymbose Acropora size class 2, converted to rel cover
-    
-    srm = interv.SRM; %DHW equivalents reduced by fogging or some other shading mechanism
+    fogging = interv.fogging;  % percent reduction in bleaching mortality through fogging
+    srm = interv.SRM; % DHW equivalents reduced by some shading mechanism
     seedyears = interv.Seedyrs; %years to shade are in column 8
     shadeyears = interv.Shadeyrs; %years to shade are in column 9
 
@@ -308,7 +295,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
             neg_e_p2, assistadapt, ...
-            natad, bleach_resist, adjusted_dhw);
+            natad, bleach_resist, adjusted_dhw, fogging);
 
         % proportional loss + proportional recruitment
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));

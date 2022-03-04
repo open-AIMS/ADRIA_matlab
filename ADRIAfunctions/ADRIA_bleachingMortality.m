@@ -1,4 +1,4 @@
-function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, bleach_resist, dhw)
+function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, bleach_resist, dhw, fogging)
 % Gompertz cumulative mortality function 
 %
 % Partial calibration using data by Hughes et al [1] (see Fig. 2C)
@@ -37,7 +37,7 @@ capped_dhw = max(0.0, dhw - ad);
 
 % Model 1: %Based on delta covers observed by Hughes et al. 2018 (Fig 2A)
 % and calibrated by Bozec et al. 2022
-Y = exp(n_p1 * (exp(n_p2 * capped_dhw)));
+Y = exp(n_p1 * (exp(n_p2 * capped_dhw))) .* (1.0 - fogging);
 
 end
 
