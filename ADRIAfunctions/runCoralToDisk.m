@@ -20,8 +20,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
 %    file_prefix : str, write results to batches of netCDFs instead of
 %                    storing in memory.
-%    batch_size : int, size of simulation batches to run/save when writing
-%                    to disk.
+%    batch_size : int, number of simulations per worker to run at a time.
 %    metrics : cell, of function handles
 %
 % Output:
@@ -71,7 +70,7 @@ b_ends = [batch_size:batch_size:N, N];
 b_intervs = cell(n_batches,1);
 b_cws = cell(n_batches,1);
 b_coralp = cell(n_batches,1);
-for b_i = 1:n_batches
+parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
     b_intervs{b_i} = intervs(b_start:b_end, :);
@@ -147,13 +146,11 @@ parfor b_i = 1:n_batches
         raw = zeros(timesteps, nspecies, nsites, 1, n_reps);
 
         for j = 1:n_reps
-            w_scen = w_scen_ss(:, :, j);
-            d_scen = d_scen_ss(:, :, j);
             res = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
                                    initial_cover, ...
-                                   w_scen, d_scen, ...
+                                   w_scen_ss(:, :, j), d_scen_ss(:, :, j), ...
                                    site_data, collect_logs);
             raw(:, :, :, 1, j) = res.Y;
             
@@ -199,8 +196,9 @@ parfor b_i = 1:n_batches
         
         saveData(tmp_d, tmp_fn, group=strcat("run_", num2str(i)));
         
-        % Reassign large struct to save memory
+        % Reassign large data structures to save memory
         % (can't use `clear` here due to `parfor`)
+        raw = [];
         tmp_d = [];
         
     end
