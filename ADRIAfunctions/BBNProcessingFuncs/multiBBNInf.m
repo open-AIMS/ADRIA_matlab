@@ -1,5 +1,5 @@
 function F0 = multiBBNInf(Data, R, knownVars,infNodes,increArray,nodePos)
-% Plots a series of histograms based on a BBN inference given a vector of known variables,
+% Calculates a series of posteriors based on BBN inferences, given a vector of known variables,
 % a vector of the incremented variable, and information about the BBN.
 % structure.
 %
@@ -16,12 +16,10 @@ function F0 = multiBBNInf(Data, R, knownVars,infNodes,increArray,nodePos)
 %                        histogram for (e.g. for years [10 20 30 40])
 %           nodePos : indicator array where nodePos(1) indicates the node number
 %                     for the incremented variable (as designated in ParentCell) 
-%           plotInd : indicates whether to plot the generated distributions
-%                     as histograms.
 %
 % Outputs -
 %           F0 : Cell strucutre containing the full distributions for each
-%                of the histograms plotted
+%                inference
 
 % Cell strucutre to store distributions
     F0 = cell(1,length(increArray));

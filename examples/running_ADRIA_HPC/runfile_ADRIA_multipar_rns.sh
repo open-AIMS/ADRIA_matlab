@@ -10,10 +10,10 @@ echo $Guided
 echo $alg_ind
 echo $RCP
 echo $Seed1
-#echo $Seed2
-#echo $SRM
-#echo $Aadpt
-#echo $Natad
+echo $Seed2
+echo $SRM
+echo $Aadpt
+echo $Natad
 echo $Count
 
 module load MATLAB/R2019a
