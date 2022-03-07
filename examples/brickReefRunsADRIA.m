@@ -12,11 +12,10 @@ ai = ADRIA();
 % number of scenarios (here, N=1 of default values), and
 % D is the number of parameters.
 param_table = ai.raw_defaults;
-rcp = 45;
-ai.constants.RCP = rcp;
+
 %% parameter combos as per deliv specifications
 guided = [0,1];
-srm =v0;
+srm = 0;
 natad = [0,0.05];
 aadt = [0,4,8];
 seed1 = [0,200,400];
@@ -36,26 +35,15 @@ perm_table = createPermutationTable(params_table);
 % Get column names
 col_names = param_table.Properties.VariableNames;
 ignore_cols = convertCharsToStrings(col_names(find(~ismember(col_names,["Guided","Seed1","Seed2","SRM","Aadpt","Natad","Seedyrs","Shadeyrs","Seedfreq","Shadefreq","Seedyr_start","Shadeyr_start"]))))
-% add repettions of remainding variables
-% perm_table = [perm_table, repmat(table2array(param_table(1,13:end)),size(perm_table,1),1)];;
-% param_table_mod = array2table(perm_table,VariableNames = param_table.Properties.VariableNames);
-
 
 perm_table_new = ai.setParameterValues(perm_table, ignore=ignore_cols', partial=true);
-%% 3. Modify table as desired...
-
-% If running multiple scenarios, specify the values for each run
-% param_table.Seed1 = [600; 700; 800; 900; 1000];
 
 %% Run ADRIA
 
 % Load site specific data
-ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
-
+ai.loadConnectivity('./Inputs/Brick/Brick_oversized_2019_636_d3_transfer_probability_matrix_wide.csv',cutoff=0.1);
 
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
-
-ai.loadDHWData(sprintf('./Inputs/Brick/DHWs/dhwRCP%f2.0_brick',rcp))
 bsize = 128;
 n_reps = 50;
 
