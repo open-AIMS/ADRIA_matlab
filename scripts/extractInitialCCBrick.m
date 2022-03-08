@@ -28,5 +28,5 @@ for l = 1:length(unique_rfs)
     end
 end
 
-filename = './Inputs/Brick/site_data/coralCoverBrickData.mat'
-save(filename,"TC");
+% filename = './Inputs/Brick/site_data/coralCoverBrickData.mat'
+% save(filename,"TC");
