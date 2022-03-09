@@ -66,7 +66,7 @@ p_bounds = [
     [0, 4];  % Guided, choice of MCDA approach
     [0, 400];  % Seed1, integer, number of Enhanced TA to seed
     [0, 400];  % Seed2, integer, number of Enhanced TC to seed
-    [0.1, 0.3];  % fogging, float, assumed percent reduction in bleaching mortality
+    [0.0, 0.3];  % fogging, float, assumed percent reduction in bleaching mortality
     [0, 12];  % SRM, float, reduction in DHWs due to shading
     [0.0, 12];  % Aadpt, float, float, increased adaptation rate
     [0.0, 0.1];  % Natad, float, natural adaptation rate
