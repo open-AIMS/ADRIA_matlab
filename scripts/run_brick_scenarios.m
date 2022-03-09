@@ -18,10 +18,10 @@ Shadefreq = [1, 5];
 Seedyr_start = [2, 6, 11, 16];
 Shadeyr_start = [2, 6, 11, 16];
 
-
-target_inputs = table(Guided, Seed1, Seed2, fogging, Aadpt, Natad, Seedyrs, Shadeyrs, Seedfreq, ...
-    Shadefreq, Seedyr_start, Shadeyr_start);
-
+% Create combinations of above target values
+target_inputs = table(Guided, Seed1, Seed2, fogging, Aadpt, Natad, ...
+                      Seedyrs, Shadeyrs, Seedfreq, Shadefreq, ...
+                      Seedyr_start, Shadeyr_start);
 perm_table = createPermutationTable(target_inputs);
 
 % Get column names
@@ -31,21 +31,29 @@ cols_to_include = ["Guided", "Seed1", "Seed2", "fogging", "Aadpt", "Natad", ...
 ignore_cols = string(col_names(~ismember(col_names,cols_to_include)));
 input_table = ai.setParameterValues(perm_table, ignore = ignore_cols', partial = false);
 
-% debug
-input_table = input_table(1:4, :);
-N = 4;
+% debug (figuring out timings)
+input_table = input_table(1:512, :);
+N = 512;
+n_reps = 20;
 
-%% Run ADRIA
+% Get/create parallel worker pool
+try
+    p = parpool('local');
+catch err
+    if ~(err.identifier == "parallel:convenience:ConnectionOpen")
+        throw(err)
+    else
+        p = gcp('nocreate'); % If no pool, do not create new one.
+    end
+end
+
+num_workers = p.NumWorkers;
 
 % Load site specific data
 ai.loadSiteData('./Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
 ai.loadConnectivity('Inputs/Brick/connectivity/2015/');
 ai.loadCoralCovers("./Inputs/Brick/site_data/coralCoverBrickTruncated.mat")
-ai.loadDHWData('./Inputs/Brick/DHWs/dhwRCP45.mat', 20)
-
-
-bsize = 2;
-n_reps = 20;
+ai.loadDHWData('./Inputs/Brick/DHWs/dhwRCP45.mat', n_reps)
 
 desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
     @(x, p) coralTaxaCover(x, p).juveniles, ...
@@ -55,7 +63,7 @@ desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
 
 tic
 ai.runToDisk(input_table, sampled_values = false, nreps = n_reps, ...
-    file_prefix = './Outputs/brick_trial', batch_size = bsize, metrics = desired_metrics, summarize=true);
+    file_prefix = './Outputs/brick_trial', batch_size = ceil(N / num_workers), metrics = desired_metrics, summarize=true);
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N * n_reps)), " seconds per run)"))
 
