@@ -107,7 +107,7 @@ if isfolder(file_loc)
     TPbase = squeeze(agg_func(data, 1));
 else
     %% Load a single transitional probability matrix
-    x = readtable(file_loc, 'ReadVariableNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
+    x = readtable(file_loc, 'ReadRowNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
     site_ids = string(x.Properties.RowNames);
     
     % Reorder rows/columns to ensure identical indexes when matching up
