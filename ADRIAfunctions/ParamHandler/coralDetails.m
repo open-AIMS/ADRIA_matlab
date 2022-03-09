@@ -32,7 +32,7 @@ n_corals = length(coral_ids);
 n_param_names = length(base_p_names);
 
 % Coral ecosystems are highly uncertain.
-% Here, we set arbitrary bounds +/- 40% of best guess values
+% Here, we set arbitrary bounds +/- 10% of best guess values
 i = 1;
 name = string.empty;
 defaults = zeros(n_corals * n_param_names, 1);
