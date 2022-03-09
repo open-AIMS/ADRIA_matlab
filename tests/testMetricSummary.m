@@ -60,7 +60,7 @@ desired_metrics = {@coralEvenness, ...
 Y = ai.gatherResults(file_prefix, desired_metrics);
 
 % Get the logged site rankings as well
-Y_rankings = ai.gatherResults(file_prefix, {}, "MCDA_rankings");
+Y_rankings = ai.gatherResults(file_prefix, {}, "site_rankings");
 
 % Total coral cover
 TC = concatMetrics(Y, "coralTaxaCover_x_p_total_cover");

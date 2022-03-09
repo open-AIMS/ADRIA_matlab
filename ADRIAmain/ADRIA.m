@@ -14,6 +14,7 @@ classdef ADRIA < handle
         strongpred  % strongest predecessor
         site_data   % table of site data (dpeth, carrying capacity, etc)
         init_coral_cov_col  % column name to derive initial coral cover from
+        init_coral_cover  % initial coral cover dataset
         connectivity_site_ids  % Site IDs as specified by the connectivity dataset
         dhw_scens  % DHW scenarios
         wave_scens % wave scenarios
@@ -26,7 +27,7 @@ classdef ADRIA < handle
         sample_defaults
         sample_bounds
         
-        init_coral_cover
+        % init_coral_cover
     end
 
     methods (Access = private)
@@ -74,59 +75,59 @@ classdef ADRIA < handle
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
         end
         
-        function init_cover = get.init_coral_cover(obj)
-            if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
-                % If empty, default base covers from coralSpec will be used
-                init_cover = [];
-                return
-            end
-            
-            % Create initial coral cover by size class based on input data
-            prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
-            nsites = height(obj.site_data);
-             
-            if obj.constants.mimic_IPMF
-                % TODO: A much neater way of handling these two cases
-                
-                % This is copied here and used as a template to fill in
-                base_coral_numbers = ...
-                    [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
-                     0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
-                     0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
-                     200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-                     200, 100, 200, 30, 0, 0; ...   % small massives
-                     0, 0, 0, 0, 0, 0];             % large massives
-                disp("Mimicking IPMF: Loading only two coral types");
-            else
-                % This is copied here and used as a template to fill in
-                base_coral_numbers = ...
-                    [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
-                     200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
-                     0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
-                     200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
-                     200, 100, 200, 200, 100, 0; ... % small massives
-                     200, 100, 20, 20, 20, 10];      % large massives
-                disp("Loading all coral types");
-            end
-            
-            % target shape is nspecies * nsites
-            init_cover = zeros(numel(base_coral_numbers), nsites);
-            for row = 1:nsites
-                if obj.constants.mimic_IPMF
-                    % TODO: A much neater way of handling these two cases
-                    x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
-                    base_coral_numbers(4:5, :) = x;
-                else
-                    x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
-                    base_coral_numbers(:, :) = x;
-                end
-                
-                tmp = base_coral_numbers';
-                init_cover(:, row) = tmp(:);
-            end
-            
-            assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
-        end
+%         function init_cover = get.init_coral_cov(obj)
+%             if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
+%                 % If empty, default base covers from coralSpec will be used
+%                 init_cover = [];
+%                 return
+%             end
+%             
+%             % Create initial coral cover by size class based on input data
+%             prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
+%             nsites = height(obj.site_data);
+%              
+%             if obj.constants.mimic_IPMF
+%                 % TODO: A much neater way of handling these two cases
+%                 
+%                 % This is copied here and used as a template to fill in
+%                 base_coral_numbers = ...
+%                     [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
+%                      0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
+%                      0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
+%                      200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
+%                      200, 100, 200, 30, 0, 0; ...   % small massives
+%                      0, 0, 0, 0, 0, 0];             % large massives
+%                 disp("Mimicking IPMF: Loading only two coral types");
+%             else
+%                 % This is copied here and used as a template to fill in
+%                 base_coral_numbers = ...
+%                     [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
+%                      200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
+%                      0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
+%                      200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
+%                      200, 100, 200, 200, 100, 0; ... % small massives
+%                      200, 100, 20, 20, 20, 10];      % large massives
+%                 disp("Loading all coral types");
+%             end
+%             
+%             % target shape is nspecies * nsites
+%             init_cover = zeros(numel(base_coral_numbers), nsites);
+%             for row = 1:nsites
+%                 if obj.constants.mimic_IPMF
+%                     % TODO: A much neater way of handling these two cases
+%                     x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
+%                     base_coral_numbers(4:5, :) = x;
+%                 else
+%                     x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
+%                     base_coral_numbers(:, :) = x;
+%                 end
+%                 
+%                 tmp = base_coral_numbers';
+%                 init_cover(:, row) = tmp(:);
+%             end
+%             
+%             assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
+%         end
 
         %% object methods
         function obj = ADRIA(init_args)
@@ -151,21 +152,21 @@ classdef ADRIA < handle
             
             % connectivity, site_data, dhw, wave
             
-            if ~(init_args.connectivity == "")
+            if init_args.connectivity ~= ""
                 obj.loadConnectivity(init_args.connectivity, ...
                                      cutoff=init_args.conn_cutoff, ...
                                      agg_func=init_args.conn_agg_func);
             end
             
-            if ~(init_args.site_data == "")
+            if init_args.site_data ~= ""
                 obj.loadSiteData(init_args.site_data, init_args.coral_cols, init_args.coral_k_col);
             end
 
-            if ~(init_args.dhw == "")
+            if init_args.dhw ~= ""
                 obj.loadDHWData(init_args.dhw, init_args.n_reps);
             end
             
-            if ~(init_args.wave == "")
+            if init_args.wave ~= ""
                 obj.loadWaveData(init_args.wave, init_args.n_reps);
             end
         end
@@ -270,9 +271,10 @@ classdef ADRIA < handle
 
         function loadSiteData(obj, filename, init_coral_cov_col, k_col)
             % Load data on site carrying capacity, depth and connectivity
-            % from indicated CSV file.
-            
-            % readtable("Inputs/Moore/site_data/MooreReefCluster_Spatial.csv")
+            % from indicated CSV file or .mat file.
+            %
+            % TODO: Move coral cover columns to binary format, so this
+            % reads CSVs only.
             arguments
                 obj
                 filename
@@ -282,27 +284,38 @@ classdef ADRIA < handle
             
             if strlength(init_coral_cov_col) > 0
                 obj.init_coral_cov_col = init_coral_cov_col;
-            end 
+            end
             
             sdata = readtable(filename);
-            tmp_s = sdata(:, [["reef_siteid", "area", k_col, init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
-            
-            % Set any missing coral cover data to 0
-            tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
-            
+            if init_coral_cov_col == ""
+                tmp_s = sdata(:, ["reef_siteid", "area", k_col, "sitedepth", "recom_connectivity"]);
+            else
+                tmp_s = sdata(:, ["reef_siteid", "area", k_col, init_coral_cov_col, "sitedepth", "recom_connectivity"]);
+
+                % Set any missing coral cover data to 0
+                tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
+            end
+
             % Sort site data by reef id
             obj.site_data = sortrows(tmp_s, "reef_siteid");
         end
 
+        function loadCoralCovers(obj, cc_fn)
+            % Load initial coral cover data
+            if endsWith(cc_fn, ".mat")
+                obj.init_coral_cover = load(cc_fn).covers;
+            elseif endsWith(cc_fn, ".nc")
+                obj.init_coral_cover = ncread(cc_fn, "covers");
+            end
+        end
+
         function loadDHWData(obj, dhw_fn, nreps)
             % Load DHW data
-            %
             if endsWith(dhw_fn, ".mat")
                 d_scens = load(dhw_fn).dhw(1:obj.constants.tf, :, 1:nreps);
             elseif endsWith(dhw_fn, ".nc")
                 d_scens = ncread(dhw_fn, "DHW");
                 d_scens = d_scens(1:obj.constants.tf, :, 1:nreps);
-
             end
 
             obj.dhw_scens = d_scens;
@@ -410,11 +423,15 @@ classdef ADRIA < handle
             end
             
             if isempty(obj.site_data)
-                error("Site data not loaded! Preload with `loadSiteData()`");
+                error("Site data not loaded! Preload with `ai.loadSiteData()`");
             end
             
             if isempty(obj.TP_data)
-                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
+                error("Connectivity data not loaded! Preload with `ai.loadConnectivity()`");
+            end
+            
+            if isempty(obj.dhw_scens)
+                error("DHW data not loaded! Preload with `ai.loadDHWData()`");
             end
             
             nreps = runargs.nreps;

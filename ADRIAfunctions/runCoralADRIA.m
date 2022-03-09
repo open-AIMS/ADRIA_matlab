@@ -8,9 +8,14 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 %
 % Inputs:
 %    interv       : table, of intervention scenarios
-%    criteria     : table, of criteria weights for each scenario
+%    crit_weights : table, of criteria weights for each scenario
 %    coral_params : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
+%    TP_data      : matrix, of transition probabilities (connectivity)
+%    site_ranks   :
+%    strongpred   : matrix, strongest predecessor for each site
+%    init_cov     : matrix[timesteps, nsites, N], initial coral cover data
+%    n_reps       : int, number of replicates to use
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
 %    site_data    : table, of site data
@@ -91,8 +96,17 @@ end
 % Some sites are within the same grid cell for connectivity
 % Here, we find those sites and map the connectivity data
 % (e.g., repeat the relevant row/columns)
-[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
+[~, ~, g_idx] = unique(string(site_data.recom_connectivity), 'rows', 'first');
 TP_data = TP_data(g_idx, g_idx);
+
+% Catch for special edge case when only a single scenario is available
+coral_cover_dims = ndims(init_cov);
+if coral_cover_dims == 3
+    init_cov = init_cov(:, :, 1:n_reps);
+elseif coral_cover_dims == 2
+    init_cov = repmat(init_cov, 1, nsites, n_reps);
+end
+
 
 parfor i = 1:N
     scen_it = intervs(i, :);
@@ -104,14 +118,14 @@ parfor i = 1:N
     c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
     if isempty(initial_cover)
-        initial_cover = repmat(c_params.basecov, 1, nsites);
+        initial_cover = repmat(c_params.basecov, 1, nsites, n_reps);
     end
 
     for j = 1:n_reps
         res = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
-                               initial_cover, ...
+                               initial_cover(:, :, j), ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), ...
                                site_data, collect_logs);
         Y(:, :, :, i, j) = res.Y;
@@ -128,7 +142,7 @@ parfor i = 1:N
             end
 
             if any(ismember("site_rankings", collect_logs))
-                rankings(:, :, :, i, j) = res.MCDA_rankings;
+                rankings(:, :, :, i, j) = res.site_rankings;
             end
         end
     end
@@ -144,7 +158,7 @@ if any(ismember("shade", collect_logs))
 end
 
 if any(ismember("site_rankings", collect_logs))
-    results.MCDA_rankings = full(rankings);
+    results.site_rankings = full(rankings);
 end
 
 end

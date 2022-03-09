@@ -72,7 +72,7 @@ SV_per_ha = metric_results.shelterVolume;
 
 %% Site rankings
 figure;
-barh(siteRanking(res.MCDA_rankings, "shade"));
+barh(siteRanking(res.site_rankings, "shade"));
 
 %% Plot coral covers over time and sites
 figure; 

@@ -2,7 +2,7 @@ Overview of data included in this directory:
 
 **site_data**
 
-Spatial/site data relating to the Brick cluster (from A. Cresswell).
+Spatial/site data relating to the Brick cluster (from B. Robson).
 
 Consists of a geopackage, shapefile, and CSVs with identical data.
 
@@ -21,6 +21,24 @@ They hold:
 - lat
 - x, position in spatial grid (?)
 - y, position in spatial grid (?)
+
+
+CSV with suffix "_reftable.csv" applies to all years and have been manually modified to include a `sitedepth` column (filled with 0, indicating unused) and 
+a `recom_connectivity` column, which is the `siteref` column with an additional version suffix.
+
+
+`coralCoversBrickData.mat`
+
+Initial coral covers for the 567 reef/sites, taken from ReefMod counterfactual data. Values for each reef/sites
+are assigned based on the Euclidean distance between the site long/lat (assumed to be centroids) and reefs indicated by GBR spatial data 
+(TODO: detail which spatial data was used).
+
+Saved as a struct with entry "covers".
+
+
+`coralCoversBrickTruncated.mat`
+
+As above but truncated to 562 reef/sites, and transformed so that the order of dimensions are "species" then "sites".
 
 
 **DHWs**
