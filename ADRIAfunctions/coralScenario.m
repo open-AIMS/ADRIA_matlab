@@ -1,53 +1,53 @@
 function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, init_cov, ...
     wave_scen, dhw_scen, site_data, collect_logs)
-% Run a single intervention scenario with given criteria and parameters
-% If each input was originally a table, this is equivalent to a running
-% a single row from each (i.e., a unique combination)
-%
-% Inputs:
-%    interv       : table, row of intervention table
-%    criteria     : table, row of criteria weights table
-%    coral_params : table, row of coral parameters
-%    sim_params   : struct, of simulation constants
-%    TP_data      : matrix, transitional probability matrix
-%    site_ranks   : matrix, of site centrality
-%    strongpred   : matrix, of strongest predecessor for each site
-%    init_cov     : matrix, of initial coral cover at time = 1
-%    wave_scen    : matrix[timesteps, nsites], spatio-temporal wave damage scenario
-%    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
-%    site_data    : table, of site data. Should be pre-sorted by the
-%                         `recom_connectivity` column
-%    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
-%
-% Outputs:
-%    results     : struct, of 
-%                  Y         - simulation results
-%                  seed_log  - Sites seeded over time
-%                  shade_log - Sites shaded over time
-%
-% Example:
-%    See `single_scenario_example.m` in the `examples` directory.
-%
-% References:
-%     1. Bozec, Y.-M., Rowell, D., Harrison, L., Gaskell, J., Hock, K., 
-%          Callaghan, D., Gorton, R., Kovacs, E. M., Lyons, M., Mumby, P., 
-%          & Roelfsema, C. (2021). 
-%        Baseline mapping to support reef restoration and resilience-based 
-%        management in the Whitsundays. 
-%        https://doi.org/10.13140/RG.2.2.26976.20482
+    % Run a single intervention scenario with given criteria and parameters
+    % If each input was originally a table, this is equivalent to a running
+    % a single row from each (i.e., a unique combination)
+    %
+    % Inputs:
+    %    interv       : table, row of intervention table
+    %    criteria     : table, row of criteria weights table
+    %    coral_params : table, row of coral parameters
+    %    sim_params   : struct, of simulation constants
+    %    TP_data      : matrix, transitional probability matrix
+    %    site_ranks   : matrix, of site centrality
+    %    strongpred   : matrix, of strongest predecessor for each site
+    %    init_cov     : matrix, of initial coral cover at time = 1
+    %    wave_scen    : matrix[timesteps, nsites], spatio-temporal wave damage scenario
+    %    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
+    %    site_data    : table, of site data. Should be pre-sorted by the
+    %                         `recom_connectivity` column
+    %    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
+    %
+    % Outputs:
+    %    results     : struct, of
+    %                  Y         - simulation results
+    %                  seed_log  - Sites seeded over time
+    %                  shade_log - Sites shaded over time
+    %
+    % Example:
+    %    See `single_scenario_example.m` in the `examples` directory.
+    %
+    % References:
+    %     1. Bozec, Y.-M., Rowell, D., Harrison, L., Gaskell, J., Hock, K.,
+    %          Callaghan, D., Gorton, R., Kovacs, E. M., Lyons, M., Mumby, P.,
+    %          & Roelfsema, C. (2021).
+    %        Baseline mapping to support reef restoration and resilience-based
+    %        management in the Whitsundays.
+    %        https://doi.org/10.13140/RG.2.2.26976.20482
 
     %% Set up connectivity
     nsites = height(site_data);
 
     %% Set up structure for dMCDA
     nsiteint = sim_params.nsiteint;
-    
+
     tf = sim_params.tf; % timeframe: total number of time steps
-    
+
     % Set up result structure where necessary
     % coralsdeployed = zeros(params.tf,ninter); % = nsiteint*seedcorals*nnz(nprefsite);
-    
+
     % years to start seeding/shading
     seed_start_year = interv.Seedyr_start;
     shade_start_year = interv.Shadeyr_start;
@@ -74,7 +74,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     if interv.Shadefreq == 0
         yrslogshade(2) = true;
     end
-    
+
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
     is_guided = strategy > 0;
     if is_guided
@@ -91,18 +91,29 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         risktol = criteria.deployed_coral_risk_tol; % risk tolerance
 
         % Filter out sites outside of desired depth range
-        max_depth = criteria.depth_min + criteria.depth_offset;
-        depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
-        depth_priority = site_data{depth_criteria, "recom_connectivity"};
+        if ~all(site_data.sitedepth == 0)
+            max_depth = criteria.depth_min + criteria.depth_offset;
+            depth_criteria = (site_data.sitedepth > -max_depth) & (site_data.sitedepth < -criteria.depth_min);
+            depth_priority = site_data{depth_criteria, "recom_connectivity"};
+        else
+            % No depth data, so consider all sites
+            depth_priority = site_data{:, "recom_connectivity"};
+        end
+        
+        if isa(depth_priority, 'cell')
+            % Catch edge case where IDs are interpreted as text/cells
+            depth_priority = 1:length(depth_priority);
+            depth_priority = depth_priority';
+        end
 
-        max_cover = site_data.k/100.0; % Max coral cover at each site. Divided by 100 to convert to proportion  
+        max_cover = site_data.k / 100.0; % Max coral cover at each site. Divided by 100 to convert to proportion
 
         % pre-allocate prefseedsites, prefshadesites and rankings
-        rankings = [depth_priority,zeros(length(depth_priority),1),zeros(length(depth_priority),1)];
-        prefseedsites = zeros(1,nsiteint);
-        prefshadesites = zeros(1,nsiteint);
+        rankings = [depth_priority, zeros(length(depth_priority), 1), zeros(length(depth_priority), 1)];
+        prefseedsites = zeros(1, nsiteint);
+        prefshadesites = zeros(1, nsiteint);
 
-        sslog = struct('seed',true, 'shade',true);
+        sslog = struct('seed', true, 'shade', true);
         dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', sim_params.prioritysites, ...
             'strongpred', strongpred, 'centr', site_ranks.C1, 'damprob', 0, 'heatstressprob', 0, ...
             'sumcover', 0, 'maxcover', max_cover, 'area', site_data.area, 'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
@@ -147,7 +158,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     % level of added natural coral adaptation
     natad = coral_params.natad + interv.Natad;
-    
+
     % taxa-specific differences in natural bleaching resistance
     bleach_resist = coral_params.bleach_resist;
 
@@ -162,7 +173,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % Disable wave mortality for now: Agreed on action for Feb deliverable
     % See email: Mon 24/01/2022 15:17 - RE: IPMF and ADRIA workflow for BC
     % NOTE: site selection in MCDA based on damage probability also disabled
-    
+
     % wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
     % for sp = 1:nspecies
     %     mwaves(:, sp, :) = wavemort90(sp) .* wave_scen;
@@ -234,18 +245,18 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             LPdhwcoeff, DHWmaxtot, LPDprm2); % larval productivity ...
         % for each species, site and year as a function of past heat exposure
         %LP_graph(tstep,:,:) = LPs
-        
+
         Y_pstep = squeeze(Yout(p_step, :, :)); %dimensions: species and sites
-        
-        % calculates scope for coral fedundity for each size class and at 
+
+        % calculates scope for coral fedundity for each size class and at
         % each site. Now using coral fecundity per m2 in 'coralSpec()'
         fecundity_scope = fecundityScope(Y_pstep, coral_params, site_data);
-        
+
         rec_abs = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
 
         % adjusting recruitment at each site by dividing by the area
         rec = rec_abs ./ site_data.area';
-               
+
         %% Setup MCDA before bleaching season
 
         % heat stress used as criterion in site selection
@@ -258,7 +269,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             % Factor 2
             % probability of coral damage from waves used as criterion in
             % site selection
-            
+
             % NOTE: Wave Damage is turned off for Feb deliv. These are all zeros!
             dMCDA_vars.damprob = squeeze(mwaves(tstep, :, :))'; % wave_scen(tstep, :)';
             dMCDA_vars.heatstressprob = dhw_step'; % heat stress
@@ -313,24 +324,24 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             % Seed each site with the value indicated with seed1/seed2
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + scaled_seed1'; % seed Enhanced Tabular Acropora
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + scaled_seed2'; % seed Enhanced Corymbose Acropora
-            
+
             % Log seed values/sites
             Yseed(tstep, s1_idx, prefseedsites) = scaled_seed1'; % log site as seeded with Enhanced Tabular Acropora
             Yseed(tstep, s2_idx, prefseedsites) = scaled_seed2'; % log site as seeded with Enhanced Corymbose Acropora
 
-%             % Seed each site with the value indicated with seed1 and/or seed2
-%             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
-%             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
-%             
-%             % Log seed values/sites
-%             Yseed(tstep, 1, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
-%             Yseed(tstep, 2, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+            %             % Seed each site with the value indicated with seed1 and/or seed2
+            %             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
+            %             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
+            %
+            %             % Log seed values/sites
+            %             Yseed(tstep, 1, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
+            %             Yseed(tstep, 2, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
 
         end
 
         % Run ODE for all species and sites
         [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
-        
+
         % Using the last step from ODE above,
         % If any sites are above their maximum possible value,
         % proportionally adjust each entry so that their sum is <= P
@@ -344,18 +355,18 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         Yout(tstep, :, :) = Y;
 
     end % tstep
-    
+
     % Assign to output variable
     results = struct('Y', Yout);
     if any(strlength(collect_logs) > 0)
         if any(ismember("seed", collect_logs))
             results.seed_log = full(Yseed);
         end
-        
+
         if any(ismember("shade", collect_logs))
             results.shade_log = full(Yshade);
         end
-        
+
         if any(ismember("site_rankings", collect_logs))
             results.site_rankings = full(site_rankings);
         end
