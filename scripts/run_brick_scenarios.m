@@ -4,11 +4,11 @@ ai = ADRIA();
 
 param_table = ai.raw_defaults;
 
-%% parameter combos as per deliv specifications
+% set specific parameter values
 Guided = [0, 1];
 Seed1 = [0, 200, 400];
 Seed2 = [0, 200, 400];
-fogging = 0;
+fogging = 0.2;
 Aadpt = [0, 4, 8];
 Natad = [0, 0.05];
 Seedyrs = [5, 10];
