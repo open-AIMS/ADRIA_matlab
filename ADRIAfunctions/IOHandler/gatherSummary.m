@@ -57,8 +57,10 @@ function collated_mets = gatherSummary(file_loc, target_var, summarize)
     % Include ADRIA logs that aren't summary stats
     collated_mets = struct();
     log_entries = fnames(~contains(fnames, ["mean", "std", "median", "std", "min", "max"]));
-    for logs = log_entries
-        collated_mets.(logs) = concatMetrics(Y_collated, logs);
+    if ~isempty(log_entries)
+        for logs = log_entries
+            collated_mets.(logs) = concatMetrics(Y_collated, logs);
+        end
     end
 
     for ent = unique_entries'
