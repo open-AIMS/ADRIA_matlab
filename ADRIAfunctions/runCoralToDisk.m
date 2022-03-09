@@ -93,6 +93,14 @@ TP_data = TP_data(g_idx, g_idx);
 w_scen_ss = wave_scen(:, :, 1:n_reps);
 d_scen_ss = dhw_scen(:, :, 1:n_reps);
 
+% Catch for special edge case when only a single scenario is available
+coral_cover_dims = ndims(init_cov);
+if coral_cover_dims == 3
+    init_cov = init_cov(:, :, 1:n_reps);
+elseif coral_cover_dims == 2
+    init_cov = repmat(init_cov, 1, nsites, n_reps);
+end
+
 parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
@@ -141,7 +149,7 @@ parfor b_i = 1:n_batches
         scen_coral_params = extractCoralSamples(b_cp(i, :), coral_spec);
 
         if isempty(initial_cover)
-            initial_cover = repmat(scen_coral_params.basecov, 1, nsites);
+            initial_cover = repmat(scen_coral_params.basecov, 1, nsites, n_reps);
         end
         
         raw = zeros(timesteps, nspecies, nsites, 1, n_reps);
@@ -152,7 +160,7 @@ parfor b_i = 1:n_batches
             res = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
-                                   initial_cover, ...
+                                   initial_cover(:, :, j), ...
                                    w_scen, d_scen, ...
                                    site_data, collect_logs);
             raw(:, :, :, 1, j) = res.Y;
