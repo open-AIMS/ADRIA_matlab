@@ -8,9 +8,14 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 %
 % Inputs:
 %    interv       : table, of intervention scenarios
-%    criteria     : table, of criteria weights for each scenario
+%    crit_weights : table, of criteria weights for each scenario
 %    coral_params : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
+%    TP_data      : matrix, of transition probabilities (connectivity)
+%    site_ranks   :
+%    strongpred   : matrix, strongest predecessor for each site
+%    init_cov     : matrix[timesteps, nsites, N], initial coral cover data
+%    n_reps       : int, number of replicates to use
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
 %    site_data    : table, of site data
