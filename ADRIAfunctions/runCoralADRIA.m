@@ -1,5 +1,5 @@
 function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
-                           TP_data, site_ranks, strongpred, init_cov, ...
+                           TP_data, site_ranks, strongpred, initial_cover, ...
                            n_reps, wave_scen, dhw_scen, site_data, collect_logs)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
@@ -14,12 +14,13 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 %    TP_data      : matrix, of transition probabilities (connectivity)
 %    site_ranks   :
 %    strongpred   : matrix, strongest predecessor for each site
-%    init_cov     : matrix[timesteps, nsites, N], initial coral cover data
+%    initial_cover: matrix[timesteps, nsites, N], initial coral cover data
 %    n_reps       : int, number of replicates to use
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
 %    site_data    : table, of site data
-%    collect_logs : bool, collect shade/seeding logs
+%    collect_logs : string, indication of what logs/meta-metrics to collect
+%    - "seed", "shade", "site_rankings", "RCI", "RFI", etc.
 %
 % Output:
 %    results : struct,
@@ -93,33 +94,22 @@ if any(ismember("site_rankings", collect_logs))
     rankings = ndSparse(zeros(timesteps, nsites, 2, N, n_reps));
 end
 
-% Some sites are within the same grid cell for connectivity
-% Here, we find those sites and map the connectivity data
-% (e.g., repeat the relevant row/columns)
-[~, ~, g_idx] = unique(string(site_data.recom_connectivity), 'rows', 'first');
-TP_data = TP_data(g_idx, g_idx);
-
 % Catch for special edge case when only a single scenario is available
-coral_cover_dims = ndims(init_cov);
+coral_cover_dims = ndims(initial_cover);
 if coral_cover_dims == 3
-    init_cov = init_cov(:, :, 1:n_reps);
+    initial_cover = initial_cover(:, :, 1:n_reps);
 elseif coral_cover_dims == 2
-    init_cov = repmat(init_cov, 1, nsites, n_reps);
+    initial_cover = repmat(initial_cover, 1, 1, n_reps);
 end
 
 
 parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
-    initial_cover = init_cov;
     
     % Note: This slows things down considerably
     % Could rejig everything to use (subset of) the table directly...
     c_params = extractCoralSamples(coral_params(i, :), coral_spec);
-
-    if isempty(initial_cover)
-        initial_cover = repmat(c_params.basecov, 1, nsites, n_reps);
-    end
 
     for j = 1:n_reps
         res = coralScenario(scen_it, scen_crit, ...

@@ -1,4 +1,4 @@
-function [TP_data, site_ranks, strongpred, site_ids] =  siteConnectivity(file_loc, con_cutoff, agg_func, swap)
+function [TP_data, site_ranks, strongpred, site_ids, truncated] =  siteConnectivity(file_loc, con_cutoff, agg_func, swap, site_order)
 % Create transitional probability matrix indicating connectivity between
 % sites, level of centrality, and the strongest predecessor for each site.
 %
@@ -13,13 +13,16 @@ function [TP_data, site_ranks, strongpred, site_ids] =  siteConnectivity(file_lo
 %                  network (defined by user or defaults in simConstants)
 %   agg_func   : function_handle, defaults to `mean`.
 %   swap       : logical, whether to transpose data.
+%   site_order : string, array of recom connectivity IDs indicating order
+%                  of TP values
 %
 % Output:
 %   TP_data    : table[float], containing the transition probability for 
 %                  all sites
 %   site_ranks : table[float], centrality for each site
 %   strongpred : matrix[float], strongest predecessor for each site
-%   transpose  : logical, whether to transpose matrix or not.
+%   site_ids   : string, site IDs, order of which indicates the row/columns
+%   truncated  : vector, of index positions that were removed
 %
 % Example: 
 %     siteConnectivity('MooreTPmean.xlsx', 0.1)

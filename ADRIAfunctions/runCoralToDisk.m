@@ -1,6 +1,6 @@
 function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               TP_data, site_ranks, strongpred, ...
-                              init_cov, ...
+                              initial_cover, ...
                               n_reps, wave_scen, dhw_scen, site_data, ...
                               collect_logs, file_prefix, batch_size, ...
                               metrics)
@@ -11,13 +11,19 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %
 % Inputs:
 %    interv       : table, of intervention scenarios
-%    criteria     : table, of criteria weights for each scenario
-%    coral_params : table, of ecological parameter permutations
+%    crit_weights : table, of criteria weights for each scenario
+%    coral_params : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
-%    wave_scen    : matrix[timesteps, nsites, n_reps], spatio-temporal wave damage scenario
-%    dhw_scen     : matrix[timesteps, nsites, n_reps], degree heating weeek scenario
-%    site_data    : table, holding max coral cover, recom site ids, etc.
-%    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
+%    TP_data      : matrix, of transition probabilities (connectivity)
+%    site_ranks   :
+%    strongpred   : matrix, strongest predecessor for each site
+%    initial_cover: matrix[timesteps, nsites, N], initial coral cover data
+%    n_reps       : int, number of replicates to use
+%    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
+%    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
+%    site_data    : table, of site data
+%    collect_logs : string, indication of what logs/meta-metrics to collect
+%    - "seed", "shade", "site_rankings", "RCI", "RFI", etc.
 %    file_prefix : str, write results to batches of netCDFs instead of
 %                    storing in memory.
 %    batch_size : int, size of simulation batches to run/save when writing
@@ -84,27 +90,20 @@ end
 clear('intervs')
 clear('crit_weights')
 
-% Some sites are within the same grid cell for connectivity
-% Here, we find those sites and map the connectivity data
-% (e.g., repeat the relevant row/columns)
-[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
-TP_data = TP_data(g_idx, g_idx);
-
 w_scen_ss = wave_scen(:, :, 1:n_reps);
 d_scen_ss = dhw_scen(:, :, 1:n_reps);
 
 % Catch for special edge case when only a single scenario is available
-coral_cover_dims = ndims(init_cov);
+coral_cover_dims = ndims(initial_cover);
 if coral_cover_dims == 3
-    init_cov = init_cov(:, :, 1:n_reps);
+    initial_cover = initial_cover(:, :, 1:n_reps);
 elseif coral_cover_dims == 2
-    init_cov = repmat(init_cov, 1, nsites, n_reps);
+    initial_cover = repmat(initial_cover, 1, 1, n_reps);
 end
 
 parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
-    initial_cover = init_cov;
     
     tmp_fn = strcat(file_prefix, '_[[', num2str(b_start), '-', num2str(b_end), ']].nc');
     if isfile(tmp_fn)
@@ -147,10 +146,6 @@ parfor b_i = 1:n_batches
         % Note: This slows things down considerably
         % Could rejig everything to use (subset of) the table directly...
         scen_coral_params = extractCoralSamples(b_cp(i, :), coral_spec);
-
-        if isempty(initial_cover)
-            initial_cover = repmat(scen_coral_params.basecov, 1, nsites, n_reps);
-        end
         
         raw = zeros(timesteps, nspecies, nsites, 1, n_reps);
 
