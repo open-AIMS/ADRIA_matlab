@@ -199,8 +199,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % matrix in which to store the output
     Yout = zeros(tf, nspecies, nsites);
 
-    % Set initial population sizes at tstep = 1
-    % init_cov = permute(init_cov, [1,3,2]);
+    % Set initial population sizes at tstep = 1    
     Yout(1, :, :) = init_cov;
 
     % These logs need to be collected as part of the run

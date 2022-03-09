@@ -46,7 +46,6 @@ max_shelter_volume_colony_m3_per_ha = max_shelter_volume_colony_litres_per_cm2 *
 sv = zeros(ntsteps, nspecies, nsites, nint, nreps);
 for sp = 1:36
     sv(:,sp,:,:,:) = (shelter_volume_colony_m3_per_ha(sp)/max_shelter_volume_colony_m3_per_ha(sp)).*X(:,sp,:,:,:);
-    %
 end
 
 % sum over groups and size classes to estimate total shelter volume per ha
