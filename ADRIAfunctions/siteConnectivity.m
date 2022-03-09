@@ -31,6 +31,7 @@ arguments
     con_cutoff {mustBeFloat}
     agg_func = function_handle @mean
     swap logical = false
+    site_order = []
 end
 
 if isfolder(file_loc)
@@ -67,11 +68,36 @@ if isfolder(file_loc)
     % This is to ensure identical indexes when matching up with spatial 
     % site data, which will also be ordered by site id.
     site_ids = string(x.Properties.RowNames);
+    
+    if ~isempty(site_order)
+        % Match up matrix order with site ids
+        order_idx = NaN(length(site_order), 1);
+        truncated = [];
+        for i = 1:length(site_order)
+            try
+                order_idx(i) = find(site_order(i) == site_ids);
+            catch err
+                if err.identifier == "MATLAB:matrix:singleSubscriptNumelMismatch"
+                    warning(strcat(site_order(i), " not found in site_ids! This site will be removed from runs."))
+                    truncated(max(1, length(truncated))) = i;
+                end
+            end
+        end
+        
+        if truncated
+            order_idx(truncated) = [];
+            site_order(i) = [];
+        end
+        
+        site_ids = site_order;
+    else
+        % Reorder rows/columns to ensure identical indexes when matching up
+        % with ordered spatial data
+        [site_ids, order_idx] = sort(site_ids);
+    end
 
-    [site_ids, order_idx] = sort(site_ids);  % reordering
     x = x(order_idx, order_idx);  % enforce order
-    
-    
+
     x_tmp = table2array(x);
     x_tmp(isnan(x_tmp)) = 0;  % Convert NaNs to 0
     if swap
@@ -113,9 +139,34 @@ else
     x = readtable(file_loc, 'ReadRowNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
     site_ids = string(x.Properties.RowNames);
     
-    % Reorder rows/columns to ensure identical indexes when matching up
-    % with ordered spatial data
-    [site_ids, order_idx] = sort(site_ids);
+    if ~isempty(site_order)
+        % Match up matrix order with site ids
+        order_idx = NaN(length(site_order), 1);
+        truncated = [];
+        for i = 1:length(site_order)
+            try
+                order_idx(i) = find(site_order(i) == site_ids);
+            catch err
+                if err.identifier == "MATLAB:matrix:singleSubscriptNumelMismatch"
+                    warning(strcat(site_order(i), " not found in site_ids! This site will be removed from runs."))
+                    truncated(max(1, length(truncated))) = i;
+                end
+            end
+        end
+        
+        if truncated
+            order_idx(truncated) = [];
+            site_order(i) = [];
+        end
+        
+        site_ids = site_order;
+    else
+        % Reorder rows/columns to ensure identical indexes when matching up
+        % with ordered spatial data
+        [site_ids, order_idx] = sort(site_ids);
+    end
+    
+    % Connectivity data should be in same order as site_data
     x = x(order_idx, order_idx);
     
     x_tmp = table2array(x);
