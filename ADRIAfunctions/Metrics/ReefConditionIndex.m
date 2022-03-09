@@ -39,7 +39,7 @@ E_i = E_func(E);
 SV_i = SV_func(SV);
 juv_i = juv_func(juveniles);
 
-Y = TC_i + E_i + SV_i + juv_i ./ 4;
+Y = (TC_i + E_i + SV_i + juv_i) ./ 4;
 
 %%%%%
 
