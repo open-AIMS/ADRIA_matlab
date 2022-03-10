@@ -40,7 +40,7 @@ function collated_mets = gatherSummary(file_loc, target_var, summarize)
         b_start = md.record_start;
         var_names = string(Ytable.Properties.VariableNames);
         if (target_var == "all") && ~ismember(target_var, var_names)                
-            parfor i = b_start:md.record_end
+            for i = b_start:md.record_end
                 x = i - b_start + 1;
                 Y_collated(i) = {table2struct(Ytable(x, :))};
             end
@@ -58,8 +58,10 @@ function collated_mets = gatherSummary(file_loc, target_var, summarize)
     collated_mets = struct();
     log_entries = fnames(~contains(fnames, ["mean", "std", "median", "std", "min", "max"]));
     if ~isempty(log_entries)
-        for logs = log_entries
-            collated_mets.(logs) = concatMetrics(Y_collated, logs);
+        for logs = log_entries'
+            % Get the average across all replicates
+            tmp = concatMetrics(Y_collated, logs);
+            collated_mets.(logs) = mean(tmp, ndims(tmp));
         end
     end
 
