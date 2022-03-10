@@ -71,7 +71,7 @@ ai.runToDisk(input_table, sampled_values=false, nreps=n_reps, ...
     batch_size=ceil(N / num_workers), metrics=desired_metrics, ...
     summarize=true, collect_logs=["fog", "seed", "site_rankings"]);
 tmp = toc;
-disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N * n_reps)), " seconds per run)"))
+disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N * n_reps)), " seconds per run; ", num2str(tmp/N), " seconds per scenario)"))
 
 % Get summary stats for all metrics
 Y = ai.gatherSummary('D:/ADRIA_results/Brick_Mar_deliv_trial2/Brick_Mar_deliv_trial');
