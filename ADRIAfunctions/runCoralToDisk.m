@@ -32,7 +32,8 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 % Output:
 %    results : struct,
 %          - Y, [n_timesteps, n_sites, N, n_reps]
-%          - seed_log, [n_timesteps, n_sites, N, n_species, n_reps]
+%          - seed_log, [n_timesteps, n_sites, N, 2, n_reps]
+%          - shade_log, [n_timesteps, n_sites, N, n_reps]
 %          - shade_log, [n_timesteps, n_sites, N, n_reps]
 %
 % Example:
@@ -121,6 +122,7 @@ parfor b_i = 1:n_batches
     % uninitialized temporary variables
     seed_log = [];
     shade_log = [];
+    fog_log = [];
     rankings = [];
     
     if any(strlength(collect_logs) > 0)
@@ -131,6 +133,10 @@ parfor b_i = 1:n_batches
 
         if any(ismember("shade", collect_logs))
             shade_log = zeros(timesteps, nsites, 1, n_reps);
+        end
+        
+        if any(ismember("fog", collect_logs))
+            fog_log = zeros(timesteps, nsites, 1, n_reps);
         end
 
         if any(ismember("site_rankings", collect_logs))
@@ -166,6 +172,10 @@ parfor b_i = 1:n_batches
                     shade_log(:, :, 1, j) = res.shade_log;
                 end
                 
+                if any(ismember("fog", collect_logs))
+                    fog_log(:, :, 1, j) = res.fog_log;
+                end
+                
                 if any(ismember("site_rankings", collect_logs))
                     rankings(:, :, :, 1, j) = res.site_rankings;
                 end
@@ -190,6 +200,10 @@ parfor b_i = 1:n_batches
 
             if any(ismember("shade", collect_logs))
                 tmp_d.shade_log = shade_log;
+            end
+            
+            if any(ismember("fog", collect_logs))
+                tmp_d.fog_log = fog_log;
             end
 
             if any(ismember("site_rankings", collect_logs))

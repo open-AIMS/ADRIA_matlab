@@ -215,6 +215,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     % These logs need to be collected as part of the run
     Yshade = ndSparse(zeros(tf, nsites));
+    Yfog = ndSparse(zeros(tf, nsites));
     Yseed = ndSparse(zeros(tf, 2, nsites)); % only log seedable corals to save memory
 
     if any(strlength(collect_logs) > 0)
@@ -306,12 +307,17 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         % Calculate bleaching mortality
         Sbl = 1 - ADRIA_bleachingMortality(tstep, neg_e_p1, ...
-            neg_e_p2, assistadapt, ...
-            natad, bleach_resist, adjusted_dhw, fogging);
+                    neg_e_p2, assistadapt, natad, ...
+                    bleach_resist, adjusted_dhw);
 
         % proportional loss + proportional recruitment
         prop_loss = Sbl .* squeeze(Sw_t(p_step, :, :));
         Yin1 = Y_pstep .* prop_loss;
+
+        if fogging > 0.0
+            Yin1(:, prefshadesites) = Yin1(:, prefshadesites) .* (1.0 - fogging);
+            Yfog(tstep, prefshadesites) = fogging;
+        end
 
         if (tstep <= (seed_start_year + seedyears)) && ~all(prefseedsites == 0)
             col_area_seed1 = coral_params.colony_area_cm2(s1_idx) / (10^4); % extract colony areas for sites selected and convert to m^2
@@ -321,21 +327,14 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
             scaled_seed1 = ((seed1 / nsiteint) * col_area_seed1) ./ site_area_seed;
             scaled_seed2 = ((seed2 / nsiteint) * col_area_seed2) ./ site_area_seed;
+
             % Seed each site with the value indicated with seed1/seed2
             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + scaled_seed1'; % seed Enhanced Tabular Acropora
             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + scaled_seed2'; % seed Enhanced Corymbose Acropora
 
             % Log seed values/sites
-            Yseed(tstep, s1_idx, prefseedsites) = scaled_seed1'; % log site as seeded with Enhanced Tabular Acropora
-            Yseed(tstep, s2_idx, prefseedsites) = scaled_seed2'; % log site as seeded with Enhanced Corymbose Acropora
-
-            %             % Seed each site with the value indicated with seed1 and/or seed2
-            %             Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + seed1; % seed Enhanced Tabular Acropora
-            %             Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + seed2; % seed Enhanced Corymbose Acropora
-            %
-            %             % Log seed values/sites
-            %             Yseed(tstep, 1, prefseedsites) = seed1; % log site as seeded with Enhanced Tabular Acropora
-            %             Yseed(tstep, 2, prefseedsites) = seed2; % log site as seeded with Enhanced Corymbose Acropora
+            Yseed(tstep, 1, prefseedsites) = scaled_seed1'; % log site as seeded with Enhanced Tabular Acropora
+            Yseed(tstep, 2, prefseedsites) = scaled_seed2'; % log site as seeded with Enhanced Corymbose Acropora
 
         end
 
@@ -365,6 +364,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         if any(ismember("shade", collect_logs))
             results.shade_log = full(Yshade);
+        end
+        
+        if any(ismember("fog", collect_logs))
+            results.fog_log = full(Yfog);
         end
 
         if any(ismember("site_rankings", collect_logs))
