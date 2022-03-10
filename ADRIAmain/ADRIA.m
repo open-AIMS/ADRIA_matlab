@@ -239,7 +239,7 @@ classdef ADRIA < handle
             end
             
             sdata = readtable(filename);
-            tmp_s = sdata(:, ["reef_siteid", "area", k_col, "sitedepth", "recom_connectivity"]);
+            tmp_s = sdata(:, ["reef_siteid", "area", k_col, "sitedepth", "recom_connectivity", "lat", "long"]);
 
             % Sort site data by reef id
             obj.site_data = sortrows(tmp_s, "reef_siteid");
