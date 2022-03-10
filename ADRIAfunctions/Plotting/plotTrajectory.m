@@ -26,7 +26,7 @@ function fig = plotTrajectory(metric, opts)
 %   >> % Calculate coral shelter volume per ha
 %   >> SV_per_ha = concatMetrics(Y, "shelterVolume");
 %
-%   >> RCI = ReefConditionIndex(evenness, SV_per_ha, TC, juv);
+%   >> RCI = ReefConditionIndex(TC, evenness, SV_per_ha, juv);
 %
 %   >> % Collate summary stats
 %   >> x = struct('SV_per_ha', SV_per_ha);
