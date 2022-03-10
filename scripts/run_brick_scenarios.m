@@ -44,7 +44,7 @@ catch err
     if ~(err.identifier == "parallel:convenience:ConnectionOpen")
         throw(err)
     else
-        p = gcp('nocreate'); % If no pool, do not create new one.
+        p = gcp('nocreate'); % If pool already exists, do not create new one.
     end
 end
 
