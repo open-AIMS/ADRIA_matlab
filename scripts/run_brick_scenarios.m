@@ -31,11 +31,11 @@ cols_to_include = ["Guided", "Seed1", "Seed2", "fogging", "Aadpt", "Natad", ...
 ignore_cols = string(col_names(~ismember(col_names,cols_to_include)));
 input_table = ai.setParameterValues(perm_table, ignore = ignore_cols', partial = false);
 
-N = 512;
+N = height(input_table);
 n_reps = 20;
 
 % debug (figuring out timings)
-input_table = input_table(1:N, :);
+% input_table = input_table(1:N, :);
 
 % Get/create parallel worker pool
 try
@@ -67,14 +67,15 @@ desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
 
 tic
 ai.runToDisk(input_table, sampled_values=false, nreps=n_reps, ...
-    file_prefix='D:/ADRIA_results/Brick_Mar_deliv_trial2/Brick_Mar_deliv_trial', ...
+    file_prefix='D:/ADRIA_results/Brick_Mar_deliv/Brick_Mar_deliv_runs', ...
     batch_size=ceil(N / num_workers), metrics=desired_metrics, ...
     summarize=true, collect_logs=["fog", "seed", "site_rankings"]);
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N * n_reps)), " seconds per run; ", num2str(tmp/N), " seconds per scenario)"))
 
 % Get summary stats for all metrics
-Y = ai.gatherSummary('D:/ADRIA_results/Brick_Mar_deliv_trial2/Brick_Mar_deliv_trial');
+Y = ai.gatherSummary('D:/ADRIA_results/Brick_Mar_deliv/Brick_Mar_deliv_runs');
+save("D:/ADRIA_results/Brick_Mar_deliv/brick_runs.mat", "-struct", "Y")
 
-mean_rci = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.mean, Y.coralEvenness.mean, Y.shelterVolume.mean, Y.coralTaxaCover_x_p_juveniles.mean);
-plotTrajectory(summarizeMetrics(struct('RCI_mean', mean_rci)).RCI_mean);
+% mean_rci = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.mean, Y.coralEvenness.mean, Y.shelterVolume.mean, Y.coralTaxaCover_x_p_juveniles.mean);
+% plotTrajectory(summarizeMetrics(struct('RCI_mean', mean_rci)).RCI_mean);
