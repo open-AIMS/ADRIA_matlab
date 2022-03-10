@@ -75,7 +75,25 @@ disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simu
 
 % Get summary stats for all metrics
 Y = ai.gatherSummary('D:/ADRIA_results/Brick_Mar_deliv/Brick_Mar_deliv_runs');
+Y.inputs = input_table;
+Y.sim_constants = ai.constants;
 save("D:/ADRIA_results/Brick_Mar_deliv/brick_runs.mat", "-struct", "Y")
+
+% Write seed ranks
+ranks_to_send = table();
+ranks_to_send.reef_id = string(ai.site_data{:, "reef_siteid"});
+seed_ranks = siteRanking(mean(Y.site_rankings, ndims(Y.site_rankings)), "seed");
+
+ranks_to_send.site_rank = seed_ranks;
+ranks_to_send.lat = ai.site_data{:, "lat"};
+ranks_to_send.long = ai.site_data{:, "long"};
+ranks_to_send = sortrows(ranks_to_send, "site_rank");
+relative_rank = 1:height(ranks_to_send);
+relative_rank = relative_rank';  % this transpose is necessary here otherwise column name is lost.
+ranks_to_send = addvars(ranks_to_send, relative_rank, 'Before', 'site_rank');
+writetable(ranks_to_send, "./Outputs/Brick_seed_site_ranks.csv");
 
 % mean_rci = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.mean, Y.coralEvenness.mean, Y.shelterVolume.mean, Y.coralTaxaCover_x_p_juveniles.mean);
 % plotTrajectory(summarizeMetrics(struct('RCI_mean', mean_rci)).RCI_mean);
+
+plotTrajectory(Y.coralTaxaCover_x_p_total_cover)
