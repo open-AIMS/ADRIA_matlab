@@ -1,5 +1,7 @@
 function collated_mets = gatherSummary(file_loc, target_var, summarize)
 % Gather summary statistics of results saved across many NetCDF files.
+% Should only used with result sets created by running ADRIA with
+% `ai.runToDisk(___, summarize=true)`
 %
 % Inputs:
 %   file_loc   : str, directory location and filename prefix
@@ -34,15 +36,15 @@ function collated_mets = gatherSummary(file_loc, target_var, summarize)
     for file = file_info'
         fn = file.name;
         full_path = fullfile(folder, fn);
-        
+
         [Ytable, md] = readDistributed(full_path, target_var);
         
         b_start = md.record_start;
         var_names = string(Ytable.Properties.VariableNames);
+        collated_res = {};
         if (target_var == "all") && ~ismember(target_var, var_names)                
             for i = b_start:md.record_end
-                x = i - b_start + 1;
-                Y_collated(i) = {table2struct(Ytable(x, :))};
+                Y_collated(i) = {table2struct(Ytable(i - b_start + 1, :))};
             end
         end
     end
@@ -61,7 +63,8 @@ function collated_mets = gatherSummary(file_loc, target_var, summarize)
         for logs = log_entries'
             % Get the average across all replicates
             tmp = concatMetrics(Y_collated, logs);
-            collated_mets.(logs) = mean(tmp, ndims(tmp));
+            collated_mets.(logs) = ndSparse(mean(tmp, ndims(tmp)));
+            clear tmp
         end
     end
 
@@ -105,12 +108,12 @@ function [result, md] = readDistributed(filename, target_var)
     end
 
     % Get information about NetCDF data source
-    fileInfo = ncinfo(filename);
+    file_info = ncinfo(filename);
     md = getADRIARunMetadata(filename);
 
     % Extract variable names and datatypes
     try
-        var_names = string({fileInfo.Variables.Name});
+        var_names = string({file_info.Variables.Name});
         is_group = false;
     catch ME
         if strcmp("MATLAB:structRefFromNonStruct", ME.identifier)
@@ -119,9 +122,12 @@ function [result, md] = readDistributed(filename, target_var)
             rethrow(ME)
         end
     end
-    
+
     nsims = md.n_sims;
     result = table();
+
+    % Open netcdf file once
+    ncid = netcdf.open(filename, 'NC_NOWRITE');
 
     if ~is_group
         % Handle older result structure where results were ungrouped
@@ -135,96 +141,127 @@ function [result, md] = readDistributed(filename, target_var)
                 % desired...
                 continue
             end
+            
+            var_id = netcdf.inqVarID(ncid, var_n);
+            tmp = netcdf.getVar(ncid, var_id, 'single');
 
-            tmp = ncread(filename, var_n);
             dim_len = ndims(tmp);
             switch dim_len
                 case 5
-                    parfor i = 1:nsims
-                        result(i, var_n) = {tmp(:, :, :, i, :)};
-                    end
+                    result(1:nsims, var_n) = {tmp(:, :, :, 1:nsims, :)};
                 case 4
-                    parfor i = 1:nsims
-                        result(i, var_n) = {tmp(:, :, i, :)};
-                    end
+                    result(1:nsims, var_n) = {tmp(:, :, 1:nsims, :)};
                 otherwise
                     error("Unexpected number of dims in result file");
             end
+
+            clear tmp;
         end
         
         return
     end
 
     % Handle cases where results were grouped
-    vars = fileInfo.Groups.Variables;
+    vars = file_info.Groups.Variables;
     nsims = md.n_sims;
+
+    % Get group IDs
+    group_ids = netcdf.inqGrps(ncid);
     
     if (target_var == "all") && ~contains(target_var, string({vars.Name}))
         % "all" is not in list of variables, so actually get everything
 
         % prep table first
         for v = 1:length(vars)
-            var_name = vars(v).Name;
-            result.(var_name) = cell(nsims, 1);
+            result.(vars(v).Name) = cell(nsims, 1);
         end
 
-        parfor v = 1:length(vars)
-            var_name = vars(v).Name;
-            for run_id = 1:nsims
-                grp_name = strcat("run_", num2str(run_id));
+        % Collate data
+        num_groups = length(group_ids);
+        for run_id = 1:num_groups
+            grp_id = group_ids(run_id);
+            var_ids = netcdf.inqVarIDs(grp_id);
+    
+            for v_pos = 1:length(var_ids)
+                v_id = var_ids(v_pos);
+                v = netcdf.inqVar(grp_id, v_id);
 
-                entry = strcat('/', grp_name, '/', var_name);
-                tmp = ncread(filename, entry);
-                
-                switch ndims(tmp)
-                    case 5
-                        result(run_id, v) = {tmp(:, :, :, 1, :)};
-                    case 4
-                        result(run_id, v) = {tmp(:, :, 1, :)};
-                    case {2,3}
-                        result(run_id, v) = {tmp};
-                    otherwise
-                        error("Unexpected number of dims in result file");
-                end
+                result(run_id, v) = {netcdf.getVar(grp_id, v_id, 'single')};
             end
         end
+
+%         for v = 1:length(vars)
+%             var_name = vars(v).Name;
+%             for run_id = 1:nsims
+%                 entry = strcat("/", "run_", num2str(run_id), "/", var_name);
+% 
+%                 var_id = netcdf.inqVarID(ncid, entry);
+%                 tmp = netcdf.getVar(ncid, var_id, 'single');
+%                 
+%                 switch ndims(tmp)
+%                     case 5
+%                         result(run_id, v) = {tmp(:, :, :, 1, :)};
+%                     case 4
+%                         result(run_id, v) = {tmp(:, :, 1, :)};
+%                     case {2,3}
+%                         result(run_id, v) = {tmp};
+%                     otherwise
+%                         error("Unexpected number of dims in result file");
+%                 end
+%             end
+%             
+%             tmp = [];  % clear tmp
+%         end
     elseif contains(target_var, string({vars.Name}))
         % Single target variable
-        result.(target_var) = repmat({0}, nsims, 1);
-        parfor run_id = 1:nsims
-            grp_name = strcat("run_", num2str(run_id));
-            entry = strcat('/', grp_name, '/', target_var);
-            tmp = single(ncread(filename, entry));
+        result.(target_var) = cell(nsims, 1);
 
-            switch ndims(tmp)
-                case 5
-                    result(run_id, 1) = {tmp(:, :, :, 1, :)};
-                case 4
-                    result(run_id, 1) = {tmp(:, :, 1, :)};
-                case {2,3}
-                    result(run_id, 1) = {tmp};
-                otherwise
-                    error("Unexpected number of dims in result file");
-            end
-        end
-    elseif target_var == "all"
-        % single variable named "all"
-        result.(target_var) = repmat({0}, nsims, 1);
-        parfor run_id = 1:nsims
-            grp_name = strcat("run_", num2str(run_id));
-            entry = strcat('/', grp_name, '/', 'all');
-            tmp = ncread(filename, entry);
+        % Collate data
+        num_groups = length(group_ids);
+        for run_id = 1:num_groups
+            grp_id = group_ids(run_id);
 
-            switch ndims(tmp)
-                case 5
-                    result(run_id, 1) = {tmp(:, :, :, 1, :)};
-                case 4
-                    result(run_id, 1) = {tmp(:, :, 1, :)};
-                otherwise
-                    error("Unexpected number of dims in result file");
-            end
+            var_id = netcdf.inqVarID(grp_id, target_var);
+            result(run_id, target_var) = {netcdf.getVar(grp_id, var_id, 'single')};
+
+%             switch ndims(tmp)
+%                 case 5
+%                     result(run_id, target_var) = {tmp(:, :, :, 1, :)};
+%                 case 4
+%                     result(run_id, target_var) = {tmp(:, :, 1, :)};
+%                 case {2,3}
+%                     result(run_id, target_var) = {tmp};
+%                 otherwise
+%                     error("Unexpected number of dims in result file");
+%             end
+% 
+%             tmp = [];
         end
+
+%     elseif target_var == "all"
+%         % single variable named "all"
+%         result.(target_var) = repmat({0}, nsims, 1);
+%         for run_id = 1:nsims
+%             grp_name = strcat("run_", num2str(run_id));
+%             entry = strcat('/', grp_name, '/', 'all');
+%             
+%             var_id = netcdf.inqVarID(ncid, entry);
+%             tmp = netcdf.getVar(ncid, var_id, 'single');
+% 
+%             switch ndims(tmp)
+%                 case 5
+%                     result(run_id, 1) = {tmp(:, :, :, 1, :)};
+%                 case 4
+%                     result(run_id, 1) = {tmp(:, :, 1, :)};
+%                 otherwise
+%                     error("Unexpected number of dims in result file");
+%             end
+%         end
+%         
+%         tmp = [];
     end
+    
+    netcdf.close(ncid);
 end
 
 
