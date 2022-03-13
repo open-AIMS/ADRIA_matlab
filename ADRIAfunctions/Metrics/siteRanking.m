@@ -13,9 +13,14 @@ function mean_r = siteRanking(rankings, orient, func)
 % Outputs:
 %     s : matrix[nsites, 1],
     arguments
-        rankings double
+        rankings
         orient string
         func = @mean
+    end
+    
+    % Convert sparse matrices if necessary
+    if isa(rankings, 'ndSparse')
+        rankings = full(rankings);
     end
     
     % Make non-selected sites affect stats negatively
