@@ -44,6 +44,8 @@ function mean_r = siteRanking(rankings, orient, func)
     switch res_type
         case 3
             mean_r = func(squeeze(rankings(:, :, target_col)), 1)';
+        case 4
+            mean_r = func(squeeze(rankings(:, :, target_col, :)), [3, 1])';
         case 5
             try
                 mean_r = func(squeeze(func(squeeze(rankings(:, :, target_col, :, :)), 1)), [2,3]);
