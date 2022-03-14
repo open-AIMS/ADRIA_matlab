@@ -582,9 +582,17 @@ classdef ADRIA < handle
             Y = gatherResults(file_loc, coral, metrics, target_var);
         end
 
-        function Y = gatherSummary(obj, file_loc)
+        function Y = gatherSummary(obj, file_loc, opts)
             % Gather summarized result sets from batch runs.
-            Y = gatherSummary(file_loc);
+            arguments
+                obj
+                file_loc string
+                opts.target_var = "all"
+                opts.scenarios = [];
+                opts.summarize = false
+            end
+
+            Y = gatherSummary(file_loc, target_var=opts.target_var, scenarios=opts.scenarios, summarize=opts.summarize);
         end
         
         function updated = setParameterValues(obj, values, opts)
