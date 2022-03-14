@@ -8,8 +8,8 @@ function collated_mets = gatherSummary(file_loc, opts)
 %                  e.g., "./some_folder/file_prefix"
 %   target_var : str, variable to collate (returns all results if not
 %                  specified)
-%   scenarios  : array, of indices or booleans indicating which scenarios
-%                  to keep. Defaults to all.
+%   scenarios  : array, of indices for which scenarios to read in.
+%                  (defaults to all)
 %   summarize  : logical, to generate a single set of summary stats (true), or
 %                  to keep summary stats separate for each scenario (false; the default)
 %
@@ -40,9 +40,9 @@ function collated_mets = gatherSummary(file_loc, opts)
     full_path = fullfile(folder, fn);
 
     % Get initial dataset
-    [Ycollated, ~] = readDistributed(full_path, target_var);
+    [Ycollated, ~] = readDistributed(full_path, target_var, scenarios);
     var_names = string(fieldnames(Ycollated));
-    if contains("all", var_names)
+    if target_var == "all" && contains("all", var_names)
         var_names = "all";
     end
 
@@ -57,21 +57,38 @@ function collated_mets = gatherSummary(file_loc, opts)
         vn = var_names(vid);
 
         v_count = v_count + 1;
+        
+        try
+            % Wrap call to wait bar around try/catch in case user
+            % accidentally closes the dialog
+            waitbar(v_count/num_vars, wb, strcat("Reading ", num2str(v_count), " of ", num_vars_str, " metrics/logs"));
+        catch
+        end
 
-        waitbar(v_count/num_vars, wb, strcat("Reading ", num2str(v_count), " of ", num_vars_str, " metrics/logs"));
         for file = file_info(2:end)'
             fn = file.name;
             full_path = fullfile(folder, fn);
 
-            [Ystruct, ~] = readDistributed(full_path, vn);
+            [Ystruct, ~] = readDistributed(full_path, vn, scenarios);
 
-            nd = ndims(Ycollated.(vn));
-            if nd < 5
-                nd_tmp = nd;
-            elseif nd == 5
-                nd_tmp = 4;
+            if isempty(Ystruct.(vn))
+                continue
             end
-
+            
+            if isempty(Ycollated.(vn))
+                Ycollated.(vn) = Ystruct.(vn);
+                continue
+            end
+            
+            nd = ndims(Ycollated.(vn));
+            
+            switch nd
+                case {5, 4}
+                    nd_tmp = nd - 1;
+                case 3
+                    nd_tmp = nd;
+            end
+            
             Ycollated.(vn) = cat(nd_tmp, Ycollated.(vn), Ystruct.(vn));
         end
 
@@ -79,12 +96,6 @@ function collated_mets = gatherSummary(file_loc, opts)
             tmp = split(vn, "__");
             stat = tmp(2);
             stat_func = str2func(stat);
-
-            if ~isempty(scenarios)
-                tmp = Ycollated.(vn);
-                Ycollated.(vn) = tmp(:, :, scenarios);
-                clear tmp;
-            end
 
             if summarize
                 % Otherwise just combine results into one giant result set
@@ -107,27 +118,17 @@ function collated_mets = gatherSummary(file_loc, opts)
                 % once across replicates, another across scenarios
                 Ycollated.(vn) = squeeze(mean(Ycollated.(vn), 5));
 
-                if ~isempty(scenarios)
-                    tmp = Ycollated.(vn);
-                    Ycollated.(vn) = tmp(:, :, :, scenarios);
-                    clear tmp;
-                end
-
                 if summarize
                     Ycollated.(vn) = squeeze(mean(Ycollated.(vn), 4));
                 end
-            elseif nd < 5
-                if vn == "fog_log"
-                    % Handle special case for fog_log with ndims == 4
+            elseif nd == 4
+                % Handle special case for fog_log with ndims == 4
+                Ycollated.(vn) = squeeze(mean(Ycollated.(vn), 4));
+                
+                if summarize
                     Ycollated.(vn) = squeeze(mean(Ycollated.(vn), 3));
                 end
-
-                if ~isempty(scenarios)
-                    tmp = Ycollated.(vn);
-                    Ycollated.(vn) = tmp(:, :, scenarios);
-                    clear tmp;
-                end
-
+            else
                 if summarize
                     Ycollated.(vn) = squeeze(mean(Ycollated.(vn), 3));
                 end
@@ -135,9 +136,10 @@ function collated_mets = gatherSummary(file_loc, opts)
         end
     end
 
-    waitbar(1,wb,'Finishing');
-    
-    waitbar(1, wb, 'Collating...');
+    try
+        waitbar(1,wb,'Collating...');
+    catch
+    end
     
     fnames = string(fieldnames(Ycollated));
 
@@ -146,9 +148,12 @@ function collated_mets = gatherSummary(file_loc, opts)
     unique_entries = unique(string(cellfun(@(x) string(strjoin(x(1:end-1), "__")), split_fnames, 'UniformOutput', false)));
     unique_entries = unique_entries(strlength(unique_entries) > 0);
     
+    % Include any logs
+    unique_entries = [unique_entries; fnames(contains(fnames, ["_rankings", "_log"]))];
+    
     collated_mets = struct();
     for ent = unique_entries'
-        if ~contains(strcat(ent, "__", "mean"), fnames)
+        if ~ismember(strcat(ent, "__mean"), fnames)
             % add log entries
             collated_mets.(ent) = Ycollated.(ent);
             Ycollated.(ent) = [];
@@ -159,7 +164,6 @@ function collated_mets = gatherSummary(file_loc, opts)
         collated_mets.(ent) = struct();
 
         for stat = ["mean", "median", "std", "min", "max"]
-            % stat_func = str2func(stat);
             tmp_fn = strcat(ent, "__", stat);
             
             % Combine results into one giant result set
@@ -168,20 +172,52 @@ function collated_mets = gatherSummary(file_loc, opts)
         end
     end
 
-    close(wb);
+    try
+        close(wb);
+    catch
+    end
 end
 
 
-function [result, md] = readDistributed(filename, target_var)
+function [result, md] = readDistributed(filename, target_var, scenarios)
 % Helper to read ADRIA reef condition data chunked into separate files.
     arguments
         filename string
         target_var string
+        scenarios = []
     end
 
     % Get information about NetCDF data source
     file_info = ncinfo(filename);
     md = getADRIARunMetadata(filename);
+    
+    if ~isempty(scenarios)
+        scenarios = ismember(md.record_start:md.record_end, scenarios);
+        if ~any(scenarios)
+            result = struct();
+            
+            try
+                var_names = string({file_info.Variables.Name});
+            catch err
+                if err.message == "Dot indexing is not supported for variables of this type."
+                    vars = file_info.Groups.Variables;
+                    var_names = string({vars.Name});
+                else
+                    rethrow(err);
+                end
+            end
+
+            if ismember(target_var, var_names)
+                result.(target_var) = [];
+            else
+                for v = 1:length(var_names)
+                    result.(var_names(v)) = [];
+                end
+            end
+            
+            return
+        end
+    end
 
     % Extract variable names and datatypes
     try
@@ -201,6 +237,7 @@ function [result, md] = readDistributed(filename, target_var)
     % Open netcdf file once
     ncid = netcdf.open(filename, 'NC_NOWRITE');
 
+    % TODO: Handle older ungrouped datasets
     if ~is_group
         % Handle older result structure where results were ungrouped
         n_vars = length(var_names);
@@ -222,6 +259,7 @@ function [result, md] = readDistributed(filename, target_var)
                 case 5
                     result(1:nsims, var_n) = {tmp(:, :, :, 1:nsims, :)};
                 case 4
+                    % special case fog_log with ndim=4
                     result(1:nsims, var_n) = {tmp(:, :, 1:nsims, :)};
                 otherwise
                     error("Unexpected number of dims in result file");
@@ -246,8 +284,8 @@ function [result, md] = readDistributed(filename, target_var)
         result.(target_var) = [];
         num_vars = 1;
         var_names = var_names(var_names == target_var);
-    else
-        % If above two conditions are not matched, then extract everything
+    elseif target_var == "all"
+        % Extract everything
         for v = 1:length(var_names)
             result.(var_names(v)) = [];
         end
@@ -261,16 +299,22 @@ function [result, md] = readDistributed(filename, target_var)
     for v_id = 1:num_vars
         v = var_names(v_id);
         for run_id = 1:num_groups
+            if ~isempty(scenarios)
+                if ~scenarios(run_id)
+                    continue
+                end
+            end
             grp_id = group_ids(run_id);
             var_id = netcdf.inqVarID(grp_id, v);
 
             tmp = netcdf.getVar(grp_id, var_id, 'single');
 
             nd = ndims(tmp);
-            if nd == 5
-                nd_tmp = 4;
-            else
-                nd_tmp = nd+1;
+            switch nd
+                case {5,4}
+                    nd_tmp = nd - 1;
+                case {2,3}
+                    nd_tmp = nd + 1;
             end
 
             if contains(v, log_match)
@@ -283,6 +327,7 @@ function [result, md] = readDistributed(filename, target_var)
         end
         
         result.(v) = squeeze(result.(v));
+        
     end
     
     netcdf.close(ncid);
