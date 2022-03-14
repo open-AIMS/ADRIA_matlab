@@ -8,8 +8,8 @@ function fig = plotTrajectory(metric, opts)
 % Inputs:
 %   metric   : struct, of summary statistics for given metric
 %   extremes : logical, whether to show min/max extremes or not.
-%   p_title  : string, plot title (optional)
-%   y_label  : string, y-axis label (optional)
+%   title  : string, plot title (optional)
+%   ylabel  : string, y-axis label (optional)
 %
 % Outputs:
 %   fig : figure object
