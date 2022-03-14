@@ -591,6 +591,10 @@ classdef ADRIA < handle
                 opts.scenarios = [];
                 opts.summarize = false
             end
+            
+            if isempty(opts.scenarios)
+                warning("Targeted scenario option was empty, so collecting all scenarios run...")
+            end
 
             Y = gatherSummary(file_loc, target_var=opts.target_var, scenarios=opts.scenarios, summarize=opts.summarize);
         end
