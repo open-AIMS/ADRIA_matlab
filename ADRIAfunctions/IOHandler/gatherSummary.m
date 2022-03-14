@@ -295,15 +295,17 @@ function [result, md] = readDistributed(filename, target_var, scenarios)
 
     % Collate data
     num_groups = length(group_ids);
-    log_match = ["_log", "_rankings"];
+    % log_match = ["_log", "_rankings"];
     for v_id = 1:num_vars
         v = var_names(v_id);
+
         for run_id = 1:num_groups
             if ~isempty(scenarios)
                 if ~scenarios(run_id)
                     continue
                 end
             end
+
             grp_id = group_ids(run_id);
             var_id = netcdf.inqVarID(grp_id, v);
 
@@ -317,17 +319,18 @@ function [result, md] = readDistributed(filename, target_var, scenarios)
                     nd_tmp = nd + 1;
             end
 
-            if contains(v, log_match)
-                result.(v) = ndSparse(cat(nd_tmp, result.(v), tmp));
-            else
-                result.(v) = cat(nd_tmp, result.(v), tmp);
-            end
+%             if contains(v, log_match)
+%                 result.(v) = ndSparse(cat(nd_tmp, result.(v), tmp));
+%             else
+%                 result.(v) = cat(nd_tmp, result.(v), tmp);
+%             end
+
+            result.(v) = cat(nd_tmp, result.(v), tmp);
 
             clear tmp;
         end
         
         result.(v) = squeeze(result.(v));
-        
     end
     
     netcdf.close(ncid);
