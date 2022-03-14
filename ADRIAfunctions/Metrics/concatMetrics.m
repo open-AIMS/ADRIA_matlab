@@ -1,21 +1,32 @@
-function concated = concatMetrics(Y_all, attr)
+function concated = concatMetrics(Y_all, attr, agg_func)
 % Join collected metric results (by `collectMetrics()`) together.
+arguments
+    Y_all
+    attr
+    agg_func = @(x, dim) x
+end
     nested = split(attr, ".");
+    entry = nested{:};
     
     if isstruct(Y_all)
         % Extract indicated field if not a collection of gathered results
-        concated = squeeze(getfield(Y_all, nested{:}));
+        concated = squeeze(Y_all.(entry));
         return
     end
     
-    concated = getfield(Y_all{1}, nested{:});
-    b = getfield(Y_all{2}, nested{:});
+    concated = getfield(Y_all{1}, entry);
+    a_nd = ndims(concated);
+    
+    concated = agg_func(concated, a_nd);
+    b = agg_func(getfield(Y_all{2}, entry), a_nd);
 
-    concated = cat(ndims(concated)+1, concated, b);
+    concated = squeeze(cat(a_nd+1, concated, b));
     nd = ndims(concated);
+    
+    clear b;
 
     for i = 3:length(Y_all)
-        concated = cat(nd, concated, getfield(Y_all{i}, nested{:}));
+        concated = cat(nd, concated, agg_func(getfield(Y_all{i}, entry), a_nd));
     end
 
     % Reorder into expected dimensions if needed
@@ -26,7 +37,7 @@ function concated = concatMetrics(Y_all, attr)
         end
     end
 
-    if class(concated) == "ndSparse"
-        concated = full(concated);
-    end
+%     if isa(concated, "ndSparse")
+%         concated = full(concated);
+%     end
 end
