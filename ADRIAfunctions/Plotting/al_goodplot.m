@@ -1,4 +1,4 @@
-function [h, mu, sigma, q, notch] = al_goodplot(x, pos, axesh, boxw, col, type, bw, p)
+function [h, mu, sigma, q, notch] = al_goodplot(x, pos, boxw, col, type, bw, p, jitw)
 % Violin and box plots for visualization of data distribution.
 %
 %   Inputs:
@@ -10,6 +10,7 @@ function [h, mu, sigma, q, notch] = al_goodplot(x, pos, axesh, boxw, col, type, 
 %     - bw: 1xP or 1x1, width of the window for kernel density. default: matlab default.
 %     - p: increment for parzen (use the same p for 2 plots to be compared
 %     to enforce the same area.). default: std/1000
+%     - jitw: jitter width for scatter plot: default 0.
 %
 %   Outputs:
 %     - h: figure handle
@@ -17,18 +18,15 @@ function [h, mu, sigma, q, notch] = al_goodplot(x, pos, axesh, boxw, col, type, 
 %     - sigma: standard deviation
 %     - q: quantiles (0 1/4 1/2 3/4 1 1/10 9/10 1/100 99/100)
 %     - notch: 95% confidence interval for median
-
-
 % Parse inputs and set default values
-
-if nargin<6 || isempty(type)
+if nargin<5 || isempty(type)
     type='bilateral';
 end
-if nargin<5 || isempty(col)
-colorOrder = [0.1484,0.5430,0.8203;0.5195,0.5977,0;0.8594,0.1953,0.1836;0.1641,0.6289,0.5938;0.8242,0.2109,0.5078;0.7070,0.5352,0;0.4219,0.4414,0.7656];
-    col=colorOrder(mod(length(get(axesh, 'Children')), size(colorOrder, 1))+1, :);
+if nargin<4 || isempty(col)
+    colorOrder = get(gca, 'ColorOrder');
+    col=colorOrder(mod(length(get(gca, 'Children')), size(colorOrder, 1))+1, :);
 end
-if nargin<4 || isempty(boxw)
+if nargin<3 || isempty(boxw)
     boxw=0.5;
 end
 if nargin<1 || isempty(x)
@@ -40,11 +38,13 @@ end
 if nargin<2 || isempty(pos)
     pos=1:size(x,2);
 end
-if nargin<7 || isempty(p)
+if nargin<7 || isempty(p)  
     p=std(x(:))/1000;
 end
+if nargin<8 || isempty(jitw)  
+    jitw=0;
+end
 u=0.9*min(x(:)):p:1.1*max(x(:));
-
 h=cell(1,size(x,2));
 mu=zeros(1,size(x,2));
 sigma=zeros(1,size(x,2));
@@ -54,14 +54,12 @@ if size(x,1)==1, x=x'; end
 if size(x,2)>1 && size(pos,1)==1, pos=repmat(pos,1,size(x,2)); end
 if size(x,2)>1 && size(col,1)==1, col=repmat(col,size(x,2),1); end
 if size(x,2)>1 && size(boxw,1)==1, boxw=repmat(boxw,1,size(x,2)); end
-
 for i=1:size(x,2)
     % Compute statistics useful to display
     mu(i)=mean(x(:,i));
     sigma(i)=std(x(:,i));
     q(:,i)=al_quantile(x(:,i),[0 1/4 1/2 3/4 1 1/10 9/10 1/100 99/100]);
     notch(:,i)=[q(3,i)-1.57*(q(4,i)-q(2,i))/sqrt(size(x,1)) q(3,i)+1.57*(q(4,i)-q(2,i))/sqrt(size(x,1))];
-    
     % Compute kernel density
     uc=u(u>q(8,i) & u<q(9,i));
     if nargin<6 || isempty(bw)
@@ -73,71 +71,70 @@ for i=1:size(x,2)
     f=boxw(i)*2200*p*f/length(x);
     
     % Plots
-    %h{i}=gcf;
+    h{i}=gcf;
     switch type
         case {'bilateral', 'man'}
-            scatter(axesh,pos(i)*ones(size(x(:,i))),x(:,i),10,col(i,:),'filled');
-            %hold on
-            patch(axesh,[pos(i)-f fliplr(pos(i)+f)], [uc fliplr(uc)], 0.97*col(i,:),'edgecolor','none','facealpha',0.15)
-            patch(axesh,[pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i)+boxw(i)/4 pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i)-boxw(i)/2 pos(i)-boxw(i)/2 pos(i)-boxw(i)/4 pos(i)-boxw(i)/2 pos(i)-boxw(i)/2], [q(2,i) notch(1,i) q(3,i) notch(2,i) q(4,i) q(4,i) notch(2,i) q(3,i) notch(1,i) q(2,i)], 0.97*col(i,:),'edgecolor','none','facealpha',0.5)
-            patch(axesh,[pos(i)-boxw(i)/8 pos(i)+boxw(i)/8 pos(i)+boxw(i)/8 pos(i)-boxw(i)/8 pos(i)-boxw(i)/8], [mu(i)-sigma(i) mu(i)-sigma(i) mu(i)+sigma(i) mu(i)+sigma(i) mu(i)-sigma(i)], col(i,:),'edgecolor','none','facealpha',0.35)
-            plot(axesh,[pos(i)-boxw(i)/4 pos(i)+boxw(i)/4], [q(3,i) q(3,i)],'color',col(i,:)/2,'linewidth',1)
-            plot(axesh,pos(i), mu(i),'*','color',col(i,:)/2,'linewidth',1)
+            scatter(pos(i)*ones(size(x(:,i)))+jitw*(rand(size(x(:,i)))-0.5),x(:,i),10,col(i,:),'filled');
+            hold on
+            patch([pos(i)-f fliplr(pos(i)+f)], [uc fliplr(uc)], 0.97*col(i,:),'edgecolor','none','facealpha',0.3)
+            patch([pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i)+boxw(i)/4 pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i)-boxw(i)/2 pos(i)-boxw(i)/2 pos(i)-boxw(i)/4 pos(i)-boxw(i)/2 pos(i)-boxw(i)/2], [q(2,i) notch(1,i) q(3,i) notch(2,i) q(4,i) q(4,i) notch(2,i) q(3,i) notch(1,i) q(2,i)], 0.97*col(i,:),'edgecolor','none','facealpha',0.5,'HandleVisibility','off')
+            patch([pos(i)-boxw(i)/8 pos(i)+boxw(i)/8 pos(i)+boxw(i)/8 pos(i)-boxw(i)/8 pos(i)-boxw(i)/8], [mu(i)-sigma(i) mu(i)-sigma(i) mu(i)+sigma(i) mu(i)+sigma(i) mu(i)-sigma(i)], col(i,:),'edgecolor','none','facealpha',0.35,'HandleVisibility','off')
+            plot([pos(i)-boxw(i)/4 pos(i)+boxw(i)/4], [q(3,i) q(3,i)],'color',col(i,:)/2,'linewidth',1,'HandleVisibility','off')
+            plot(pos(i), mu(i),'*','color',col(i,:)/2,'linewidth',1,'HandleVisibility','off')
             
             if strcmp(type, 'man')
                 % Display graph documentation
                 pu=floor(mean(find(uc>q(4,i) & uc<q(7,i))));
-                plot(axesh,[pos(i)+f(pu),pos(i)+1.2*boxw(i)], [uc(pu), uc(pu)],':','color','k');
+                plot([pos(i)+f(pu),pos(i)+1.2*boxw(i)], [uc(pu), uc(pu)],':','color','k');
                 text(pos(i)+1.2*boxw(i), uc(pu),' kernel density','clipping', 'on');
-                plot(axesh,[pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [notch(1,i), notch(1,i)],':','color','k')
+                plot([pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [notch(1,i), notch(1,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), notch(1,i),' notch inf., 95% conf. median');
-                plot(axesh,[pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [notch(2,i), notch(2,i)],':','color','k')
+                plot([pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [notch(2,i), notch(2,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), notch(2,i),' notch sup., 95% conf. median');
-                plot(axesh,[pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [q(2,i), q(2,i)],':','color','k')
+                plot([pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [q(2,i), q(2,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), q(2,i),' 1st quartile, q(0.25)');
-                plot(axesh,[pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [q(4,i), q(4,i)],':','color','k')
+                plot([pos(i)+boxw(i)/2,pos(i)+1.2*boxw(i)], [q(4,i), q(4,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), q(4,i),' 3rd quartile, q(0.75)');
-                plot(axesh,[pos(i)+boxw(i)/4,pos(i)+1.2*boxw(i)], [q(3,i), q(3,i)],':','color','k')
+                plot([pos(i)+boxw(i)/4,pos(i)+1.2*boxw(i)], [q(3,i), q(3,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), q(3,i),' median, q(0.5)');
-                plot(axesh,[pos(i)+boxw(i)/8,pos(i)+1.2*boxw(i)], [mu(i)-sigma(i), mu(i)-sigma(i)],':','color','k')
+                plot([pos(i)+boxw(i)/8,pos(i)+1.2*boxw(i)], [mu(i)-sigma(i), mu(i)-sigma(i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), mu(i)-sigma(i),' mean - standard deviation');
-                plot(axesh,[pos(i)+boxw(i)/8,pos(i)+1.2*boxw(i)], [mu(i)+sigma(i), mu(i)+sigma(i)],':','color','k')
+                plot([pos(i)+boxw(i)/8,pos(i)+1.2*boxw(i)], [mu(i)+sigma(i), mu(i)+sigma(i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), mu(i)+sigma(i),' mean + standard deviation');
-                plot(axesh,[pos(i)+f(2),pos(i)+1.2*boxw(i)], [q(8,i), q(8,i)],':','color','k')
+                plot([pos(i)+f(2),pos(i)+1.2*boxw(i)], [q(8,i), q(8,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), q(8,i),' 1st percentile, q(0.01)');
-                plot(axesh,[pos(i)+f(length(f)-1),pos(i)+1.2*boxw(i)], [q(9,i), q(9,i)],':','color','k')
+                plot([pos(i)+f(length(f)-1),pos(i)+1.2*boxw(i)], [q(9,i), q(9,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), q(9,i),' 99th percentile, q(0.99)');
-                plot(axesh,[pos(i),pos(i)+1.2*boxw(i)], [mu(i), mu(i)],':','color','k')
+                plot([pos(i),pos(i)+1.2*boxw(i)], [mu(i), mu(i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), mu(i),' mean');
-                plot(axesh,[pos(i),pos(i)+1.2*boxw(i)], [q(5,i), q(5,i)],':','color','k')
+                plot([pos(i),pos(i)+1.2*boxw(i)], [q(5,i), q(5,i)],':','color','k')
                 text(pos(i)+1.2*boxw(i), q(5,i),' raw data');
-                plot(axesh,pos(i)+3*boxw(i),0)
+                plot(pos(i)+3*boxw(i),0)
             end
             
         case 'left'
-            scatter(axesh,(pos(i)-boxw(i)/40)*ones(size(x(:,i))),x(:,i),10,col(i,:),'filled');
-            %hold on
-            patch(axesh,pos(i)-f, uc, 0.97*col(i,:),'edgecolor','none','facealpha',0.15)
-            patch(axesh,[pos(i) pos(i)-boxw(i)/2 pos(i)-boxw(i)/2 pos(i)-boxw(i)/4 pos(i)-boxw(i)/2 pos(i)-boxw(i)/2 pos(i) pos(i)], [q(2,i) q(2,i) notch(1,i) q(3,i) notch(2,i) q(4,i) q(4,i) q(2,i)], 0.97*col(i,:),'edgecolor','none','facealpha',0.5)
-            patch(axesh,[pos(i)-boxw(i)/8 pos(i) pos(i) pos(i)-boxw(i)/8 pos(i)-boxw(i)/8], [mu(i)-sigma(i) mu(i)-sigma(i) mu(i)+sigma(i) mu(i)+sigma(i) mu(i)-sigma(i)], col(i,:),'edgecolor','none','facealpha',0.35)
-            plot(axesh,[pos(i)-boxw(i)/4 pos(i)], [q(3,i) q(3,i)],'color',col(i,:)/2,'linewidth',1.5)
-            plot(axesh,pos(i)-boxw(i)/20, mu(i),'*','color',col(i,:)/2,'linewidth',1)
+            scatter((pos(i)-boxw(i)/40)*ones(size(x(:,i)))-jitw*0.25*rand(size(x(:,i))),x(:,i),10,col(i,:),'filled');
+            hold on
+            patch(pos(i)-f, uc, 0.97*col(i,:),'edgecolor','none','facealpha',0.3,'HandleVisibility','off')
+            patch([pos(i) pos(i)-boxw(i)/2 pos(i)-boxw(i)/2 pos(i)-boxw(i)/4 pos(i)-boxw(i)/2 pos(i)-boxw(i)/2 pos(i) pos(i)], [q(2,i) q(2,i) notch(1,i) q(3,i) notch(2,i) q(4,i) q(4,i) q(2,i)], 0.97*col(i,:),'edgecolor','none','facealpha',0.5,'HandleVisibility','off')
+            patch([pos(i)-boxw(i)/8 pos(i) pos(i) pos(i)-boxw(i)/8 pos(i)-boxw(i)/8], [mu(i)-sigma(i) mu(i)-sigma(i) mu(i)+sigma(i) mu(i)+sigma(i) mu(i)-sigma(i)], col(i,:),'edgecolor','none','facealpha',0.35,'HandleVisibility','off')
+            plot([pos(i)-boxw(i)/4 pos(i)], [q(3,i) q(3,i)],'color',col(i,:)/2,'linewidth',1.5,'HandleVisibility','off')
+            plot(pos(i)-boxw(i)/20, mu(i),'*','color',col(i,:)/2,'linewidth',1,'HandleVisibility','off')
             
         case 'right'
-            scatter(axesh,(pos(i)+boxw(i)/40)*ones(size(x(:,i))),x(:,i),10,col(i,:),'filled');
-            %hold on
-            patch(axesh,pos(i)+f, uc, 0.97*col(i,:),'edgecolor','none','facealpha',0.15)
-            patch(axesh,[pos(i) pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i)+boxw(i)/4 pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i) pos(i)], [q(2,i) q(2,i) notch(1,i) q(3,i) notch(2,i) q(4,i) q(4,i) q(2,i)], 0.97*col(i,:),'edgecolor','none','facealpha',0.5)
-            patch(axesh,[pos(i)+boxw(i)/8 pos(i) pos(i) pos(i)+boxw(i)/8 pos(i)+boxw(i)/8], [mu(i)-sigma(i) mu(i)-sigma(i) mu(i)+sigma(i) mu(i)+sigma(i) mu(i)-sigma(i)], col(i,:),'edgecolor','none','facealpha',0.35)
-            plot(axesh,[pos(i)+boxw(i)/4 pos(i)], [q(3,i) q(3,i)],'color',col(i,:)/2,'linewidth',1.5)
-            plot(axesh,pos(i)+boxw(i)/20, mu(i),'*','color',col(i,:)/2,'linewidth',1)
+            scatter((pos(i)+boxw(i)/40)*ones(size(x(:,i)))+jitw*0.25*rand(size(x(:,i))),x(:,i),10,col(i,:),'filled');
+            hold on
+            patch(pos(i)+f, uc, 0.97*col(i,:),'edgecolor','none','facealpha',0.3,'HandleVisibility','off')
+            patch([pos(i) pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i)+boxw(i)/4 pos(i)+boxw(i)/2 pos(i)+boxw(i)/2 pos(i) pos(i)], [q(2,i) q(2,i) notch(1,i) q(3,i) notch(2,i) q(4,i) q(4,i) q(2,i)], 0.97*col(i,:),'edgecolor','none','facealpha',0.5,'HandleVisibility','off')
+            patch([pos(i)+boxw(i)/8 pos(i) pos(i) pos(i)+boxw(i)/8 pos(i)+boxw(i)/8], [mu(i)-sigma(i) mu(i)-sigma(i) mu(i)+sigma(i) mu(i)+sigma(i) mu(i)-sigma(i)], col(i,:),'edgecolor','none','facealpha',0.35,'HandleVisibility','off')
+            plot([pos(i)+boxw(i)/4 pos(i)], [q(3,i) q(3,i)],'color',col(i,:)/2,'linewidth',1.5,'HandleVisibility','off')
+            plot(pos(i)+boxw(i)/20, mu(i),'*','color',col(i,:)/2,'linewidth',1,'HandleVisibility','off')
             
     end
 end
-%grid on
-%box on
+grid on
+box on
 end
-
 % Stat functions to avoid using the statistical toolbox
 function q = al_quantile(x, p)
 sx=sort(x);
@@ -151,15 +148,14 @@ for i=1:length(p)
     end
 end
 end
-
 function f = al_parzen(x, u, bw)
 q=al_quantile(x,[1/4 3/4]);
 if nargin<3 || isempty(bw)
     bw=0.9*min(std(x),(q(2)-q(1))/1.35)*length(x)^(-1/5); % Silverman's rule of thumb
 end
 f=zeros(size(u));
-for i=1:length(x)
-    k=(1/(bw*sqrt(2*pi)))*exp(-0.5*((x(i)-u)/bw).^2);
-    f=f+k;
+for i=1:length(u)
+    f(i)=sum(exp(-0.5*((x-u(i))/bw).^2));
 end
+f=f/(bw*sqrt(2*pi));
 end
