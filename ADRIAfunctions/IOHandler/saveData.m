@@ -92,7 +92,7 @@ function saveData(data, filename, nc_settings)
     end
 
     if strcmpi(fmt, 'mat')
-        save(filename, 'data');
+        save(filename, 'data', '-v7.3');
     elseif strcmpi(fmt, 'csv')
         writematrix(data, filename);
     elseif strcmpi(fmt, 'nc')
