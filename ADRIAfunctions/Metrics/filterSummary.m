@@ -17,8 +17,8 @@ function filtered = filterSummary(summarized, idx)
     nd = ndims(mean_res);
 
     % Need to filter the last dimension (i.e., by scenario), but we don't 
-    % know the number of dimensions up front, so this approach takes care 
-    % of that.
+    % always know the number of dimensions up front, so this approach takes 
+    % care of that.
     sz = size(mean_res);
     sel = repmat({1}, 1, nd);
     for s = 1:nd
