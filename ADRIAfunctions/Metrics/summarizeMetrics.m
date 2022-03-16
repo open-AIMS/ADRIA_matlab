@@ -6,14 +6,14 @@ function summarized = summarizeMetrics(metrics)
 %    metrics : struct, of metric values
 %
 % Outputs:
-%   x : struct, nested by given metric names, with their means, medians, 
-%               minimums, maximums, and standard deviations, e.g.,
-%               metrics = struct('TC', TC);
+%   summarized : struct, nested by given metric names, with their means, medians, 
+%                  minimums, maximums, and standard deviations, e.g.,
+%                  metrics = struct('TC', TC);
 %
 % Example:
 %               >> evenness = concatMetrics(Y, "coralEvenness");
 %               >> metrics = struct('evenness', evenness);
-%               >> summarizeMetrics(metrics);
+%               >> x = summarizeMetrics(metrics);
 %
 %               >> x.evenness.mean
 %               >> x.evenness.median
