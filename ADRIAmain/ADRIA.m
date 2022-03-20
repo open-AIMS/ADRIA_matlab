@@ -290,7 +290,7 @@ classdef ADRIA < handle
             obj.strongpred = sp;
             obj.connectivity_site_ids = site_ids;
             obj.removed_sites = removed;
-            
+
             if ~isempty(removed)
                 % Remove indicated site from site table
                 obj.site_data = obj.site_data(setdiff(1:end, obj.removed_sites), :);

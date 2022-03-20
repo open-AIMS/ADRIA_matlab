@@ -86,7 +86,7 @@ if isfolder(file_loc)
         
         if truncated
             order_idx(truncated) = [];
-            site_order(i) = [];
+            site_order(truncated) = [];
         end
         
         site_ids = site_order;
@@ -156,7 +156,7 @@ else
         
         if truncated
             order_idx(truncated) = [];
-            site_order(i) = [];
+            site_order(truncated) = [];
         end
         
         site_ids = site_order;
