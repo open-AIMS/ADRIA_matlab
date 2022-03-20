@@ -8,12 +8,12 @@ ai = ADRIA();
 %ai.loadSiteData('Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
 
 %Moore site data
-ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
+%ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
 ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
 
 % Path to folder or file. If folder, takes the average from all files in the given folder.
 %ai.loadConnectivity('Inputs/Brick/connectivity/2015/', cutoff = 0.018, swap = true);
-ai.loadConnectivity('Inputs/Moore/connectivity/2015/', cutoff = 0.01, swap = true);
+ai.loadConnectivity('Inputs/Moore/connectivity/2015/', cutoff = 0.008, swap = true);
 
 % site data as used by ADRIA
 ai.site_data;
@@ -25,13 +25,13 @@ lat = ai.site_data.lat;
 lon = ai.site_data.long;
 
 % Takuya's test of sites matching recom order
-all(ai.connectivity_site_ids == ai.site_data.recom_connectivity)
+%all(ai.connectivity_site_ids == ai.site_data.recom_connectivity)
 
 %Option: scale with site area and k values
 Y = Y.* ai.site_data.area/1e4 .* ai.site_data.k/100 ;
 
 % Option: set self-seeding to zero (replace diagonal with zeros)
-Y = Y - diag(diag(Y));
+%Y = Y - diag(diag(Y));
 
 DGbase = digraph(Y);
 EWbase = DGbase.Edges.Weight;
