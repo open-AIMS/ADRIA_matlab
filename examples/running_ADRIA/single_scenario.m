@@ -63,7 +63,10 @@ for n = 1:length(sim_names)
     end
 
     prompt(n) = field_name;
-    definput(n) = sim_constants.(field_name{1});
+
+    if ~isempty(sim_constants.(field_name{1}))
+        definput(n) = sim_constants.(field_name{1});
+    end
 end
 
 prompt = prompt(~cellfun('isempty',prompt));

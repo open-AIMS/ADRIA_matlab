@@ -31,6 +31,13 @@ cols_to_include = ["Guided", "Seed1", "Seed2", "fogging", "Aadpt", "Natad", ...
 ignore_cols = string(col_names(~ismember(col_names,cols_to_include)));
 input_table = ai.setParameterValues(perm_table, ignore = ignore_cols', partial = false);
 
+% Remove unnecessary counterfactual runs
+% cfs = input_table((input_table.Seed1 == 0) & (input_table.Seed2 == 0) & (input_table.fogging == 0.0), :);
+% cf_scenario = cfs(1, :);
+% interv_scenarios = input_table(((input_table.Seed1 > 0) | (input_table.Seed2 > 0)) | (input_table.fogging > 0.0), :);
+% input_table = [cf_scenario; interv_scenarios];
+
+
 N = height(input_table);
 n_reps = 20;
 

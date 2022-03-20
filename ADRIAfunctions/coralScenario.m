@@ -187,7 +187,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Setting constant vars to avoid incurring access overhead
     % specify constant odeset option
-    non_neg_opt = odeset('NonNegative', 1:nspecies:nsites);
+    non_neg_opt = odeset('NonNegative', 1:nspecies:nsites);  % , 'AbsTol', 1e-3
 
     % return 3 steps as we're only interested in the last one anyway
     % saves memory
@@ -319,7 +319,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             Yfog(tstep, prefshadesites) = fogging;
         end
 
-        if (tstep <= (seed_start_year + seedyears)) && ~all(prefseedsites == 0)
+        if ((seed_start_year <= tstep) && (tstep <= (seed_start_year + seedyears))) && ~all(prefseedsites == 0)
             % extract colony areas for sites selected and convert to m^2
             col_area_seed1 = coral_params.colony_area_cm2(s1_idx) / (10^4);
             col_area_seed2 = coral_params.colony_area_cm2(s2_idx) / (10^4);

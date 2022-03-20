@@ -587,9 +587,9 @@ classdef ADRIA < handle
             arguments
                 obj
                 file_loc string
-                opts.target_var = "all"
+                opts.target_var string = "all"
                 opts.scenarios = [];
-                opts.summarize = false
+                opts.summarize logical = false
             end
             
             if isempty(opts.scenarios)

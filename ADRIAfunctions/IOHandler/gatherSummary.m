@@ -111,8 +111,26 @@ function collated_mets = gatherSummary(file_loc, opts)
 
             [Ystruct, md] = readDistributed(full_path, vn, scenarios);
 
-            if isempty(Ystruct.(vn))
-                continue
+                if isempty(Ystruct.(vn))
+                    continue
+                end
+
+                if isempty(Ycollated.(vn))
+                    Ycollated.(vn) = Ystruct.(vn);
+                    continue
+                end
+
+                nd = ndims(Ycollated.(vn));
+
+                switch nd
+                    case {5, 4}
+                        nd_tmp = nd - 1;
+                    case 3
+                        nd_tmp = nd;
+                end
+
+                % TODO: Insert into preallocated matrix
+                Ycollated.(vn) = cat(nd_tmp, Ycollated.(vn), Ystruct.(vn));
             end
             
 %             if v == "site_rankings"
