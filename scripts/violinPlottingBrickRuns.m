@@ -116,7 +116,13 @@ hold off
 % 4: 8 DHW and no fogging
 % 5: 8 DHW and fogging
 % 6: 8 DHW, fogging and natural adaptation
+% tstep = 10;
+% hold on
+% al_goodplot(selected_int_RCI_45_2.median(1:tstep:end,:)', yr(1:tstep:end), 0.5, cols(2,:), 'right')
+% al_goodplot(selected_int_RCI_45_3.median(1:tstep:end,:)', yr(1:tstep:end), 0.5, cols(1,:), 'left')
+% 
 
+%%
 yr = linspace(2026,2099,74);
 
 % find index for each scenario
@@ -183,13 +189,13 @@ hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_2,selected_cf_RCI_45,yr,10,'mean' ,...
+plotCompareViolin(selected_int_RCI_45_2,selected_cf_RCI_45,yr,2,'mean' ,...
     {'RCI','Interv.','Counterf.'},intv_struct_2,cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_3,selected_cf_RCI_45,yr,10,'mean' , ...
+plotCompareViolin(selected_int_RCI_45_3,selected_cf_RCI_45,yr,2,'mean' , ...
     {'RCI','Interv.','Counterf.'},intv_struct_3, ...
     cols,ylims)
 hold off
