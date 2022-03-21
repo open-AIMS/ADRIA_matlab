@@ -11,10 +11,11 @@ cols = cols([6,8],:);
 cols = [cols(2,:);cols(1,:)];
 
 %% Violin plots: comparison of 4 metrics, counterfactual and intervention Seed 500, Aadpt 4, Natad 0.05
+% vector of the years in the data set
 yr = linspace(2026,2099,74);
 
-tgt_ind_cf = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==0));
-tgt_ind_int = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
+tgt_ind_cf = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==0));
+tgt_ind_int = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
 
 selected_int_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int);
 selected_cf_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_cf);
@@ -22,8 +23,8 @@ selected_int_SV = filterSummary(out_45.shelterVolume, tgt_ind_int);
 selected_cf_SV = filterSummary(out_45.shelterVolume, tgt_ind_cf);
 selected_int_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_int);
 selected_cf_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_cf);
-selected_int_Ev = filterSummary(out_45.coralEvenness, tgt_ind_int);
-selected_cf_Ev = filterSummary(out_45.coralEvenness, tgt_ind_cf);
+% selected_int_Ev = filterSummary(out_45.coralEvenness, tgt_ind_int);
+% selected_cf_Ev = filterSummary(out_45.coralEvenness, tgt_ind_cf);
 selected_int_RCI = filterSummary(out_45_RCI, tgt_ind_int);
 selected_cf_RCI = filterSummary(out_45_RCI, tgt_ind_cf);
 
@@ -62,8 +63,8 @@ hold off
 
 %% intervention Seed 500, Aadpt 4, Natad, Guided vs. unguided
 
-tgt_ind_int1 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
-tgt_ind_int2 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==0));
+tgt_ind_int1 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
+tgt_ind_int2 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==0));
 selected_int_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int1);
 selected_cf_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int2);
 selected_int_Ev = filterSummary(out_45.coralEvenness, tgt_ind_int1);
@@ -115,17 +116,32 @@ hold off
 % 4: 8 DHW and no fogging
 % 5: 8 DHW and fogging
 % 6: 8 DHW, fogging and natural adaptation
+% tstep = 10;
+% hold on
+% al_goodplot(selected_int_RCI_45_2.median(1:tstep:end,:)', yr(1:tstep:end), 0.5, cols(2,:), 'right')
+% al_goodplot(selected_int_RCI_45_3.median(1:tstep:end,:)', yr(1:tstep:end), 0.5, cols(1,:), 'left')
+% 
 
+%%
 yr = linspace(2026,2099,74);
 
-tgt_ind_cf_45 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==0));
-tgt_ind_int_45_1 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==1));
-tgt_ind_int_45_2 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==1));
-tgt_ind_int_45_3 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
-tgt_ind_int_45_4 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
-tgt_ind_int_45_5 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
-tgt_ind_int_45_6 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.SRM==0)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
+% find index for each scenario
+% counterfactual
+tgt_ind_cf_45 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==0));
+% 0 DHW but seeded (= larval slick intervention) and no fogging
+tgt_ind_int_45_1 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==1));
+% Fogging only
+tgt_ind_int_45_2 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==1));
+% 4 DHW and fogging 
+tgt_ind_int_45_3 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
+% 8 DHW and no fogging
+tgt_ind_int_45_4 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
+% 8 DHW and fogging
+tgt_ind_int_45_5 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
+% 8 DHW, fogging and natural adaptation
+tgt_ind_int_45_6 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
 
+% retrieve indices for each scenario
 selected_cf_RCI_45 = filterSummary(out_45_RCI, tgt_ind_cf_45);
 selected_int_RCI_45_1 = filterSummary(out_45_RCI, tgt_ind_int_45_1);
 selected_int_RCI_45_2 = filterSummary(out_45_RCI, tgt_ind_int_45_2);
@@ -134,7 +150,7 @@ selected_int_RCI_45_4 = filterSummary(out_45_RCI, tgt_ind_int_45_4);
 selected_int_RCI_45_5 = filterSummary(out_45_RCI, tgt_ind_int_45_5);
 selected_int_RCI_45_6 = filterSummary(out_45_RCI, tgt_ind_int_45_6);
 
-%% plot 2*2 panel time series every 5 yrs
+%% plot 2*3 panel time series every 10 yrs
 % set up site ranks structs for each scenario
 seed_site_rankings_45_2 = out_45.site_rankings(:,:,:,tgt_ind_int_45_2);
 intv_struct_2 = struct('site_rankings',seed_site_rankings_45_2,'int',"shade");
@@ -173,13 +189,13 @@ hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_2,selected_cf_RCI_45,yr,10,'mean' ,...
+plotCompareViolin(selected_int_RCI_45_2,selected_cf_RCI_45,yr,2,'mean' ,...
     {'RCI','Interv.','Counterf.'},intv_struct_2,cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_3,selected_cf_RCI_45,yr,10,'mean' , ...
+plotCompareViolin(selected_int_RCI_45_3,selected_cf_RCI_45,yr,2,'mean' , ...
     {'RCI','Interv.','Counterf.'},intv_struct_3, ...
     cols,ylims)
 hold off
