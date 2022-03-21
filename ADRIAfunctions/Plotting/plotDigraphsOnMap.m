@@ -8,13 +8,12 @@ ai = ADRIA();
 %ai.loadSiteData('Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
 
 %Moore site data
+%ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
 ai.loadSiteData('Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv');
 
-
 % Path to folder or file. If folder, takes the average from all files in the given folder.
-%ai.loadConnectivity('Inputs/Brick/connectivity/2016/');
-ai.loadConnectivity('Inputs/Moore/connectivity/2015/');
-
+%ai.loadConnectivity('Inputs/Brick/connectivity/2015/', cutoff = 0.018, swap = true);
+ai.loadConnectivity('Inputs/Moore/connectivity/2015/', cutoff = 0.008, swap = true);
 
 % site data as used by ADRIA
 ai.site_data;
@@ -25,13 +24,8 @@ Y = ai.TP_data;
 lat = ai.site_data.lat;
 lon = ai.site_data.long;
 
-con_cutoff = 0.0001; %lower proportion of con
-maxY = max(Y,[],'all');
-maxYcut = maxY*con_cutoff;
-Y(Y<con_cutoff) = 0;  %filter out weak connections
-
-% Option: remove high outliers
-%Y(Y>200) = 0;
+% Takuya's test of sites matching recom order
+%all(ai.connectivity_site_ids == ai.site_data.recom_connectivity)
 
 %Option: scale with site area and k values
 Y = Y.* ai.site_data.area/1e4 .* ai.site_data.k/100 ;
@@ -60,9 +54,9 @@ bbox = [lonmin,latmin;lonmax,latmax];
 P = shaperead('Great_Barrier_Reef_Features.shp', 'BoundingBox', bbox);
 
 Lat = P.X;
-Lon = P.Y;
-f= figure;
+Lon = P.Y;f= figure;
 f.Position = [10, 10, 800 600];
+
 geoshow(P, 'FaceColor', [0.8,0.8,0.8])
 hold on
 
