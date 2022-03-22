@@ -28,7 +28,6 @@ recom_connectivity = conn.source_site;
 reef_siteid = sdata.site_id;
 
 % find all sites in both the site data and connectivity files
-% rename as integers for site selection indexing
 inds = ismember(reef_siteid,recom_connectivity);
 reef_siteid = reef_siteid(inds);
 
@@ -57,28 +56,30 @@ ai.loadSiteData(site_data_file)
 
 %% Load DHW data
 n_reps = 50;
+% use RCP 4.5
 dhwRCP45 = "./Inputs/Hastings/DHWs/dhwRCP45.mat";
 ai.loadDHWData(dhwRCP45,n_reps);
 
 %% Create fake coral cover file
-covers = 10*ones(nsites,2);
-coral_cover_file = "./Inputs/Hastings/Site_data/HastingsCC.mat"
-save(coral_cover_file,"covers")
+covers = 10*ones(nsites,1); 
+coral_cover_file = "./Inputs/Hastings/Site_data/HastingsCC.mat";
+save(coral_cover_file,"covers");
 
 % load file into ai
-ai.loadCoralCovers(coral_cover_file)
+ai.loadCoralCovers(coral_cover_file);
 
 %% Begin site selection
-% connectivity years to use
+
+% connectivity years and days to use
 cyears = [2016, 2019];
 days = 1:3;
+
 % use first step of DHW data
 tstep = 1;
+
 for d = days % connectivity days loop
     for cyr = cyears % connectivity years loop
-
-        %% Connectivity
-        sprintf("Day %1.0f, year %4.0f",d,cyr)
+        %% Load connectivity
         connectivity_file = sprintf('./Inputs/Hastings/connectivity/%4.0f/Hastings_%4.0f_d%1.0f_transfer_probability_matrix_wide.csv', cyr,cyr,d);
         ai.loadConnectivity(connectivity_file, cutoff = 0.1);
 
@@ -94,7 +95,6 @@ for d = days % connectivity days loop
         rcp_ranks = struct();
  
         % calculate rankings
-        % index using ind as dhw and wave data is full years data set
         order_sel = ai.siteSelection(criteria, tstep, n_reps, 1, sslog);
         topsis_sel = ai.siteSelection(criteria, tstep, n_reps, 2, sslog);
         vikor_sel = ai.siteSelection(criteria, tstep, n_reps, 3, sslog);
@@ -113,7 +113,7 @@ for d = days % connectivity days loop
         % create filename
         filename = sprintf('./Outputs/Rankings_Hastings_connectivity%4.0f_day%1.0f.xlsx', cyr, d);
         
-        % create table of ranks and corresponding ReefMod IDs
+        % create table of ranks and corresponding IDs
         T = table(reef_siteid, ...
             rcp_ranks.mean_Order, rcp_ranks.mean_TOPSIS, rcp_ranks.mean_VIKOR);
 
@@ -122,6 +122,6 @@ for d = days % connectivity days loop
             'Order (RCP 45)', 'TOPSIS (RCP 45)', 'VIKOR (RCP 45)'};
 
         % Write table to Excel file
-        writetable(T, filename, 'Sheet', sprintf('Site ranks'));
+        writetable(T, filename, 'Sheet', sprintf('Site ranks year %4.0f day %1.0f',cyr,d));
     end
 end
