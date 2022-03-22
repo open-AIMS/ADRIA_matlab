@@ -106,6 +106,15 @@ addPath(proj, './Inputs/Cairns/DHWs');
 addPath(proj, './Inputs/Cairns/Site_data');
 addPath(proj, './Inputs/Cairns/Waves');
 
+addPath(proj, './Inputs/Hastings');
+addPath(proj, './Inputs/Hastings/connectivity');
+addPath(proj, './Inputs/Hastings/connectivity/2015');
+addPath(proj, './Inputs/Hastings/connectivity/2016');
+addPath(proj, './Inputs/Hastings/connectivity/2019');
+addPath(proj, './Inputs/Hastings/DHWs');
+addPath(proj, './Inputs/Hastings/Site_data');
+
 addPath(proj, './scripts');
+
 % Programmatically install toolbox:
 % https://au.mathworks.com/help/matlab/ref/matlab.addons.toolbox.installtoolbox.html

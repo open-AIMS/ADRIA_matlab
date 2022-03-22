@@ -345,7 +345,7 @@ classdef ADRIA < handle
 
 
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
-                                                alg, sslog, initcovcol)
+                                                alg, sslog)
             arguments
                 obj
                 criteria table
@@ -353,7 +353,6 @@ classdef ADRIA < handle
                 nreps {mustBeInteger}
                 alg {mustBeInteger}
                 sslog struct
-                initcovcol string
             end
             
             % Check site data and connectivity loaded
@@ -385,26 +384,30 @@ classdef ADRIA < handle
     
             % Filter out sites outside of desired depth range
             max_depth = depth_min + depth_offset;
-            depth_criteria = (site_d.sitedepth > -max_depth) & (site_d.sitedepth < -depth_min);
+            depth_criteria = find((site_d.sitedepth > -max_depth) & (site_d.sitedepth < -depth_min));
+
             depth_priority = site_d{depth_criteria, "recom_connectivity"};
     
             max_cover = site_d.k/100.0; % Max coral cover at each site
 
             nsiteint = obj.constants.nsiteint;
             nsites = length(max_cover);
-            w_scens = obj.wave_scens;
-            %oad(wavefilepath).wave(tstep, :, 1:nreps);
-            dhw_scen = obj.dhw_scens;
-            %load(dhwfilepath).dhw(tstep, :, 1:nreps);
+            if ~isempty(obj.wave_scens)
+                w_scens = obj.wave_scens;
+            else
+                w_scens = zeros(1,nsites,nreps);
+            end
 
-            sumcover = sum(site_d{:,initcovcol},2); 
+            dhw_scen = obj.dhw_scens;
+
+            sumcover = sum(obj.init_coral_cover,2); 
             sumcover = sumcover/100.0;
 
             store_rankings = zeros(nreps,length(depth_priority),3);
 
             for l = 1:nreps
                 % site_id, seeding rank, shading rank
-                rankings = [depth_priority, zeros(length(depth_priority), 1), zeros(length(depth_priority), 1)];
+                rankings = [depth_criteria, zeros(length(depth_criteria), 1), zeros(length(depth_criteria), 1)];
                 prefseedsites = zeros(1,nsiteint);
                 prefshadesites = zeros(1,nsiteint);
                 dhw_step = dhw_scen(tstep,:,l);
@@ -412,7 +415,7 @@ classdef ADRIA < handle
 
                 w_step = w_scens(tstep,:,l);
                 damprob = w_step';
-                dMCDA_vars = struct('site_ids', depth_priority, 'nsiteint', nsiteint, 'prioritysites', obj.constants.prioritysites, ...
+                dMCDA_vars = struct('site_ids', depth_criteria, 'nsiteint', nsiteint, 'prioritysites', obj.constants.prioritysites, ...
                     'strongpred', strong_pred, 'centr', sr.C1, 'damprob', damprob, 'heatstressprob', heatstressprob, ...
                     'sumcover', sumcover,'maxcover', max_cover, 'area',area,'risktol', risktol, 'wtconseed', wtconseed, 'wtconshade', wtconshade, ...
                     'wtwaves', wtwaves, 'wtheat', wtheat, 'wthicover', wthicover, 'wtlocover', wtlocover, 'wtpredecseed', ...
