@@ -1,6 +1,6 @@
 %% Loading counterfactual and intervention data
 out_45 = load('./Outputs/brick_runs_RCP45.mat');
-out_45_RCI = load('./Outputs/brick_runs_RCP45_RCI.mat');
+out_45_RCI = load('./Outputs/brick_runs_RCP45_RCI_no_evenness.mat');
 % out_26 = load('./Outputs/brick_runs_RCP26.mat');
 % out_26_RCI = load('./Outputs/brick_runs_RCP26_RCI.mat');
 % out_60 = load('./Outputs/brick_runs_RCP60.mat');
@@ -201,40 +201,40 @@ t.TileSpacing = 'compact';
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_1,selected_cf_RCI_45,yr,10,'mean' ,...
+plotCompareViolin(selected_int_RCI_45_1,selected_cf_RCI_45,yr,tstep,'mean' ,...
     {'RCI','Interv.','Counterf.'},intv_struct_1, cols,ylims,"Legend")
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_2,selected_cf_RCI_45,yr,5,'mean' ,...
+plotCompareViolin(selected_int_RCI_45_2,selected_cf_RCI_45,yr,tstep,'mean' ,...
     {'RCI','Interv.','Counterf.'},intv_struct_2,cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_3,selected_cf_RCI_45,yr,5,'mean' , ...
+plotCompareViolin(selected_int_RCI_45_3,selected_cf_RCI_45,yr,tstep,'mean' , ...
     {'RCI','Interv.','Counterf.'},intv_struct_3, ...
     cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_4,selected_cf_RCI_45,yr,10,'mean' , ...
+plotCompareViolin(selected_int_RCI_45_4,selected_cf_RCI_45,yr,tstep,'mean' , ...
     {'RCI','Interv.','Counterf.'},intv_struct_4, ...
     cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_5,selected_cf_RCI_45,yr,10,'mean' , ...
+plotCompareViolin(selected_int_RCI_45_5,selected_cf_RCI_45,yr,tstep,'mean' , ...
     {'RCI','Interv.','Counterf.'},intv_struct_5, ...
     cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_6,selected_cf_RCI_45,yr,10,'mean' , ...
+plotCompareViolin(selected_int_RCI_45_6,selected_cf_RCI_45,yr,tstep,'mean' , ...
     {'RCI','Interv.','Counterf.'},intv_struct_6, ...
     cols,ylims)
 hold off

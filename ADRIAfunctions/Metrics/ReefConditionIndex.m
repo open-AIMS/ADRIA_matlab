@@ -22,15 +22,15 @@ function Y = ReefConditionIndex(TC, E, SV, juveniles)
 
 % Note that the scores for evenness and juveniles are slightly different
 TC_func = @(x) interp1([0, 0.05, 0.15, 0.25, 0.35, 0.45, 1.0], [0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0], x);
-E_func = @(x) interp1([0, 0.15, 0.25, 0.35, 0.45, 1.0], [0, 0.1, 0.5, 0.7, 0.9, 1.0], x);
+%E_func = @(x) interp1([0, 0.15, 0.25, 0.35, 0.45, 1.0], [0, 0.1, 0.5, 0.7, 0.9, 1.0], x);
 SV_func = @(x) interp1([0, 0.18, 0.30, 0.35, 0.45, 1.0], [0, 0.1, 0.3, 0.5, 0.9, 1.0], x);
 juv_func = @(x) interp1([0, 0.15, 0.25, 0.35, 1.0], [0, 0.1, 0.5, 0.9, 1.0], x);
 
 TC_i = TC_func(TC);
-E_i = E_func(E);
+%E_i = E_func(E);
 SV_i = SV_func(SV);
 juv_i = juv_func(juveniles);
-
-Y = (TC_i + E_i + SV_i + juv_i) ./ 4;
+% + E_i
+Y = (TC_i + SV_i + juv_i) ./ 4;
 
 end
