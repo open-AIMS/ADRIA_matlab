@@ -31,6 +31,13 @@ E_i = E_func(E);
 SV_i = SV_func(SV);
 juv_i = juv_func(juveniles);
 
-Y = (TC_i + E_i + SV_i + juv_i) ./ 4;
+% Original
+% Y = (TC_i + E_i + SV_i + juv_i) ./ 4;
+
+% Weighted, giving evenness 10% weight
+% Y = (TC_i*0.3) + (E_i*0.1) + (SV_i*0.3) + (juv_i*0.3);
+
+% Removing evenness completely
+Y = (TC_i + SV_i + juv_i) ./ 3;
 
 end
