@@ -2,6 +2,9 @@ function rci = RCISummary(TC, E, SV, juveniles)
 % Convert summarized Total Coral Cover, Evenness, Shelter Volume and
 % Juvenile metrics into equivalent summarized Reef Condition Indices.
 %
+% See also: 
+%   - `summarizeMetrics()`
+%
 % Inputs:
 %   TC        : struct, Summary stats for Total Coral Cover
 %   E         : struct, Summary stats for Evenness
