@@ -12,7 +12,7 @@ fogging = [0.0, 0.2];
 Aadpt = [0, 4, 8];
 Natad = [0.0, 0.05];
 Seedyrs = 5;
-Shadeyrs = 20;
+Shadeyrs = [20, 74];
 Seedfreq = [0, 3];
 Shadefreq = [1, 5];
 Seedyr_start = [2, 6, 11, 16];
@@ -38,6 +38,13 @@ input_table = ai.setParameterValues(perm_table, ignore = ignore_cols', partial =
 % input_table = [cf_scenario; interv_scenarios];
 
 
+protective_fog_scenarios = (input_table.Guided == 1) & ...
+                           (input_table.Seed1 == 500000) & ...
+                           (input_table.Seed2 == 500000) & ...
+                           (input_table.fogging == 0.2);
+input_table = input_table(protective_fog_scenarios, :);
+
+% input_table = input_table(1:64, :);
 N = height(input_table);
 n_reps = 20;
 
@@ -61,7 +68,6 @@ ai.constants.tf = 74;
 ai.loadSiteData('./Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
 ai.loadConnectivity('Inputs/Brick/connectivity/2015/');
 ai.loadCoralCovers("./Inputs/Brick/site_data/coralCoverBrickTruncated.mat");
-ai.loadDHWData('./Inputs/Brick/DHWs/dhwRCP45.mat', n_reps);
 
 desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
     @(x, p) coralTaxaCover(x, p).juveniles, ...
@@ -69,44 +75,44 @@ desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
     @shelterVolume, ...
     };
 
-tic
-ai.runToDisk(input_table, sampled_values=false, nreps=n_reps, ...
-    file_prefix='D:/ADRIA_results/Brick_Mar_deliv_RCP45/Brick_Mar_deliv_RCP45_runs', ...
-    batch_size=ceil(N / num_workers), metrics=desired_metrics, ...
-    summarize=true, collect_logs=["fog", "seed", "site_rankings"]);
-% Y = ai.run(input_table, sampled_values=false, nreps=3, collect_logs=["site_rankings", "fog_log", "seed_log"]);
-tmp = toc;
-disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N * n_reps)), " seconds per run; ", num2str(tmp/N), " seconds per scenario)"))
+target_RCPs = ["45"; "26"; "60"];
+for rcp = target_RCPs'
+    dhw_data = strcat("./Inputs/Brick/DHWs/dhwRCP", rcp, ".mat");
+    ai.loadDHWData(dhw_data, n_reps);
 
-% Shutdown parallel pool to clear memory
-delete(p);
+    tgt_rcp = strcat("D:/ADRIA_results/Brick_Mar_deliv_RCP", rcp, "_protective_fog/");
+    mkdir(tgt_rcp{1});
 
-% Get summary stats for all metrics
-tic
-Y = ai.gatherSummary('D:/ADRIA_results/Brick_Mar_deliv_RCP45/Brick_Mar_deliv_runs', summarize=false);
-tmp = toc;
-disp(strcat("Took ", num2str(tmp), " seconds to collect all scenarios"))
+    file_prefix = strcat(tgt_rcp, "RCP", rcp, "_protective_fog");
+    
+    tic
+    ai.runToDisk(input_table, sampled_values=false, nreps=n_reps, ...
+        file_prefix=file_prefix, ...
+        batch_size=ceil(N / num_workers), metrics=desired_metrics, ...
+        summarize=true, collect_logs=["fog", "seed", "site_rankings"]);
 
-Y.inputs = input_table;
-Y.sim_constants = ai.constants;
-save("D:/ADRIA_results/Brick_Mar_deliv_RCP45/brick_runs_RCP45.mat", "-struct", "Y")
-% save("D:/ADRIA_results/Brick_Mar_deliv_RCP45/brick_runs_RCP45_logs.mat", "-struct", "Y")
+    tmp = toc;
+    disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N * n_reps)), " seconds per run; ", num2str(tmp/N), " seconds per scenario)"))
+    
+    % Get summary stats for all metrics
+    tic
+    Y = ai.gatherSummary(file_prefix, summarize=false);
+    tmp = toc;
+    disp(strcat("Took ", num2str(tmp), " seconds to collect all scenarios"))
+    
+    mean_RCI = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.mean, Y.coralEvenness.mean, Y.shelterVolume.mean, Y.coralTaxaCover_x_p_juveniles.mean);
+    median_RCI = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.median, Y.coralEvenness.median, Y.shelterVolume.median, Y.coralTaxaCover_x_p_juveniles.median);
+    min_RCI = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.min, Y.coralEvenness.min, Y.shelterVolume.min, Y.coralTaxaCover_x_p_juveniles.min);
+    max_RCI = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.max, Y.coralEvenness.max, Y.shelterVolume.max, Y.coralTaxaCover_x_p_juveniles.max);
+    std_RCI = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.std, Y.coralEvenness.std, Y.shelterVolume.std, Y.coralTaxaCover_x_p_juveniles.std);
 
-% Write seed ranks
-ranks_to_send = table();
-ranks_to_send.reef_id = string(ai.site_data{:, "reef_siteid"});
-seed_ranks = siteRanking(mean(Y.site_rankings, ndims(Y.site_rankings)), "seed");
-
-ranks_to_send.site_rank = seed_ranks;
-ranks_to_send.lat = ai.site_data{:, "lat"};
-ranks_to_send.long = ai.site_data{:, "long"};
-ranks_to_send = sortrows(ranks_to_send, "site_rank");
-relative_rank = 1:height(ranks_to_send);
-relative_rank = relative_rank';  % this transpose is necessary here otherwise column name is lost.
-ranks_to_send = addvars(ranks_to_send, relative_rank, 'Before', 'site_rank');
-writetable(ranks_to_send, "./Outputs/Brick_seed_site_ranks_RCP45.csv");
-
-% mean_rci = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.mean, Y.coralEvenness.mean, Y.shelterVolume.mean, Y.coralTaxaCover_x_p_juveniles.mean);
-% plotTrajectory(summarizeMetrics(struct('RCI_mean', mean_rci)).RCI_mean);
-
-plotTrajectory(Y.coralTaxaCover_x_p_total_cover)
+    RCI = struct("mean", mean_RCI, "median", median_RCI, "min", min_RCI, "max", max_RCI, "std", std_RCI);
+    Y.RCI = RCI;
+    
+    tic
+    Y.inputs = input_table;
+    Y.sim_constants = ai.constants;
+    save(strcat(file_prefix, ".mat"), "-struct", "Y", "-v7.3");
+    tmp = toc;
+    disp(strcat("Took ", num2str(tmp), " seconds to save scenarios"))
+end
