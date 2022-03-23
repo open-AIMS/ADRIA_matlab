@@ -71,6 +71,10 @@ function collated_mets = gatherSummary(file_loc, opts)
             sel(i) = {1:sz(i)};
         end
         
+        if fn == "site_rankings" && cat_dim == 3
+            cat_dim = nd+1;
+        end
+        
         sz(cat_dim) = N;
         Ycollated.(fn) = zeros(sz, 'single');
         Ycollated.(fn)(sel{:}) = Yfirst.(fn);
@@ -90,10 +94,6 @@ function collated_mets = gatherSummary(file_loc, opts)
         vn = var_names(vid);
 
         v_count = v_count + 1;
-        
-        nd = ndims(Ycollated.(vn));
-        concat_dim = nd;  % dimension to concat over
-
         for file = file_info(2:end)'
             f_count = f_count + 1;
 
@@ -121,11 +121,20 @@ function collated_mets = gatherSummary(file_loc, opts)
             end
 
             nd = ndims(Ycollated.(vn));
-
-            sel = repmat({1}, 1, nd);
             sz = size(Ystruct.(vn));
-            sz_len = length(size(Ystruct.(vn)));
-            for i = 1:sz_len
+            nd2 = length(sz);
+            if vn == "site_rankings"
+                concat_dim = 4;
+                sel = repmat({1}, 1, concat_dim);
+            elseif (nd == nd2) && all(size(Ycollated.(vn)) == sz)
+                concat_dim = nd + 1;
+                sel = repmat({1}, 1, concat_dim);
+            else
+                sel = repmat({1}, 1, nd);
+                concat_dim = nd;
+            end
+
+            for i = 1:max(concat_dim, nd)
                 if (i ~= concat_dim)
                     sel(i) = {1:sz(i)};
                 else
@@ -343,9 +352,9 @@ function [result, md] = readDistributed(filename, target_var, scenarios)
                 
                 % Get info on number of dimensions
                 if v == "site_rankings"
-                    tmp_d = [md.n_sites, 2, num_groups];
-                    nd = 3;
-                    scen_dim = 3;
+                    tmp_d = [md.n_timesteps, md.n_sites, 2, num_groups];
+                    nd = 4;
+                    scen_dim = 4;
                 elseif contains(v, "_log")
                     if v == "seed_log"
                         tmp_d = [md.n_timesteps, 2, md.n_sites, num_groups];
@@ -384,12 +393,7 @@ function [result, md] = readDistributed(filename, target_var, scenarios)
                 
                 % Create dimension indexer, as we don't know how big each
                 % dimension is.
-                if v ~= "site_rankings"
-                    sel = repmat({1}, 1, nd);
-                else
-                    sel = repmat({1}, 1, 3);
-                end
-                
+                sel = repmat({1}, 1, nd);
                 for i = 1:length(tmp_d)
                     sel(i) = {1:tmp_d(i)};
                 end
@@ -398,11 +402,11 @@ function [result, md] = readDistributed(filename, target_var, scenarios)
             sel{scen_dim} = run_id;
             
             if v == "site_rankings"
-                sel{2} = 1;
-                result.(v)(sel{:}) = siteRanking(tmp, "seed");
+                sel{3} = 1;
+                result.(v)(sel{:}) = tmp(:, :, 1);
                 
-                sel{2} = 2;
-                result.(v)(sel{:}) = siteRanking(tmp, "shade");
+                sel{3} = 2;
+                result.(v)(sel{:}) = tmp(:, :, 2);
             else
                 if v == "seed_log"
                     result.(v)(sel{:}) = mean(tmp, 5);
