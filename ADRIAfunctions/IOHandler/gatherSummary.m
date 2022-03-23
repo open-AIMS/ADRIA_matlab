@@ -111,45 +111,17 @@ function collated_mets = gatherSummary(file_loc, opts)
 
             [Ystruct, md] = readDistributed(full_path, vn, scenarios);
 
-                if isempty(Ystruct.(vn))
-                    continue
-                end
-
-                if isempty(Ycollated.(vn))
-                    Ycollated.(vn) = Ystruct.(vn);
-                    continue
-                end
-
-                nd = ndims(Ycollated.(vn));
-
-                switch nd
-                    case {5, 4}
-                        nd_tmp = nd - 1;
-                    case 3
-                        nd_tmp = nd;
-                end
-
-                % TODO: Insert into preallocated matrix
-                Ycollated.(vn) = cat(nd_tmp, Ycollated.(vn), Ystruct.(vn));
+            if isempty(Ystruct.(vn))
+                continue
             end
-            
-%             if v == "site_rankings"
-%                 sel = repmat({1}, 1, nd);
-%                 tmp_d = [md.n_sites, 2, num_groups];
-%                 nd = 3;
-%                 scen_dim = 3;
-%             elseif contains(v, "_log")
-%                 if v == "seed_log"
-%                     tmp_d = [md.n_timesteps, 2, md.n_sites, N];
-%                     nd = 4;
-%                     scen_dim = 4;
-%                 elseif v == "fog_log"
-%                     tmp_d = [md.n_timesteps, md.n_sites, num_groups];
-%                     nd = 3;
-%                     scen_dim = 3;
-%                 end
-%             end
-%             
+
+            if isempty(Ycollated.(vn))
+                Ycollated.(vn) = Ystruct.(vn);
+                continue
+            end
+
+            nd = ndims(Ycollated.(vn));
+
             sel = repmat({1}, 1, nd);
             sz = size(Ystruct.(vn));
             sz_len = length(size(Ystruct.(vn)));
@@ -165,12 +137,7 @@ function collated_mets = gatherSummary(file_loc, opts)
                 sel = sel(1:4);
             end
 
-            try
-                Ycollated.(vn)(sel{:}) = Ystruct.(vn);
-            catch ME
-                debug = 100;
-            end
-            
+            Ycollated.(vn)(sel{:}) = Ystruct.(vn);
             
             clear Ystruct;
         end
