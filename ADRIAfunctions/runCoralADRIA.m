@@ -139,16 +139,19 @@ parfor i = 1:N
 end
 
 results = struct('Y', full(Y));
+
+% Store the average locations/ranks for each climate replicate
 if any(ismember("seed", collect_logs))
-    results.seed_log = full(seed);
+    results.seed_log = full(mean(seed, ndims(seed)));
 end
 
 if any(ismember("shade", collect_logs))
-    results.shade_log = full(shade);
+    results.shade_log = full(mean(shade, ndims(shade)));
 end
 
 if any(ismember("site_rankings", collect_logs))
-    results.site_rankings = full(rankings);
+    rankings(rankings == 0) = nsites + 1;
+    results.site_rankings = full(mean(rankings, ndims(rankings)));
 end
 
 end

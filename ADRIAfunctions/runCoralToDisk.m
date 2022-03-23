@@ -194,20 +194,22 @@ parfor b_i = 1:n_batches
         end
         
         if any(strlength(collect_logs) > 0)
+            % Store the average locations/ranks for each climate replicate
             if any(ismember("seed", collect_logs))
-                tmp_d.seed_log = seed_log;
+                tmp_d.seed_log = mean(seed_log, ndims(seed_log));
             end
 
             if any(ismember("shade", collect_logs))
-                tmp_d.shade_log = shade_log;
+                tmp_d.shade_log = mean(shade_log, ndims(shade_log));
             end
             
             if any(ismember("fog", collect_logs))
-                tmp_d.fog_log = fog_log;
+                tmp_d.fog_log = mean(fog_log, ndims(fog_log));
             end
 
             if any(ismember("site_rankings", collect_logs))
-                tmp_d.site_rankings = rankings;
+                rankings(rankings == 0) = nsites + 1;
+                tmp_d.site_rankings = mean(rankings, ndims(rankings));
             end
         end
         
@@ -217,7 +219,7 @@ parfor b_i = 1:n_batches
         % (can't use `clear` here due to `parfor`)
         raw = [];
         tmp_d = [];
-        
+
     end
 
     % include metadata
