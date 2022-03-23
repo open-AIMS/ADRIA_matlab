@@ -1,19 +1,19 @@
 %% Loading counterfactual and intervention data
-out_45 = load('./Outputs/brick_runs_RCP45.mat');
+out_45 = load('./Outputs/brick_runs_RCP45_2.mat');
 
 %% Indices for runs of interest
 tgt_ind = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5));
 %% Make data table for BBNs and polar plots, using 15 best sites and 15 worst sites for seeding
 % extract site rankings for seeding, where seeding is used (seeding>0 and guided)
 % site_rankings = out_45.site_rankings(:,:,1,index_s1s2g1);
-%mean_CC = squeeze(mean(mean(out_45.coralTaxaCover_x_p_total_cover.mean,1),3));
+% mean_CC = squeeze(mean(mean(out_45.coralTaxaCover_x_p_total_cover.mean,1),3));
 % mean ranks over years and scenarios
 % site_rankings = squeeze(mean(mean(site_rankings,1),4));
 % site_vec = [(1:561)',mean_CC'];
 % ranks = sortrows(site_vec,2,'descend');
 
 sites = 1:561;
-yr_5 = yr;
+yr_5 = (1:74)+2025;
 %(1:5:end);
 
 % best 15 and worst 15 according to average ranks
@@ -68,13 +68,13 @@ figure(2);
 bn_visualize(parent_cell, R, names, gca);
 
 %% BBN inferences
-increArray = [10,30,40,50];
+increArray = [10,30,40];
 knownVars =[1,500000,500000,0,4,0.05];
 inf_cells = [1,3:8];
 nodePos = 1;
 F = multiBBNInf(dat_tab_store,R,knownVars,inf_cells,increArray,nodePos);
 
-knownVars =[0,0,0,0,0,0];
+knownVars =[0,500000,500000,0,4,0.05];
 F_cf = multiBBNInf(dat_tab_store,R,knownVars,inf_cells,increArray,nodePos);
 
 %% plots comparing coral cover for intervention and cf
