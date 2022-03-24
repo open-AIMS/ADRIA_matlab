@@ -253,7 +253,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % each site. Now using coral fecundity per m2 in 'coralSpec()'
         fecundity_scope = fecundityScope(Y_pstep, coral_params, site_data);
 
-        rec_abs = potential_settler_cover * (fecundity_scope * TP_data) .* LPs;
+        rec_abs = potential_settler_cover * ((fecundity_scope .* LPs) * TP_data);
 
         % adjusting recruitment at each site by dividing by the area
         rec = rec_abs ./ site_data.area';
