@@ -295,8 +295,12 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             prefshadesites = randi(nsites, [nsiteint, 1])';
         end
 
+        in_shade_years = (shade_start_year <= tstep) && (tstep <= (shade_start_year + shadeyears));
+        has_shade_sites = ~all(prefshadesites == 0);
+        has_seed_sites = ~all(prefseedsites == 0);
+
         % Warming and disturbance event going into the pulse function
-        if (srm > 0) && (tstep <= (shade_start_year + shadeyears)) && ~all(prefshadesites == 0)
+        if (srm > 0) && in_shade_years && has_shade_sites
             Yshade(tstep, prefshadesites) = srm;
 
             % Apply reduction in DHW due to shading
