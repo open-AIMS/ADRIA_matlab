@@ -99,7 +99,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             % No depth data, so consider all sites
             depth_priority = site_data{:, "recom_connectivity"};
         end
-        
+
         if isa(depth_priority, 'cell')
             % Catch edge case where IDs are interpreted as text/cells
             depth_priority = 1:length(depth_priority);
@@ -210,7 +210,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % matrix in which to store the output
     Yout = zeros(tf, nspecies, nsites);
 
-    % Set initial population sizes at tstep = 1    
+    % Set initial population sizes at tstep = 1
     Yout(1, :, :) = init_cov;
 
     % These logs need to be collected as part of the run
@@ -366,7 +366,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         if any(ismember("shade", collect_logs))
             results.shade_log = full(Yshade);
         end
-        
+
         if any(ismember("fog", collect_logs))
             results.fog_log = full(Yfog);
         end
