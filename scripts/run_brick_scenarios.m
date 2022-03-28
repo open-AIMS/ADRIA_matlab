@@ -183,7 +183,7 @@ for rcp = target_RCPs'
     tic
     ai.runToDisk(input_table, sampled_values=false, nreps=n_reps, ...
         file_prefix=file_prefix, ...
-        batch_size=ceil(N / num_workers), metrics=desired_metrics, ...
+        batch_size=ceil(N / num_workers / 2), metrics=desired_metrics, ...
         summarize=true, collect_logs=["fog", "seed", "site_rankings"]);
     tmp = toc;
     disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N * n_reps)), " seconds per run; ", num2str(tmp/N), " seconds per scenario)"))
@@ -192,7 +192,7 @@ for rcp = target_RCPs'
     tic
     Y = ai.gatherSummary(file_prefix, summarize=false);
     tmp = toc;
-    disp(strcat("Took ", num2str(tmp), " seconds to collect all scenarios"))
+    disp(strcat("Took ", num2str(tmp), " seconds to collect summaries"))
     
     mean_RCI = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.mean, Y.coralEvenness.mean, Y.shelterVolume.mean, Y.coralTaxaCover_x_p_juveniles.mean);
     median_RCI = ReefConditionIndex(Y.coralTaxaCover_x_p_total_cover.median, Y.coralEvenness.median, Y.shelterVolume.median, Y.coralTaxaCover_x_p_juveniles.median);
@@ -210,7 +210,8 @@ for rcp = target_RCPs'
     tmp = toc;
     disp(strcat("Took ", num2str(tmp), " seconds to save scenarios"))
     
-    break
+    clear Y;
+    clear RCI;
 end
 
 % plot(mean(Y.RCI.mean(:, :, 1), 2), 'DisplayName', "CF", 'LineWidth',2)
@@ -221,4 +222,42 @@ end
 % plot(mean(Y.RCI.mean(:, :, 4), 2), 'DisplayName', "Unguided interventions, 0.05 natad", 'LineWidth',2)
 % plot(mean(Y.RCI.mean(:, :, 6), 2), 'DisplayName', "Guided interventions, 0.05 natad", 'LineWidth',2)
 % legend
+% hold off
+% 
+% 
+% plot(mean(Y.RCI.mean(:, :, 1), 2), 'DisplayName', "CF", 'LineWidth',2)
+% hold on
+% plot(mean(Y.RCI.mean(:, :, input_table.Guided == 0), [2,3]), 'DisplayName', "Unguided", 'LineWidth',2)
+% plot(mean(Y.RCI.mean(:, :, input_table.Guided == 1), [2,3]), 'DisplayName', "Guided", 'LineWidth',2)
+% 
+% % Find top 10
+% [~,idx]=sort(mean(Y.RCI.mean(:, :, input_table.Guided == 0), [1,3]),'descend');
+% top_10 = idx(1:10);
+% plot(mean(Y.RCI.mean(:, top_10, input_table.Guided == 0), [2,3]), 'DisplayName', "Unguided (Top 10 sites)", 'LineWidth',2)
+% 
+% [~,idx]=sort(mean(Y.RCI.mean(:, :, input_table.Guided == 1), [1,3]),'descend');
+% top_10 = idx(1:10);
+% plot(mean(Y.RCI.mean(:, top_10, input_table.Guided == 1), [2,3]), 'DisplayName', "Guided (Top 10 sites)", 'LineWidth',2)
+% legend
+% title(["Mean RCI" "Guided vs Unguided"]);
+% hold off
+% 
+% not_fogged_cond = (input_table.Seed1 == 500000) & (input_table.fogging == 0.0);
+% fogged_cond = (input_table.Seed1 == 500000) & (input_table.fogging == 0.2) & (input_table.Shadeyr_start == 2) & (input_table.Shadeyrs == 74);
+% 
+% plot(mean(Y.RCI.mean(:, :, 1), 2), 'DisplayName', "CF", 'LineWidth',2)
+% hold on
+% plot(mean(Y.RCI.mean(:, :, not_fogged_cond), [2,3]), 'DisplayName', "No Fog", 'LineWidth',2)
+% plot(mean(Y.RCI.mean(:, :, fogged_cond), [2,3]), 'DisplayName', "Fogging", 'LineWidth',2)
+% 
+% % Find top 10
+% [~,idx]=sort(mean(Y.RCI.mean(:, :, not_fogged_cond), [1,3]),'descend');
+% top_10 = idx(1:10);
+% plot(mean(Y.RCI.mean(:, top_10, not_fogged_cond), [2,3]), 'DisplayName', "No Fog (Top 10 sites)", 'LineWidth',2)
+% 
+% [~,idx]=sort(mean(Y.RCI.mean(:, :, fogged_cond), [1,3]),'descend');
+% top_10 = idx(1:10);
+% plot(mean(Y.RCI.mean(:, top_10, fogged_cond), [2,3]), 'DisplayName', "Fogging (Top 10 sites)", 'LineWidth',2)
+% legend
+% title(["Mean RCI" "No Fog vs Fogging, with Seeding"]);
 
