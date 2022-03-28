@@ -1,6 +1,7 @@
 %% Loading counterfactual and intervention data
-out_45 = load('./Outputs/brick_runs_RCP45.mat');
+out_45 = load('./Outputs/RCP45_redux.mat');
 out_45_RCI = load('./Outputs/brick_runs_RCP45_RCI_no_evenness.mat');
+out_45_fog = load('./Outputs/RCP45_protective_fog.mat');
 % out_26 = load('./Outputs/brick_runs_RCP26.mat');
 % out_26_RCI = load('./Outputs/brick_runs_RCP26_RCI.mat');
 % out_60 = load('./Outputs/brick_runs_RCP60.mat');
@@ -11,7 +12,7 @@ cols = cols([6,8],:);
 cols = [cols(2,:);cols(1,:)];
 
 % load extra runs for fogging
-fog_runs = load("./Outputs/reruns_long_fog_brick_scens.mat");
+just_fog_runs = load("./Outputs/reruns_justfog_all_metrics.mat");
 
 %% Violin plots: comparison of 4 metrics, counterfactual and intervention Seed 500, Aadpt 4, Natad 0.05
 % vector of the years in the data set
@@ -65,9 +66,9 @@ plotCompareViolin(selected_int_Ju,selected_cf_Ju,yr,5,'mean' , ...
 hold off
 
 %% intervention Seed 500, Aadpt 4, Natad, Guided vs. unguided
-
-tgt_ind_int1 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
-tgt_ind_int2 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==0));
+yr = linspace(2026,2099,74);
+tgt_ind_int1 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.0)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
+tgt_ind_int2 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0.0)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==0));
 selected_int_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int1);
 selected_cf_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int2);
 selected_int_Ev = filterSummary(out_45.coralEvenness, tgt_ind_int1);
@@ -76,14 +77,14 @@ selected_int_SV = filterSummary(out_45.shelterVolume, tgt_ind_int1);
 selected_cf_SV = filterSummary(out_45.shelterVolume, tgt_ind_int2);
 selected_int_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_int1);
 selected_cf_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_int2);
-selected_int_RCI = filterSummary(out_45_RCI, tgt_ind_int);
-selected_cf_RCI = filterSummary(out_45_RCI, tgt_ind_cf);
+selected_int_RCI = filterSummary(out_45_RCI, tgt_ind_int1);
+selected_cf_RCI = filterSummary(out_45_RCI, tgt_ind_int2);
 
 %% plot every 5 yrs
 seed_site_rankings = out_45.site_rankings(:,:,:,tgt_ind_int1);
 seed_struct = struct('site_rankings',seed_site_rankings,'int',"seed")
 
-figure(2)
+figure(3)
 t = tiledlayout(2,2)
 t.TileSpacing = 'compact';
 
@@ -113,82 +114,131 @@ hold off
 
 
 %% Violin plots: RCI for 6 interventions, RCP 45
-% 1: 0 DHW but seeded (= larval slick intervention) and no fogging
-% 2: Fogging only
-% 3: 4 DHW and fogging  (the first multi-panel set already shows 4DHW without fogging)
-% 4: 8 DHW and no fogging
-% 5: 8 DHW and fogging
-% 6: 8 DHW, fogging and natural adaptation
-
 yr = linspace(2026,2099,74);
 
 % find index for each scenario
 % counterfactual
-tgt_ind_cf_45 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==0));
-% 0 DHW but seeded (= larval slick intervention) and no fogging
-tgt_ind_int_45_1 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==1));
+tgt_ind_cf_45 = find((out_45.inputs.Seedyr_start==2)& ...
+                    (out_45.inputs.Shadeyr_start==2)& ...
+                    (out_45.inputs.Seedyrs==5)& ...
+                    (out_45.inputs.Shadeyrs==20)& ...
+                    (out_45.inputs.Shadefreq==1)& ...
+                    (out_45.inputs.Seedfreq==0)& ...
+                    (out_45.inputs.Seed1==0)& ...
+                    (out_45.inputs.Seed2==0)& ...
+                    (out_45.inputs.fogging==0)& ...
+                    (out_45.inputs.Natad==0)& ...
+                    (out_45.inputs.Aadpt==0)& ...
+                    (out_45.inputs.Guided==0));
+% 0 DHW but seeded 
+tgt_ind_int_45_seedOnly = find((out_45.inputs.Seedyr_start==2)& ...
+                                (out_45.inputs.Shadeyr_start==2)& ...
+                                (out_45.inputs.Shadefreq==1)& ...
+                                (out_45.inputs.Seedfreq==0)& ...
+                                (out_45.inputs.Shadeyrs==20)& ...
+                                (out_45.inputs.Seedyrs==5)& ...
+                                (out_45.inputs.Seed1==500000)& ...
+                                (out_45.inputs.Seed2==500000)& ...
+                                (out_45.inputs.fogging==0)& ...
+                                (out_45.inputs.Natad==0)& ...
+                                (out_45.inputs.Aadpt==0)& ...
+                                (out_45.inputs.Guided==1));
 % Fogging only
-%tgt_ind_int_45_2 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==0)&(out_45.inputs.Seed2==0)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==0)&(out_45.inputs.Guided==1));
-% 4 DHW and fogging 
-%tgt_ind_int_45_3 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==4)&(out_45.inputs.Guided==1));
-% 8 DHW and no fogging
-tgt_ind_int_45_4 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
+%tgt_ind_int_45_fogOnly = find((out_45_fog.inputs.Seedyr_start==2)&(out_45_fog.inputs.Shadeyr_start==2)&(out_45_fog.inputs.Shadefreq==1)&(out_45_fog.inputs.Seedfreq==0)&(out_45_fog.inputs.Shadeyrs==74)&(out_45_fog.inputs.Seedyrs==5)&(out_45_fog.inputs.Seed1==0)&(out_45_fog.inputs.Seed2==0)&(out_45_fog.inputs.fogging==0.2)&(out_45_fog.inputs.Natad==0)&(out_45_fog.inputs.Aadpt==0)&(out_45_fog.inputs.Guided==1));
+% 4 DHW seed 
+tgt_ind_int_45_seed4dhw = find((out_45.inputs.Seedyr_start==2)& ...
+                                (out_45.inputs.Shadeyr_start==2)& ...
+                                (out_45.inputs.Shadefreq==1)& ...
+                                (out_45.inputs.Seedfreq==0)& ...
+                                (out_45.inputs.Shadeyrs==20)& ...
+                                (out_45.inputs.Seedyrs==5)& ...
+                                (out_45.inputs.Seed1==500000)& ...
+                                (out_45.inputs.Seed2==500000)& ...
+                                (out_45.inputs.fogging==0)& ...
+                                (out_45.inputs.Natad==0)& ...
+                                (out_45.inputs.Aadpt==4)& ...
+                                (out_45.inputs.Guided==1));
+% 8 DHW seed
+tgt_ind_int_45_seed8dhw = find((out_45.inputs.Seedyr_start==2)& ...
+                                (out_45.inputs.Shadeyr_start==2)& ...
+                                (out_45.inputs.Shadefreq==1)& ...
+                                (out_45.inputs.Seedfreq==0)& ...
+                                (out_45.inputs.Shadeyrs==20)& ...
+                                (out_45.inputs.Seedyrs==5)& ...
+                                (out_45.inputs.Seed1==500000)& ...
+                                (out_45.inputs.Seed2==500000)& ...
+                                (out_45.inputs.fogging==0)& ...
+                                (out_45.inputs.Natad==0)& ...
+                                (out_45.inputs.Aadpt==8)& ...
+                                (out_45.inputs.Guided==1));
 % 8 DHW and fogging
-%tgt_ind_int_45_5 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
-% 8 DHW, fogging and natural adaptation
-%tgt_ind_int_45_6 = find((out_45.inputs.Seedyr_start==2)&(out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadefreq==1)&(out_45.inputs.Seedfreq==0)&(out_45.inputs.Shadeyrs==20)&(out_45.inputs.Seedyrs==5)&(out_45.inputs.Seed1==500000)&(out_45.inputs.Seed2==500000)&(out_45.inputs.fogging==0.2)&(out_45.inputs.Natad==0.05)&(out_45.inputs.Aadpt==8)&(out_45.inputs.Guided==1));
+tgt_ind_int_45_fog8dhw = find((out_45_fog.inputs.Seedyr_start==2)& ...
+                                (out_45_fog.inputs.Shadeyr_start==2)& ...
+                                (out_45_fog.inputs.Shadefreq==1)& ...
+                                (out_45_fog.inputs.Seedfreq==0)& ...
+                                (out_45_fog.inputs.Shadeyrs==74)& ...
+                                (out_45_fog.inputs.Seedyrs==5)& ...
+                                (out_45_fog.inputs.Seed1==500000)& ...
+                                (out_45_fog.inputs.Seed2==500000)& ...
+                                (out_45_fog.inputs.fogging==0.2)& ...
+                                (out_45_fog.inputs.Natad==0)& ...
+                                (out_45_fog.inputs.Aadpt==8)& ...
+                                (out_45_fog.inputs.Guided==1));
+% 4 DHW and fogging
+tgt_ind_int_45_fog4dhw = find((out_45_fog.inputs.Seedyr_start==2)& ...
+                                (out_45_fog.inputs.Shadeyr_start==2)& ...
+                                (out_45_fog.inputs.Shadefreq==1)& ...
+                                (out_45_fog.inputs.Seedfreq==0)& ...
+                                (out_45_fog.inputs.Shadeyrs==74)& ...
+                                (out_45_fog.inputs.Seedyrs==5)& ...
+                                (out_45_fog.inputs.Seed1==500000)& ...
+                                (out_45_fog.inputs.Seed2==500000)& ...
+                                (out_45_fog.inputs.fogging==0.2)& ...
+                                (out_45_fog.inputs.Natad==0)& ...
+                                (out_45_fog.inputs.Aadpt==4)& ...
+                                (out_45_fog.inputs.Guided==1));
 
 % retrieve indices for each scenario
+% counterfactual
 selected_cf_RCI_45 = filterSummary(out_45_RCI, tgt_ind_cf_45);
-selected_int_RCI_45_1 = filterSummary(out_45_RCI, tgt_ind_int_45_1);
-%selected_int_RCI_45_2 = filterSummary(out_45_RCI, tgt_ind_int_45_2);
-%selected_int_RCI_45_3 = filterSummary(out_45_RCI, tgt_ind_int_45_3);
-selected_int_RCI_45_4 = filterSummary(out_45_RCI, tgt_ind_int_45_4);
-%selected_int_RCI_45_5 = filterSummary(out_45_RCI, tgt_ind_int_45_5);
-%selected_int_RCI_45_6 = filterSummary(out_45_RCI, tgt_ind_int_45_6);
-
-selected_int_RCI_45_2 = fog_runs.reruns_2;
-selected_int_RCI_45_3 = fog_runs.reruns_3;
-selected_int_RCI_45_5 = fog_runs.reruns_5;
-selected_int_RCI_45_6 = fog_runs.reruns_6;
+% only seeded 
+selected_int_RCI_seedOnly = filterSummary(out_45_RCI, tgt_ind_int_45_seedOnly);
+% Fogging only
+selected_int_RCI_45_fogOnly = struct('mean',just_fog_runs.reruns_justfog.RCI_mean);
+% 4 DHW seed 
+selected_int_RCI_45_seed4dhw = filterSummary(out_45_RCI, tgt_ind_int_45_seed4dhw);
+% 8 DHW seed 
+selected_int_RCI_45_seed8dhw = filterSummary(out_45_RCI, tgt_ind_int_45_seed8dhw);
+% 8 DHW and fogging
+selected_int_RCI_45_fog8dhw = filterSummary(out_45_fog.RCI, tgt_ind_int_45_fog8dhw);
+% 4 DHW and fogging
+selected_int_RCI_45_fog4dhw = filterSummary(out_45_fog.RCI, tgt_ind_int_45_fog4dhw);
 
 %% plot 2*3 panel time series every 10 yrs
+rerun_seed_ranks = load("./Outputs/reruns_seed_ranks.mat");
+
 % set up site ranks structs for each scenario
-seed_site_rankings_45_1 = out_45.site_rankings(:,:,:,tgt_ind_int_45_1);
-intv_struct_1 = struct('site_rankings',seed_site_rankings_45_1,'int',"seed");
+seed_site_rankings_45_seedOnly = rerun_seed_ranks.site_ranks_reruns.just_seed;
+%out_45.site_rankings(:,:,:,tgt_ind_int_45_seedOnly);
+intv_struct_seedOnly = struct('site_rankings',seed_site_rankings_45_seedOnly,'int',"seed");
 
-seed_site_rankings_45_2 = fog_runs.reruns_2.site_rankings;
-%out_45.site_rankings(:,:,:,tgt_ind_int_45_2);
-intv_struct_2 = struct('site_rankings',seed_site_rankings_45_2,'int',"shade");
+% seed_site_rankings_45_fogOnly = out_45_fog.site_rankings(:,:,:,tgt_ind_int_45_fogOnly);
+seed_site_rankings_45_fogOnly = just_fog_runs.reruns_justfog.site_rankings;
+intv_struct_fogOnly = struct('site_rankings',seed_site_rankings_45_fogOnly,'int',"shade");
 
-seed_site_rankings_45_3 = fog_runs.reruns_3.site_rankings;
-%out_45.site_rankings(:,:,:,tgt_ind_int_45_3);
-intv_struct_3 = struct('site_rankings',seed_site_rankings_45_3,'int',"both");
+seed_site_rankings_45_seed4dhw = rerun_seed_ranks.site_ranks_reruns.seed4dhw;
+%out_45.site_rankings(:,:,:,tgt_ind_int_45_seed4dhw);
+intv_struct_seed4dhw = struct('site_rankings',seed_site_rankings_45_seed4dhw,'int',"seed");
 
-seed_site_rankings_45_4 = out_45.site_rankings(:,:,:,tgt_ind_int_45_4);
-intv_struct_4 = struct('site_rankings',seed_site_rankings_45_4,'int',"seed");
+seed_site_rankings_45_seed8dhw = rerun_seed_ranks.site_ranks_reruns.seed8dhw;
+%out_45.site_rankings(:,:,:,tgt_ind_int_45_seed8dhw);
+intv_struct_seed8dhw = struct('site_rankings',seed_site_rankings_45_seed8dhw,'int',"seed");
 
-seed_site_rankings_45_5 = fog_runs.reruns_5.site_rankings;
-%out_45.site_rankings(:,:,:,tgt_ind_int_45_5);
-intv_struct_5 = struct('site_rankings',seed_site_rankings_45_5,'int',"both");
+seed_site_rankings_45_fog8dhw = out_45_fog.site_rankings(:,:,:,tgt_ind_int_45_fog8dhw);
+intv_struct_fog8dhw = struct('site_rankings',seed_site_rankings_45_fog8dhw,'int',"both");
 
-seed_site_rankings_45_6 = fog_runs.reruns_6.site_rankings;
-%out_45.site_rankings(:,:,:,tgt_ind_int_45_6);
-intv_struct_6 = struct('site_rankings',seed_site_rankings_45_6,'int',"both");
-
-% load re-run site_ranks
-% ranks_rerun = load("./Outputs/ranks_brick_scens.mat");
-% seed_site_rankings_45_1 = squeeze(mean(ranks_rerun.left_out_ranks.r_1,5));
-% intv_struct_1 = struct('site_rankings',seed_site_rankings_45_1,'int',"seed");
-% 
-% seed_site_rankings_45_3 = squeeze(mean(ranks_rerun.left_out_ranks.r_3,5));
-% intv_struct_3 = struct('site_rankings',seed_site_rankings_45_3,'int',"both");
-% 
-% seed_site_rankings_45_5 = squeeze(mean(ranks_rerun.left_out_ranks.r_5,5));
-% intv_struct_5 = struct('site_rankings',seed_site_rankings_45_5,'int',"both");
-% 
-% seed_site_rankings_45_6 = squeeze(mean(ranks_rerun.left_out_ranks.r_6,5));
-% intv_struct_6 = struct('site_rankings',seed_site_rankings_45_6,'int',"both");
+seed_site_rankings_45_fog4dhw = out_45_fog.site_rankings(:,:,:,tgt_ind_int_45_fog4dhw);
+intv_struct_fog4dhw = struct('site_rankings',seed_site_rankings_45_fog4dhw,'int',"both");
 
 %% Plotting 6 scenarios
 
@@ -201,41 +251,41 @@ t.TileSpacing = 'compact';
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_1,selected_cf_RCI_45,yr,tstep,'mean' ,...
-    {'RCI','Interv.','Counterf.'},intv_struct_1, cols,ylims,"Legend")
+plotCompareViolin(selected_int_RCI_seedOnly,selected_cf_RCI_45,yr,tstep,'mean' ,...
+    {'RCI','Interv.','Counterf.'},intv_struct_seedOnly, cols,ylims,"Legend")
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_2,selected_cf_RCI_45,yr,tstep,'mean' ,...
-    {'RCI','Interv.','Counterf.'},intv_struct_2,cols,ylims)
+plotCompareViolin(selected_int_RCI_45_fogOnly,selected_cf_RCI_45,yr,tstep,'mean' ,...
+    {'RCI','Interv.','Counterf.'},intv_struct_fogOnly,cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_3,selected_cf_RCI_45,yr,tstep,'mean' , ...
-    {'RCI','Interv.','Counterf.'},intv_struct_3, ...
+plotCompareViolin(selected_int_RCI_45_seed4dhw,selected_cf_RCI_45,yr,tstep,'mean' , ...
+    {'RCI','Interv.','Counterf.'},intv_struct_seed4dhw, ...
     cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_4,selected_cf_RCI_45,yr,tstep,'mean' , ...
-    {'RCI','Interv.','Counterf.'},intv_struct_4, ...
+plotCompareViolin(selected_int_RCI_45_fog4dhw,selected_cf_RCI_45,yr,tstep,'mean' , ...
+    {'RCI','Interv.','Counterf.'},intv_struct_fog4dhw, ...
     cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_5,selected_cf_RCI_45,yr,tstep,'mean' , ...
-    {'RCI','Interv.','Counterf.'},intv_struct_5, ...
+plotCompareViolin(selected_int_RCI_45_seed8dhw,selected_cf_RCI_45,yr,tstep,'mean' , ...
+    {'RCI','Interv.','Counterf.'},intv_struct_seed8dhw, ...
     cols,ylims)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI_45_6,selected_cf_RCI_45,yr,tstep,'mean' , ...
-    {'RCI','Interv.','Counterf.'},intv_struct_6, ...
+plotCompareViolin(selected_int_RCI_45_fog8dhw,selected_cf_RCI_45,yr,tstep,'mean' , ...
+    {'RCI','Interv.','Counterf.'},intv_struct_fog8dhw, ...
     cols,ylims)
 hold off
 
