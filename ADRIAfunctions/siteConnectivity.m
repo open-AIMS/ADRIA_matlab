@@ -52,88 +52,82 @@ if isfolder(file_loc)
     t_files = files(~t_dirs);
 
     locs = string({t_files.folder});
-    fns = string({t_files.name});
+    % fns = string({t_files.name});
+    year_dirs = unique(locs);  % should be directory for each year
     
-    % Create list of full, absolute, paths
-    num_files = length(locs);
-    full_paths = string(zeros(num_files, 1));
-    for i = 1:length(locs)
-        full_paths(i) = fullfile(locs(i), fns(i));
-    end
+    tmp_data = [];
+    TPbase = [];
+    truncated = [];
+    for year_dir_id = 1:length(year_dirs)
+        file_path = year_dirs(year_dir_id);
+        year_files = dir(file_path);
+        
+        year_data = year_files(~[year_files.isdir]);
+        
+        % sublocs = string({year_data.folder});
+        fns = string({year_data.name});
+        for f_id = 1:length(fns)
+            fname = fns(f_id);
+            f_loc = strcat(file_path, filesep, fname);
+            truncate = false;
 
-    % Load first file to determine size (width/height)
-    x = readtable(full_paths(1), 'ReadRowNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
-    
-    % Retrieve and sort by site ids
-    % This is to ensure identical indexes when matching up with spatial 
-    % site data, which will also be ordered by site id.
-    site_ids = string(x.Properties.RowNames);
-    
-    if ~isempty(site_order)
-        % Match up matrix order with site ids
-        order_idx = NaN(length(site_order), 1);
-        truncated = [];
-        for i = 1:length(site_order)
-            try
-                order_idx(i) = find(site_order(i) == site_ids);
-            catch err
-                if err.identifier == "MATLAB:matrix:singleSubscriptNumelMismatch"
-                    warning(strcat(site_order(i), " not found in site_ids! This site will be removed from runs."))
-                    truncated(max(1, length(truncated))) = i;
+            x = readtable(f_loc, 'ReadRowNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
+            site_ids = string(x.Properties.RowNames);
+            if ~isempty(site_order)
+                % Match up matrix order with site ids
+                order_idx = NaN(length(site_order), 1);
+                for i = 1:length(site_order)
+                    try
+                        order_idx(i) = find(site_order(i) == site_ids);
+                    catch err
+                        if err.identifier == "MATLAB:matrix:singleSubscriptNumelMismatch"
+                            if ~ismember(i, truncated)
+                                warning(strcat(site_order(i), " not found in site_ids! This site will be removed from runs."))
+                                truncated(end+1) = i;
+                                truncate = true;
+                            end
+                        end
+                    end
                 end
+
+                if truncate
+                    order_idx(truncated) = [];
+                    site_order(truncated) = [];
+                end
+
+                site_ids = site_order;
+            else
+                % Reorder rows/columns to ensure identical indexes when matching up
+                % with ordered spatial data
+                [site_ids, order_idx] = sort(site_ids);
             end
+            
+            x = x(order_idx, order_idx);  % enforce order
+            x_tmp = table2array(x);
+            x_tmp(isnan(x_tmp)) = 0;  % Convert NaNs to 0
+            if swap
+                x_tmp = transpose(x_tmp);
+            end
+
+            if isempty(tmp_data)
+                [w, h] = size(x_tmp);
+                tmp_data = zeros(length(fns), w, h);
+            end
+            
+            if isempty(TPbase)
+                TPbase = zeros(length(year_dirs), w, h);
+            end
+
+            tmp_data(f_id, :, :) = x_tmp;
         end
         
-        if truncated
-            order_idx(truncated) = [];
-            site_order(truncated) = [];
-        end
-        
-        site_ids = site_order;
-    else
-        % Reorder rows/columns to ensure identical indexes when matching up
-        % with ordered spatial data
-        [site_ids, order_idx] = sort(site_ids);
-    end
-
-    x = x(order_idx, order_idx);  % enforce order
-
-    x_tmp = table2array(x);
-    x_tmp(isnan(x_tmp)) = 0;  % Convert NaNs to 0
-    if swap
-        x_tmp = transpose(x_tmp);
-    end
-
-    [w, h] = size(x_tmp);
-    
-    data = zeros(length(full_paths), w, h);
-    data(1, :, :) = x_tmp;
-    for fn_i = 2:length(full_paths)
-        t_fn = full_paths(fn_i);
-        
-        x = readtable(t_fn, 'ReadVariableNames', true, 'ReadRowNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
-        
-        % Reorder rows/columns, assuming identical ID orders...
-        x = x(order_idx, order_idx);
-        
-        % Convert NaNs to 0
-        x{:, :}(isnan(x{:, :})) = 0;
-        
-        % Store data
-        % Transition probability matrix for all sites
-        % Data set is flipped from what ADRIA expects, so transpose.
-        x_tmp = table2array(x);
-        x_tmp(isnan(x_tmp)) = 0;  % Convert NaNs to 0
-        
-        if swap
-            data(fn_i, :, :) = transpose(x_tmp);
-        else
-            data(fn_i, :, :) = x_tmp;
-        end 
+        TPbase(year_dir_id, :, :) = squeeze(agg_func(tmp_data, 1));
+        tmp_data = [];
     end
     
-    % aggregate data with indicated aggregation method (default: mean)
-    TPbase = squeeze(agg_func(data, 1));
+    % get stat of stats across all available years
+    % e.g., mean of mean connectivity over years
+    TPbase = squeeze(agg_func(TPbase, 1));
 else
     %% Load a single transitional probability matrix
     x = readtable(file_loc, 'ReadRowNames', true, 'ReadVariableNames', true, 'CommentStyle', '#', 'TreatAsEmpty', "NA");
@@ -179,6 +173,7 @@ else
         TPbase = x_tmp;
     end
 end
+
 
 maxTP1cut = max(TPbase,[],'all')*con_cutoff;
 TPbase(TPbase<maxTP1cut) = 0;  % filter out weak connections
