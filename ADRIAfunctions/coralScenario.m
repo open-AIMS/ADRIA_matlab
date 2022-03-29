@@ -266,11 +266,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % heat stress used as criterion in site selection
         dhw_step = dhw_scen(tstep, :); % subset of DHW for given timestep
 
-        in_shade_years = (shade_start_year <= tstep) && (tstep <= (shade_start_year + shade_years));
-        has_shade_sites = ~all(prefshadesites == 0);
-        has_seed_sites = ~all(prefseedsites == 0);
-
-        in_seed_years = ((seed_start_year <= tstep) && (tstep <= (seed_start_year + seed_years)));
+        in_shade_years = (shade_start_year <= tstep) && (tstep <= (shade_start_year + shade_years - 1));
+        in_seed_years = ((seed_start_year <= tstep) && (tstep <= (seed_start_year + seed_years - 1)));
 
         %% Select preferred intervention sites based on criteria (heuristics)
         if is_guided
@@ -309,6 +306,9 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 prefshadesites = randi(nsites, [nsiteint, 1])';
             end
         end
+        
+        has_shade_sites = ~all(prefshadesites == 0);
+        has_seed_sites = ~all(prefseedsites == 0);
 
         % Warming and disturbance event going into the pulse function
         if (srm > 0) && in_shade_years && has_shade_sites
