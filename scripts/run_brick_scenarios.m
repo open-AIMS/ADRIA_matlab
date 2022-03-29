@@ -161,7 +161,7 @@ ai.constants.tf = 74;
 
 % Load site specific data
 ai.loadSiteData('./Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
-ai.loadConnectivity('Inputs/Brick/connectivity/');
+ai.loadConnectivity('Inputs/Brick/connectivity/', cutoff=0.01);
 ai.loadCoralCovers("./Inputs/Brick/site_data/coralCoverBrickTruncated.mat");
 
 desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
@@ -170,12 +170,12 @@ desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
     @shelterVolume, ...
     };
 
-target_RCPs = ["45"; "60"; "26"];
+target_RCPs = ["45"];  % ; "60"; "26"
 for rcp = target_RCPs'
     dhw_data = strcat("./Inputs/Brick/DHWs/dhwRCP", rcp, ".mat");
     ai.loadDHWData(dhw_data, n_reps);
 
-    tgt_rcp = strcat("D:/ADRIA_results/Brick_Mar_deliv_RCP", rcp, "_redux/");
+    tgt_rcp = strcat("D:/ADRIA_results/Brick_Mar_deliv_2022-03-29_RCP", rcp, "_redux/");
     mkdir(tgt_rcp{1});
 
     file_prefix = strcat(tgt_rcp, "RCP", rcp, "_redux");
