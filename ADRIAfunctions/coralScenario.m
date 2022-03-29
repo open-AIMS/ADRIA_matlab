@@ -312,23 +312,19 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             Yshade(tstep, prefshadesites) = srm;
 
             % Apply reduction in DHW due to shading
-            adjusted_dhw = max(0.0, dhw_step-Yshade(tstep, :));
+            adjusted_dhw = max(0.0, dhw_step - Yshade(tstep, :));
         else
             adjusted_dhw = dhw_step;
         end
 
-%         if fogging > 0.0 && ~all(prefshadesites == 0)
-%             Yin1(:, prefshadesites) = Yin1(:, prefshadesites) .* (1.0 - fogging);
-%             Yfog(tstep, prefshadesites) = fogging;
-%         end
         if fogging > 0.0 && in_shade_years && (has_seed_sites || has_shade_sites)
             if has_seed_sites
                 % Always fog where sites are selected if possible
-                adjusted_dhw(:, prefseedsites) = adjusted_dhw(:, prefseedsites) .* (1 - fogging);
+                adjusted_dhw(:, prefseedsites) = adjusted_dhw(:, prefseedsites) .* (1.0 - fogging);
                 Yfog(tstep, prefseedsites) = fogging;
             elseif has_shade_sites
                 % Otherwise, if no sites are selected, fog selected shade sites
-                adjusted_dhw(:, prefshadesites) = adjusted_dhw(:, prefshadesites) .* (1 - fogging);
+                adjusted_dhw(:, prefshadesites) = adjusted_dhw(:, prefshadesites) .* (1.0 - fogging);
                 Yfog(tstep, prefshadesites) = fogging;
             end
         end
