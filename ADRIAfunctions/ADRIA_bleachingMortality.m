@@ -39,7 +39,7 @@ function Y = ADRIA_bleachingMortality(tstep, n_p1, n_p2, a_adapt, n_adapt, bleac
 %      Marine Ecology Progress Series, 603, 257–264.
 %      https://doi.org/10.3354/meps12732
 
-ad = a_adapt + bleach_resist + tstep .* n_adapt;
+ad = a_adapt + bleach_resist + (tstep .* n_adapt);
 
 % Incorporate adaptation effect but maximum reduction is to 0
 capped_dhw = max(0.0, dhw - ad);
