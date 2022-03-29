@@ -161,7 +161,7 @@ ai.constants.tf = 74;
 
 % Load site specific data
 ai.loadSiteData('./Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
-ai.loadConnectivity('Inputs/Brick/connectivity/2015/');
+ai.loadConnectivity('Inputs/Brick/connectivity/');
 ai.loadCoralCovers("./Inputs/Brick/site_data/coralCoverBrickTruncated.mat");
 
 desired_metrics = {@(x, p) coralTaxaCover(x, p).total_cover, ...
