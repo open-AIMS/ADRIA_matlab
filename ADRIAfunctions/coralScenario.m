@@ -65,7 +65,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     yrslogseed = false(1, tf);
     if interv.Seedfreq > 0
         % set seed locations on specified years
-        yrslogseed(seed_start_year:interv.Seedfreq:(seed_start_year + seed_years)) = true;
+        yrslogseed(seed_start_year:interv.Seedfreq:(seed_start_year + seed_years - 1)) = true;
     else
         % set once at specified start year
         yrslogseed(seed_start_year) = true;
@@ -76,7 +76,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     yrslogshade = false(1, tf);
     if interv.Shadefreq > 0
         % set locations on specified years
-        yrslogshade(shade_start_year:interv.Shadefreq:(shade_start_year + shade_years)) = true;
+        yrslogshade(shade_start_year:interv.Shadefreq:(shade_start_year + shade_years - 1)) = true;
     else
         % set once at specified start year
         yrslogshade(shade_start_year) = true;
@@ -320,7 +320,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             adjusted_dhw = dhw_step;
         end
 
-        if fogging > 0.0 && in_shade_years && (has_seed_sites || has_shade_sites)
+        if (fogging > 0.0) && in_shade_years && (has_seed_sites || has_shade_sites)
             if has_seed_sites
                 % Always fog where sites are selected if possible
                 adjusted_dhw(:, prefseedsites) = adjusted_dhw(:, prefseedsites) .* (1.0 - fogging);
