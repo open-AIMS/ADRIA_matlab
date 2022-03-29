@@ -266,9 +266,11 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % heat stress used as criterion in site selection
         dhw_step = dhw_scen(tstep, :); % subset of DHW for given timestep
 
-        in_shade_years = (shade_start_year <= tstep) && (tstep <= (shade_start_year + shadeyears));
+        in_shade_years = (shade_start_year <= tstep) && (tstep <= (shade_start_year + shade_years));
         has_shade_sites = ~all(prefshadesites == 0);
         has_seed_sites = ~all(prefseedsites == 0);
+
+        in_seed_years = ((seed_start_year <= tstep) && (tstep <= (seed_start_year + seed_years)));
 
         %% Select preferred intervention sites based on criteria (heuristics)
         if is_guided
@@ -298,12 +300,12 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 site_rankings(tstep, rankings(:, 1), :) = rankings(:, 2:end);
             end
         else
-            if yrschangeseed(tf)
+            if yrslogseed(tstep)
                 % Unguided deployment, seed/shade corals anywhere
                 prefseedsites = randi(nsites, [nsiteint, 1])';
             end
 
-            if yrschangeshade(tf)
+            if yrslogshade(tstep)
                 prefshadesites = randi(nsites, [nsiteint, 1])';
             end
         end
@@ -343,7 +345,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         if (seed1 > 0) || (seed2 > 0)
             % Seed corals
-            if ((seed_start_year <= tstep) && (tstep <= (seed_start_year + seedyears))) && has_seed_sites
+            if in_seed_years && has_seed_sites
                 % extract colony areas for sites selected and convert to m^2
                 col_area_seed1 = coral_params.colony_area_cm2(s1_idx) / (10^4);
                 col_area_seed2 = coral_params.colony_area_cm2(s2_idx) / (10^4);
