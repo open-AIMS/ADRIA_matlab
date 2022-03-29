@@ -124,6 +124,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         % for repeatability
         rng(int64(sum(interv{:, :})+sum(criteria{:, :})))
     end
+
     %(pi*((2-1)/2)^2)/(10^2)
     seed1 = interv.Seed1; %tabular Acropora size class 2, per year per species per cluster
     seed2 = interv.Seed2; %corymbose Acropora size class 2, per year per species per cluster
@@ -263,7 +264,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         % heat stress used as criterion in site selection
         dhw_step = dhw_scen(tstep, :); % subset of DHW for given timestep
-        
+
         in_shade_years = (shade_start_year <= tstep) && (tstep <= (shade_start_year + shadeyears));
         has_shade_sites = ~all(prefshadesites == 0);
         has_seed_sites = ~all(prefseedsites == 0);
@@ -284,6 +285,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             dMCDA_vars.sumcover = squeeze(sum(Y_pstep, 1))'; % Dims: nsites * 1
             % dMCDA_vars.prioritysites = prioritysites;
             % DCMAvars.centr = centr
+
             sslog.seed = yrslogseed(tstep);
             sslog.shade = yrslogshade(tstep);
             [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankings] = ADRIA_DMCDA(dMCDA_vars, strategy, sslog, prefseedsites, prefshadesites, rankings); % site selection function for intervention deployment
@@ -299,7 +301,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 % Unguided deployment, seed/shade corals anywhere
                 prefseedsites = randi(nsites, [nsiteint, 1])';
             end
-            
+
             if yrschangeshade(tf)
                 prefshadesites = randi(nsites, [nsiteint, 1])';
             end
