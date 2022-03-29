@@ -63,26 +63,27 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % find yrs at which to reassess seeding site selection and indicate
     % these in yrslogseed
     yrslogseed = false(1, tf);
-    yrschangeseed = seed_start_year:interv.Seedfreq:tf;
-    yrslogseed(yrschangeseed) = true;
-
-    % if seed_times is zero, assess once in year 2
-    % (set and forget site selection)
-    if interv.Seedfreq == 0
-        yrslogseed(2) = true;
+    if interv.Seedfreq > 0
+        % set seed locations on specified years
+        yrslogseed(seed_start_year:interv.Seedfreq:(seed_start_year + seed_years)) = true;
+    else
+        % set once at specified start year
+        yrslogseed(seed_start_year) = true;
     end
 
     % find yrs at which to reassess seeding site selection and indicate
     % these in yrslogseed
     yrslogshade = false(1, tf);
-    yrschangeshade = shade_start_year:interv.Shadefreq:tf;
-    yrslogshade(yrschangeshade) = true;
-
-    % if shade_times is zero, assess once in year 2
-    % (set and forget site selection)
-    if interv.Shadefreq == 0
-        yrslogshade(2) = true;
+    if interv.Shadefreq > 0
+        % set locations on specified years
+        yrslogshade(shade_start_year:interv.Shadefreq:(shade_start_year + shade_years)) = true;
+    else
+        % set once at specified start year
+        yrslogshade(shade_start_year) = true;
     end
+
+    prefseedsites = false;
+    prefshadesites = false;
 
     strategy = interv.Guided; % Intervention strategy: 0 is random, 1 is guided
     is_guided = strategy > 0;
