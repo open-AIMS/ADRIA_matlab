@@ -51,10 +51,11 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % years to start seeding/shading
     seed_start_year = interv.Seedyr_start;
     shade_start_year = interv.Shadeyr_start;
+
     % find yrs at which to reassess seeding site selection and indicate
     % these in yrslogseed
     yrslogseed = false(1, tf);
-    yrschangeseed = shade_start_year:interv.Seedfreq:tf;
+    yrschangeseed = seed_start_year:interv.Seedfreq:tf;
     yrslogseed(yrschangeseed) = true;
 
     % if seed_times is zero, assess once in year 2
