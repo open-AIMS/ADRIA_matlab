@@ -12,15 +12,15 @@ param_table.Seed2 = 500000;
 param_table.SRM = 0;
 param_table.fogging = 0.2;
 param_table.Aadpt = 4;
-param_table.Natad = 0.05;
-param_table.Seedyrs = 5;
+param_table.Natad = 0.0;
+param_table.Seedyrs = 10;
 param_table.Shadeyrs = 74;
-param_table.Seedfreq = 0;
+param_table.Seedfreq = 10;
 param_table.Shadefreq = 1;
 param_table.Seedyr_start = 2;
 param_table.Shadeyr_start = 2;
 
-n_reps = 50;
+n_reps = 20;
 
 % Run all years
 ai.constants.tf = 74;
@@ -61,7 +61,7 @@ save("./Outputs/reruns_bugfix_metrics.mat","reruns_2","reruns_3");
 %%
 cols = parula(10);
 cols = cols([6,8],:);
-cols = [cols(1,:);cols(2,:)];
+cols = [cols(2,:);cols(1,:)];
 yr = linspace(2026,2099,74);
 seed_site_rankings2 = reruns_2.site_rankings;
 seed_struct2 = struct('site_rankings',seed_site_rankings2,'int',"seed");
