@@ -41,7 +41,7 @@ tgt_ind_int = find((out_45.inputs.Seedyr_start==2)& ...
                     (out_45.inputs.fogging==0)& ...
                     (out_45.inputs.Natad==0)& ...
                     (out_45.inputs.Aadpt==4)& ...
-                    (out_45.inputs.Guided==1));
+                    (out_45.inputs.Guided==0));
 
 %% Use indices to select metrics
 selected_int_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int);
@@ -59,7 +59,7 @@ selected_cf_RCI = filterSummary(out_45.RCI, tgt_ind_cf);
 seed_site_rankings = out_45.site_rankings(:,:,:,tgt_ind_int);
 struct_seed = struct('site_rankings',seed_site_rankings,'int',"seed");
 tstep = 5;
-figure(1)
+figure(2)
 t = tiledlayout(2,2)
 t.TileSpacing = 'compact';
 
@@ -310,6 +310,11 @@ plotCompareViolin(selected_int_RCI_45_fog8dhw,selected_cf_RCI_45,yr,tstep,'mean'
 hold off
 
 %% Memory saving for just using RCI
+
+cols = parula(10);
+cols = cols([6,8],:);
+cols = [cols(2,:);cols(1,:)];
+
 out_45_RCI = out_45.RCI;
 out_45_CC = out_45.coralTaxaCover_x_p_total_cover;
 out_45_inputs = out_45.inputs;
@@ -362,10 +367,10 @@ tgt_ind_cf = find((out_45.inputs.Seedyr_start==2)& ...
                     (out_45.inputs.Guided==0));
 
 %% Use indices to select RCI's and calculate delta RCI
-metric = "RCI"
+metric = "total_cover"
 if strcmp(metric,"RCI")
     plotxaxis = "RCI"
-else
+elseif strcmp(metric,"total_cover")
     plotxaxis = "Coral Cover"
 end
 selected_int_RCI_Guided_0dhw = filterSummary(out_45.(metric), tgt_ind_int_Guided_0dhw);
@@ -386,9 +391,7 @@ deltaRCI_Unguided_0dhw = median(selected_int_RCI_Unguided_0dhw.mean(time_slice,:
 deltaRCI_Unguided_4dhw = median(selected_int_RCI_Unguided_4dhw.mean(time_slice,:)-selected_cf_RCI.mean(time_slice,:),1);
 deltaRCI_Unguided_8dhw = median(selected_int_RCI_Unguided_8dhw.mean(time_slice,:)-selected_cf_RCI.mean(time_slice,:),1);
 
-%% Retreive indices of top 20 performing sites
-sitetype = "Top 20 performing sites"
-if strcmp(sitetype,"Top 20 performing sites")
+%% Retreive indices of top 20 performing site
 
     [~,top20_Unguided_0dhw_sites] = maxk(deltaRCI_Unguided_0dhw,20,2);
     [~,top20_Unguided_4dhw_sites] = maxk(deltaRCI_Unguided_4dhw,20,2);
@@ -398,36 +401,33 @@ if strcmp(sitetype,"Top 20 performing sites")
     [~,top20_Guided_4dhw_sites] = maxk(deltaRCI_Guided_4dhw,20,2);
     [~,top20_Guided_8dhw_sites] = maxk(deltaRCI_Guided_8dhw,20,2);
 
-    top20_Unguided_0dhw = deltaRCI_Unguided_0dhw(:,top20_Unguided_0dhw_sites);
-    top20_Unguided_4dhw = deltaRCI_Unguided_4dhw(:,top20_Unguided_4dhw_sites);
-    top20_Unguided_8dhw = deltaRCI_Unguided_8dhw(:,top20_Unguided_8dhw_sites);
+    top20perf_Unguided_0dhw = deltaRCI_Unguided_0dhw(:,top20_Unguided_0dhw_sites);
+    top20perf_Unguided_4dhw = deltaRCI_Unguided_4dhw(:,top20_Unguided_4dhw_sites);
+    top20perf_Unguided_8dhw = deltaRCI_Unguided_8dhw(:,top20_Unguided_8dhw_sites);
     
-    top20_Guided_0dhw = deltaRCI_Guided_0dhw(:,top20_Guided_0dhw_sites);
-    top20_Guided_4dhw = deltaRCI_Guided_4dhw(:,top20_Guided_4dhw_sites);
-    top20_Guided_8dhw = deltaRCI_Guided_8dhw(:,top20_Guided_8dhw_sites);
-
-elseif strcmp(sitetype,"Top 20 ranked sites")
+    top20perf_Guided_0dhw = deltaRCI_Guided_0dhw(:,top20_Guided_0dhw_sites);
+    top20perf_Guided_4dhw = deltaRCI_Guided_4dhw(:,top20_Guided_4dhw_sites);
+    top20perf_Guided_8dhw = deltaRCI_Guided_8dhw(:,top20_Guided_8dhw_sites);
 
     top20_Guided_0dhw_site_ranks = squeeze(mean(out_45.site_rankings(:,:,1,tgt_ind_int_Guided_0dhw),1));
     top20_Guided_0dhw_sites = sortrows([(1:561)', top20_Guided_0dhw_site_ranks'],2,'ascend');
-    top20_Guided_0dhw_sites = top20_Guided_0dhw_sites(1:20,1);
+    top20ranks_Guided_0dhw_sites = top20_Guided_0dhw_sites(1:20,1);
     
     top20_Guided_4dhw_site_ranks = squeeze(mean(out_45.site_rankings(:,:,1,tgt_ind_int_Guided_4dhw),1));
     top20_Guided_4dhw_sites = sortrows([(1:561)', top20_Guided_4dhw_site_ranks'],2,'ascend');
-    top20_Guided_4dhw_sites = top20_Guided_4dhw_sites(1:20,1);
+    top20ranks_Guided_4dhw_sites = top20_Guided_4dhw_sites(1:20,1);
     
     top20_Guided_8dhw_site_ranks = squeeze(mean(out_45.site_rankings(:,:,1,tgt_ind_int_Guided_8dhw),1));
     top20_Guided_8dhw_sites = sortrows([(1:561)', top20_Guided_8dhw_site_ranks'],2,'ascend');
-    top20_Guided_8dhw_sites = top20_Guided_8dhw_sites(1:20,1);
+    top20ranks_Guided_8dhw_sites = top20_Guided_8dhw_sites(1:20,1);
 
-    top20_Unguided_0dhw = deltaRCI_Unguided_0dhw(:,top20_Guided_0dhw_sites);
-    top20_Unguided_4dhw = deltaRCI_Unguided_4dhw(:,top20_Guided_4dhw_sites);
-    top20_Unguided_8dhw = deltaRCI_Unguided_8dhw(:,top20_Guided_8dhw_sites);
+    top20ranks_Unguided_0dhw = deltaRCI_Unguided_0dhw(:,top20ranks_Guided_0dhw_sites);
+    top20ranks_Unguided_4dhw = deltaRCI_Unguided_4dhw(:,top20ranks_Guided_4dhw_sites);
+    top20ranks_Unguided_8dhw = deltaRCI_Unguided_8dhw(:,top20ranks_Guided_8dhw_sites);
     
-    top20_Guided_0dhw = deltaRCI_Guided_0dhw(:,top20_Guided_0dhw_sites);
-    top20_Guided_4dhw = deltaRCI_Guided_4dhw(:,top20_Guided_4dhw_sites);
-    top20_Guided_8dhw = deltaRCI_Guided_8dhw(:,top20_Guided_8dhw_sites);
-end
+    top20ranks_Guided_0dhw = deltaRCI_Guided_0dhw(:,top20ranks_Guided_0dhw_sites);
+    top20ranks_Guided_4dhw = deltaRCI_Guided_4dhw(:,top20ranks_Guided_4dhw_sites);
+    top20ranks_Guided_8dhw = deltaRCI_Guided_8dhw(:,top20ranks_Guided_8dhw_sites);
 
 
 
@@ -436,14 +436,16 @@ dhw = [1,2,3];
 %['0 DHW','4DHW','8DHW']
 deltaRCI_Unguided = [deltaRCI_Unguided_0dhw(:), deltaRCI_Unguided_4dhw(:), deltaRCI_Unguided_8dhw(:)];
 deltaRCI_Guided = [deltaRCI_Guided_0dhw(:), deltaRCI_Guided_4dhw(:), deltaRCI_Guided_8dhw(:)];
-deltaRCI_Unguided_top20 = [top20_Unguided_0dhw(:), top20_Unguided_4dhw(:), top20_Unguided_8dhw(:)];
-deltaRCI_Guided_top20 = [top20_Guided_0dhw(:), top20_Guided_4dhw(:), top20_Guided_8dhw(:)];
+deltaRCI_Unguided_top20perf = [top20perf_Unguided_0dhw(:), top20perf_Unguided_4dhw(:), top20perf_Unguided_8dhw(:)];
+deltaRCI_Guided_top20perf = [top20perf_Guided_0dhw(:), top20perf_Guided_4dhw(:), top20perf_Guided_8dhw(:)];
+deltaRCI_Unguided_top20ranks = [top20ranks_Unguided_0dhw(:), top20ranks_Unguided_4dhw(:), top20ranks_Unguided_8dhw(:)];
+deltaRCI_Guided_top20ranks = [top20ranks_Guided_0dhw(:), top20ranks_Guided_4dhw(:), top20ranks_Guided_8dhw(:)];
 
-col1 = cols(1,:);
-col2 = cols(2,:);
+col1 = cols(2,:);
+col2 = cols(1,:);
 
 figure(4)
-t = tiledlayout(2,2)
+t = tiledlayout(3,2)
 t.TileSpacing = 'compact';
 
 nexttile
@@ -451,8 +453,8 @@ hold on
 al_goodplot(deltaRCI_Unguided, dhw, 0.5, col1);
 xlim([0,4]);
 ylim([0,0.6]);
-xlabel('Assisted Adaptation','Fontsize',16,'Interpreter','latex');
-ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',16,'Interpreter','latex');
+xlabel('Assisted Adaptation','Fontsize',14,'Interpreter','latex');
+ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',14,'Interpreter','latex');
 xticks([1 2 3]);
 xticklabels({'0 DHW','4 DHW','8 DHW'});
 title('Unguided, full domain','Fontsize',16,'Interpreter','latex');
@@ -463,8 +465,8 @@ hold on
 al_goodplot(deltaRCI_Guided, dhw, 0.5, col2);
 xlim([0,4]);
 ylim([0,0.6]);
-xlabel('Assisted Adaptation','Fontsize',16,'Interpreter','latex');
-ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',16,'Interpreter','latex');
+xlabel('Assisted Adaptation','Fontsize',14,'Interpreter','latex');
+ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',14,'Interpreter','latex');
 xticks([1 2 3]);
 xticklabels({'0 DHW','4 DHW','8 DHW'});
 title('Guided, full domain','Fontsize',16,'Interpreter','latex');
@@ -472,24 +474,48 @@ hold off
 
 nexttile
 hold on
-al_goodplot(deltaRCI_Unguided_top20, dhw, 0.5, col1);
+al_goodplot(deltaRCI_Unguided_top20perf, dhw, 0.5, col1);
 xlim([0,4]);
 ylim([0,0.6]);
-xlabel('Assisted Adaptation','Fontsize',16,'Interpreter','latex');
-ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',16,'Interpreter','latex');
+xlabel('Assisted Adaptation','Fontsize',14,'Interpreter','latex');
+ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',14,'Interpreter','latex');
 xticks([1 2 3]);
 xticklabels({'0 DHW','4 DHW','8 DHW'});
-title(strcat("Unguided, ",sitetype),'Fontsize',16,'Interpreter','latex');
+title(strcat("Unguided, top 20 performing sites"),'Fontsize',16,'Interpreter','latex');
 hold off
 
 nexttile
 hold on
-al_goodplot(deltaRCI_Guided_top20, dhw, 0.5, col2);
+al_goodplot(deltaRCI_Guided_top20perf, dhw, 0.5, col2);
 xlim([0,4]);
 ylim([0,0.6]);
-xlabel('Assisted Adaptation','Fontsize',16,'Interpreter','latex');
-ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',16,'Interpreter','latex');
+xlabel('Assisted Adaptation','Fontsize',14,'Interpreter','latex');
+ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',14,'Interpreter','latex');
 xticks([1 2 3]);
 xticklabels({'0 DHW','4 DHW','8 DHW'});
-title(strcat("Guided, ",sitetype),'Fontsize',16,'Interpreter','latex');
+title(strcat("Guided, top 20 performing sites"),'Fontsize',16,'Interpreter','latex');
+hold off
+
+nexttile
+hold on
+al_goodplot(deltaRCI_Unguided_top20ranks, dhw, 0.5, col1);
+xlim([0,4]);
+ylim([0,0.6]);
+xlabel('Assisted Adaptation','Fontsize',14,'Interpreter','latex');
+ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',14,'Interpreter','latex');
+xticks([1 2 3]);
+xticklabels({'0 DHW','4 DHW','8 DHW'});
+title(strcat("Unguided, top 20 ranked sites"),'Fontsize',16,'Interpreter','latex');
+hold off
+
+nexttile
+hold on
+al_goodplot(deltaRCI_Guided_top20ranks, dhw, 0.5, col2);
+xlim([0,4]);
+ylim([0,0.6]);
+xlabel('Assisted Adaptation','Fontsize',14,'Interpreter','latex');
+ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',14,'Interpreter','latex');
+xticks([1 2 3]);
+xticklabels({'0 DHW','4 DHW','8 DHW'});
+title(strcat("Guided, top 20 ranked sites"),'Fontsize',16,'Interpreter','latex');
 hold off
