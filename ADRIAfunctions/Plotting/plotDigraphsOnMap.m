@@ -71,3 +71,5 @@ set(gca,'color','none'); %set box to transparent
 colorbar;
 axis([lonmin,lonmax,latmin,latmax]); 
 %end
+
+
