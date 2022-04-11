@@ -2,6 +2,7 @@
 
 %% Plot connectivity digraphs from connectivity matrix on map
 ai = ADRIA();
+
 % Load site specific data
 % Must be loaded first
 % Brick site data
@@ -52,7 +53,10 @@ bbox = [lonmin,latmin;lonmax,latmax];
 P = shaperead('Great_Barrier_Reef_features.shp', 'BoundingBox', bbox);
 
 Lat = P.X;
-Lon = P.Y;f= figure;
+Lon = P.Y;
+% P.Lat = Lat;
+% P.Lon = Lon;
+f= figure;
 f.Position = [10, 10, 800 600];
 
 geoshow(P, 'FaceColor', [0.8,0.8,0.8])
