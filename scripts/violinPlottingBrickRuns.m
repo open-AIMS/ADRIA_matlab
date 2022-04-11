@@ -38,10 +38,10 @@ tgt_ind_int = find((out_45.inputs.Seedyr_start==2)& ...
                     (out_45.inputs.Seedyrs==5)& ...
                     (out_45.inputs.Seed1==500000)& ...
                     (out_45.inputs.Seed2==500000)& ...
-                    (out_45.inputs.fogging==0)& ...
+                    (out_45.inputs.fogging==0.2)& ...
                     (out_45.inputs.Natad==0)& ...
                     (out_45.inputs.Aadpt==4)& ...
-                    (out_45.inputs.Guided==0));
+                    (out_45.inputs.Guided==1));
 
 %% Use indices to select metrics
 selected_int_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int);
@@ -105,23 +105,32 @@ key_params = (out_45.inputs.Seedyr_start==2)& ...
                     (out_45.inputs.fogging==0.2)& ...
                     (out_45.inputs.Natad==0.0)& ...
                     (out_45.inputs.Aadpt==8);
-tgt_ind_int1 = find(key_params&(out_45.inputs.Guided==1));
-tgt_ind_int2 = find(key_params&(out_45.inputs.Guided==0));
+tgt_ind_intg = find(key_params&(out_45.inputs.Guided==1));
+tgt_ind_intug = find(key_params&(out_45.inputs.Guided==0));
 
 %% Select each metric using indices
-selected_int_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int1);
-selected_cf_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int2);
-selected_int_Ev = filterSummary(out_45.coralEvenness, tgt_ind_int1);
-selected_cf_Ev = filterSummary(out_45.coralEvenness, tgt_ind_int2);
-selected_int_SV = filterSummary(out_45.shelterVolume, tgt_ind_int1);
-selected_cf_SV = filterSummary(out_45.shelterVolume, tgt_ind_int2);
-selected_int_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_int1);
-selected_cf_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_int2);
-selected_int_RCI = filterSummary(out_45.RCI, tgt_ind_int1);
-selected_cf_RCI = filterSummary(out_45.RCI, tgt_ind_int2);
+selected_g_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_intg);
+selected_ug_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_intug);
+% selected_g_Ev = filterSummary(out_45.coralEvenness, tgt_ind_intg);
+% selected_ug_Ev = filterSummary(out_45.coralEvenness, tgt_ind_intug);
+selected_g_SV = filterSummary(out_45.shelterVolume, tgt_ind_intg);
+selected_ug_SV = filterSummary(out_45.shelterVolume, tgt_ind_intug);
+selected_g_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_intg);
+selected_ug_Ju = filterSummary(out_45.coralTaxaCover_x_p_juveniles, tgt_ind_intug);
+selected_g_RCI = filterSummary(out_45.RCI, tgt_ind_intg);
+selected_ug_RCI = filterSummary(out_45.RCI, tgt_ind_intug);
+
+selected_g_TC = struct('mean',selected_g_TC.mean-selected_cf_TC.mean)
+selected_ug_TC = struct('mean',selected_ug_TC.mean-selected_cf_TC.mean)
+selected_g_SV = struct('mean',selected_g_SV.mean-selected_cf_SV.mean)
+selected_ug_SV = struct('mean',selected_ug_SV.mean-selected_cf_SV.mean)
+selected_g_Ju = struct('mean',selected_g_Ju.mean-selected_cf_Ju.mean)
+selected_ug_Ju = struct('mean',selected_ug_Ju.mean-selected_cf_Ju.mean)
+selected_g_RCI = struct('mean',selected_g_RCI.mean-selected_cf_RCI.mean)
+selected_ug_RCI = struct('mean',selected_ug_RCI.mean-selected_cf_RCI.mean)
 
 %% plot every 5 yrs
-seed_site_rankings = out_45.site_rankings(:,:,:,tgt_ind_int1);
+seed_site_rankings = out_45.site_rankings(:,:,:,tgt_ind_intg);
 seed_struct = struct('site_rankings',seed_site_rankings,'int',"seed")
 tstep = 5;
 figure(3)
@@ -130,28 +139,81 @@ t.TileSpacing = 'compact';
 
 nexttile
 hold on
-plotCompareViolin(selected_int_TC,selected_cf_TC,yr,tstep,'mean' ,...
-    {'Coral Cover','Guided','Unguided'},seed_struct,cols,[],"Legend")
+plotCompareViolin(selected_g_TC,selected_ug_TC,yr,tstep,'mean' ,...
+    {'$\delta$ Coral Cover','Guided','Unguided'},seed_struct,cols,[],"Legend")
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_RCI,selected_cf_RCI,yr,tstep,'mean' ,...
-    {'RCI','Guided','Unguided'},seed_struct,cols)
+plotCompareViolin(selected_g_RCI,selected_ug_RCI,yr,tstep,'mean' ,...
+    {'$\delta$ RCI','Guided','Unguided'},seed_struct,cols)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_SV,selected_cf_SV,yr,tstep,'mean' ,...
-    {'Relative Shelter Volume','Guided','Unguided'},seed_struct,cols)
+plotCompareViolin(selected_g_SV,selected_ug_SV,yr,tstep,'mean' ,...
+    {'$\delta$ Relative Shelter Volume','Guided','Unguided'},seed_struct,cols)
 hold off
 
 nexttile
 hold on
-plotCompareViolin(selected_int_Ju,selected_cf_Ju,yr,tstep,'mean' ,...
-    {'Juveniles','Guided','Unguided'},seed_struct,cols)
+plotCompareViolin(selected_g_Ju,selected_ug_Ju,yr,tstep,'mean' ,...
+    {'$\delta$ Juveniles','Guided','Unguided'},seed_struct,cols)
+hold off
+%% Mean value plots
+figure(3)
+t = tiledlayout(2,2)
+t.TileSpacing = 'compact';
+
+nexttile
+hold on
+plot(yr,mean(selected_g_TC.mean,2),'Color',cols(1,:),'LineWidth',2)
+plot(yr,mean(selected_ug_TC.mean,2),'Color',cols(2,:),'LineWidth',2)
+plot(yr,median(selected_g_TC.mean,2),'Color',cols(1,:),'LineWidth',2,'LineStyle','--')
+plot(yr,median(selected_ug_TC.mean,2),'Color',cols(2,:),'LineWidth',2,'LineStyle','--')
+ylim([0,0.0425])
+xlabel('Year','Interpreter','latex','Fontsize',12)
+ylabel('$\delta$ mean coral cover','Interpreter','latex','Fontsize',12)
+%xlim([2040,2060])
 hold off
 
+nexttile
+hold on
+plot(yr,mean(selected_g_RCI.mean,2),'Color',cols(1,:),'LineWidth',2)
+plot(yr,mean(selected_ug_RCI.mean,2),'Color',cols(2,:),'LineWidth',2)
+plot(yr,median(selected_g_RCI.mean,2),'Color',cols(1,:),'LineWidth',2,'LineStyle','--')
+plot(yr,median(selected_ug_RCI.mean,2),'Color',cols(2,:),'LineWidth',2,'LineStyle','--')
+ylim([0,0.0425])
+xlabel('Year','Interpreter','latex','Fontsize',12)
+ylabel('$\delta$ mean RCI','Interpreter','latex','Fontsize',12)
+%xlim([2040,2060])
+hold off
+
+nexttile
+hold on
+plot(yr,mean(selected_g_SV.mean,2),'Color',cols(1,:),'LineWidth',2)
+plot(yr,mean(selected_ug_SV.mean,2),'Color',cols(2,:),'LineWidth',2)
+plot(yr,median(selected_g_SV.mean,2),'Color',cols(1,:),'LineWidth',2,'LineStyle','--')
+plot(yr,median(selected_ug_SV.mean,2),'Color',cols(2,:),'LineWidth',2,'LineStyle','--')
+ylim([0,0.0425])
+xlabel('Year','Interpreter','latex','Fontsize',12)
+ylabel('$\delta$ mean shelter volume ','Interpreter','latex','Fontsize',12)
+%xlim([2040,2060])
+hold off
+
+nexttile
+hold on
+plot(yr,mean(selected_g_Ju.mean,2),'Color',cols(1,:),'LineWidth',2)
+plot(yr,mean(selected_ug_Ju.mean,2),'Color',cols(2,:),'LineWidth',2)
+plot(yr,median(selected_g_Ju.mean,2),'Color',cols(1,:),'LineWidth',2,'LineStyle','--')
+plot(yr,median(selected_ug_Ju.mean,2),'Color',cols(2,:),'LineWidth',2,'LineStyle','--')
+l = legend('Guided mean','Unguided mean','Guided median','Unguided median')
+ylim([0,0.003])
+set(l,'Interpreter','latex','Fontsize',10)
+xlabel('Year','Interpreter','latex','Fontsize',12)
+ylabel('$\delta$ mean juveniles','Interpreter','latex','Fontsize',12)
+%xlim([2040,2060])
+hold off
 
 %% Violin plots: RCI for 6 interventions, RCP 45
 yr = linspace(2026,2099,74);
@@ -189,8 +251,8 @@ tgt_ind_int_45_seedOnly = find(base_vars& ...
 tgt_ind_int_45_fogOnly = find(base_vars& ...
                         (out_45.inputs.fogging==0.2)& ...
                         (out_45.inputs.Aadpt==0)& ...
-                        (out_45.inputs.Seed1==0)& ...
-                        (out_45.inputs.Seed2==0)& ...
+                        (out_45.inputs.Seed1==500000)& ...
+                        (out_45.inputs.Seed2==500000)& ...
                         (out_45.inputs.Guided==1));
 % 4 DHW seed 
 tgt_ind_int_45_seed4dhw = find(base_vars& ...
@@ -518,4 +580,130 @@ ylabel(strcat("$\delta ", plotxaxis," $"),'Fontsize',14,'Interpreter','latex');
 xticks([1 2 3]);
 xticklabels({'0 DHW','4 DHW','8 DHW'});
 title(strcat("Guided, top 20 ranked sites"),'Fontsize',16,'Interpreter','latex');
+hold off
+
+%% Plots of different start years for seeding and shading
+
+unchanged_vars = (out_45.inputs.Shadefreq==1)& ...
+                    (out_45.inputs.Aadpt==4)& ...
+                    (out_45.inputs.Seedfreq==0)& ...                    
+                    (out_45.inputs.Seedyrs==5)& ...
+                    (out_45.inputs.Seed1==500000)& ...
+                    (out_45.inputs.Seed2==500000)& ...
+                    (out_45.inputs.Natad==0.0)& ...
+                    (out_45.inputs.Guided==1);
+
+tgt_ind_int_seedyr2 = find(unchanged_vars&(out_45.inputs.Seedyr_start==2)& ...
+    (out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadeyrs==20)&...
+     (out_45.inputs.fogging==0));
+tgt_ind_int_seedyr6 = find(unchanged_vars&(out_45.inputs.Seedyr_start==6)& ...
+    (out_45.inputs.Shadeyr_start==6)&(out_45.inputs.Shadeyrs==20)&...
+     (out_45.inputs.fogging==0));
+tgt_ind_int_seedyr11 = find(unchanged_vars&(out_45.inputs.Seedyr_start==11)& ...
+    (out_45.inputs.Shadeyr_start==11)&(out_45.inputs.Shadeyrs==20)&...
+     (out_45.inputs.fogging==0));
+tgt_ind_int_seedyr16 = find(unchanged_vars&(out_45.inputs.Seedyr_start==16)& ...
+    (out_45.inputs.Shadeyr_start==16)&(out_45.inputs.Shadeyrs==20)&...
+     (out_45.inputs.fogging==0));
+
+tgt_ind_int_seedfogyr2 = find(unchanged_vars&(out_45.inputs.Seedyr_start==2)& ...
+    (out_45.inputs.Shadeyr_start==2)&(out_45.inputs.Shadeyrs==74)&...
+     (out_45.inputs.fogging==0.2));
+tgt_ind_int_seedfogyr6 = find(unchanged_vars&(out_45.inputs.Seedyr_start==6)& ...
+    (out_45.inputs.Shadeyr_start==6)&(out_45.inputs.Shadeyrs==74)&...
+     (out_45.inputs.fogging==0.2));
+tgt_ind_int_seedfogyr11 = find(unchanged_vars&(out_45.inputs.Seedyr_start==11)& ...
+    (out_45.inputs.Shadeyr_start==11)&(out_45.inputs.Shadeyrs==74)&...
+     (out_45.inputs.fogging==0.2));
+tgt_ind_int_seedfogyr16 = find(unchanged_vars&(out_45.inputs.Seedyr_start==16)& ...
+    (out_45.inputs.Shadeyr_start==16)&(out_45.inputs.Shadeyrs==74)&...
+     (out_45.inputs.fogging==0.2));
+
+tgt_ind_cf = find((out_45.inputs.Seedyr_start==2)& ...
+                    (out_45.inputs.Shadeyr_start==2)& ...
+                    (out_45.inputs.Shadefreq==1)& ...
+                    (out_45.inputs.Seedfreq==0)& ...
+                    (out_45.inputs.Shadeyrs==20)& ...
+                    (out_45.inputs.Seedyrs==5)& ...
+                    (out_45.inputs.Seed1==0)& ...
+                    (out_45.inputs.Seed2==0)& ...
+                    (out_45.inputs.fogging==0)& ...
+                    (out_45.inputs.Natad==0.0)& ...
+                    (out_45.inputs.Aadpt==0)& ...
+                    (out_45.inputs.Guided==0));
+%% Load site data
+ai = ADRIA()
+ai.loadSiteData('./Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
+ai.loadConnectivity('Inputs/Brick/connectivity/', cutoff=0.01);
+ai.loadCoralCovers("./Inputs/Brick/site_data/coralCoverBrickTruncated.mat");
+areas = ai.site_data.area;
+areas_large = repmat(areas',74,1);
+%% plotting
+yr = linspace(2026,2099,74);
+selected_int_seedyr2 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedyr2);
+selected_int_seedyr6 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedyr6);
+selected_int_seedyr11 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedyr11);
+selected_int_seedyr16 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedyr16);
+
+selected_int_seedfogyr2 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedfogyr2);
+selected_int_seedfogyr6 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedfogyr6);
+selected_int_seedfogyr11 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedfogyr11);
+selected_int_seedfogyr16 = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_int_seedfogyr16);
+selected_cf_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_cf);
+
+cols2 = parula(10);
+figure(4)
+t = tiledlayout(2,2)
+t.TileSpacing = 'compact';
+
+nexttile
+hold on
+plot(yr,mean(selected_int_seedyr2.mean,2)-mean(selected_cf_TC.mean,2),'Color',cols2(4,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedyr6.mean,2)-mean(selected_cf_TC.mean,2),'Color',cols2(5,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedyr11.mean,2)-mean(selected_cf_TC.mean,2),'Color',cols2(9,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedyr16.mean,2)-mean(selected_cf_TC.mean,2),'Color',[255/255,102/255,102/255],'LineWidth',2)
+l = legend('2026','2031','2036','2040')
+set(l,'Interpreter','latex','Fontsize',18)
+xlabel('Year','Interpreter','latex','Fontsize',18)
+ylabel('$\delta$ mean coral cover (prop.)','Interpreter','latex','Fontsize',16)
+ax = gca;
+ax.FontSize = 18;
+ax.YAxis.Exponent=0;
+ytickformat('%1.3f')
+hold off
+
+nexttile
+hold on
+plot(yr,mean(selected_int_seedyr2.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',cols2(4,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedyr6.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',cols2(5,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedyr11.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',cols2(9,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedyr16.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',[255/255,102/255,102/255],'LineWidth',2)
+xlabel('Year','Interpreter','latex','Fontsize',18)
+ylabel('$\delta$ mean coral cover (hectares)','Interpreter','latex','Fontsize',16)
+ax = gca;
+ax.FontSize = 18;
+hold off
+
+nexttile
+hold on
+plot(yr,mean(selected_int_seedfogyr2.mean,2)-mean(selected_cf_TC.mean,2),'Color',cols2(4,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedfogyr6.mean,2)-mean(selected_cf_TC.mean,2),'Color',cols2(5,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedfogyr11.mean,2)-mean(selected_cf_TC.mean,2),'Color',cols2(9,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedfogyr16.mean,2)-mean(selected_cf_TC.mean,2),'Color',[255/255,102/255,102/255],'LineWidth',2)
+xlabel('Year','Interpreter','latex','Fontsize',18)
+ylabel('$\delta$ mean coral cover (prop.)','Interpreter','latex','Fontsize',16)
+ax = gca;
+ax.FontSize = 18;
+hold off
+
+nexttile
+hold on
+plot(yr,mean(selected_int_seedfogyr2.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',cols2(4,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedfogyr6.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',cols2(5,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedfogyr11.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',cols2(9,:),'LineWidth',2)
+plot(yr,mean(selected_int_seedfogyr16.mean.*areas_large,2)-mean(selected_cf_TC.mean.*areas_large,2),'Color',[255/255,102/255,102/255],'LineWidth',2)
+xlabel('Year','Interpreter','latex','Fontsize',18)
+ylabel('$\delta$ mean coral cover (hectares)','Interpreter','latex','Fontsize',16)
+ax = gca;
+ax.FontSize = 18;
 hold off
