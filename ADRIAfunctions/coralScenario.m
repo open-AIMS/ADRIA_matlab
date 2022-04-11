@@ -1,6 +1,6 @@
 function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, init_cov, ...
-    wave_scen, dhw_scen, site_data, collect_logs)
+    wave_scen, dhw_scen, site_data, collect_logs, ode_func)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -187,6 +187,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     Sw_t = 1 - mwaves;
 
     %% Setting constant vars to avoid incurring access overhead
+    % specify ode solver
+    odesolve = str2func(ode_func);
     % specify constant odeset option
     non_neg_opt = odeset('NonNegative', 1:nspecies:nsites);
 
@@ -341,7 +343,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         end
 
         % Run ODE for all species and sites
-        [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
+        [~, Y] = odesolve(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
         
         % Using the last step from ODE above,
         % If any sites are above their maximum possible value,

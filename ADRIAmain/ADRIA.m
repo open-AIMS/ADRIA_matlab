@@ -407,8 +407,11 @@ classdef ADRIA < handle
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+               runargs.odefunc string % solver for solving ecological odes
             end
-            
+            if isempty(runargs.odefunc)
+                runargs.odefunc = "@ode45"
+            end
             if isempty(obj.site_data)
                 error("Site data not loaded! Preload with `loadSiteData()`");
             end
@@ -439,7 +442,8 @@ classdef ADRIA < handle
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, ...
-                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs, ...
+                     runargs.odefunc);
         end
         
         function runToDisk(obj, X, runargs)
