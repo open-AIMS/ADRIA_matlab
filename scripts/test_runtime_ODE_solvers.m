@@ -8,13 +8,18 @@ ai = ADRIA();
 %% 2. Build a parameter table using default values
 
 param_table = ai.raw_defaults;
+% param_table.Guided = 1;
+% param_table.Seed1 = 500000;
+% param_table.Seed2 = 500000;
+% param_table.Aadpt =4;
+% param_table.Seedfreq = 0;
 
 %% Run ADRIA
 
 % Load site specific data
 ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
-n_reps = 20;
+n_reps = 50;
 ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 %% with ode45
@@ -39,15 +44,37 @@ tmp = toc;
 N = size(Y23, 4);
 disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
-%% with stiff solver ode15s
-% odestr = "ode15s";
+%% with ode78
+odestr = "ode78";
+tic
+% Run a single simulation with `n_reps` replicates
+res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr);
+Y78 = res.Y;  % get raw results
+tmp = toc;
+
+N = size(Y78, 4);
+disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+
+%% with ode89
+odestr = "ode89";
+tic
+% Run a single simulation with `n_reps` replicates
+res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr);
+Y89 = res.Y;  % get raw results
+tmp = toc;
+
+N = size(Y89, 4);
+disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+
+%% with stiff solver ode23s
+% odestr = "ode23s";
 % tic
 % % Run a single simulation with `n_reps` replicates
 % res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr);
-% Y = res.Y;  % get raw results
+% Y23t = res.Y;  % get raw results
 % tmp = toc;
 % 
-% N = size(Y, 4);
+% N = size(Y23t, 4);
 % disp(strcat("With ",odestr, ". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 %% with variable order method ode113
 odestr = "ode113";
@@ -58,6 +85,57 @@ Y113 = res.Y;  % get raw results
 tmp = toc;
 
 N = size(Y113, 4);
-disp(strcat("With",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 %% plot difference to ode45
-diff23 = sqrt(sum(sum(sum(sum((Y45-Y23).^2,2),3),4),5))
+diff23 = sqrt(sum(sum(sum(sum((Y45-Y23).^2,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan'));
+diff113 = sqrt(sum(sum(sum(sum((Y45-Y113).^2,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan'));
+diff78 = sqrt(sum(sum(sum(sum((Y45-Y78).^2,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan'));
+diff89 = sqrt(sum(sum(sum(sum((Y45-Y89).^2,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan'));
+
+mean23 = mean(mean(mean(mean(Y23,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan');
+mean45 = mean(mean(mean(mean(Y45,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan');
+mean113 = mean(mean(mean(mean(Y113,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan');
+mean78 = mean(mean(mean(mean(Y78,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan');
+mean89 = mean(mean(mean(mean(Y89,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan');
+
+dist23 = zeros(50,658800);
+dist45 = zeros(50,658800);
+dist78 = zeros(50,658800);
+dist113 = zeros(50,658800);
+dist89 = zeros(50,658800);
+for kk = 1:50
+    dist23(kk,:) = reshape(Y23(kk,:,:,:,:),1,658800);
+    dist45(kk,:)  = reshape(Y45(kk,:,:,:,:),1,658800);
+    dist113(kk,:)  = reshape(Y113(kk,:,:,:,:),1,658800);
+    dist78(kk,:)  = reshape(Y78(kk,:,:,:,:),1,658800);
+    dist89(kk,:)  = reshape(Y89(kk,:,:,:,:),1,658800);
+end
+dist23(isnan(dist23)) = 0;
+dist45(isnan(dist45)) = 0;
+dist113(isnan(dist113)) = 0;
+dist78(isnan(dist78)) = 0;
+dist89(isnan(dist89)) = 0;
+years = 2025+(1:50);
+
+figure(1)
+subplot(1,3,1)
+plot(years',diff23,years',diff113,years',diff78,years',diff89)
+legend('ode23','ode113','ode78','ode89')
+xlabel('Year')
+ylabel('Mean difference in coral cover to ode45')
+subplot(1,3,2)
+plot(years',mean45,years',mean23,years',mean113,years',mean78,years',mean89)
+legend('ode45','ode23','ode113','ode78','ode89')
+xlabel('Year')
+ylabel('Mean coral cover')
+subplot(1,3,3)
+cols = parula(5);
+hold on 
+plot_distribution_prctile(years',dist45','Color',cols(1,:))
+plot_distribution_prctile(years',dist23','Color',cols(2,:))
+plot_distribution_prctile(years',dist113','Color',cols(3,:))
+plot_distribution_prctile(years',dist78','Color',cols(4,:))
+plot_distribution_prctile(years',dist89','Color',cols(5,:))
+legend('ode45','ode23','ode113','ode78','ode89')
+xlabel('Year')
+ylabel('Mean coral cover')
