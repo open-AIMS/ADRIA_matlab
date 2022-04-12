@@ -408,6 +408,10 @@ classdef ADRIA < handle
                runargs.nreps {mustBeInteger}
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
                runargs.odefunc string % solver for solving ecological odes
+               runargs.odeopts struct
+            end
+            if isempty(runargs.odeopts)
+                runargs.odeopts = struct('reltol',1e-3,'abstol',1e-6);
             end
             if isempty(runargs.odefunc)
                 runargs.odefunc = "@ode45"
@@ -443,7 +447,7 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, ...
                      w_scens, d_scens, obj.site_data, runargs.collect_logs, ...
-                     runargs.odefunc);
+                     runargs.odefunc,runargs.odeopts);
         end
         
         function runToDisk(obj, X, runargs)
