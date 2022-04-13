@@ -537,7 +537,7 @@ classdef ADRIA < handle
                 end
             end
 
-            ncwriteatt(tmp_fn, "metadata", "n_reps", nreps);
+            ncwriteatt(tmp_fn, "metadata", "n_reps", n_reps);
             ncwriteatt(tmp_fn, "metadata", "n_timesteps", obj.constants.tf);
             ncwriteatt(tmp_fn, "metadata", "n_sites", n_sites);
             ncwriteatt(tmp_fn, "metadata", "n_species", length(obj.coral_spec.coral_id));
@@ -547,7 +547,7 @@ classdef ADRIA < handle
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
-                     obj.init_coral_cover, nreps, w_scens, d_scens, ...
+                     obj.init_coral_cover, n_reps, w_scens, d_scens, ...
                      obj.site_data, runargs.collect_logs, ...
                      fprefix, runargs.batch_size, runargs.metrics, runargs.summarize);
         end
