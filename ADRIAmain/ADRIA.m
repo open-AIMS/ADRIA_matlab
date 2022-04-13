@@ -75,60 +75,6 @@ classdef ADRIA < handle
             details = obj.parameterDetails();
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
         end
-        
-%         function init_cover = get.init_coral_cov(obj)
-%             if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
-%                 % If empty, default base covers from coralSpec will be used
-%                 init_cover = [];
-%                 return
-%             end
-%             
-%             % Create initial coral cover by size class based on input data
-%             prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
-%             nsites = height(obj.site_data);
-%              
-%             if obj.constants.mimic_IPMF
-%                 % TODO: A much neater way of handling these two cases
-%                 
-%                 % This is copied here and used as a template to fill in
-%                 base_coral_numbers = ...
-%                     [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
-%                      0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
-%                      0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
-%                      200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-%                      200, 100, 200, 30, 0, 0; ...   % small massives
-%                      0, 0, 0, 0, 0, 0];             % large massives
-%                 disp("Mimicking IPMF: Loading only two coral types");
-%             else
-%                 % This is copied here and used as a template to fill in
-%                 base_coral_numbers = ...
-%                     [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
-%                      200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
-%                      0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
-%                      200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
-%                      200, 100, 200, 200, 100, 0; ... % small massives
-%                      200, 100, 20, 20, 20, 10];      % large massives
-%                 disp("Loading all coral types");
-%             end
-%             
-%             % target shape is nspecies * nsites
-%             init_cover = zeros(numel(base_coral_numbers), nsites);
-%             for row = 1:nsites
-%                 if obj.constants.mimic_IPMF
-%                     % TODO: A much neater way of handling these two cases
-%                     x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
-%                     base_coral_numbers(4:5, :) = x;
-%                 else
-%                     x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
-%                     base_coral_numbers(:, :) = x;
-%                 end
-%                 
-%                 tmp = base_coral_numbers';
-%                 init_cover(:, row) = tmp(:);
-%             end
-%             
-%             assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
-%         end
 
         %% object methods
         function obj = ADRIA(init_args)
