@@ -177,13 +177,13 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     % See email: Mon 24/01/2022 15:17 - RE: IPMF and ADRIA workflow for BC
     % NOTE: site selection in MCDA based on damage probability also disabled
 
-    % wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
-    % for sp = 1:nspecies
-    %     mwaves(:, sp, :) = wavemort90(sp) .* wave_scen;
-    % end
+    wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
+    for sp = 1:nspecies
+        mwaves(:, sp, :) = wavemort90(sp) .* wave_scen;
+    end
 
-    % mwaves(mwaves < 0) = 0;
-    % mwaves(mwaves > 1) = 1;
+    mwaves(mwaves < 0) = 0;
+    mwaves(mwaves > 1) = 1;
 
     % Pre-calculate proportional survivors from wave damage
     Sw_t = 1 - mwaves;
