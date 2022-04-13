@@ -214,6 +214,8 @@ classdef ADRIA < handle
         end
 
         function [it_r, crit_r, coral_r] = componentIndices(obj)
+            % Helper method to identify start/end locations of model
+            % component parameters for interventions, criteria, and corals.
             it_s = 1;
             it_e = height(obj.interventions);
 
