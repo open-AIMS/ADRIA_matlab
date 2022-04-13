@@ -48,6 +48,7 @@ sample_table.depth_offset(:) = 5;
 %% Load site specific data
 ai.loadConnectivity('Inputs/Moore/connectivity/2015/moore_d3_2015_transfer_probability_matrix_wide.csv');
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
+ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
 %% Scenario runs
 
@@ -70,3 +71,7 @@ juv = TC_a.juveniles;
 
 % ReefConditionIndex
 RCI_test = ReefConditionIndex(TC, E, SV, juv);
+
+plotTrajectory(summarizeMetrics(struct('RCI', RCI_test)).RCI)
+
+

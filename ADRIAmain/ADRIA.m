@@ -8,13 +8,15 @@ classdef ADRIA < handle
         coral_spec table
     end
 
-    properties (Access = private)
+    properties (SetAccess = private, GetAccess=public)
         TP_data     % site connectivity data
         site_ranks  % site rank
         strongpred  % strongest predecessor
         site_data   % table of site data (dpeth, carrying capacity, etc)
         init_coral_cov_col  % column name to derive initial coral cover from
-        connectivity_site_ids  % Site IDs as specified by the connectivity dataset
+        init_coral_cover  % initial coral cover dataset
+        connectivity_site_ids  % Site IDs as specified by the connectivity dataset (indicates order of `TP_data`)
+        removed_sites  % indices of sites that were removed. Used to align site_data, DHW, connectivity, etc.
         dhw_scens  % DHW scenarios
         wave_scens % wave scenarios
     end
@@ -26,7 +28,7 @@ classdef ADRIA < handle
         sample_defaults
         sample_bounds
         
-        init_coral_cover
+        % init_coral_cover
     end
 
     methods (Access = private)
@@ -74,59 +76,59 @@ classdef ADRIA < handle
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
         end
         
-        function init_cover = get.init_coral_cover(obj)
-            if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
-                % If empty, default base covers from coralSpec will be used
-                init_cover = [];
-                return
-            end
-            
-            % Create initial coral cover by size class based on input data
-            prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
-            nsites = height(obj.site_data);
-             
-            if obj.constants.mimic_IPMF
-                % TODO: A much neater way of handling these two cases
-                
-                % This is copied here and used as a template to fill in
-                base_coral_numbers = ...
-                    [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
-                     0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
-                     0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
-                     200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-                     200, 100, 200, 30, 0, 0; ...   % small massives
-                     0, 0, 0, 0, 0, 0];             % large massives
-                disp("Mimicking IPMF: Loading only two coral types");
-            else
-                % This is copied here and used as a template to fill in
-                base_coral_numbers = ...
-                    [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
-                     200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
-                     0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
-                     200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
-                     200, 100, 200, 200, 100, 0; ... % small massives
-                     200, 100, 20, 20, 20, 10];      % large massives
-                disp("Loading all coral types");
-            end
-            
-            % target shape is nspecies * nsites
-            init_cover = zeros(numel(base_coral_numbers), nsites);
-            for row = 1:nsites
-                if obj.constants.mimic_IPMF
-                    % TODO: A much neater way of handling these two cases
-                    x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
-                    base_coral_numbers(4:5, :) = x;
-                else
-                    x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
-                    base_coral_numbers(:, :) = x;
-                end
-                
-                tmp = base_coral_numbers';
-                init_cover(:, row) = tmp(:);
-            end
-            
-            assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
-        end
+%         function init_cover = get.init_coral_cov(obj)
+%             if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
+%                 % If empty, default base covers from coralSpec will be used
+%                 init_cover = [];
+%                 return
+%             end
+%             
+%             % Create initial coral cover by size class based on input data
+%             prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
+%             nsites = height(obj.site_data);
+%              
+%             if obj.constants.mimic_IPMF
+%                 % TODO: A much neater way of handling these two cases
+%                 
+%                 % This is copied here and used as a template to fill in
+%                 base_coral_numbers = ...
+%                     [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
+%                      0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
+%                      0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
+%                      200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
+%                      200, 100, 200, 30, 0, 0; ...   % small massives
+%                      0, 0, 0, 0, 0, 0];             % large massives
+%                 disp("Mimicking IPMF: Loading only two coral types");
+%             else
+%                 % This is copied here and used as a template to fill in
+%                 base_coral_numbers = ...
+%                     [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
+%                      200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
+%                      0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
+%                      200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
+%                      200, 100, 200, 200, 100, 0; ... % small massives
+%                      200, 100, 20, 20, 20, 10];      % large massives
+%                 disp("Loading all coral types");
+%             end
+%             
+%             % target shape is nspecies * nsites
+%             init_cover = zeros(numel(base_coral_numbers), nsites);
+%             for row = 1:nsites
+%                 if obj.constants.mimic_IPMF
+%                     % TODO: A much neater way of handling these two cases
+%                     x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
+%                     base_coral_numbers(4:5, :) = x;
+%                 else
+%                     x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
+%                     base_coral_numbers(:, :) = x;
+%                 end
+%                 
+%                 tmp = base_coral_numbers';
+%                 init_cover(:, row) = tmp(:);
+%             end
+%             
+%             assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
+%         end
 
         %% object methods
         function obj = ADRIA(init_args)
@@ -136,7 +138,6 @@ classdef ADRIA < handle
                 init_args.conn_cutoff {mustBeFloat} = NaN  % relies on value defined in sim_constants if not provided
                 init_args.conn_agg_func = @mean  % aggregation method if indicated location is a folder of files
                 init_args.site_data = ""
-                init_args.coral_cols string = ["Acropora2026", "Goniastrea2026"]  % base coral cover columns to load
                 init_args.coral_k_col string = "k"  % max coral cover column
                 init_args.dhw = ""  % path to DHW data
                 init_args.wave = ""  % path to wave data
@@ -148,24 +149,22 @@ classdef ADRIA < handle
             obj.corals = coralDetails();
             obj.constants = simConstants();
             obj.coral_spec = coralSpec();
+
+            if init_args.site_data ~= ""
+                obj.loadSiteData(init_args.site_data, init_args.coral_k_col);
+            end
             
-            % connectivity, site_data, dhw, wave
-            
-            if ~(init_args.connectivity == "")
+            if init_args.connectivity ~= ""
                 obj.loadConnectivity(init_args.connectivity, ...
                                      cutoff=init_args.conn_cutoff, ...
                                      agg_func=init_args.conn_agg_func);
             end
-            
-            if ~(init_args.site_data == "")
-                obj.loadSiteData(init_args.site_data, init_args.coral_cols, init_args.coral_k_col);
-            end
 
-            if ~(init_args.dhw == "")
+            if init_args.dhw ~= ""
                 obj.loadDHWData(init_args.dhw, init_args.n_reps);
             end
             
-            if ~(init_args.wave == "")
+            if init_args.wave ~= ""
                 obj.loadWaveData(init_args.wave, init_args.n_reps);
             end
         end
@@ -228,6 +227,23 @@ classdef ADRIA < handle
             crit_r = crit_s:crit_e;
             coral_r = coral_s:coral_e;
         end
+        
+        function loadSiteData(obj, filename, k_col)
+            % Load data on site carrying capacity, depth and corresponding
+            % connectivity ids from given CSV file.
+
+            arguments
+                obj
+                filename
+                k_col = "k"  % column to load max coral cover from
+            end
+            
+            sdata = readtable(filename);
+            tmp_s = sdata(:, ["reef_siteid", "area", k_col, "sitedepth", "recom_connectivity", "lat", "long"]);
+
+            % Sort site data by reef id
+            obj.site_data = sortrows(tmp_s, "reef_siteid");
+        end
 
         function obj = loadConnectivity(obj, fileset, conargs)
             % Load site connectivity data from a given file or set of files.
@@ -236,6 +252,8 @@ classdef ADRIA < handle
             % If it is a path to a folder, then loads the all files found
             % within and aggregates with the function specified with
             % `agg_func`
+            %
+            % Note: `site_data` must be loaded beforehand.
             %
             % Example:
             %     % load single dataset
@@ -253,6 +271,10 @@ classdef ADRIA < handle
                conargs.cutoff {mustBeFloat} = NaN
                conargs.swap = false
             end
+            
+            if isempty(obj.site_data)
+                error("Load site data before loading connectivity. This is to ensure datasets all align.")
+            end
 
             if isnan(conargs.cutoff)
                cutoff = obj.constants.con_cutoff;
@@ -260,49 +282,45 @@ classdef ADRIA < handle
                cutoff = conargs.cutoff;
             end
 
-            [tp, sr, sp, site_ids] = siteConnectivity(fileset, cutoff, conargs.agg_func, conargs.swap);
+            [tp, sr, sp, site_ids, removed] = siteConnectivity(fileset, cutoff, conargs.agg_func, ...
+                                                      conargs.swap, string(obj.site_data{:, "recom_connectivity"}));
 
             obj.TP_data = tp;
             obj.site_ranks = sr;
             obj.strongpred = sp;
             obj.connectivity_site_ids = site_ids;
+            obj.removed_sites = removed;
+
+            if ~isempty(removed)
+                % Remove indicated site from site table
+                obj.site_data = obj.site_data(setdiff(1:end, obj.removed_sites), :);
+            end
         end
 
-        function loadSiteData(obj, filename, init_coral_cov_col, k_col)
-            % Load data on site carrying capacity, depth and connectivity
-            % from indicated CSV file.
-            
-            % readtable("Inputs/Moore/site_data/MooreReefCluster_Spatial.csv")
-            arguments
-                obj
-                filename
-                init_coral_cov_col = ["Acropora2026", "Goniastrea2026"]  % Columns with base coral values
-                k_col = "k"  % column to load max coral cover from
+        function loadCoralCovers(obj, cc_fn)
+            % Load initial coral cover data
+            if endsWith(cc_fn, ".mat")
+                obj.init_coral_cover = load(cc_fn).covers;
+            elseif endsWith(cc_fn, ".nc")
+                obj.init_coral_cover = ncread(cc_fn, "covers");
             end
             
-            if strlength(init_coral_cov_col) > 0
-                obj.init_coral_cov_col = init_coral_cov_col;
-            end 
-            
-            sdata = readtable(filename);
-            tmp_s = sdata(:, [["reef_siteid", "area", k_col, init_coral_cov_col, "sitedepth", "recom_connectivity"]]);
-            
-            % Set any missing coral cover data to 0
-            tmp_s{any(ismissing(tmp_s{:, init_coral_cov_col}),2), init_coral_cov_col} = 0;
-            
-            % Sort site data by reef id
-            obj.site_data = sortrows(tmp_s, "reef_siteid");
+            if ~isempty(obj.removed_sites)
+                obj.init_coral_cover = obj.init_coral_cover(:, setdiff(1:end, obj.removed_sites));
+            end
         end
 
         function loadDHWData(obj, dhw_fn, nreps)
             % Load DHW data
-            %
             if endsWith(dhw_fn, ".mat")
                 d_scens = load(dhw_fn).dhw(1:obj.constants.tf, :, 1:nreps);
             elseif endsWith(dhw_fn, ".nc")
                 d_scens = ncread(dhw_fn, "DHW");
                 d_scens = d_scens(1:obj.constants.tf, :, 1:nreps);
-
+            end
+            
+            if ~isempty(obj.removed_sites)
+                d_scens = d_scens(:, setdiff(1:end, obj.removed_sites), :);
             end
 
             obj.dhw_scens = d_scens;
@@ -316,6 +334,10 @@ classdef ADRIA < handle
             elseif endsWith(wave_fn, ".nc")
                 w_scens = ncread(wave_fn, "wave");
                 w_scens = w_scens(1:obj.constants.tf, :, 1:nreps);
+            end
+            
+            if ~isempty(obj.removed_sites)
+                w_scens = w_scens(:, setdiff(1:end, obj.removed_sites), :);
             end
 
             obj.wave_scens = w_scens;
@@ -417,11 +439,15 @@ classdef ADRIA < handle
                 runargs.odefunc = "@ode45"
             end
             if isempty(obj.site_data)
-                error("Site data not loaded! Preload with `loadSiteData()`");
+                error("Site data not loaded! Preload with `ai.loadSiteData()`");
             end
             
             if isempty(obj.TP_data)
-                error("Connectivity data not loaded! Preload with `loadConnectivity()`");
+                error("Connectivity data not loaded! Preload with `ai.loadConnectivity()`");
+            end
+            
+            if isempty(obj.dhw_scens)
+                error("DHW data not loaded! Preload with `ai.loadDHWData()`");
             end
             
             nreps = runargs.nreps;
@@ -460,6 +486,7 @@ classdef ADRIA < handle
                runargs.file_prefix string
                runargs.batch_size {mustBeInteger} = 500
                runargs.metrics cell = {}  % metrics to collect
+               runargs.summarize logical = false  % to summarize metric results or not
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
             
@@ -528,7 +555,7 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, w_scens, d_scens, ...
                      obj.site_data, runargs.collect_logs, ...
-                     fprefix, runargs.batch_size, runargs.metrics);
+                     fprefix, runargs.batch_size, runargs.metrics, runargs.summarize);
         end
         
         function Y = gatherResults(obj, file_loc, metrics, target_var)
@@ -561,6 +588,23 @@ classdef ADRIA < handle
             [~, ~, coral] = obj.splitParameterTable(input_table);
 
             Y = gatherResults(file_loc, coral, metrics, target_var);
+        end
+
+        function Y = gatherSummary(obj, file_loc, opts)
+            % Gather summarized result sets from batch runs.
+            arguments
+                obj
+                file_loc string
+                opts.target_var string = "all"
+                opts.scenarios = [];
+                opts.summarize logical = false
+            end
+            
+            if isempty(opts.scenarios)
+                warning("Targeted scenario option was empty, so collecting all scenarios run...")
+            end
+
+            Y = gatherSummary(file_loc, target_var=opts.target_var, scenarios=opts.scenarios, summarize=opts.summarize);
         end
         
         function updated = setParameterValues(obj, values, opts)

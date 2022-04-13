@@ -13,9 +13,14 @@ function mean_r = siteRanking(rankings, orient, func)
 % Outputs:
 %     s : matrix[nsites, 1],
     arguments
-        rankings double
+        rankings
         orient string
         func = @mean
+    end
+    
+    % Convert sparse matrices if necessary
+    if isa(rankings, 'ndSparse')
+        rankings = full(rankings);
     end
     
     % Make non-selected sites affect stats negatively
@@ -39,6 +44,8 @@ function mean_r = siteRanking(rankings, orient, func)
     switch res_type
         case 3
             mean_r = func(squeeze(rankings(:, :, target_col)), 1)';
+        case 4
+            mean_r = func(squeeze(rankings(:, :, target_col, :)), [3, 1])';
         case 5
             try
                 mean_r = func(squeeze(func(squeeze(rankings(:, :, target_col, :, :)), 1)), [2,3]);

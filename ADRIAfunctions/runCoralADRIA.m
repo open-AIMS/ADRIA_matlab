@@ -2,6 +2,7 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
                            TP_data, site_ranks, strongpred, init_cov, ...
                            n_reps, wave_scen, dhw_scen, site_data, collect_logs, ...
                            ode_func,ode_opts)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9,13 +10,19 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 %
 % Inputs:
 %    interv       : table, of intervention scenarios
-%    criteria     : table, of criteria weights for each scenario
+%    crit_weights : table, of criteria weights for each scenario
 %    coral_params : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
+%    TP_data      : matrix, of transition probabilities (connectivity)
+%    site_ranks   :
+%    strongpred   : matrix, strongest predecessor for each site
+%    initial_cover: matrix[timesteps, nsites, N], initial coral cover data
+%    n_reps       : int, number of replicates to use
 %    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
 %    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
 %    site_data    : table, of site data
-%    collect_logs : bool, collect shade/seeding logs
+%    collect_logs : string, of what logs to collect
+%                     "seed", "shade", "site_rankings" etc.
 %
 % Output:
 %    results : struct,
@@ -89,30 +96,28 @@ if any(ismember("site_rankings", collect_logs))
     rankings = ndSparse(zeros(timesteps, nsites, 2, N, n_reps));
 end
 
-% Some sites are within the same grid cell for connectivity
-% Here, we find those sites and map the connectivity data
-% (e.g., repeat the relevant row/columns)
-[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
-TP_data = TP_data(g_idx, g_idx);
+% Catch for special edge case when only a single scenario is available
+coral_cover_dims = ndims(initial_cover);
+if coral_cover_dims == 3
+    initial_cover = initial_cover(:, :, 1:n_reps);
+elseif coral_cover_dims == 2
+    initial_cover = repmat(initial_cover, 1, 1, n_reps);
+end
+
 
 parfor i = 1:N
     scen_it = intervs(i, :);
     scen_crit = crit_weights(i, :);
-    initial_cover = init_cov;
     
     % Note: This slows things down considerably
     % Could rejig everything to use (subset of) the table directly...
     c_params = extractCoralSamples(coral_params(i, :), coral_spec);
 
-    if isempty(initial_cover)
-        initial_cover = repmat(c_params.basecov, 1, nsites);
-    end
-
     for j = 1:n_reps
         res = coralScenario(scen_it, scen_crit, ...
                                c_params, sim_params, ...
                                TP_data, site_ranks, strongpred, ...
-                               initial_cover, ...
+                               initial_cover(:, :, j), ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), ...
                                site_data, collect_logs, ...
                                ode_func,ode_opts);
@@ -130,23 +135,26 @@ parfor i = 1:N
             end
 
             if any(ismember("site_rankings", collect_logs))
-                rankings(:, :, :, i, j) = res.MCDA_rankings;
+                rankings(:, :, :, i, j) = res.site_rankings;
             end
         end
     end
 end
 
 results = struct('Y', full(Y));
+
+% Store the average locations/ranks for each climate replicate
 if any(ismember("seed", collect_logs))
-    results.seed_log = full(seed);
+    results.seed_log = full(mean(seed, ndims(seed)));
 end
 
 if any(ismember("shade", collect_logs))
-    results.shade_log = full(shade);
+    results.shade_log = full(mean(shade, ndims(shade)));
 end
 
 if any(ismember("site_rankings", collect_logs))
-    results.MCDA_rankings = full(rankings);
+    rankings(rankings == 0) = nsites + 1;
+    results.site_rankings = full(mean(rankings, ndims(rankings)));
 end
 
 end

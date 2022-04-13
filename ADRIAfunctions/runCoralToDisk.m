@@ -1,9 +1,9 @@
 function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               TP_data, site_ranks, strongpred, ...
-                              init_cov, ...
+                              initial_cover, ...
                               n_reps, wave_scen, dhw_scen, site_data, ...
                               collect_logs, file_prefix, batch_size, ...
-                              metrics)
+                              metrics, summarize)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -11,23 +11,29 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %
 % Inputs:
 %    interv       : table, of intervention scenarios
-%    criteria     : table, of criteria weights for each scenario
-%    coral_params : table, of ecological parameter permutations
+%    crit_weights : table, of criteria weights for each scenario
+%    coral_params : table, of coral parameter values for each scenario
 %    sim_params   : struct, of simulation constants
-%    wave_scen    : matrix[timesteps, nsites, n_reps], spatio-temporal wave damage scenario
-%    dhw_scen     : matrix[timesteps, nsites, n_reps], degree heating weeek scenario
-%    site_data    : table, holding max coral cover, recom site ids, etc.
-%    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
+%    TP_data      : matrix, of transition probabilities (connectivity)
+%    site_ranks   :
+%    strongpred   : matrix, strongest predecessor for each site
+%    initial_cover: matrix[timesteps, nsites, N], initial coral cover data
+%    n_reps       : int, number of replicates to use
+%    wave_scen    : matrix[timesteps, nsites, N], spatio-temporal wave damage scenario
+%    dhw_scen     : matrix[timesteps, nsites, N], degree heating weeek scenario
+%    site_data    : table, of site data
+%    collect_logs : string, of what logs to collect
+%                     "seed", "shade", "site_rankings" etc.
 %    file_prefix : str, write results to batches of netCDFs instead of
 %                    storing in memory.
-%    batch_size : int, size of simulation batches to run/save when writing
-%                    to disk.
+%    batch_size : int, number of simulations per worker to run at a time.
 %    metrics : cell, of function handles
 %
 % Output:
 %    results : struct,
 %          - Y, [n_timesteps, n_sites, N, n_reps]
-%          - seed_log, [n_timesteps, n_sites, N, n_species, n_reps]
+%          - seed_log, [n_timesteps, n_sites, N, 2, n_reps]
+%          - shade_log, [n_timesteps, n_sites, N, n_reps]
 %          - shade_log, [n_timesteps, n_sites, N, n_reps]
 %
 % Example:
@@ -71,7 +77,7 @@ b_ends = [batch_size:batch_size:N, N];
 b_intervs = cell(n_batches,1);
 b_cws = cell(n_batches,1);
 b_coralp = cell(n_batches,1);
-for b_i = 1:n_batches
+parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
     b_intervs{b_i} = intervs(b_start:b_end, :);
@@ -84,19 +90,20 @@ end
 clear('intervs')
 clear('crit_weights')
 
-% Some sites are within the same grid cell for connectivity
-% Here, we find those sites and map the connectivity data
-% (e.g., repeat the relevant row/columns)
-[~, ~, g_idx] = unique(site_data.recom_connectivity, 'rows', 'first');
-TP_data = TP_data(g_idx, g_idx);
-
 w_scen_ss = wave_scen(:, :, 1:n_reps);
 d_scen_ss = dhw_scen(:, :, 1:n_reps);
+
+% Catch for special edge case when only a single scenario is available
+coral_cover_dims = ndims(initial_cover);
+if coral_cover_dims == 3
+    initial_cover = initial_cover(:, :, 1:n_reps);
+elseif coral_cover_dims == 2
+    initial_cover = repmat(initial_cover, 1, 1, n_reps);
+end
 
 parfor b_i = 1:n_batches
     b_start = b_starts(b_i);
     b_end = b_ends(b_i);
-    initial_cover = init_cov;
     
     tmp_fn = strcat(file_prefix, '_[[', num2str(b_start), '-', num2str(b_end), ']].nc');
     if isfile(tmp_fn)
@@ -115,6 +122,7 @@ parfor b_i = 1:n_batches
     % uninitialized temporary variables
     seed_log = [];
     shade_log = [];
+    fog_log = [];
     rankings = [];
     
     if any(strlength(collect_logs) > 0)
@@ -125,6 +133,10 @@ parfor b_i = 1:n_batches
 
         if any(ismember("shade", collect_logs))
             shade_log = zeros(timesteps, nsites, 1, n_reps);
+        end
+        
+        if any(ismember("fog", collect_logs))
+            fog_log = zeros(timesteps, nsites, 1, n_reps);
         end
 
         if any(ismember("site_rankings", collect_logs))
@@ -139,21 +151,15 @@ parfor b_i = 1:n_batches
         % Note: This slows things down considerably
         % Could rejig everything to use (subset of) the table directly...
         scen_coral_params = extractCoralSamples(b_cp(i, :), coral_spec);
-
-        if isempty(initial_cover)
-            initial_cover = repmat(scen_coral_params.basecov, 1, nsites);
-        end
         
         raw = zeros(timesteps, nspecies, nsites, 1, n_reps);
 
         for j = 1:n_reps
-            w_scen = w_scen_ss(:, :, j);
-            d_scen = d_scen_ss(:, :, j);
             res = coralScenario(scen_it, scen_crit, ...
                                    scen_coral_params, sim_params, ...
                                    TP_data, site_ranks, strongpred, ...
-                                   initial_cover, ...
-                                   w_scen, d_scen, ...
+                                   initial_cover(:, :, j), ...
+                                   w_scen_ss(:, :, j), d_scen_ss(:, :, j), ...
                                    site_data, collect_logs);
             raw(:, :, :, 1, j) = res.Y;
             
@@ -164,6 +170,10 @@ parfor b_i = 1:n_batches
                 
                 if any(ismember("shade", collect_logs))
                     shade_log(:, :, 1, j) = res.shade_log;
+                end
+                
+                if any(ismember("fog", collect_logs))
+                    fog_log(:, :, 1, j) = res.fog_log;
                 end
                 
                 if any(ismember("site_rankings", collect_logs))
@@ -177,28 +187,39 @@ parfor b_i = 1:n_batches
             tmp_d = struct("all", raw);
         else
             tmp_d = collectMetrics(raw, coral_params, metrics);
+            
+            if summarize
+                tmp_d = summarizeMetrics(tmp_d);
+            end
         end
         
         if any(strlength(collect_logs) > 0)
+            % Store the average locations/ranks for each climate replicate
             if any(ismember("seed", collect_logs))
-                tmp_d.seed_log = seed_log;
+                tmp_d.seed_log = mean(seed_log, ndims(seed_log));
             end
 
             if any(ismember("shade", collect_logs))
-                tmp_d.shade_log = shade_log;
+                tmp_d.shade_log = mean(shade_log, ndims(shade_log));
+            end
+            
+            if any(ismember("fog", collect_logs))
+                tmp_d.fog_log = mean(fog_log, ndims(fog_log));
             end
 
             if any(ismember("site_rankings", collect_logs))
-                tmp_d.site_rankings = rankings;
+                rankings(rankings == 0) = nsites + 1;
+                tmp_d.site_rankings = mean(rankings, ndims(rankings));
             end
         end
         
         saveData(tmp_d, tmp_fn, group=strcat("run_", num2str(i)));
         
-        % Reassign large struct to save memory
+        % Reassign large data structures to save memory
         % (can't use `clear` here due to `parfor`)
+        raw = [];
         tmp_d = [];
-        
+
     end
 
     % include metadata

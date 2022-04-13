@@ -16,6 +16,7 @@ reefID = F.reefs190(:,1);
 reefID = table2array(reefID);
 lat = F.reefs190.LAT;
 lon = F.reefs190.LON;
+area = F.reefs190.GeomCH_2D_Area_km2;
 %reef_area = table2array(F.reefs190(:,8));
 
 %% Extract the connectivity matrices for all years:
@@ -24,20 +25,22 @@ matrix_length = numel(reefID);
 Y = zeros(matrix_length);
 for yr = 1:7
 Y(:,:,yr) = G.GBR_CONNECT(yr).ACROPORA(reefID , reefID);
-Y = G.GBR_CONNECT(7).ACROPORA(reefID , reefID);
-Y = full(Y); 
+% Y = G.GBR_CONNECT(7).ACROPORA(reefID , reefID);
+Y = full(Y);
+Y = Y.*area; %Multipli by habitat area to scale to max standing coral stock 
+%Y = squeeze(mean(Y,3));
 %T = table(squeeze(Y(:,:,yr)));
-Year = yr + 2007;
-Year = num2str(Year);
-filename = strcat('Cairns_connectivity_', Year);
-writematrix(Y, filename);
-%writetable(T, filename.csv,'WriteVariableNames',false);
+% Year = yr + 2007;
+% Year = num2str(Year);
+% filename = strcat('Cairns_connectivity_', Year);
+% writematrix(Y, filename);
+% %writetable(T, filename.csv,'WriteVariableNames',false);
 end
 
 %% Code below is only if you want to visualise results  
 % note: adjust con_cutoff to see strongest connections
 
-con_cutoff = 0.02;
+con_cutoff = 0.01;
 maxY = max(Y,[],'all');
 maxYcut = maxY*con_cutoff;
 Y(Y<con_cutoff) = 0;  %filter out weak connections
@@ -47,10 +50,16 @@ EWbase = DGbase.Edges.Weight;
 
 C1 = centrality(DGbase,'outdegree','Importance',DGbase.Edges.Weight);
 
-bbox = [145 -17.5; 147 -15.5];
-PP = shaperead('TS_AIMS_NESP_Torres_Strait_Features_V1b_with_GBR_Features.shp', 'BoundingBox',bbox);
-%PP = shaperead('benthic.shp');
-mapshow(PP)
+lonmin = 145.9; 
+latmin = -16.95; 
+lonmax = 146.4; 
+latmax = -16.37; 
+bbox = [lonmin latmin; lonmax latmax];
+
+PP = shaperead('Great_Barrier_Reef_Features.shp', 'BoundingBox',bbox);
+f = figure;
+f.Position = [50, 50, 900 600];
+mapshow(PP,'FaceColor', [0.8,0.8,0.8])
 
 hold on
 J1=plot(DGbase, 'XData', lon, 'YData', lat);
@@ -64,7 +73,7 @@ J1.MarkerSize = 2;
 set(gca,'FontSize', 14);
 set(gca,'color','none'); %set box to transparent
 %Cairns
-axis([145, 147, -17.5, -15.5]);
+axis([lonmin, lonmax, latmin, latmax]);
 colormap jet;
 colorbar;
 caxis([0,inf]);

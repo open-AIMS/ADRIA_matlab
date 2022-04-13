@@ -105,5 +105,7 @@ addPath(proj, './Inputs/Cairns/Connectivity');
 addPath(proj, './Inputs/Cairns/DHWs');
 addPath(proj, './Inputs/Cairns/Site_data');
 addPath(proj, './Inputs/Cairns/Waves');
+
+addPath(proj, './scripts');
 % Programmatically install toolbox:
 % https://au.mathworks.com/help/matlab/ref/matlab.addons.toolbox.installtoolbox.html

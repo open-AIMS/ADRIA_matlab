@@ -12,10 +12,11 @@ ai = ADRIA();
 % number of scenarios (here, N=1 of default values), and
 % D is the number of parameters.
 param_table = ai.raw_defaults;
-
+rcp = 45;
+ai.constants.RCP = rcp;
 %% parameter combos as per deliv specifications
 guided = [0,1];
-srm =0;
+srm =v0;
 natad = [0,0.05];
 aadt = [0,4,8];
 seed1 = [0,200,400];
@@ -53,6 +54,8 @@ ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_pro
 
 
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
+
+ai.loadDHWData(sprintf('./Inputs/Brick/DHWs/dhwRCP%f2.0_brick',rcp))
 bsize = 128;
 n_reps = 50;
 
@@ -72,7 +75,7 @@ desired_metrics = {@coralTaxaCover, ...
 Y = ai.gatherResults('./Outputs/example_multirun', desired_metrics);
 
 % Collect logged values from raw result set
-Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "MCDA_rankings");
+Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "site_rankings");
 
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
@@ -87,7 +90,7 @@ mean_TC = concatMetrics(Y, "mean_coralTaxaCover_x_p_total_cover_4");
 mean_TC = squeeze(mean(mean_TC(end, :, :, :), bsize));
 
 % Extract site rankings for shading
-rankings = concatMetrics(Y_rankings, "MCDA_rankings");
+rankings = concatMetrics(Y_rankings, "site_rankings");
 
 % Total coral cover
 TC = concatMetrics(Y, "coralTaxaCover.total_cover");

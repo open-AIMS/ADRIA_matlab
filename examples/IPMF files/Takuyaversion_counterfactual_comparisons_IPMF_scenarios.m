@@ -79,7 +79,7 @@ desired_metrics = {@coralTaxaCover, ...
 Y = ai.gatherResults(file_location_prefix, desired_metrics);
 
 % Get the logged site rankings as well
-Y_rankings = ai.gatherResults(file_location_prefix, {}, "MCDA_rankings");
+Y_rankings = ai.gatherResults(file_location_prefix, {}, "site_rankings");
 
 tmp = toc;
 

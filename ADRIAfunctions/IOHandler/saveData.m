@@ -92,7 +92,7 @@ function saveData(data, filename, nc_settings)
     end
 
     if strcmpi(fmt, 'mat')
-        save(filename, 'data');
+        save(filename, 'data', '-v7.3');
     elseif strcmpi(fmt, 'csv')
         writematrix(data, filename);
     elseif strcmpi(fmt, 'nc')
@@ -111,21 +111,25 @@ function saveData(data, filename, nc_settings)
                      'DeflateLevel', c_level);
             ncwrite(filename, nc_varname, data);
         else
-            f_names = fieldnames(data);
+            f_names = string(fieldnames(data));
             n_vars = length(f_names);
-            group_name = nc_settings.group;
+            group_name = string(nc_settings.group);
             for i = 1:n_vars
-                tmp_fn = f_names{i};  % fieldname
+                tmp_fn = string(f_names{i});  % fieldname
                 t_data = data.(tmp_fn);
 
                 if strlength(group_name) > 0
                     if ~startsWith(group_name, '/')
                         grp_fn = strcat('/', group_name, '/', tmp_fn);
+                        dim_name = tmp_fn;
                     else
-                        grp_fn = strcat(group_name, '_', tmp_fn);
+                        grp_fn = strcat(group_name, '__', tmp_fn);
+                        dim_name = split(group_name, "/");
+                        dim_name = dim_name(end);
                     end
                 else
                     grp_fn = tmp_fn;
+                    dim_name = tmp_fn;
                 end
 
                 dtype = class(t_data);
@@ -134,15 +138,15 @@ function saveData(data, filename, nc_settings)
                         [x, y, z, v, w] = size(t_data);
 
                         nccreate(filename, grp_fn, 'Dimensions', ...
-                            {[tmp_fn '_x'], x, [tmp_fn '_y'], y, ...
-                             [tmp_fn '_z'], z, [tmp_fn '_v'], v, ...
-                             [tmp_fn '_w'], w}, 'DeflateLevel', c_level, 'Format', 'netcdf4');
+                            {strcat(dim_name, "_x"), x, strcat(dim_name, "_y"), y, ...
+                             strcat(dim_name, "_z"), z, strcat(dim_name, "_v"), v, ...
+                             strcat(dim_name, "_w"), w}, 'DeflateLevel', c_level, 'Format', 'netcdf4');
                         ncwrite(filename, grp_fn, t_data);
                     case {'char', 'string'}
                         vlen = length(t_data);
                         nccreate(filename, grp_fn,...
                             'Datatype', dtype,...
-                            'Dimensions', {[tmp_fn '_x'] vlen},.....
+                            'Dimensions', {strcat(dim_name, "_x"), vlen},...
                             'format', ncfiletype);
                         ncwrite(filename, grp_fn, t_data);
                     case 'struct'

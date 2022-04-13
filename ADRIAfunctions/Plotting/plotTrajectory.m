@@ -8,8 +8,8 @@ function fig = plotTrajectory(metric, opts)
 % Inputs:
 %   metric   : struct, of summary statistics for given metric
 %   extremes : logical, whether to show min/max extremes or not.
-%   p_title  : string, plot title (optional)
-%   y_label  : string, y-axis label (optional)
+%   title  : string, plot title (optional)
+%   ylabel  : string, y-axis label (optional)
 %
 % Outputs:
 %   fig : figure object
@@ -26,7 +26,7 @@ function fig = plotTrajectory(metric, opts)
 %   >> % Calculate coral shelter volume per ha
 %   >> SV_per_ha = concatMetrics(Y, "shelterVolume");
 %
-%   >> RCI = ReefConditionIndex(evenness, SV_per_ha, TC, juv);
+%   >> RCI = ReefConditionIndex(TC, evenness, SV_per_ha, juv);
 %
 %   >> % Collate summary stats
 %   >> x = struct('SV_per_ha', SV_per_ha);

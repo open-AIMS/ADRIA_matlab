@@ -2,10 +2,11 @@ function Y = growthODE4_KA(X, r, P, mb, rec, comp)
 
 % Inputs:   X, array, coral state. Dimensions: nspecies (36) by nsites
 %           r: array, growth rates (transitions). Dimensions: nspecies
-%           mb: array, mortality rates (background). Dimensions: nspecies
 %           P: scalar, max cover. Will be changed to a site function
+%           mb: array, mortality rates (background). Dimensions: nspecies
 %           rec: array, recruitment. Dimensions: ngroups (6) by nsites
-
+%           comp: float, competition rate between small massives and Tabular Acropora
+%
 % coral parameter values are defined in 'coralParams()'
 % X is relative cover of 6 coral groups in 6 size classes
 % r is the transition of relative covers between size classes

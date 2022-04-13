@@ -63,7 +63,10 @@ for n = 1:length(sim_names)
     end
 
     prompt(n) = field_name;
-    definput(n) = sim_constants.(field_name{1});
+
+    if ~isempty(sim_constants.(field_name{1}))
+        definput(n) = sim_constants.(field_name{1});
+    end
 end
 
 prompt = prompt(~cellfun('isempty',prompt));
@@ -116,7 +119,7 @@ param_table = [new_interv_opts, new_criteria_opts, coral_params];
 res = ai.run(param_table, sampled_values=false, nreps=1, collect_logs=["seed", "shade", "site_rankings"]);
 seed_log = res.seed_log;
 shade_log = res.shade_log;
-rankings = res.MCDA_rankings;
+rankings = res.site_rankings;
 Y = res.Y;  % get raw results, ignoring seed/shade logs
 
 % Collect metrics
