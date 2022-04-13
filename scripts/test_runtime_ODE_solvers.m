@@ -16,17 +16,23 @@ param_table = ai.raw_defaults;
 
 %% Run ADRIA
 
-% Load site specific data
-ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
-ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 n_reps = 50;
-ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat', n_reps);
 
+% Run all years
+ai.constants.tf = 74;
+tf = ai.constants.tf;
+% Load site specific data
+ai.loadSiteData('./Inputs/Brick/site_data/Brick_2015_637_reftable.csv');
+ai.loadConnectivity('Inputs/Brick/connectivity/2015/');
+ai.loadCoralCovers("./Inputs/Brick/site_data/coralCoverBrickTruncated.mat");
+ai.loadDHWData('./Inputs/Brick/DHWs/dhwRCP45.mat', n_reps);
+
+opts = struct('reltol',1e-3,'abstol',1e-6);
 %% with ode45
 odestr = "ode45";
 tic
 % Run a single simulation with `n_reps` replicates
-res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc = odestr);
+res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc = odestr,odeopts=opts);
 Y45 = res.Y;  % get raw results
 tmp = toc;
 
@@ -37,7 +43,7 @@ disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(
 odestr = "ode23";
 tic
 % Run a single simulation with `n_reps` replicates
-res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr);
+res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
 Y23 = res.Y;  % get raw results
 tmp = toc;
 
@@ -48,7 +54,7 @@ disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(
 odestr = "ode78";
 tic
 % Run a single simulation with `n_reps` replicates
-res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr);
+res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
 Y78 = res.Y;  % get raw results
 tmp = toc;
 
@@ -59,7 +65,7 @@ disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(
 odestr = "ode89";
 tic
 % Run a single simulation with `n_reps` replicates
-res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr);
+res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
 Y89 = res.Y;  % get raw results
 tmp = toc;
 
@@ -80,7 +86,7 @@ disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(
 odestr = "ode113";
 tic
 % Run a single simulation with `n_reps` replicates
-res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr);
+res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
 Y113 = res.Y;  % get raw results
 tmp = toc;
 
@@ -98,24 +104,25 @@ mean113 = mean(mean(mean(mean(Y113,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omi
 mean78 = mean(mean(mean(mean(Y78,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan');
 mean89 = mean(mean(mean(mean(Y89,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan');
 
-dist23 = zeros(50,658800);
-dist45 = zeros(50,658800);
-dist78 = zeros(50,658800);
-dist113 = zeros(50,658800);
-dist89 = zeros(50,658800);
-for kk = 1:50
-    dist23(kk,:) = reshape(Y23(kk,:,:,:,:),1,658800);
-    dist45(kk,:)  = reshape(Y45(kk,:,:,:,:),1,658800);
-    dist113(kk,:)  = reshape(Y113(kk,:,:,:,:),1,658800);
-    dist78(kk,:)  = reshape(Y78(kk,:,:,:,:),1,658800);
-    dist89(kk,:)  = reshape(Y89(kk,:,:,:,:),1,658800);
+nperm = 1009800;
+dist23 = zeros(tf,nperm);
+dist45 = zeros(tf,nperm);
+dist78 = zeros(tf,nperm);
+dist113 = zeros(tf,nperm);
+dist89 = zeros(tf,nperm);
+for kk = 1:tf
+    dist23(kk,:) = reshape(Y23(kk,:,:,:,:),1,nperm);
+    dist45(kk,:)  = reshape(Y45(kk,:,:,:,:),1,nperm);
+    dist113(kk,:)  = reshape(Y113(kk,:,:,:,:),1,nperm);
+    dist78(kk,:)  = reshape(Y78(kk,:,:,:,:),1,nperm);
+    dist89(kk,:)  = reshape(Y89(kk,:,:,:,:),1,nperm);
 end
 dist23(isnan(dist23)) = 0;
 dist45(isnan(dist45)) = 0;
 dist113(isnan(dist113)) = 0;
 dist78(isnan(dist78)) = 0;
 dist89(isnan(dist89)) = 0;
-years = 2025+(1:50);
+years = 2025+(1:tf);
 
 figure(1)
 subplot(1,3,1)
@@ -145,7 +152,7 @@ abs_tols = [1e-7,1e-6,1e-5,1e-4];
 rel_tols = [1e-4,1e-3,1e-2,0.1];
 y45_times = zeros(1,length(abs_tols));
 y23_times = zeros(1,length(abs_tols));
-diffstore = zeros(length(abs_tols),50);
+diffstore = zeros(length(abs_tols),tf);
 mean45store = diffstore;
 mean23store = diffstore;
 %%
