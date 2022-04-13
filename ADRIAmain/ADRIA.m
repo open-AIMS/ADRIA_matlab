@@ -393,9 +393,7 @@ classdef ADRIA < handle
             nsiteint = obj.constants.nsiteint;
             nsites = length(max_cover);
             w_scens = obj.wave_scens;
-            %oad(wavefilepath).wave(tstep, :, 1:nreps);
             dhw_scen = obj.dhw_scens;
-            %load(dhwfilepath).dhw(tstep, :, 1:nreps);
 
             sumcover = sum(site_d{:,initcovcol},2); 
             sumcover = sumcover/100.0;
@@ -444,17 +442,20 @@ classdef ADRIA < handle
             end
             
             nreps = runargs.nreps;
-
-            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
-            % NEEDS TO BE CLEANED UP.
-            % Load DHW time series for each site
-            % Wave data is all zeros (ignore mortality due to wave damage
-            % and cyclones).
-            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            nsites = height(obj.site_data);
             tf = obj.constants.tf;
+            
             d_scens = obj.dhw_scens;
-            [~, nsites, ~] = size(d_scens);
-            w_scens = zeros(tf, nsites, nreps);
+            if isempty(d_scens)
+                warning("No DHW scenarios loaded! Running simulations with heat stress deactivated.")
+                d_scens = zeros(tf, nspecies, nsites);
+            end
+            
+            w_scens = obj.wave_scens;    
+            if isempty(w_scens)
+                warning("No wave scenarios loaded! Running simulations with wave stress deactivated.")
+                w_scens = zeros(tf, nsites, nreps);
+            end
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
@@ -481,21 +482,22 @@ classdef ADRIA < handle
                runargs.summarize logical = false  % to summarize metric results or not
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
             end
-            
-            nreps = runargs.nreps;
-            
-            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
-            % NEEDS TO BE CLEANED UP.
-            % Load DHW time series for each site
-            % Wave data is all zeros (ignore mortality due to wave damage
-            % and cyclones).
-            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
-            % [~, n_sites, ~] = size(w_scens);
 
+            n_reps = runargs.nreps;
+            n_sites = height(obj.site_data);
             tf = obj.constants.tf;
+            
             d_scens = obj.dhw_scens;
-            [~, n_sites, ~] = size(d_scens);
-            w_scens = zeros(tf, n_sites, nreps);
+            if isempty(d_scens)
+                warning("No DHW scenarios loaded! Running simulations with heat stress deactivated.")
+                d_scens = zeros(tf, nspecies, n_sites);
+            end
+            
+            w_scens = obj.wave_scens;    
+            if isempty(w_scens)
+                warning("No wave scenarios loaded! Running simulations with wave stress deactivated.")
+                w_scens = zeros(tf, n_sites, n_reps);
+            end
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
