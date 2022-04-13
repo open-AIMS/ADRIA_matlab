@@ -18,12 +18,12 @@ Shadefreq = [1, 5];
 Seedyr_start = [2, 6, 11, 16];
 Shadeyr_start = [2, 6, 11, 16];
 
-
+int_index = 2:6;
 % Create combinations of above target values
 target_inputs = table(Guided, Seed1, Seed2, fogging, Aadpt, Natad, ...
                       Seedyrs, Shadeyrs, Seedfreq, Shadefreq, ...
                       Seedyr_start, Shadeyr_start);
-perm_table = createPermutationTable(target_inputs);
+perm_table = createPermutationTable(target_inputs,int_index);
 
 % Get column names
 col_names = param_table.Properties.VariableNames;

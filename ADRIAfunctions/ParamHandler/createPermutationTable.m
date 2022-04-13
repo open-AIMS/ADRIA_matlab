@@ -1,4 +1,4 @@
-function perm_table = createPermutationTable(params_tab)
+function perm_table = createPermutationTable(params_tab,int_idx)
     % Creates a table of all permutations of the intervention inputs, which can be added to
     % ai.default params to make a run parameter table
     nvar = width(params_tab);
@@ -22,8 +22,16 @@ function perm_table = createPermutationTable(params_tab)
         N(k) = N(k-1) ./ n(k-1);
     end
     
+    % building permutation table
     perm_table(:, 1) = reshape(repmat(params_tab{1, 1}, N(2), 1), N(1), N(1)/(N(2) * n(1)));
     for j = 2:nvar
         perm_table(:, j) = reshape(repmat(params_tab{1, j}, N(j+1), N(1)/(n(j) * N(j+1))), N(1), 1);
     end
+
+    % filter out nonsensical or repetitive values
+    % repeating counterfactuals - find all rows where all intervention
+    % parameters are zero and remover all but one (these are all
+    % equivalent counterfactuals)
+    inds_cf = find(sum(perm_table(:,int_idx),2)==0);
+    perm_table(int_idx(2:end),:) = [];
 end
