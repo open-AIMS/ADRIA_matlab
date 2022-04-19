@@ -8,7 +8,7 @@ out_45 = load('./Outputs/RCP45_redux.mat');
 %% Create data table of interv - cf for 8 scenarios
 % create indexes for each scenario
 % counterfactual
-g='unuided';
+g='unguided';
 if strcmp(g,'guided')
     flag = 1;
 else
@@ -111,7 +111,7 @@ tgt_ind_int_45_fog4dhw = find((out_45.inputs.Seedyr_start==2)& ...
 % ranks data
 sites = 1:561;
 site_rankings = squeeze(out_45.site_rankings(:,:,1,:));
-yrs = 25:74;
+yrs = 1:74;
 
 %% counterfactual
 selected_cf_TC = filterSummary(out_45.coralTaxaCover_x_p_total_cover, tgt_ind_cf);
@@ -144,11 +144,11 @@ selected_int1_Ju = squeeze(mean(selected_int1_Ju.mean(yrs,:,:),1));
 selected_int1_RCI = squeeze(mean(selected_int1_RCI.mean(yrs,:,:),1));
 
 % find top 10 sites for this scenario
-site_ranks1 = mean(site_rankings(yrs,:,tgt_ind_int_45_seedOnly),1);
-temp_ranks = [sites',site_ranks1'];
-temp_order = sortrows(temp_ranks,2,'ascend');
-sites1 = temp_order(:,1);
-
+% site_ranks1 = mean(site_rankings(yrs,:,tgt_ind_int_45_seedOnly),1);
+% temp_ranks = [sites',site_ranks1'];
+% temp_order = sortrows(temp_ranks,2,'ascend');
+% sites1 = temp_order(:,1);
+sites1 = sites';
 mean_tc1 = selected_int1_TC(:,sites1);
 mean_sv1 = selected_int1_SV(:,sites1);
 mean_ju1 = selected_int1_Ju(:,sites1);
@@ -173,11 +173,11 @@ selected_int2_Ju = squeeze(mean(selected_int2_Ju.mean(yrs,:,:),1));
 selected_int2_RCI = squeeze(mean(selected_int2_RCI.mean(yrs,:,:),1));
 
 % find top 10 sites for this scenario
-site_ranks2 = mean(site_rankings(yrs,:,tgt_ind_int_45_seed4dhw),1);
-temp_ranks = [sites',site_ranks2'];
-temp_order = sortrows(temp_ranks,2,'ascend');
-sites2 = temp_order(:,1);
-
+% site_ranks2 = mean(site_rankings(yrs,:,tgt_ind_int_45_seed4dhw),1);
+% temp_ranks = [sites',site_ranks2'];
+% temp_order = sortrows(temp_ranks,2,'ascend');
+% sites2 = temp_order(:,1);
+sites2=sites';
 mean_tc2 = selected_int2_TC(:,sites2);
 mean_sv2 = selected_int2_SV(:,sites2);
 mean_ju2 = selected_int2_Ju(:,sites2);
@@ -201,11 +201,11 @@ selected_int3_Ju = squeeze(mean(selected_int3_Ju.mean(yrs,:,:),1));
 selected_int3_RCI = squeeze(mean(selected_int3_RCI.mean(yrs,:,:),1));
 
 % find top 10 sites for this scenario
-site_ranks3 = mean(site_rankings(yrs,:,tgt_ind_int_45_seed8dhw),1);
-temp_ranks = [sites',site_ranks3'];
-temp_order = sortrows(temp_ranks,2,'ascend');
-sites3 = temp_order(:,1);
-
+% site_ranks3 = mean(site_rankings(yrs,:,tgt_ind_int_45_seed8dhw),1);
+% temp_ranks = [sites',site_ranks3'];
+% temp_order = sortrows(temp_ranks,2,'ascend');
+% sites3 = temp_order(:,1);
+sites3 = sites';
 mean_tc3 = selected_int3_TC(:,sites3);
 mean_sv3 = selected_int3_SV(:,sites3);
 mean_ju3 = selected_int3_Ju(:,sites3);
@@ -230,11 +230,11 @@ selected_int4_Ju = squeeze(mean(selected_int4_Ju.mean(yrs,:,:),1));
 selected_int4_RCI = squeeze(mean(selected_int4_RCI.mean(yrs,:,:),1));
 
 % find top 10 sites for this scenario
-site_ranks4 = mean(site_rankings(yrs,:,tgt_ind_int_45_fogOnly),1);
-temp_ranks = [sites',site_ranks4'];
-temp_order = sortrows(temp_ranks,2,'ascend');
-sites4 = temp_order(:,1);
-
+% site_ranks4 = mean(site_rankings(yrs,:,tgt_ind_int_45_fogOnly),1);
+% temp_ranks = [sites',site_ranks4'];
+% temp_order = sortrows(temp_ranks,2,'ascend');
+% sites4 = temp_order(:,1);
+sites4 = sites';
 mean_tc4 = selected_int4_TC(:,sites4);
 mean_sv4 = selected_int4_SV(:,sites4);
 mean_ju4 = selected_int4_Ju(:,sites4);
@@ -258,11 +258,11 @@ selected_int5_Ju = squeeze(mean(selected_int5_Ju.mean(yrs,:,:),1));
 selected_int5_RCI = squeeze(mean(selected_int5_RCI.mean(yrs,:,:),1));
 
 % find top 10 sites for this scenario
-site_ranks5 = mean(site_rankings(yrs,:,tgt_ind_int_45_fog4dhw),1);
-temp_ranks = [sites',site_ranks5'];
-temp_order = sortrows(temp_ranks,2,'ascend');
-sites5 = temp_order(:,1);
-
+% site_ranks5 = mean(site_rankings(yrs,:,tgt_ind_int_45_fog4dhw),1);
+% temp_ranks = [sites',site_ranks5'];
+% temp_order = sortrows(temp_ranks,2,'ascend');
+% sites5 = temp_order(:,1);
+sites5=sites';
 mean_tc5 = selected_int5_TC(:,sites5);
 mean_sv5 = selected_int5_SV(:,sites5);;
 mean_ju5 = selected_int5_Ju(:,sites5);
@@ -286,11 +286,11 @@ selected_int6_Ju = squeeze(mean(selected_int6_Ju.mean(yrs,:,:),1));
 selected_int6_RCI = squeeze(mean(selected_int6_RCI.mean(yrs,:,:),1));
 
 % find top 10 sites for this scenario
-site_ranks6 = mean(site_rankings(yrs,:,tgt_ind_int_45_fog8dhw),1);
-temp_ranks = [sites',site_ranks6'];
-temp_order = sortrows(temp_ranks,2,'ascend');
-sites6 = temp_order(:,1);
-
+% site_ranks6 = mean(site_rankings(yrs,:,tgt_ind_int_45_fog8dhw),1);
+% temp_ranks = [sites',site_ranks6'];
+% temp_order = sortrows(temp_ranks,2,'ascend');
+% sites6 = temp_order(:,1);
+sites6 = sites';
 mean_tc6 = selected_int6_TC(:,sites6);
 mean_sv6 = selected_int6_SV(:,sites6);
 mean_ju6 = selected_int6_Ju(:,sites6);
