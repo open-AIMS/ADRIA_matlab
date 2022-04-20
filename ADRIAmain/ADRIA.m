@@ -429,15 +429,10 @@ classdef ADRIA < handle
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
-               runargs.odefunc string = [] % solver for solving ecological odes
-               runargs.odeopts struct = [] % tolerance values for ode
+               runargs.odefunc function_handle = @ode23 % solver for solving ecological odes
+               runargs.odeopts struct = struct('reltol',1e-4,'abstol',1e-7) % tolerance values for ode
             end
-            if isempty(runargs.odeopts)
-                runargs.odeopts = struct('reltol',1e-4,'abstol',1e-7);
-            end
-            if isempty(runargs.odefunc)
-                runargs.odefunc = "@ode23"
-            end
+
             if isempty(obj.site_data)
                 error("Site data not loaded! Preload with `ai.loadSiteData()`");
             end
@@ -488,15 +483,10 @@ classdef ADRIA < handle
                runargs.metrics cell = {}  % metrics to collect
                runargs.summarize logical = false  % to summarize metric results or not
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
-               runargs.odefunc string = [] % solver for solving ecological odes
-               runargs.odeopts struct = [] % tolerance values for ode
+               runargs.odefunc function_handle = @ode23 % solver for solving ecological odes
+               runargs.odeopts struct = struct('reltol',1e-4,'abstol',1e-7) % tolerance values for ode
             end
-            if isempty(runargs.odeopts)
-                runargs.odeopts = struct('reltol',1e-4,'abstol',1e-7);
-            end
-            if isempty(runargs.odefunc)
-                runargs.odefunc = "@ode23"
-            end
+
             nreps = runargs.nreps;
             
             % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE

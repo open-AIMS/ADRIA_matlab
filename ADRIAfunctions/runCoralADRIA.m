@@ -23,7 +23,10 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 %    site_data    : table, of site data
 %    collect_logs : string, of what logs to collect
 %                     "seed", "shade", "site_rankings" etc.
-%
+%    ode_func : function handle, designates the solver to be used to solve
+%               the growth ode at each time step.
+%    ode_opts : struct with labels 'abstol' and 'reltol', designates
+%               tolerances to be used in ode solver.
 % Output:
 %    results : struct,
 %          - Y, [n_timesteps, n_sites, N, n_reps]

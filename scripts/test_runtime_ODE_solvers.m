@@ -29,7 +29,7 @@ ai.loadDHWData('./Inputs/Brick/DHWs/dhwRCP45.mat', n_reps);
 
 opts = struct('reltol',1e-3,'abstol',1e-6);
 %% with ode45
-odestr = "ode45";
+odestr = @ode45;
 tic
 % Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
@@ -37,10 +37,10 @@ Y45 = res.Y;  % get raw results
 tmp = toc;
 
 N = size(Y45, 4);
-disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+disp(strcat("Ode45 took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
 %% with ode23
-odestr = "ode23";
+odestr = @ode23;
 tic
 % Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
@@ -48,10 +48,10 @@ Y23 = res.Y;  % get raw results
 tmp = toc;
 
 N = size(Y23, 4);
-disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+disp(strcat("Ode23 took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
 %% with ode78
-odestr = "ode78";
+odestr = @ode78;
 tic
 % Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
@@ -59,10 +59,10 @@ Y78 = res.Y;  % get raw results
 tmp = toc;
 
 N = size(Y78, 4);
-disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+disp(strcat("Ode78 took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
 %% with ode89
-odestr = "ode89";
+odestr = @ode89;
 tic
 % Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
@@ -70,7 +70,7 @@ Y89 = res.Y;  % get raw results
 tmp = toc;
 
 N = size(Y89, 4);
-disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+disp(strcat("Ode89 took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 
 %% with stiff solver ode23s
 % odestr = "ode23s";
@@ -83,7 +83,7 @@ disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(
 % N = size(Y23t, 4);
 % disp(strcat("With ",odestr, ". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 %% with variable order method ode113
-odestr = "ode113";
+odestr = @ode113;
 tic
 % Run a single simulation with `n_reps` replicates
 res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
@@ -91,7 +91,7 @@ Y113 = res.Y;  % get raw results
 tmp = toc;
 
 N = size(Y113, 4);
-disp(strcat("With ",odestr,". Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
+disp(strcat("Ode113 took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))
 %% plot difference to ode45
 diff23 = sqrt(sum(sum(sum(sum((Y45-Y23).^2,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan'));
 diff113 = sqrt(sum(sum(sum(sum((Y45-Y113).^2,2,'omitnan'),3,'omitnan'),4,'omitnan'),5,'omitnan'));
@@ -161,13 +161,13 @@ for tt = 1:length(abs_tols)
     % with ode45
     tic
     % Run a single simulation with `n_reps` replicates
-    res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc = "ode45",odeopts =opts);
+    res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc = @ode45,odeopts =opts);
     Y45 = res.Y;  % get raw results
     tmp = toc;    
     N = size(Y45, 4);
     y45_times(tt) = tmp/(N*n_reps);
     % with ode23
-    odestr = "ode23";
+    odestr = @ode23;
     tic
     % Run a single simulation with `n_reps` replicates
     res = ai.run(param_table, sampled_values=false, nreps=n_reps,odefunc=odestr,odeopts=opts);
@@ -186,7 +186,7 @@ for tt = 1:length(abs_tols)
     mean23store(tt,:) = mean23;
 end
 %%
-figure(1)
+figure(2)
 subplot(1,3,1)
 hold on
 for ll = 1:length(abs_tols)

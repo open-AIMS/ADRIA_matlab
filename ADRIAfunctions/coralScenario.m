@@ -1,6 +1,6 @@
 function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, init_cov, ...
-    wave_scen, dhw_scen, site_data, collect_logs, ode_func,ode_opts)
+    wave_scen, dhw_scen, site_data, collect_logs, odesolve,ode_opts)
 % Run a single intervention scenario with given criteria and parameters
 % If each input was originally a table, this is equivalent to a running
 % a single row from each (i.e., a unique combination)
@@ -19,7 +19,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 %    site_data    : table, of site data. Should be pre-sorted by the
 %                         `recom_connectivity` column
 %    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
-%
+%    odesolve : function handle, designates the solver to be used to solve
+%               the growth ode at each time step.
+%    ode_opts : struct with labels 'abstol' and 'reltol', designates
+%               tolerances to be used in ode solver.
 % Outputs:
 %    results     : struct, of 
 %                  Y         - simulation results
@@ -189,8 +192,6 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     Sw_t = 1 - mwaves;
 
     %% Setting constant vars to avoid incurring access overhead
-    % specify ode solver
-    odesolve = str2func(ode_func);
     % specify constant odeset option
 
     non_neg_opt = odeset('NonNegative', 1:nspecies:nsites,'RelTol',ode_opts.reltol, ...
