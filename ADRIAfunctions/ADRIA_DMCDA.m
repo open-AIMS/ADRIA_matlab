@@ -72,13 +72,17 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% prefseedsites
     % Combine data into matrix
     A(:, 1) = site_ids; %site IDs
-    
+
     % Account for cases where no coral cover
-    if max(centr.*sumcover.*area)~= 0
-       A(:, 2) = centr.*sumcover.*area / max(centr.*sumcover.*area); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
+    c_cov_area = centr .* sumcover .* area
+    if max(c_cov_area) ~= 0
+        % node connectivity centrality, need to instead work out strongest
+        % predecessors to priority sites
+        A(:, 2) = c_cov_area / max(c_cov_area);
     else
-        A(:, 3) = centr.*sumcover.*area;
+        A(:, 2) = c_cov_area;
     end
+
     % Account for cases where no chance of damage or heat stress
     if max(damprob) ~= 0
         % damage probability from wave exposure
