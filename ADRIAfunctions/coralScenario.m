@@ -60,8 +60,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     seed2 = interv.Seed2; %corymbose Acropora size class 2, per year per species per cluster
     fogging = interv.fogging; % percent reduction in bleaching mortality through fogging
     srm = interv.SRM; % DHW equivalents reduced by some shading mechanism
-    seed_years = interv.Seedyrs; %years to shade are in column 8
-    shade_years = interv.Shadeyrs; %years to shade are in column 9
+    seed_years = interv.Seedyrs; %years to seed
+    shade_years = interv.Shadeyrs; %years to shade
 
     % find yrs at which to reassess seeding site selection and indicate
     % these in yrslogseed
