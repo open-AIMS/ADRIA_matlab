@@ -1,41 +1,44 @@
 function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     TP_data, site_ranks, strongpred, init_cov, ...
-    wave_scen, dhw_scen, site_data, collect_logs)
-    % Run a single intervention scenario with given criteria and parameters
-    % If each input was originally a table, this is equivalent to a running
-    % a single row from each (i.e., a unique combination)
-    %
-    % Inputs:
-    %    interv       : table, row of intervention table
-    %    criteria     : table, row of criteria weights table
-    %    coral_params : table, row of coral parameters
-    %    sim_params   : struct, of simulation constants
-    %    TP_data      : matrix, transitional probability matrix
-    %    site_ranks   : matrix, of site centrality
-    %    strongpred   : matrix, of strongest predecessor for each site
-    %    init_cov     : matrix, of initial coral cover at time = 1
-    %    wave_scen    : matrix[timesteps, nsites], spatio-temporal wave damage scenario
-    %    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
-    %    site_data    : table, of site data. Should be pre-sorted by the
-    %                         `recom_connectivity` column
-    %    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
-    %
-    % Outputs:
-    %    results     : struct, of
-    %                  Y         - simulation results
-    %                  seed_log  - Sites seeded over time
-    %                  shade_log - Sites shaded over time
-    %
-    % Example:
-    %    See `single_scenario_example.m` in the `examples` directory.
-    %
-    % References:
-    %     1. Bozec, Y.-M., Rowell, D., Harrison, L., Gaskell, J., Hock, K.,
-    %          Callaghan, D., Gorton, R., Kovacs, E. M., Lyons, M., Mumby, P.,
-    %          & Roelfsema, C. (2021).
-    %        Baseline mapping to support reef restoration and resilience-based
-    %        management in the Whitsundays.
-    %        https://doi.org/10.13140/RG.2.2.26976.20482
+    wave_scen, dhw_scen, site_data, collect_logs, odesolve,ode_opts)
+% Run a single intervention scenario with given criteria and parameters
+% If each input was originally a table, this is equivalent to a running
+% a single row from each (i.e., a unique combination)
+%
+% Inputs:
+%    interv       : table, row of intervention table
+%    criteria     : table, row of criteria weights table
+%    coral_params : table, row of coral parameters
+%    sim_params   : struct, of simulation constants
+%    TP_data      : matrix, transitional probability matrix
+%    site_ranks   : matrix, of site centrality
+%    strongpred   : matrix, of strongest predecessor for each site
+%    init_cov     : matrix, of initial coral cover at time = 1
+%    wave_scen    : matrix[timesteps, nsites], spatio-temporal wave damage scenario
+%    dhw_scen     : matrix[timesteps, nsites], degree heating weeek scenario
+%    site_data    : table, of site data. Should be pre-sorted by the
+%                         `recom_connectivity` column
+%    collect_logs : string, indication of what logs to collect - "seed", "shade", "site_rankings"
+%    odesolve : function handle, designates the solver to be used to solve
+%               the growth ode at each time step.
+%    ode_opts : struct with labels 'abstol' and 'reltol', designates
+%               tolerances to be used in ode solver.
+% Outputs:
+%    results     : struct, of 
+%                  Y         - simulation results
+%                  seed_log  - Sites seeded over time
+%                  shade_log - Sites shaded over time
+%
+% Example:
+%    See `single_scenario_example.m` in the `examples` directory.
+%
+% References:
+%     1. Bozec, Y.-M., Rowell, D., Harrison, L., Gaskell, J., Hock, K., 
+%          Callaghan, D., Gorton, R., Kovacs, E. M., Lyons, M., Mumby, P., 
+%          & Roelfsema, C. (2021). 
+%        Baseline mapping to support reef restoration and resilience-based 
+%        management in the Whitsundays. 
+%        https://doi.org/10.13140/RG.2.2.26976.20482
 
     %% Set up connectivity
     nsites = height(site_data);
@@ -57,8 +60,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     seed2 = interv.Seed2; %corymbose Acropora size class 2, per year per species per cluster
     fogging = interv.fogging; % percent reduction in bleaching mortality through fogging
     srm = interv.SRM; % DHW equivalents reduced by some shading mechanism
-    seed_years = interv.Seedyrs; %years to shade are in column 8
-    shade_years = interv.Shadeyrs; %years to shade are in column 9
+    seed_years = interv.Seedyrs; %years to seed
+    shade_years = interv.Shadeyrs; %years to shade
 
     % find yrs at which to reassess seeding site selection and indicate
     % these in yrslogseed
@@ -190,7 +193,10 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     %% Setting constant vars to avoid incurring access overhead
     % specify constant odeset option
-    non_neg_opt = odeset('NonNegative', 1:nspecies:nsites);  % , 'AbsTol', 1e-3
+
+    non_neg_opt = odeset('NonNegative', 1:nspecies:nsites,'RelTol',ode_opts.reltol, ...
+                    'AbsTol',ode_opts.abstol);
+
 
     % return 3 steps as we're only interested in the last one anyway
     % saves memory
@@ -235,6 +241,8 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
     potential_settler_cover = max_settler_density * basal_area_per_settler ...
         * density_ratio_of_settlers_to_larvae;
+
+    to_seed_corals = (seed1 > 0) || (seed2 > 0);
 
     %% Running the model as pulse-impulsive
     % Loop for time steps
@@ -343,12 +351,11 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
 
         Yin1 = Y_pstep .* prop_loss;
 
-        if (seed1 > 0) || (seed2 > 0)
+        if to_seed_corals && in_seed_years && has_seed_sites
             % Seed corals
-            if in_seed_years && has_seed_sites
-                % extract colony areas for sites selected and convert to m^2
-                col_area_seed1 = coral_params.colony_area_cm2(s1_idx) / (10^4);
-                col_area_seed2 = coral_params.colony_area_cm2(s2_idx) / (10^4);
+            % extract colony areas for sites selected and convert to m^2
+            col_area_seed1 = coral_params.colony_area_cm2(s1_idx) / (10^4);
+            col_area_seed2 = coral_params.colony_area_cm2(s2_idx) / (10^4);
 
                 site_area_seed = site_data.area(prefseedsites) .* (site_data.k(prefseedsites) / 100); % extract site area for sites selected and scale by available space for populations (k)
 
@@ -359,14 +366,15 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
                 Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + scaled_seed1; % seed Enhanced Tabular Acropora
                 Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + scaled_seed2; % seed Enhanced Corymbose Acropora
 
-                % Log seed values/sites
-                Yseed(tstep, 1, prefseedsites) = scaled_seed1; % log site as seeded with Enhanced Tabular Acropora
-                Yseed(tstep, 2, prefseedsites) = scaled_seed2; % log site as seeded with Enhanced Corymbose Acropora
-            end
+            % Log seed values/sites
+            Yseed(tstep, 1, prefseedsites) = scaled_seed1; % log site as seeded with Enhanced Tabular Acropora
+            Yseed(tstep, 2, prefseedsites) = scaled_seed2; % log site as seeded with Enhanced Corymbose Acropora
         end
 
         % Run ODE for all species and sites
-        [~, Y] = ode45(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
+
+        [~, Y] = odesolve(@(t, X) growthODE4_KA(X, e_r, e_P, e_mb, rec, e_comp), tspan, Yin1, non_neg_opt);
+        
 
         % Using the last step from ODE above,
         % If any sites are above their maximum possible value,

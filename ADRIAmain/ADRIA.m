@@ -375,8 +375,10 @@ classdef ADRIA < handle
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+               runargs.odefunc function_handle = @ode23 % solver for solving ecological odes
+               runargs.odeopts struct = struct('reltol',1e-4,'abstol',1e-7) % tolerance values for ode
             end
-            
+
             if isempty(obj.site_data)
                 error("Site data not loaded! Preload with `ai.loadSiteData()`");
             end
@@ -414,7 +416,8 @@ classdef ADRIA < handle
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, ...
-                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs, ...
+                     runargs.odefunc,runargs.odeopts);
         end
         
         function runToDisk(obj, X, runargs)
@@ -429,6 +432,8 @@ classdef ADRIA < handle
                runargs.metrics cell = {}  % metrics to collect
                runargs.summarize logical = false  % to summarize metric results or not
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+               runargs.odefunc function_handle = @ode23 % solver for solving ecological odes
+               runargs.odeopts struct = struct('reltol',1e-4,'abstol',1e-7) % tolerance values for ode
             end
 
             n_reps = runargs.nreps;
@@ -497,7 +502,8 @@ classdef ADRIA < handle
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, n_reps, w_scens, d_scens, ...
                      obj.site_data, runargs.collect_logs, ...
-                     fprefix, runargs.batch_size, runargs.metrics, runargs.summarize);
+                     fprefix, runargs.batch_size, runargs.metrics, runargs.summarize, ...
+                     runargs.odefunc,runargs.odeopts);
         end
         
         function Y = gatherResults(obj, file_loc, metrics, target_var)
