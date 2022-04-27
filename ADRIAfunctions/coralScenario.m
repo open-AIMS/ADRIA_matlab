@@ -71,7 +71,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         yrslogseed(seed_start_year:interv.Seedfreq:(seed_start_year + seed_years - 1)) = true;
     else
         % set once at specified start year
-        yrslogseed(seed_start_year) = true;
+        yrslogseed(max(seed_start_year, 2)) = true;
     end
 
     % find yrs at which to reassess seeding site selection and indicate
@@ -82,7 +82,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
         yrslogshade(shade_start_year:interv.Shadefreq:(shade_start_year + shade_years - 1)) = true;
     else
         % set once at specified start year
-        yrslogshade(shade_start_year) = true;
+        yrslogshade(max(shade_start_year, 2)) = true;
     end
 
     prefseedsites = false;
