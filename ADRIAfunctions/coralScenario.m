@@ -174,12 +174,7 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     LPDprm2 = sim_params.LPDprm2; % parameter offsetting LPD curve
 
     %% project wave mortality
-    mwaves = ndSparse(zeros(tf, nspecies, nsites)); % overwrite input
-
-    % Disable wave mortality for now: Agreed on action for Feb deliverable
-    % See email: Mon 24/01/2022 15:17 - RE: IPMF and ADRIA workflow for BC
-    % NOTE: site selection in MCDA based on damage probability also disabled
-
+    mwaves = ndSparse(zeros(tf, nspecies, nsites));
     wavemort90 = coral_params.wavemort90; % 90th percentile wave mortality
     for sp = 1:nspecies
         mwaves(:, sp, :) = wavemort90(sp) .* wave_scen;
@@ -355,14 +350,14 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
             col_area_seed1 = coral_params.colony_area_cm2(s1_idx) / (10^4);
             col_area_seed2 = coral_params.colony_area_cm2(s2_idx) / (10^4);
 
-                site_area_seed = site_data.area(prefseedsites) .* (site_data.k(prefseedsites) / 100); % extract site area for sites selected and scale by available space for populations (k)
+            site_area_seed = site_data.area(prefseedsites) .* (site_data.k(prefseedsites) / 100); % extract site area for sites selected and scale by available space for populations (k)
 
-                scaled_seed1 = (((seed1 / nsiteint) * col_area_seed1) ./ site_area_seed)';
-                scaled_seed2 = (((seed2 / nsiteint) * col_area_seed2) ./ site_area_seed)';
+            scaled_seed1 = (((seed1 / nsiteint) * col_area_seed1) ./ site_area_seed)';
+            scaled_seed2 = (((seed2 / nsiteint) * col_area_seed2) ./ site_area_seed)';
 
-                % Seed each site with the value indicated with seed1/seed2
-                Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + scaled_seed1; % seed Enhanced Tabular Acropora
-                Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + scaled_seed2; % seed Enhanced Corymbose Acropora
+            % Seed each site with the value indicated with seed1/seed2
+            Yin1(s1_idx, prefseedsites) = Yin1(s1_idx, prefseedsites) + scaled_seed1; % seed Enhanced Tabular Acropora
+            Yin1(s2_idx, prefseedsites) = Yin1(s2_idx, prefseedsites) + scaled_seed2; % seed Enhanced Corymbose Acropora
 
             % Log seed values/sites
             Yseed(tstep, 1, prefseedsites) = scaled_seed1; % log site as seeded with Enhanced Tabular Acropora
