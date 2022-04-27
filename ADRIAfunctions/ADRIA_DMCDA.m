@@ -74,7 +74,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     A(:, 1) = site_ids; %site IDs
 
     % Account for cases where no coral cover
-    c_cov_area = centr .* sumcover .* area
+    c_cov_area = centr .* sumcover .* area;
     if max(c_cov_area) ~= 0
         % node connectivity centrality, need to instead work out strongest
         % predecessors to priority sites
