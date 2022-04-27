@@ -189,13 +189,11 @@ function results = coralScenario(interv, criteria, coral_params, sim_params, ...
     mwaves(mwaves > 1) = 1;
 
     % Pre-calculate proportional survivors from wave damage
-    Sw_t = 1 - mwaves;
+    Sw_t = 1.0 - mwaves;
 
     %% Setting constant vars to avoid incurring access overhead
     % specify constant odeset option
-
-    non_neg_opt = odeset('NonNegative', 1:nspecies:nsites,'RelTol',ode_opts.reltol, ...
-                    'AbsTol',ode_opts.abstol);
+    non_neg_opt = odeset('RelTol',ode_opts.reltol, 'AbsTol',ode_opts.abstol);
 
 
     % return 3 steps as we're only interested in the last one anyway
