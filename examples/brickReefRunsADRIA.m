@@ -29,8 +29,8 @@ shadeyrs = [5,10];
 
 params_table = table(guided,seed1,seed2,srm,natad,aadt,seedyrs,shadeyrs, seedfreq,...
     shadefreq,seedstartyr,shadestartyr);
-
-perm_table = createPermutationTable(params_table);
+ints = 2:6; % key intervention parameters at indices 2:6
+perm_table = createPermutationTable(params_table,ints);
 
 % Get column names
 col_names = param_table.Properties.VariableNames;
