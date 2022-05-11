@@ -28,10 +28,4 @@ function perm_table = createPermutationTable(params_tab,int_idx)
         perm_table(:, j) = reshape(repmat(params_tab{1, j}, N(j+1), N(1)/(n(j) * N(j+1))), N(1), 1);
     end
 
-    % filter out nonsensical or repetitive values
-    % repeating counterfactuals - find all rows where all intervention
-    % parameters are zero and remove all but one (these are all
-    % equivalent counterfactuals)
-    inds_cf = find(sum(perm_table(:,int_idx),2)==0);
-    perm_table(inds_cf(2:end),:) = [];
 end

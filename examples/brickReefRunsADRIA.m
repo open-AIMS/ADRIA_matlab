@@ -16,6 +16,7 @@ param_table = ai.raw_defaults;
 %% parameter combos as per deliv specifications
 guided = [0,1];
 srm = 0;
+fogging = [0,0.2];
 natad = [0,0.05];
 aadt = [0,4,8];
 seed1 = [0,200,400];
@@ -27,17 +28,17 @@ shadestartyr = [2,6,11,16];
 seedyrs = [5,10];
 shadeyrs = [5,10];
 
-params_table = table(guided,seed1,seed2,srm,natad,aadt,seedyrs,shadeyrs, seedfreq,...
+params_table = table(guided,seed1,seed2,srm,fogging,natad,aadt,seedyrs,shadeyrs, seedfreq,...
     shadefreq,seedstartyr,shadestartyr);
-ints = 2:6; % key intervention parameters at indices 2:6
-perm_table = createPermutationTable(params_table,ints);
+
+perm_table = createPermutationTable(params_table);
 
 % Get column names
 col_names = param_table.Properties.VariableNames;
-ignore_cols = convertCharsToStrings(col_names(find(~ismember(col_names,["Guided","Seed1","Seed2","SRM","Aadpt","Natad","Seedyrs","Shadeyrs","Seedfreq","Shadefreq","Seedyr_start","Shadeyr_start"]))))
+ignore_cols = convertCharsToStrings(col_names(find(~ismember(col_names,["Guided","Seed1","Seed2","SRM","fogging","Aadpt","Natad","Seedyrs","Shadeyrs","Seedfreq","Shadefreq","Seedyr_start","Shadeyr_start"]))))
 
 perm_table_new = ai.setParameterValues(perm_table, ignore=ignore_cols', partial=true);
-
+perm_table_filtered = filterPermutationTable(perm_table_new,params_table)
 %% Run ADRIA
 
 % Load site specific data
