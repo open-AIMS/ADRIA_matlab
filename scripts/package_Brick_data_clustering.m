@@ -37,8 +37,8 @@ tgt_ind_int_45_seedOnly = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Seed2==500000)& ...
                                 (out_45.inputs.fogging==0)& ...
                                 (out_45.inputs.Natad==0)& ...
-                                (out_45.inputs.Aadpt==0)& ...
-                                (out_45.inputs.Guided==flag));
+                                (out_45.inputs.Aadpt==0));%& ...
+                               % (out_45.inputs.Guided==flag));
 % Fogging only
 tgt_ind_int_45_fogOnly = find((out_45.inputs.Seedyr_start==2)& ...
                             (out_45.inputs.Shadeyr_start==2)& ...
@@ -50,8 +50,8 @@ tgt_ind_int_45_fogOnly = find((out_45.inputs.Seedyr_start==2)& ...
                             (out_45.inputs.Seed2==0)& ...
                             (out_45.inputs.fogging==0.2)& ...
                             (out_45.inputs.Natad==0)& ...
-                            (out_45.inputs.Aadpt==0)& ...
-                            (out_45.inputs.Guided==flag));
+                            (out_45.inputs.Aadpt==0));%& ...
+                         %   (out_45.inputs.Guided==flag));
 % 4 DHW seed 
 tgt_ind_int_45_seed4dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Shadeyr_start==2)& ...
@@ -63,8 +63,8 @@ tgt_ind_int_45_seed4dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Seed2==500000)& ...
                                 (out_45.inputs.fogging==0)& ...
                                 (out_45.inputs.Natad==0)& ...
-                                (out_45.inputs.Aadpt==4)& ...
-                                (out_45.inputs.Guided==flag));
+                                (out_45.inputs.Aadpt==4));%& ...
+                               % (out_45.inputs.Guided==flag));
 % 8 DHW seed
 tgt_ind_int_45_seed8dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Shadeyr_start==2)& ...
@@ -76,8 +76,8 @@ tgt_ind_int_45_seed8dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Seed2==500000)& ...
                                 (out_45.inputs.fogging==0)& ...
                                 (out_45.inputs.Natad==0)& ...
-                                (out_45.inputs.Aadpt==8)& ...
-                                (out_45.inputs.Guided==flag));
+                                (out_45.inputs.Aadpt==8));%& ...
+                                %(out_45.inputs.Guided==flag));
 % 8 DHW and fogging
 tgt_ind_int_45_fog8dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Shadeyr_start==2)& ...
@@ -89,8 +89,8 @@ tgt_ind_int_45_fog8dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Seed2==500000)& ...
                                 (out_45.inputs.fogging==0.2)& ...
                                 (out_45.inputs.Natad==0)& ...
-                                (out_45.inputs.Aadpt==8)& ...
-                                (out_45.inputs.Guided==flag));
+                                (out_45.inputs.Aadpt==8));%& ...
+                               % (out_45.inputs.Guided==flag));
 % 4 DHW and fogging
 tgt_ind_int_45_fog4dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Shadeyr_start==2)& ...
@@ -102,8 +102,8 @@ tgt_ind_int_45_fog4dhw = find((out_45.inputs.Seedyr_start==2)& ...
                                 (out_45.inputs.Seed2==500000)& ...
                                 (out_45.inputs.fogging==0.2)& ...
                                 (out_45.inputs.Natad==0)& ...
-                                (out_45.inputs.Aadpt==4)& ...
-                                (out_45.inputs.Guided==flag));
+                                (out_45.inputs.Aadpt==4));%& ...
+                               %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         (out_45.inputs.Guided==flag));
 
 
 
@@ -149,12 +149,12 @@ selected_int1_RCI = squeeze(mean(selected_int1_RCI.mean(yrs,:,:),1));
 % temp_order = sortrows(temp_ranks,2,'ascend');
 % sites1 = temp_order(:,1);
 sites1 = sites';
-mean_tc1 = selected_int1_TC(:,sites1);
-mean_sv1 = selected_int1_SV(:,sites1);
-mean_ju1 = selected_int1_Ju(:,sites1);
+mean_tc1 = mean(selected_int1_TC,2);
+mean_sv1 = mean(selected_int1_SV,2);
+mean_ju1 = mean(selected_int1_Ju,2);
 %mean_ev1 = ((selected_int1_Ev(:,sites1)-selected_cf_Ev(:,sites1))./selected_cf_Ev(:,sites1))'.*100;
-mean_rci1 = selected_int1_RCI(:,sites1);
-table1 = table(sites1,mean_tc1',mean_sv1',mean_ju1',mean_rci1');
+mean_rci1 = mean(selected_int1_RCI,2)
+table1 = table(sites1,mean_tc1,mean_sv1,mean_ju1,mean_rci1);
 table1.Properties.VariableNames = {'Sites','TC','SV','Ju','RCI'};
 writetable(table1,strcat('justseed_table_Brickruns_',g,'.csv'))
 
@@ -178,12 +178,12 @@ selected_int2_RCI = squeeze(mean(selected_int2_RCI.mean(yrs,:,:),1));
 % temp_order = sortrows(temp_ranks,2,'ascend');
 % sites2 = temp_order(:,1);
 sites2=sites';
-mean_tc2 = selected_int2_TC(:,sites2);
-mean_sv2 = selected_int2_SV(:,sites2);
-mean_ju2 = selected_int2_Ju(:,sites2);
+mean_tc2 = mean(selected_int2_TC,2);
+mean_sv2 = mean(selected_int2_SV,2);
+mean_ju2 = mean(selected_int2_Ju,2);
 %mean_ev2 = ((selected_int2_Ev(:,sites2)-selected_cf_Ev(:,sites2))./selected_cf_Ev(:,sites2))'.*100;
-mean_rci2 = selected_int2_RCI(:,sites2);
-table2 = table(sites2,mean_tc2',mean_sv2',mean_ju2',mean_rci2');
+mean_rci2 = mean(selected_int2_RCI,2);
+table2 = table(sites2,mean_tc2,mean_sv2,mean_ju2,mean_rci2);
 table2.Properties.VariableNames = {'Sites','TC','SV','Ju','RCI'};
 writetable(table2,strcat('seed4_table_Brickruns_',g,'.csv'));
 
@@ -206,12 +206,12 @@ selected_int3_RCI = squeeze(mean(selected_int3_RCI.mean(yrs,:,:),1));
 % temp_order = sortrows(temp_ranks,2,'ascend');
 % sites3 = temp_order(:,1);
 sites3 = sites';
-mean_tc3 = selected_int3_TC(:,sites3);
-mean_sv3 = selected_int3_SV(:,sites3);
-mean_ju3 = selected_int3_Ju(:,sites3);
+mean_tc3 = mean(selected_int3_TC,2);
+mean_sv3 = mean(selected_int3_SV,2);
+mean_ju3 = mean(selected_int3_Ju,2);
 %mean_ev3 = ((selected_int3_Ev(:,sites3)-selected_cf_Ev(:,sites3))./selected_cf_Ev(:,sites3))'.*100;
-mean_rci3 = selected_int3_RCI(:,sites3);
-table3 = table(sites3,mean_tc3',mean_sv3',mean_ju3',mean_rci3');
+mean_rci3 = mean(selected_int3_RCI,2);
+table3 = table(sites3,mean_tc3,mean_sv3,mean_ju3,mean_rci3);
 table3.Properties.VariableNames = {'Sites','TC','SV','Ju','RCI'};
 writetable(table3,strcat('seed8_table_Brickruns_',g,'.csv'));
 
@@ -235,12 +235,12 @@ selected_int4_RCI = squeeze(mean(selected_int4_RCI.mean(yrs,:,:),1));
 % temp_order = sortrows(temp_ranks,2,'ascend');
 % sites4 = temp_order(:,1);
 sites4 = sites';
-mean_tc4 = selected_int4_TC(:,sites4);
-mean_sv4 = selected_int4_SV(:,sites4);
-mean_ju4 = selected_int4_Ju(:,sites4);
+mean_tc4 = mean(selected_int4_TC,2);
+mean_sv4 = mean(selected_int4_SV,2);
+mean_ju4 = mean(selected_int4_Ju,2);
 %mean_ev4 = ((selected_int4_Ev(:,sites4)-selected_cf_Ev(:,sites4))./selected_cf_Ev(:,sites4))'.*100;
-mean_rci4 = selected_int4_RCI(:,sites4);
-table4 = table(sites4,mean_tc4',mean_sv4',mean_ju4',mean_rci4');
+mean_rci4 = mean(selected_int4_RCI,2);
+table4 = table(sites4,mean_tc4,mean_sv4,mean_ju4,mean_rci4);
 table4.Properties.VariableNames = {'Sites','TC','SV','Ju','RCI'};
 writetable(table4,strcat('justfog_table_Brickruns_',g,'.csv'));
 
@@ -263,12 +263,12 @@ selected_int5_RCI = squeeze(mean(selected_int5_RCI.mean(yrs,:,:),1));
 % temp_order = sortrows(temp_ranks,2,'ascend');
 % sites5 = temp_order(:,1);
 sites5=sites';
-mean_tc5 = selected_int5_TC(:,sites5);
-mean_sv5 = selected_int5_SV(:,sites5);;
-mean_ju5 = selected_int5_Ju(:,sites5);
+mean_tc5 = mean(selected_int5_TC,2);
+mean_sv5 = mean(selected_int5_SV,2);;
+mean_ju5 = mean(selected_int5_Ju,2);
 %mean_ev5 = ((selected_int5_Ev(:,sites5)-selected_cf_Ev(:,sites5))./selected_cf_Ev(:,sites5))'.*100;
-mean_rci5 = selected_int5_RCI(:,sites5);
-table5 = table(sites5,mean_tc5',mean_sv5',mean_ju5',mean_rci5');
+mean_rci5 = mean(selected_int5_RCI,2);
+table5 = table(sites5,mean_tc5,mean_sv5,mean_ju5,mean_rci5);
 table5.Properties.VariableNames = {'Sites','TC','SV','Ju','RCI'};
 writetable(table5,strcat('fogseed4_table_Brickruns_',g,'.csv'));
 
@@ -291,11 +291,11 @@ selected_int6_RCI = squeeze(mean(selected_int6_RCI.mean(yrs,:,:),1));
 % temp_order = sortrows(temp_ranks,2,'ascend');
 % sites6 = temp_order(:,1);
 sites6 = sites';
-mean_tc6 = selected_int6_TC(:,sites6);
-mean_sv6 = selected_int6_SV(:,sites6);
-mean_ju6 = selected_int6_Ju(:,sites6);
+mean_tc6 = mean(selected_int6_TC,2);
+mean_sv6 = mean(selected_int6_SV,2);
+mean_ju6 = mean(selected_int6_Ju,2);
 %mean_ev6 = ((selected_int6_Ev(:,sites6)-selected_cf_Ev(:,sites6))./selected_cf_Ev(:,sites6))'.*100;
-mean_rci6 = selected_int6_RCI(:,sites6)
-table6 = table(sites6,mean_tc6',mean_sv6',mean_ju6',mean_rci6');
+mean_rci6 = mean(selected_int6_RCI,2);
+table6 = table(sites6,mean_tc6,mean_sv6,mean_ju6,mean_rci6);
 table6.Properties.VariableNames = {'Sites','TC','SV','Ju','RCI'};
 writetable(table6,strcat('fogseed8_table_Brickruns_',g,'.csv'));
