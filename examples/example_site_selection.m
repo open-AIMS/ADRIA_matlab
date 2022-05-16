@@ -4,16 +4,21 @@
 %% 1. initialize ADRIA interface
 
 ai = ADRIA();
-nreps = 50;
+% number of climatic replicates
+n_reps = 10;
+
 %% Set-up scenario
 
 % Load site specific data & connectivity
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["k","Acropora2026", "Goniastrea2026"]);
 ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
-ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat',nreps)
+ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat',nreps);
 
-% number of climatic replicates
-n_reps = 10;
+% save zeros matrix for stand-in wave data and then load
+wave_data = './Inputs/Moore/Waves/wave_data.mat';
+wave = zeros(size(ai.dhw_scens));
+save(wave_data,'wave');
+ai.loadWaveData(wave_data,nreps);
 
 % specify want rankings for seeding and shading
 sslog = struct('seed', true,'shade', true);
