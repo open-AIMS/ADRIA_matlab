@@ -38,19 +38,20 @@ col_names = param_table.Properties.VariableNames;
 ignore_cols = convertCharsToStrings(col_names(find(~ismember(col_names,["Guided","Seed1","Seed2","SRM","fogging","Aadpt","Natad","Seedyrs","Shadeyrs","Seedfreq","Shadefreq","Seedyr_start","Shadeyr_start"]))))
 
 perm_table_new = ai.setParameterValues(perm_table, ignore=ignore_cols', partial=true);
-perm_table_filtered = filterPermutationTable(perm_table_new)
+perm_table_filtered = filterPermutationTable(perm_table_new);
+
 %% Run ADRIA
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
 
 % Load site specific data
-ai.loadConnectivity('./Inputs/Brick/Brick_oversized_2019_636_d1_transfer_probability_matrix_wide.csv',cutoff=0.1);
+ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d1_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
 
 bsize = 128;
 n_reps = 50;
 
 tic
-ai.runToDisk(param_table_mod, sampled_values=false, nreps=n_reps, ...
-    file_prefix='./Outputs/example_multirun', batch_size=bsize, collect_logs=["site_rankings"]);
+ai.runToDisk(perm_table_filtered, sampled_values=false, nreps=n_reps, ...
+    file_prefix='./Outputs/Moore_example_multirun', batch_size=bsize, collect_logs=["site_rankings"]);
 
 % Gather results, applying a metric to each result set.
 % The last entry is an example of how one might create a custom aggregator
@@ -61,10 +62,10 @@ desired_metrics = {@coralTaxaCover, ...
                    @coralSpeciesCover, ...
                    @shelterVolume, ...
                    @(x, p) mean(coralTaxaCover(x, p).total_cover, bsize)};
-Y = ai.gatherResults('./Outputs/example_multirun', desired_metrics);
+Y = ai.gatherResults('./Outputs/Moore_example_multirun', desired_metrics);
 
 % Collect logged values from raw result set
-Y_rankings = ai.gatherResults('./Outputs/example_multirun', {}, "site_rankings");
+Y_rankings = ai.gatherResults('./Outputs/Moore_example_multirun', {}, "site_rankings");
 
 tmp = toc;
 disp(strcat("Took ", num2str(tmp), " seconds to run ", num2str(N*n_reps), " simulations (", num2str(tmp/(N*n_reps)), " seconds per run)"))

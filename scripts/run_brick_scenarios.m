@@ -5,6 +5,7 @@ ai = ADRIA();
 param_table = ai.raw_defaults;
 
 % set specific parameter values
+SRM = 0;
 Guided = [0, 1];
 Seed1 = [0, 500000];
 Seed2 = [0, 500000];
@@ -18,20 +19,27 @@ Shadefreq = [1, 5];
 Seedyr_start = [2, 6, 11, 16];
 Shadeyr_start = [2, 6, 11, 16];
 
-int_index = 2:6;
 % Create combinations of above target values
-target_inputs = table(Guided, Seed1, Seed2, fogging, Aadpt, Natad, ...
+target_inputs = table(Guided, Seed1, Seed2, SRM, fogging, Aadpt, Natad, ...
                       Seedyrs, Shadeyrs, Seedfreq, Shadefreq, ...
                       Seedyr_start, Shadeyr_start);
-perm_table = createPermutationTable(target_inputs,int_index);
+perm_table = createPermutationTable(target_inputs);
+
+
+% Get column names
+col_names = param_table.Properties.VariableNames;
+ignore_cols = convertCharsToStrings(col_names(find(~ismember(col_names,["Guided","Seed1","Seed2","SRM","fogging","Aadpt","Natad","Seedyrs","Shadeyrs","Seedfreq","Shadefreq","Seedyr_start","Shadeyr_start"]))))
+
+perm_table_new = ai.setParameterValues(perm_table, ignore=ignore_cols', partial=true);
+perm_table_filtered = filterPermutationTable(perm_table_new);
 
 % Get column names
 col_names = param_table.Properties.VariableNames;
 cols_to_include = ["Guided", "Seed1", "Seed2", "fogging", "Aadpt", "Natad", ...
-    "Seedyrs", "Shadeyrs", "Seedfreq", "Shadefreq", "Seedyr_start", ...
-    "Shadeyr_start"];
+     "Seedyrs", "Shadeyrs", "Seedfreq", "Shadefreq", "Seedyr_start", ...
+     "Shadeyr_start"];
 ignore_cols = string(col_names(~ismember(col_names,cols_to_include)));
-input_table = ai.setParameterValues(perm_table, ignore = ignore_cols', partial = false);
+input_table = ai.setParameterValues(perm_table_filtered, ignore = ignore_cols', partial = false);
 
 % Remove unnecessary counterfactual runs
 cfs = input_table((input_table.Seed1 == 0) & (input_table.Seed2 == 0) & (input_table.fogging == 0.0), :);
