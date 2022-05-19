@@ -75,60 +75,6 @@ classdef ADRIA < handle
             details = obj.parameterDetails();
             bounds = details(:, ["name", "lower_bound", "upper_bound"]);
         end
-        
-%         function init_cover = get.init_coral_cov(obj)
-%             if isempty(obj.site_data) || isempty(obj.init_coral_cov_col)
-%                 % If empty, default base covers from coralSpec will be used
-%                 init_cover = [];
-%                 return
-%             end
-%             
-%             % Create initial coral cover by size class based on input data
-%             prop_cover_per_site = obj.site_data(:, obj.init_coral_cov_col);
-%             nsites = height(obj.site_data);
-%              
-%             if obj.constants.mimic_IPMF
-%                 % TODO: A much neater way of handling these two cases
-%                 
-%                 % This is copied here and used as a template to fill in
-%                 base_coral_numbers = ...
-%                     [0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Enhanced
-%                      0, 0, 0, 0, 0, 0; ...          % Tabular Acropora Unenhanced
-%                      0, 0, 0, 0, 0, 0; ...          % Corymbose Acropora Enhanced
-%                      200, 100, 100, 50, 30, 10; ... % Corymbose Acropora Unenhanced
-%                      200, 100, 200, 30, 0, 0; ...   % small massives
-%                      0, 0, 0, 0, 0, 0];             % large massives
-%                 disp("Mimicking IPMF: Loading only two coral types");
-%             else
-%                 % This is copied here and used as a template to fill in
-%                 base_coral_numbers = ...
-%                     [0, 0, 0, 0, 0, 0; ...           % Tabular Acropora Enhanced
-%                      200, 100, 100, 50, 30, 10; ...  % Tabular Acropora Unenhanced
-%                      0, 0, 0, 0, 0, 0; ...           % Corymbose Acropora Enhanced
-%                      200, 100, 100, 50, 30, 10; ...  % Corymbose Acropora Unenhanced
-%                      200, 100, 200, 200, 100, 0; ... % small massives
-%                      200, 100, 20, 20, 20, 10];      % large massives
-%                 disp("Loading all coral types");
-%             end
-%             
-%             % target shape is nspecies * nsites
-%             init_cover = zeros(numel(base_coral_numbers), nsites);
-%             for row = 1:nsites
-%                 if obj.constants.mimic_IPMF
-%                     % TODO: A much neater way of handling these two cases
-%                     x = baseCoralNumbersFromCovers(prop_cover_per_site{row, :});
-%                     base_coral_numbers(4:5, :) = x;
-%                 else
-%                     x = baseCoralNumbersFromCoversAllTaxa(prop_cover_per_site{row, :});
-%                     base_coral_numbers(:, :) = x;
-%                 end
-%                 
-%                 tmp = base_coral_numbers';
-%                 init_cover(:, row) = tmp(:);
-%             end
-%             
-%             assert(~all(any(isnan(init_cover))), "NaNs found in coral cover data")
-%         end
 
         %% object methods
         function obj = ADRIA(init_args)
@@ -214,6 +160,8 @@ classdef ADRIA < handle
         end
 
         function [it_r, crit_r, coral_r] = componentIndices(obj)
+            % Helper method to identify start/end locations of model
+            % component parameters for interventions, criteria, and corals.
             it_s = 1;
             it_e = height(obj.interventions);
 
@@ -393,9 +341,7 @@ classdef ADRIA < handle
             nsiteint = obj.constants.nsiteint;
             nsites = length(max_cover);
             w_scens = obj.wave_scens;
-            %oad(wavefilepath).wave(tstep, :, 1:nreps);
             dhw_scen = obj.dhw_scens;
-            %load(dhwfilepath).dhw(tstep, :, 1:nreps);
 
             sumcover = sum(site_d{:,initcovcol},2); 
             sumcover = sumcover/100.0;
@@ -429,8 +375,10 @@ classdef ADRIA < handle
                runargs.sampled_values logical
                runargs.nreps {mustBeInteger}
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+               runargs.odefunc function_handle = @ode23 % solver for solving ecological odes
+               runargs.odeopts struct = struct('reltol',1e-4,'abstol',1e-7) % tolerance values for ode
             end
-            
+
             if isempty(obj.site_data)
                 error("Site data not loaded! Preload with `ai.loadSiteData()`");
             end
@@ -444,17 +392,20 @@ classdef ADRIA < handle
             end
             
             nreps = runargs.nreps;
-
-            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
-            % NEEDS TO BE CLEANED UP.
-            % Load DHW time series for each site
-            % Wave data is all zeros (ignore mortality due to wave damage
-            % and cyclones).
-            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
+            nsites = height(obj.site_data);
             tf = obj.constants.tf;
+            
             d_scens = obj.dhw_scens;
-            [~, nsites, ~] = size(d_scens);
-            w_scens = zeros(tf, nsites, nreps);
+            if isempty(d_scens)
+                warning("No DHW scenarios loaded! Running simulations with heat stress deactivated.")
+                d_scens = zeros(tf, nspecies, nsites);
+            end
+            
+            w_scens = obj.wave_scens;    
+            if isempty(w_scens)
+                warning("No wave scenarios loaded! Running simulations with wave stress deactivated.")
+                w_scens = zeros(tf, nsites, nreps);
+            end
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
@@ -465,7 +416,8 @@ classdef ADRIA < handle
             Y = runCoralADRIA(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
                      obj.init_coral_cover, nreps, ...
-                     w_scens, d_scens, obj.site_data, runargs.collect_logs);
+                     w_scens, d_scens, obj.site_data, runargs.collect_logs, ...
+                     runargs.odefunc,runargs.odeopts);
         end
         
         function runToDisk(obj, X, runargs)
@@ -480,22 +432,25 @@ classdef ADRIA < handle
                runargs.metrics cell = {}  % metrics to collect
                runargs.summarize logical = false  % to summarize metric results or not
                runargs.collect_logs string = [""]  % valid options: seed, shade, site_rankings
+               runargs.odefunc function_handle = @ode23 % solver for solving ecological odes
+               runargs.odeopts struct = struct('reltol',1e-4,'abstol',1e-7) % tolerance values for ode
+            end
+
+            n_reps = runargs.nreps;
+            n_sites = height(obj.site_data);
+            tf = obj.constants.tf;
+            
+            d_scens = obj.dhw_scens;
+            if isempty(d_scens)
+                warning("No DHW scenarios loaded! Running simulations with heat stress deactivated.")
+                d_scens = zeros(tf, nspecies, n_sites);
             end
             
-            nreps = runargs.nreps;
-            
-            % QUICK ADJUSTMENT FOR FEB 2022 DELIVERABLE
-            % NEEDS TO BE CLEANED UP.
-            % Load DHW time series for each site
-            % Wave data is all zeros (ignore mortality due to wave damage
-            % and cyclones).
-            % [w_scens, d_scens] = obj.setup_waveDHWs(nreps);
-            % [~, n_sites, ~] = size(w_scens);
-
-            tf = obj.constants.tf;
-            d_scens = obj.dhw_scens;
-            [~, n_sites, ~] = size(d_scens);
-            w_scens = zeros(tf, n_sites, nreps);
+            w_scens = obj.wave_scens;    
+            if isempty(w_scens)
+                warning("No wave scenarios loaded! Running simulations with wave stress deactivated.")
+                w_scens = zeros(tf, n_sites, n_reps);
+            end
 
             if runargs.sampled_values
                 X = obj.convertSamples(X);
@@ -535,7 +490,7 @@ classdef ADRIA < handle
                 end
             end
 
-            ncwriteatt(tmp_fn, "metadata", "n_reps", nreps);
+            ncwriteatt(tmp_fn, "metadata", "n_reps", n_reps);
             ncwriteatt(tmp_fn, "metadata", "n_timesteps", obj.constants.tf);
             ncwriteatt(tmp_fn, "metadata", "n_sites", n_sites);
             ncwriteatt(tmp_fn, "metadata", "n_species", length(obj.coral_spec.coral_id));
@@ -545,9 +500,10 @@ classdef ADRIA < handle
 
             runCoralToDisk(interv, crit, coral, obj.constants, ...
                      obj.TP_data, obj.site_ranks, obj.strongpred, ...
-                     obj.init_coral_cover, nreps, w_scens, d_scens, ...
+                     obj.init_coral_cover, n_reps, w_scens, d_scens, ...
                      obj.site_data, runargs.collect_logs, ...
-                     fprefix, runargs.batch_size, runargs.metrics, runargs.summarize);
+                     fprefix, runargs.batch_size, runargs.metrics, runargs.summarize, ...
+                     runargs.odefunc,runargs.odeopts);
         end
         
         function Y = gatherResults(obj, file_loc, metrics, target_var)

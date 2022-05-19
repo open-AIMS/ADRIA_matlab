@@ -56,7 +56,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     wtlocover = DMCDA_vars.wtlocover;
     wtpredecseed = DMCDA_vars.wtpredecseed;
     wtpredecshade = DMCDA_vars.wtpredecshade;
-    
+
     % site_id, seeding rank, shading rank
     rankings = [site_ids, zeros(nsites, 1), zeros(nsites, 1)];
 
@@ -72,13 +72,17 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     %% prefseedsites
     % Combine data into matrix
     A(:, 1) = site_ids; %site IDs
-    
+
     % Account for cases where no coral cover
-    if max(centr.*sumcover.*area)~= 0
-       A(:, 2) = centr.*sumcover.*area / max(centr.*sumcover.*area); %node connectivity centrality, need to instead work out strongest predecessors to priority sites
+    c_cov_area = centr .* sumcover .* area;
+    if max(c_cov_area) ~= 0
+        % node connectivity centrality, need to instead work out strongest
+        % predecessors to priority sites
+        A(:, 2) = c_cov_area / max(c_cov_area);
     else
-        A(:, 3) = centr.*sumcover.*area;
+        A(:, 2) = c_cov_area;
     end
+
     % Account for cases where no chance of damage or heat stress
     if max(damprob) ~= 0
         % damage probability from wave exposure
@@ -95,7 +99,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     end
 
     A(:, 5) = predec(:, 3); % priority predecessors
-   
+
     A(:, 6) = (maxcover - sumcover) ./ maxcover; % proportion of cover compared to max possible cover
 
     % set any infs to zero
@@ -130,7 +134,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
         % define seeding decision matrix
         SE(:, 1) = A(:, 1); % sites column (remaining)
         SE(:, 2) = A(:, 2); % centrality
-        SE(:, 3) = (1 - A(:, 3)); % complementary of damage risk 
+        SE(:, 3) = (1 - A(:, 3)); % complementary of damage risk
         SE(:, 4) = (1 - A(:, 4)); % complimetary of wave risk
         SE(:, 5) = A(:, 5); % priority predecessors
         SE(:, 6) = A(:, 6); % coral real estate relative to max capacity
@@ -161,26 +165,26 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 else
                     wse(all(SE == 0, 1)) = [];
                     SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
-    
+
                     % normalisation
                     SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                     SE = SE .* repmat(wse, size(SE, 1), 1);
-    
+
                     % simple ranking - add criteria weighted values for each sites
                     seed_order(:, 1) = SE(:, 1);
                     seed_order(:, 2) = sum(SE(:, 2:end), 2);
                     seed_order = sortrows(seed_order, 2, 'descend'); %sort from highest to lowest indicator
-                    
+
                     % Add ranking column
                     seed_order(:, 3) = 1:length(seed_order(:, 1));
-    
+
                     last_idx = min(nsiteint, height(seed_order));
-    
+
                     %highest indicator picks the seed site
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
                 end
-            elseif ~sslog.seed 
+            elseif ~sslog.seed
                 % reassign as input if not updated so matlab has output
                 prefseedsites = prefseedsites;
                 nprefseedsites = numel(prefseedsites);
@@ -193,19 +197,19 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 % normalisation
                 SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
                 SH = SH .* repmat(wsh, size(SH, 1), 1);
-    
+
                 SHwt(:, 1) = SH(:, 1);
                 SHwt(:, 2) = sum(SH(:, 2:end), 2); %for now, simply add indicators
-    
+
                 shade_order = sortrows(SHwt, 2, 'descend'); %sort from highest to lowest indicator
-    
+
                 last_idx = min(nsiteint, height(shade_order));
-    
+
                 %highest indicators picks the cool sites
                 prefshadesites = shade_order(1:last_idx, 1);
                 nprefshadesites = numel(prefshadesites);
                 % reassign as input if not updated so matlab has output
-            elseif ~sslog.shade 
+            elseif ~sslog.shade
                 prefshadesites = prefshadesites;
                 nprefshadesites = numel(prefshadesites);
             end
@@ -226,66 +230,66 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     % compute the set of positive ideal solutions for each criteria (max for
                     % good crieteria, min for bad criteria). Max used as all crieteria
                     % represent preferred attributes not costs or negative attributes
-    
+
                     PIS = max(SE(:, 2:end));
-    
+
                     % compute the set of negative ideal solutions for each criteria
                     % (min for good criteria, max for bad criteria).
                     % Min used as all criteria represent preferred attributes not
                     % costs or negative attributes
-    
+
                     NIS = min(SE(:, 2:end));
-    
+
                     % calculate separation distance from the ideal and non-ideal solns
                     S_p = sqrt(sum((SE(:, 2:end) - PIS).^2, 2));
                     S_n = sqrt(sum((SE(:, 2:end) - NIS).^2, 2));
-    
+
                     % final ranking measure of relative closeness C
                     C = S_n ./ (S_p + S_n);
                     SEwt = [SE(:, 1), C];
                     seed_order = sortrows(SEwt, 2, 'descend');
-    
+
                     last_idx = min(nsiteint, height(seed_order));
-    
+
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
 
                 end
                 % reassign as input if not updated so matlab has output
-            elseif ~sslog.seed 
+            elseif ~sslog.seed
                 prefseedsites = prefseedsites;
                 nprefseedsites = numel(prefseedsites);
             end
 
-            if sslog.shade 
+            if sslog.shade
                 % shading rankings
                 wsh(all(SH == 0, 1)) = [];
                 SH(:, all(SH == 0, 1)) = []; %if a column is all zeros, delete
-                
+
                 % normalisation
 
                 SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
                 SH = SH .* repmat(wsh, size(SH, 1), 1);
-    
+
                 % compute the set of positive ideal solutions for each criteria (max for
                 % good crieteria, min for bad criteria). Max used as all crieteria
                 % represent preferred attributes not costs or negative attributes
                 PIS = max(SH(:, 2:end));
-    
+
                 % compute the set of negative ideal solutions for each criteria (min for
                 % good crieteria, max for bad criteria). Min used as all crieteria
                 % represent preferred attributes not costs or negative attributes
                 NIS = min(SH(:, 2:end));
-    
+
                 % calculate separation distance from the ideal and non-ideal solns
                 S_p = sqrt(sum((SH(:, 2:end) - PIS).^2, 2));
                 S_n = sqrt(sum((SH(:, 2:end) - NIS).^2, 2));
-    
+
                 % final ranking measue of relative closeness C
                 C = S_n ./ (S_p + S_n);
                 SHwt = [SH(:, 1), C];
                 shade_order = sortrows(SHwt, 2, 'descend');
-                
+
                 %highest indicators picks the cool sites
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
@@ -312,9 +316,9 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     % normalisation
                     SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                     SE = SE .* repmat(wse, size(SE, 1), 1);
-    
+
                     F_s = max(SE(:, 2:end));
-    
+
                     % Compute utility of the majority S (Manhatten Distance)
                     % Compute individual regret R (Chebyshev distance)
                     sr_arg = ((F_s - SE(:, 2:end)));
@@ -322,7 +326,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     S = [SE(:, 1), S];
                     R = max(sr_arg, [], 2);
                     R = [SE(:, 1), R];
-    
+
                     % Compute the VIKOR compromise Q
                     S_s = max(S(:, 2));
                     S_h = min(S(:, 2));
@@ -330,17 +334,17 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                     R_h = min(R(:, 2));
                     Q = v * (S(:, 2) - S_h) / (S_s - S_h) + (1 - v) * (R(:, 2) - R_h) / (R_s - R_h);
                     Q = [SE(:, 1), Q];
-    
+
                     % sort Q in ascending order rows
                     seed_order = sortrows(Q, 2, 'ascend');
-    
+
                     last_idx = min(nsiteint, height(seed_order));
-    
+
                     prefseedsites = seed_order(1:last_idx, 1);
                     nprefseedsites = numel(prefseedsites);
                 end
                 % reassign as input if not updated so matlab has output
-            elseif ~sslog.seed 
+            elseif ~sslog.seed
                 prefseedsites = prefseedsites;
                 nprefseedsites = numel(prefseedsites);
             end
@@ -352,9 +356,9 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 % normalisation
                 SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
                 SH = SH .* repmat(wsh, size(SH, 1), 1);
-    
+
                 F_s = max(SH(:, 2:end));
-    
+
                 % Compute utility of the majority S (Manhatten Distance)
                 % Compute individual regret R (Chebyshev distance)
                 sr_arg = ((F_s - SH(:, 2:end)));
@@ -362,7 +366,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 S = [SH(:, 1), S];
                 R = max(sr_arg, [], 2);
                 R = [SH(:, 1), R];
-    
+
                 % Compute the VIKOR compromise Q
                 S_s = max(S(:, 2));
                 S_h = min(S(:, 2));
@@ -370,10 +374,10 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 R_h = min(R(:, 2));
                 Q = v * (S(:, 2) - S_h) / (S_s - S_h) + (1 - v) * (R(:, 2) - R_h) / (R_s - R_h);
                 Q = [SH(:, 1), Q];
-    
+
                 % sort R, S and Q in ascending order rows
                 shade_order = sortrows(Q, 2, 'ascend');
-    
+
                 last_idx = min(nsiteint, height(shade_order));
                 prefshadesites = shade_order(1:last_idx, 1);
                 nprefshadesites = numel(prefshadesites);
@@ -399,36 +403,36 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 else
                     wse(all(SE == 0, 1)) = [];
                     SE(:, all(SE == 0, 1)) = []; %if a column is all zeros, delete
-    
+
                     % integer weights must sum to number of preferred sites
                     A = ones(1, length(SE(:, 1)));
                     b = nsiteint;
-    
+
                     % integer variables
                     intcon = 1:length(SE(:, 1));
-    
+
                     % normalisation
                     SE(:, 2:end) = SE(:, 2:end) ./ sqrt(sum(SE(:, 2:end).^2));
                     SE = SE .* repmat(wse, size(SE, 1), 1);
-    
+
                     % multi-objective function for seeding
                     fun1 = @(x) -1 * ADRIA_siteobj(x, SE(:, 2:end));
-    
+
                     % solve multi-objective problem using genetic alg
                     lb = zeros(1, length(SE(:, 1))); % x (weightings) can be 0
                     ub = ones(1, length(SE(:, 1))); % to 1
                     x1 = gamultiobj(fun1, length(SE(:, 1)), Aeq, beq, A, b, lb, ub, [], intcon, opts);
-    
+
                     % randomly select solution from pareto front
                     ind = randi([1, size(x1, 1)]);
-    
+
                     % select optimal sites
                     prefseedsites = site_ids(logical(x1(ind, :)));
                     nprefseedsites = numel(prefseedsites);
-                    
+
                     seed_order = repmat(prefseedsites, 1, 2);
                 end
-            elseif ~sslog.seed 
+            elseif ~sslog.seed
                 % reassign as input if not updated so matlab has output
                 prefseedsites = prefseedsites;
                 nprefseedsites = numel(prefseedsites);
@@ -441,31 +445,31 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
                 % integer weights must sum to number of preferred sites
                 A = ones(1, length(SH(:, 1)));
                 b = nsiteint;
-    
+
                 % integer variables
                 intcon = 1:length(SH(:, 1));
-    
+
                 % normalisation
 
                 SH(:, 2:end) = SH(:, 2:end) ./ sqrt(sum(SH(:, 2:end).^2));
                 SH = SH .* repmat(wsh, size(SH, 1), 1);
-    
+
                 lb = zeros(1, length(SH(:, 1))); % x (weightings) can be 0
                 ub = ones(1, length(SH(:, 1))); % to 1
-    
+
                 % multi-objective function for shading
                 fun2 = @(x) -1 * ADRIA_siteobj(x, SH(:, 2:end));
 
                 % solve multi-objective problem using genetic alg
                 x2 = gamultiobj(fun2, length(SH(:, 1)), Aeq, beq, A, b, lb, ub, [], intcon, opts);
-    
+
                 % randomly select solution from pareto front
                 ind = randi([1, size(x2, 1)]);
-    
+
                 % select optimal sites
                 prefshadesites = site_ids(logical(x2(ind, :)));
                 nprefshadesites = numel(prefshadesites);
-                
+
                 shade_order = repmat(prefshadesites, 1, 2);
             elseif ~sslog.shade
                 % reassign as input if not updated so matlab has output
@@ -476,7 +480,7 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
     otherwise
             error("Unknown MCDA algorithm choice.")
     end
-        
+
     % Add ranking column
     if exist('seed_order', 'var')
         seed_order(:, 3) = 1:length(seed_order(:, 1));
@@ -494,13 +498,15 @@ function [prefseedsites, prefshadesites, nprefseedsites, nprefshadesites, rankin
         [~,ii] = ismember(shade_order(:,1), rankings(:,1), "rows");
         align = ii(ii ~= 0);
         rankings(align, 3) = shade_order(:, 3);
-    end  
-    % if seeding or shading rankings have not been filled, replace with input rankings
+    end
+
+    % Replace with input rankings if seeding or shading rankings have not been filled
     if (sum(rankings(:,2)) == 0) && (nprefseedsites~=0)
         rankings(:,2) = rankingsin(:,2);
         nprefseedsites = numel(prefseedsites);
-                
-    elseif (sum(rankings(:,3)) == 0) && (nprefshadesites~=0)
+    end
+
+    if (sum(rankings(:,3)) == 0) && (nprefshadesites~=0)
         rankings(:,3) = rankingsin(:,3);
         nprefshadesites = numel(prefshadesites);
     end

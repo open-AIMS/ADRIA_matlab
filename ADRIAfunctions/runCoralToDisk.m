@@ -3,7 +3,7 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
                               initial_cover, ...
                               n_reps, wave_scen, dhw_scen, site_data, ...
                               collect_logs, file_prefix, batch_size, ...
-                              metrics, summarize)
+                              metrics, summarize, ode_func,ode_opts)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -28,7 +28,10 @@ function runCoralToDisk(intervs, crit_weights, coral_params, sim_params, ...
 %                    storing in memory.
 %    batch_size : int, number of simulations per worker to run at a time.
 %    metrics : cell, of function handles
-%
+%    ode_func : function handle, designates the solver to be used to solve
+%               the growth ode at each time step.
+%    ode_opts : struct with labels 'abstol' and 'reltol', designates
+%               tolerances to be used in ode solver.
 % Output:
 %    results : struct,
 %          - Y, [n_timesteps, n_sites, N, n_reps]
@@ -160,7 +163,7 @@ parfor b_i = 1:n_batches
                                    TP_data, site_ranks, strongpred, ...
                                    initial_cover(:, :, j), ...
                                    w_scen_ss(:, :, j), d_scen_ss(:, :, j), ...
-                                   site_data, collect_logs);
+                                   site_data, collect_logs,ode_func,ode_opts);
             raw(:, :, :, 1, j) = res.Y;
             
             if any(strlength(collect_logs) > 0)

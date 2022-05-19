@@ -1,6 +1,8 @@
 function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params, ...
                            TP_data, site_ranks, strongpred, initial_cover, ...
-                           n_reps, wave_scen, dhw_scen, site_data, collect_logs)
+                           n_reps, wave_scen, dhw_scen, site_data, collect_logs, ...
+                           ode_func,ode_opts)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% ADRIA: Adaptive Dynamic Reef Intervention Algorithm %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,7 +23,10 @@ function results = runCoralADRIA(intervs, crit_weights, coral_params, sim_params
 %    site_data    : table, of site data
 %    collect_logs : string, of what logs to collect
 %                     "seed", "shade", "site_rankings" etc.
-%
+%    ode_func : function handle, designates the solver to be used to solve
+%               the growth ode at each time step.
+%    ode_opts : struct with labels 'abstol' and 'reltol', designates
+%               tolerances to be used in ode solver.
 % Output:
 %    results : struct,
 %          - Y, [n_timesteps, n_sites, N, n_reps]
@@ -117,7 +122,8 @@ parfor i = 1:N
                                TP_data, site_ranks, strongpred, ...
                                initial_cover(:, :, j), ...
                                wave_scen(:, :, j), dhw_scen(:, :, j), ...
-                               site_data, collect_logs);
+                               site_data, collect_logs, ...
+                               ode_func,ode_opts);
         Y(:, :, :, i, j) = res.Y;
         
         if any(strlength(collect_logs) > 0)
