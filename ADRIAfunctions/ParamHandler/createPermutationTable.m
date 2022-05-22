@@ -1,19 +1,27 @@
-function perm_table = createPermutationTable(params_tab)
+function perm_tbl = createPermutationTable(params_tbl)
     % Creates a table of all permutations of the intervention inputs, which can be added to
-    % ai.default params to make a run parameter table
-    nvar = width(params_tab);
+    % ai.default_params to make a run parameter table
+    % INPUTS:
+    %       params_tbl: 1 by k table where k is the number of parameters to
+    %       permute. The ith column contains an array which lists each value
+    %       for the ith parameter.
+    % OUTPUTS:
+    %       perm_tbl: N by k table where N is the number of possible
+    %       permutations (unique combinations) of the k parameters.
+
+    nvar = width(params_tbl);
     
     % number of different values for each intervention parameter
     n = zeros(1, nvar);
     for l = 1:nvar
-        n(l) = length(params_tab{1, l});
+        n(l) = length(params_tbl{1, l});
     end
     
     % total number of permutations
     Nperms = prod(n);
     
     % create storage table
-    perm_table = zeros(Nperms, nargin);
+    perm_tbl = zeros(Nperms, nargin);
     
     % vector denoting size of blocks for parameter repetitions
     N = zeros(1, length(n)+1);
@@ -22,8 +30,10 @@ function perm_table = createPermutationTable(params_tab)
         N(k) = N(k-1) ./ n(k-1);
     end
     
-    perm_table(:, 1) = reshape(repmat(params_tab{1, 1}, N(2), 1), N(1), N(1)/(N(2) * n(1)));
+    % building permutation table
+    perm_tbl(:, 1) = reshape(repmat(params_tbl{1, 1}, N(2), 1), N(1), N(1)/(N(2) * n(1)));
     for j = 2:nvar
-        perm_table(:, j) = reshape(repmat(params_tab{1, j}, N(j+1), N(1)/(n(j) * N(j+1))), N(1), 1);
+        perm_tbl(:, j) = reshape(repmat(params_tbl{1, j}, N(j+1), N(1)/(n(j) * N(j+1))), N(1), 1);
     end
+
 end
