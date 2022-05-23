@@ -2,29 +2,22 @@
 % without running the ecological model
 
 %% 1. initialize ADRIA interface
-
-ai = ADRIA();
-% number of climatic replicates
-n_reps = 10;
+% Load site specific data & connectivity
+site_data = './Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv';
+conn_data = './Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv';
+dhw_data = './Inputs/Moore/DHWs/dhwRCP45.mat';
+wave_data = './Inputs/Moore/Waves/wave_data.mat';
+nreps = 10;
+ai = ADRIA(connectivity=conn_data, site_data=site_data, dhw=dhw_data,...
+    wave=wave_data, conn_cutoff=0.1, n_reps=nreps);
 
 %% Set-up scenario
-
-% Load site specific data & connectivity
-ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["k","Acropora2026", "Goniastrea2026"]);
-ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
-ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45.mat',nreps);
-
-% save zeros matrix for stand-in wave data and then load
-wave_data = './Inputs/Moore/Waves/wave_data.mat';
-wave = zeros(size(ai.dhw_scens));
-save(wave_data,'wave');
-ai.loadWaveData(wave_data,nreps);
 
 % specify want rankings for seeding and shading
 sslog = struct('seed', true,'shade', true);
 
 % specify species and year to use for coral cover
-init_coral_cov_col = ["Acropora2026", "Goniastrea2026"];
+ai.init_coral_cov_col = ["Acropora2026", "Goniastrea2026"];
 
 % choose algorithm to use
 alg_ind = 1;
@@ -42,7 +35,7 @@ criteria.coral_cover_high = 1;
 
 %% Run site selection
 % calculate rankings
-rankings_mat = ai.siteSelection(criteria,tstep,n_reps,alg_ind,sslog,init_coral_cov_col);
+rankings_mat = ai.siteSelection(criteria,tstep,nreps,alg_ind,sslog);
 % find mean seeding ranks over climate stochasticity
 mean_ranks_seed = siteRanking(rankings_mat(:,:,2:end),'seed');
 % pair with site IDs

@@ -4,7 +4,6 @@ classdef ADRIA < handle
         criterias table
         corals table
         constants struct
-
         coral_spec table
     end
 
@@ -293,7 +292,7 @@ classdef ADRIA < handle
 
 
         function store_rankings = siteSelection(obj, criteria, tstep, nreps,...
-                                                alg, sslog, initcovcol)
+                                                alg, sslog)
             arguments
                 obj
                 criteria table
@@ -301,7 +300,6 @@ classdef ADRIA < handle
                 nreps {mustBeInteger}
                 alg {mustBeInteger}
                 sslog struct
-                initcovcol string
             end
             
             % Check site data and connectivity loaded
@@ -343,7 +341,7 @@ classdef ADRIA < handle
             w_scens = obj.wave_scens;
             dhw_scen = obj.dhw_scens;
 
-            sumcover = sum(site_d{:,initcovcol},2); 
+            sumcover = sum(site_d{:,obj.init_coral_cov_col},2); 
             sumcover = sumcover/100.0;
 
             store_rankings = zeros(nreps,length(depth_priority),3);
