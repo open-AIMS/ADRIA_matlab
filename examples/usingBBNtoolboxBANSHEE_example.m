@@ -6,19 +6,16 @@ names = {'RCP'; 'Years'; 'Guided'; 'PrSites'; 'Seed1'; 'Seed2'; 'SRM'; 'AssAdt';
 % construct `parent_cell`, a cell structure of size 1*(no. of nodes)
 % each cell contains the parents of the node corresponding the the cell no.
 % (e.g. cell no. 2 contains the parents of the Years node)
-parent_cell = cell(1, 12);
-for i = 1:9
-    parent_cell{i} = [];
-end
-parent_cell{10} = 1:9;
-parent_cell{11} = 1:9;
-parent_cell{12} = 1:9;
+nnodes = length(names);
+nmetrics = 3;
+
+parent_cell = createParentCell(nnodes,nmetrics);
 
 % load data into a matrix
 % should have size (no. of parameter permutations)*(no. of nodes)
 % (note this is a very small data set so inference outcomes may not make
 % sense)
-bbn_data = readmatrix('ADRIA_BBN_Data.csv');
+bbn_data = readmatrix('./Inputs/ADRIA_BBN_Data_example.csv');
 
 % this data has an irrelevant column for the DMCDA algorithm variable (the
 % same for every variable permutation in this case, so not included)
@@ -58,15 +55,16 @@ sprintf('The average coral cover is : %1.3f, the average CES is : %1.3f, the ave
 
 % make the same inference but now with incrementally increasing years and
 % retrieve the full distribution
-F = cell(1, 5);
+knownVars = [26, 1, 3, 0.0005, 0.0005, 0, 0, 0];
+nodePos = 2;
+increArray = [10,20,30,40,50];
+infNodes = 1:9;
+F = multiBBNInf(bbn_data, R, knownVars,infNodes,increArray,nodePos)
 figure(3);
 hold on
-for l = 1:5
-    F{l} = inference(inf_cells, [26, l * 10, 1, 3, 0.0005, 0.0005, 0, 0, 0], R, bbn_data, 'full', 1000, 'near');
-    hist_dat = F{l};
-    % plot the coral cover distribution as a histogram
-    h = histogram(hist_dat{1}, 'NumBins', 30, 'Normalization', 'probability');
-end
+indx = 1;
+plotHistMulti(F,indx,[])
+
 legend('year 10', 'year 20', 'year 30', 'year 40', 'year 50');
 
 % perform an inference on the interventions
@@ -82,5 +80,5 @@ F0 = inference([1:9], [60, 30, 1, 3, 0, 0, 5, 6, 0], R, bbn_data, 'full', 1000, 
 
 % find probability
 dist = F0{1};
-prob = sum(dist(dist > 0.8)) / sum(dist);
+prob = calcBBNProb(dist,0.8,1);
 sprintf('The probability of coral cover >0.8 for this scenario is %1.4f', prob);
