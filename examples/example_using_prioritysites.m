@@ -32,10 +32,9 @@ param_table.Seedfreq = 0;
 %% Run ADRIA
 
 % Load site specific data
-ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
-
 ai.loadSiteData('./Inputs/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv', ["Acropora2026", "Goniastrea2026"]);
-
+ai.loadConnectivity('./Inputs/Moore/connectivity/2015/moore_d2_2015_transfer_probability_matrix_wide.csv',cutoff=0.1);
+ai.loadDHWData('./Inputs/Moore/DHWs/dhwRCP45')
 
 ai.constants.prioritysites = 1:256';
 n_reps = 2;
