@@ -18,6 +18,8 @@ sim_constants = ai.constants;
 
 % Generate samples using simple monte carlo
 % Create selection table based on lower/upper parameter bounds
+% NOTE: This is for example purposes only. In practice, a more
+%       appropriate sampling method should be adopted.
 sample_table = table;
 for p = 1:height(combined_opts)
     a = combined_opts.lower_bound(p);
